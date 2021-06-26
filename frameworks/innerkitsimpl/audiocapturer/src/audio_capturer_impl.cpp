@@ -23,6 +23,7 @@
 namespace OHOS {
 namespace Audio {
 using namespace OHOS::Media;
+using namespace OHOS::AudioStandard;
 
 const unsigned long long TIME_CONVERSION_US_S = 1000000ULL; /* us to s */
 const unsigned long long TIME_CONVERSION_NS_US = 1000ULL; /* ns to us */

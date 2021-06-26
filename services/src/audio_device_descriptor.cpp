@@ -17,6 +17,7 @@
 #include "media_log.h"
 
 namespace OHOS {
+namespace AudioStandard {
 /**
  * @brief The AudioDeviceDescriptor class provides
  *         different sets of audio devices and their roles
@@ -50,4 +51,5 @@ AudioDeviceDescriptor *AudioDeviceDescriptor::Unmarshalling(Parcel &in)
     audioDeviceDescriptor->deviceRole_ = static_cast<AudioDeviceDescriptor::DeviceRole>(in.ReadInt32());
     return audioDeviceDescriptor;
 }
+} // namespace AudioStandard
 } // namespace OHOS

@@ -22,10 +22,15 @@
 #include "napi/native_api.h"
 #include "napi/native_node_api.h"
 
+namespace OHOS {
+namespace AudioStandard {
 static const std::string AUDIO_DEVICE_DESCRIPTOR_NAPI_CLASS_NAME = "AudioDeviceDescriptor";
 
 class AudioDeviceDescriptorNapi {
 public:
+    AudioDeviceDescriptorNapi();
+    ~AudioDeviceDescriptorNapi();
+
     enum DeviceType {
         INVALID = 0,
         SPEAKER = 1,
@@ -42,22 +47,21 @@ public:
 
     static napi_value Init(napi_env env, napi_value exports);
     static napi_value CreateAudioDeviceDescriptorWrapper(napi_env env,
-        OHOS::sptr<OHOS::AudioDeviceDescriptor> audioDeviceDescriptor);
+        sptr<AudioDeviceDescriptor> deviceDescriptor);
 
 private:
-    explicit AudioDeviceDescriptorNapi();
-    ~AudioDeviceDescriptorNapi();
-
     static void Destructor(napi_env env, void* nativeObject, void* finalize_hint);
     static napi_value Construct(napi_env env, napi_callback_info info);
     static napi_value GetDeviceRole(napi_env env, napi_callback_info info);
     static napi_value GetDeviceType(napi_env env, napi_callback_info info);
 
     static napi_ref sConstructor_;
-    static OHOS::sptr<OHOS::AudioDeviceDescriptor> sAudioDescriptor_;
+    static sptr<AudioDeviceDescriptor> sAudioDescriptor_;
 
-    OHOS::sptr<OHOS::AudioDeviceDescriptor> audioDescriptor_;
+    sptr<AudioDeviceDescriptor> audioDescriptor_;
     napi_env env_;
     napi_ref wrapper_;
 };
+} // namespace AudioStandard
+} // namespace OHOS
 #endif /* AUDIO_DEVICE_DESCRIPTOR_NAPI_H_ */

@@ -19,6 +19,7 @@
 #include "parcel.h"
 
 namespace OHOS {
+namespace AudioStandard {
 /**
  * @brief The AudioDeviceDescriptor class provides different sets of audio devices and their roles
  */
@@ -91,5 +92,6 @@ enum DeviceType {
     bool Marshalling(Parcel &parcel) const override;
     static AudioDeviceDescriptor* Unmarshalling(Parcel &parcel);
 };
+} // namespace AudioStandard
 } // namespace OHOS
 #endif // ST_AUDIO_DEVICE_DESCRIPTOR_H

@@ -14,7 +14,7 @@
      limitations under the License.
 -->
 <info>
-    <process>audio_service</process>
+    <process>pulseaudio</process>
     <loadlibs>
         <libpath>/system/lib/libaudio_service.z.so</libpath>
     </loadlibs>

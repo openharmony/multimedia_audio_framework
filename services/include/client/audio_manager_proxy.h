@@ -17,23 +17,26 @@
 #define ST_AUDIO_MANAGER_PROXY_H
 
 #include "iremote_proxy.h"
-#include "audio_svc_manager.h"
+#include "audio_system_manager.h"
 #include "audio_manager_base.h"
 #include "audio_device_descriptor.h"
 
 namespace OHOS {
+namespace AudioStandard {
 class AudioManagerProxy : public IRemoteProxy<IStandardAudioService> {
 public:
     explicit AudioManagerProxy(const sptr<IRemoteObject> &impl);
     virtual ~AudioManagerProxy() = default;
-
-    void SetVolume(AudioSvcManager::AudioVolumeType volumeType, int32_t volume) override;
-    int32_t GetVolume(AudioSvcManager::AudioVolumeType volumeType) override;
-    int32_t GetMaxVolume(AudioSvcManager::AudioVolumeType volumeType) override;
-    int32_t GetMinVolume(AudioSvcManager::AudioVolumeType volumeType) override;
+    float GetMaxVolume(AudioSystemManager::AudioVolumeType volumeType) override;
+    float GetMinVolume(AudioSystemManager::AudioVolumeType volumeType) override;
+    int32_t SetMicrophoneMute(bool isMute) override;
+    bool IsMicrophoneMute() override;
     std::vector<sptr<AudioDeviceDescriptor>> GetDevices(AudioDeviceDescriptor::DeviceFlag deviceFlag) override;
+    const std::string GetAudioParameter(const std::string key) override;
+    void SetAudioParameter(const std::string key, const std::string value) override;
 private:
     static inline BrokerDelegator<AudioManagerProxy> delegator_;
 };
+} // namespace AudioStandard
 } // namespace OHOS
 #endif // ST_AUDIO_MANAGER_PROXY_H

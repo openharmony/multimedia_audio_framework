@@ -14,72 +14,77 @@
  */
 
 #include "audio_manager_proxy.h"
-#include "audio_svc_manager.h"
+#include "audio_system_manager.h"
 #include "media_log.h"
 
 namespace OHOS {
+namespace AudioStandard {
 AudioManagerProxy::AudioManagerProxy(const sptr<IRemoteObject> &impl)
     : IRemoteProxy<IStandardAudioService>(impl)
 {
 }
 
-void AudioManagerProxy::SetVolume(AudioSvcManager::AudioVolumeType volumeType, int32_t volume)
+float AudioManagerProxy::GetMaxVolume(AudioSystemManager::AudioVolumeType volumeType)
 {
     MessageParcel data;
     MessageParcel reply;
     MessageOption option;
     data.WriteInt32(static_cast<int>(volumeType));
-    data.WriteInt32(volume);
-    int error = Remote()->SendRequest(SET_VOLUME, data, reply, option);
-    if (error != ERR_NONE) {
-        MEDIA_ERR_LOG("set volume failed, error: %d", error);
-        return;
-    }
-}
-
-int32_t AudioManagerProxy::GetVolume(AudioSvcManager::AudioVolumeType volumeType)
-{
-    MessageParcel data;
-    MessageParcel reply;
-    MessageOption option;
-    data.WriteInt32(static_cast<int>(volumeType));
-    int error = Remote()->SendRequest(GET_VOLUME, data, reply, option);
-    if (error != ERR_NONE) {
-        MEDIA_ERR_LOG("Get volume failed, error: %d", error);
-        return error;
-    }
-    int volume = reply.ReadInt32();
-    return volume;
-}
-
-int32_t AudioManagerProxy::GetMaxVolume(AudioSvcManager::AudioVolumeType volumeType)
-{
-    MessageParcel data;
-    MessageParcel reply;
-    MessageOption option;
-    data.WriteInt32(static_cast<int>(volumeType));
-    int error = Remote()->SendRequest(GET_MAX_VOLUME, data, reply, option);
+    int32_t error = Remote()->SendRequest(GET_MAX_VOLUME, data, reply, option);
     if (error != ERR_NONE) {
         MEDIA_ERR_LOG("Get max volume failed, error: %d", error);
         return error;
     }
-    int volume = reply.ReadInt32();
+    float volume = reply.ReadFloat();
     return volume;
 }
 
-int32_t AudioManagerProxy::GetMinVolume(AudioSvcManager::AudioVolumeType volumeType)
+float AudioManagerProxy::GetMinVolume(AudioSystemManager::AudioVolumeType volumeType)
 {
     MessageParcel data;
     MessageParcel reply;
     MessageOption option;
-    data.WriteInt32(static_cast<int>(volumeType));
-    int error = Remote()->SendRequest(GET_MIN_VOLUME, data, reply, option);
+    data.WriteInt32(static_cast<int32_t>(volumeType));
+
+    int32_t error = Remote()->SendRequest(GET_MIN_VOLUME, data, reply, option);
     if (error != ERR_NONE) {
         MEDIA_ERR_LOG("Get min volume failed, error: %d", error);
         return error;
     }
-    int volume = reply.ReadInt32();
+
+    float volume = reply.ReadFloat();
     return volume;
+}
+
+int32_t AudioManagerProxy::SetMicrophoneMute(bool isMute)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+    data.WriteBool(isMute);
+    int32_t error = Remote()->SendRequest(SET_MICROPHONE_MUTE, data, reply, option);
+    if (error != ERR_NONE) {
+        MEDIA_ERR_LOG("SetMicrophoneMute failed, error: %d", error);
+        return error;
+    }
+    int32_t result = reply.ReadInt32();
+
+    return result;
+}
+
+bool AudioManagerProxy::IsMicrophoneMute()
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+    int32_t error = Remote()->SendRequest(IS_MICROPHONE_MUTE, data, reply, option);
+    if (error != ERR_NONE) {
+        MEDIA_ERR_LOG("IsMicrophoneMute failed, error: %d", error);
+        return false;
+    }
+    bool isMute = reply.ReadBool();
+    
+    return isMute;
 }
 
 std::vector<sptr<AudioDeviceDescriptor>> AudioManagerProxy::GetDevices(AudioDeviceDescriptor::DeviceFlag deviceFlag)
@@ -87,17 +92,53 @@ std::vector<sptr<AudioDeviceDescriptor>> AudioManagerProxy::GetDevices(AudioDevi
     MessageParcel data;
     MessageParcel reply;
     MessageOption option;
-    data.WriteInt32(static_cast<int>(deviceFlag));
-    int error = Remote()->SendRequest(GET_DEVICES, data, reply, option);
+    data.WriteInt32(static_cast<int32_t>(deviceFlag));
+
+    int32_t error = Remote()->SendRequest(GET_DEVICES, data, reply, option);
     std::vector<sptr<AudioDeviceDescriptor>> deviceInfo;
     if (error != ERR_NONE) {
-        MEDIA_ERR_LOG("Get device failed, error: %d", error);
+        MEDIA_ERR_LOG("Get devices failed, error: %d", error);
         return deviceInfo;
     }
-    int size = reply.ReadInt32();
-    for (int i = 0; i < size; i++) {
+
+    int32_t size = reply.ReadInt32();
+    for (int32_t i = 0; i < size; i++) {
         deviceInfo.push_back(AudioDeviceDescriptor::Unmarshalling(reply));
     }
     return deviceInfo;
 }
+
+const std::string AudioManagerProxy::GetAudioParameter(const std::string key)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+
+    data.WriteString(static_cast<std::string>(key));
+    int32_t error = Remote()->SendRequest(GET_AUDIO_PARAMETER, data, reply, option);
+    if (error != ERR_NONE) {
+        MEDIA_ERR_LOG("Get audio parameter failed, error: %d", error);
+        const std::string value = "";
+        return value;
+    }
+
+    const std::string value = reply.ReadString();
+    return value;
+}
+
+void AudioManagerProxy::SetAudioParameter(const std::string key, const std::string value)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+
+    data.WriteString(static_cast<std::string>(key));
+    data.WriteString(static_cast<std::string>(value));
+    int32_t error = Remote()->SendRequest(SET_AUDIO_PARAMETER, data, reply, option);
+    if (error != ERR_NONE) {
+        MEDIA_ERR_LOG("Get audio parameter failed, error: %d", error);
+        return;
+    }
+}
+} // namespace AudioStandard
 } // namespace OHOS

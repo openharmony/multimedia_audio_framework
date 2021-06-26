@@ -18,14 +18,15 @@
 
 #include <mutex>
 #include <unordered_map>
-
+#include <pthread.h>
 #include "iremote_stub.h"
 #include "system_ability.h"
-#include "audio_svc_manager.h"
+#include "audio_system_manager.h"
 #include "audio_manager_base.h"
 #include "audio_device_descriptor.h"
 
 namespace OHOS {
+namespace AudioStandard {
 class AudioServer : public SystemAbility, public AudioManagerStub {
     DECLARE_SYSTEM_ABILITY(AudioServer);
 public:
@@ -35,16 +36,22 @@ public:
     void OnDump() override;
     void OnStart() override;
     void OnStop() override;
-    void SetVolume(AudioSvcManager::AudioVolumeType volumeType, int32_t volume) override;
-    int32_t GetVolume(AudioSvcManager::AudioVolumeType volumeType) override;
-    int32_t GetMaxVolume(AudioSvcManager::AudioVolumeType volumeType) override;
-    int32_t GetMinVolume(AudioSvcManager::AudioVolumeType volumeType) override;
+    float GetMaxVolume(AudioSystemManager::AudioVolumeType volumeType) override;
+    float GetMinVolume(AudioSystemManager::AudioVolumeType volumeType) override;
+    int32_t SetMicrophoneMute(bool isMute) override;
+    bool IsMicrophoneMute() override;
     std::vector<sptr<AudioDeviceDescriptor>> GetDevices(AudioDeviceDescriptor::DeviceFlag deviceFlag) override;
+    static void* paDaemonThread(void* arg);
+    void SetAudioParameter(const std::string key, const std::string value) override;
+    const std::string GetAudioParameter(const std::string key) override;
 private:
-    static const int32_t MAX_VOLUME = 15;
-    static const int32_t MIN_VOLUME = 0;
-    static std::unordered_map<int, int> AudioStreamVolumeMap;
+    static constexpr float MAX_VOLUME = 1.0;
+    static constexpr float MIN_VOLUME = 0;
+    static std::unordered_map<int, float> AudioStreamVolumeMap;
     std::vector<sptr<AudioDeviceDescriptor>> audioDeviceDescriptor_;
+    static std::map<std::string, std::string> audioParameters;
+    pthread_t m_paDaemonThread;
 };
+} // namespace AudioStandard
 } // namespace OHOS
 #endif // ST_AUDIO_SERVER_H

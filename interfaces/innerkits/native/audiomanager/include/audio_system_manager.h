@@ -13,20 +13,23 @@
  * limitations under the License.
  */
 
-#ifndef ST_AUDIO_SVC_MANAGER_H
-#define ST_AUDIO_SVC_MANAGER_H
+#ifndef ST_AUDIO_SYSTEM_MANAGER_H
+#define ST_AUDIO_SYSTEM_MANAGER_H
 
 #include <cstdlib>
 
 #include "audio_device_descriptor.h"
+#include "audio_stream.h"
+#include "audio_policy_manager.h"
 
 namespace OHOS {
+namespace AudioStandard {
 /**
- * @brief The AudioSvcManager class is an abstract definition of audio manager.
+ * @brief The AudioSystemManager class is an abstract definition of audio manager.
  *        Provides a series of client/interfaces for audio management
  */
 
-class AudioSvcManager {
+class AudioSystemManager {
 public:
 enum AudioVolumeType {
         /**
@@ -70,16 +73,28 @@ enum AudioVolumeType {
          */
         STREAM_ACCESSIBILITY = 10
     };
-    static AudioSvcManager* GetInstance();
-    void SetVolume(AudioSvcManager::AudioVolumeType volumeType, int32_t volume);
-    int GetVolume(AudioSvcManager::AudioVolumeType volumeType);
-    int GetMaxVolume(AudioSvcManager::AudioVolumeType volumeType);
-    int GetMinVolume(AudioSvcManager::AudioVolumeType volumeType);
+    static AudioSystemManager* GetInstance();
+    int32_t SetVolume(AudioSystemManager::AudioVolumeType volumeType, float volume);
+    float GetVolume(AudioSystemManager::AudioVolumeType volumeType);
+    float GetMaxVolume(AudioSystemManager::AudioVolumeType volumeType);
+    float GetMinVolume(AudioSystemManager::AudioVolumeType volumeType);
+    int32_t SetMute(AudioSystemManager::AudioVolumeType volumeType, bool mute);
+    bool IsStreamMute(AudioSystemManager::AudioVolumeType volumeType);
+    int32_t SetMicrophoneMute(bool IsMute);
+    bool IsMicrophoneMute(void);
     std::vector<sptr<AudioDeviceDescriptor>> GetDevices(AudioDeviceDescriptor::DeviceFlag deviceFlag);
+    const std::string GetAudioParameter(const std::string key);
+    void SetAudioParameter(const std::string key, const std::string value);
+    int32_t SetDeviceActive(AudioDeviceDescriptor::DeviceType deviceType, bool flag);
+    bool IsDeviceActive(AudioDeviceDescriptor::DeviceType deviceType);
+    bool IsStreamActive(AudioSystemManager::AudioVolumeType volumeType);
+    bool SetRingerMode(AudioRingerMode ringMode);
+    AudioRingerMode GetRingerMode();
 private:
-    AudioSvcManager();
-    virtual ~AudioSvcManager();
+    AudioSystemManager();
+    virtual ~AudioSystemManager();
     void init();
 };
+} // namespace AudioStandard
 } // namespace OHOS
-#endif // ST_AUDIO_SVC_MANAGER_H
+#endif // ST_AUDIO_SYSTEM_MANAGER_H

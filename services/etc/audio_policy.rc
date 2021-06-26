@@ -11,12 +11,11 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-service audio_service /system/bin/sa_main /system/profile/audio_service.xml
+service audio_policy /system/bin/sa_main /system/profile/audio_policy.xml
     class z_core
-    user audioserver
-    group system shell
     seclabel u:r:audiodistributedservice:s0
+    disabled
 
-on boot
-    start audio_service
+on audio_policy_start
+    start audio_policy
 
