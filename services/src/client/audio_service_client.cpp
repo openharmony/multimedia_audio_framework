@@ -210,6 +210,12 @@ AudioServiceClient::AudioServiceClient()
     internalRdBufIndex = 0;
     internalRdBufLen = 0;
     underFlowCount = 0;
+
+    acache.readIndex = 0;
+    acache.writeIndex = 0;
+    acache.isFull = false;
+    acache.totalCacheSize = 0;
+    acache.buffer = NULL;
 }
 
 void AudioServiceClient::ResetPAAudioClient()
@@ -261,6 +267,16 @@ void AudioServiceClient::ResetPAAudioClient()
     internalRdBufIndex = 0;
     internalRdBufLen   = 0;
     underFlowCount     = 0;
+
+    if (acache.buffer) {
+        free(acache.buffer);
+    }
+
+    acache.buffer = NULL;
+    acache.readIndex = 0;
+    acache.writeIndex = 0;
+    acache.isFull = false;
+    acache.totalCacheSize = 0;
 }
 
 AudioServiceClient::~AudioServiceClient()
@@ -424,6 +440,21 @@ int32_t AudioServiceClient::ConnectStreamToPA()
     return AUDIO_CLIENT_SUCCESS;
 }
 
+int32_t AudioServiceClient::InitializeAudioCache()
+{
+    MEDIA_INFO_LOG("Initializing internal audio cache");
+    CHECK_PA_STATUS_RET_IF_FAIL(mainLoop, context, paStream, AUDIO_CLIENT_PA_ERR);
+
+    const pa_buffer_attr *bufferAttr = pa_stream_get_buffer_attr(paStream);
+
+    acache.buffer = (uint8_t *) malloc(bufferAttr->minreq);
+    acache.readIndex = 0;
+    acache.writeIndex = 0;
+    acache.totalCacheSize = bufferAttr->minreq;
+    acache.isFull = false;
+    return AUDIO_CLIENT_SUCCESS;
+}
+
 int32_t AudioServiceClient::CreateStream(AudioStreamParams audioParams, AudioStreamType audioType)
 {
     int error;
@@ -470,6 +501,10 @@ int32_t AudioServiceClient::CreateStream(AudioStreamParams audioParams, AudioStr
         MEDIA_ERR_LOG("Create Stream Failed");
         ResetPAAudioClient();
         return AUDIO_CLIENT_CREATE_STREAM_ERR;
+    }
+
+    if (eAudioClientType == AUDIO_SERVICE_CLIENT_PLAYBACK) {
+        InitializeAudioCache();
     }
 
     MEDIA_INFO_LOG("Created Stream");
@@ -588,6 +623,13 @@ int32_t AudioServiceClient::FlushStream()
 int32_t AudioServiceClient::DrainStream()
 {
     int error;
+
+    error = DrainAudioCache();
+    if (error != AUDIO_CLIENT_SUCCESS) {
+        MEDIA_ERR_LOG("Audio cache drain failed");
+        return AUDIO_CLIENT_ERR;
+    }
+
     CHECK_PA_STATUS_RET_IF_FAIL(mainLoop, context, paStream, AUDIO_CLIENT_PA_ERR);
     pa_operation *operation = NULL;
 
@@ -624,15 +666,14 @@ int32_t AudioServiceClient::SetStreamVolume(uint32_t sessionID, uint32_t volume)
     return AUDIO_CLIENT_SUCCESS;
 }
 
-size_t AudioServiceClient::WriteStream(const StreamBuffer &stream, int32_t &pError)
+int32_t AudioServiceClient::DrainAudioCache()
 {
-    const uint8_t* buffer = stream.buffer;
-    size_t length = stream.bufferLen;
-    int error = 0;
-
-    CHECK_PA_STATUS_FOR_WRITE(mainLoop, context, paStream, pError, 0);
-
+    CHECK_PA_STATUS_RET_IF_FAIL(mainLoop, context, paStream, AUDIO_CLIENT_PA_ERR);
     pa_threaded_mainloop_lock(mainLoop);
+
+    int32_t error;
+    size_t length = acache.writeIndex - acache.readIndex;
+    const uint8_t *buffer = acache.buffer;
 
     while (length > 0) {
         size_t writableSize;
@@ -641,6 +682,93 @@ size_t AudioServiceClient::WriteStream(const StreamBuffer &stream, int32_t &pErr
             pa_threaded_mainloop_wait(mainLoop);
         }
 
+        if (writableSize > length) {
+            writableSize = length;
+        }
+
+        writableSize = AlignToAudioFrameSize(writableSize, sampleSpec);
+        if (writableSize == 0) {
+            break;
+        }
+
+        error = pa_stream_write(paStream, (void *)buffer, writableSize, NULL, 0LL, PA_SEEK_RELATIVE);
+        if (error < 0) {
+            break;
+        }
+
+        MEDIA_INFO_LOG("writable size: %{public}zu  bytes to write: %{public}zu  return val: %{public}d", writableSize, length, error);
+
+        buffer = (const uint8_t *)buffer + writableSize;
+        length -= writableSize;
+        acache.readIndex += writableSize;
+        acache.isFull = false;
+    }
+
+    acache.readIndex = 0;
+    acache.writeIndex = 0;
+    acache.isFull = false;
+
+    pa_threaded_mainloop_unlock(mainLoop);
+    return error;
+}
+
+size_t AudioServiceClient::WriteToAudioCache(const StreamBuffer &stream)
+{
+    const uint8_t *inputBuffer = stream.buffer;
+    uint8_t *cacheBuffer = acache.buffer + acache.writeIndex;
+
+    size_t inputLen = stream.bufferLen;
+
+    while (inputLen > 0) {
+        size_t writableSize = acache.totalCacheSize - acache.writeIndex;
+
+        if (writableSize > inputLen) {
+            writableSize = inputLen;
+        }
+
+        if (writableSize == 0) {
+            break;
+        }
+
+        memcpy_s(cacheBuffer, acache.totalCacheSize, (const uint8_t *)inputBuffer, writableSize);
+
+        inputBuffer = (const uint8_t *)inputBuffer + writableSize;
+        cacheBuffer = cacheBuffer + writableSize;
+        inputLen -= writableSize;
+        acache.writeIndex += writableSize;
+    }
+
+    if ((acache.writeIndex - acache.readIndex) == acache.totalCacheSize) {
+        acache.isFull = true;
+    }
+
+    return (stream.bufferLen - inputLen);
+}
+
+size_t AudioServiceClient::WriteStream(const StreamBuffer &stream, int32_t &pError)
+{
+    int error = 0;
+    size_t cachedLen = WriteToAudioCache(stream);
+
+    if (!acache.isFull) {
+        pError = error;
+        return cachedLen;
+    }
+
+    CHECK_PA_STATUS_FOR_WRITE(mainLoop, context, paStream, pError, 0);
+    pa_threaded_mainloop_lock(mainLoop);
+
+    const uint8_t *buffer = acache.buffer;
+    size_t length = acache.totalCacheSize;
+
+    while (length > 0) {
+        size_t writableSize;
+
+        while (!(writableSize = pa_stream_writable_size(paStream))) {
+            pa_threaded_mainloop_wait(mainLoop);
+        }
+
+        MEDIA_INFO_LOG("WriteStream writableSize = %{public}zu  length = %{public}zu", writableSize, length);
         if (writableSize > length)
             writableSize = length;
 
@@ -658,11 +786,33 @@ size_t AudioServiceClient::WriteStream(const StreamBuffer &stream, int32_t &pErr
 
         buffer = (const uint8_t*) buffer + writableSize;
         length -= writableSize;
+        acache.readIndex += writableSize;
+        acache.isFull = false;
+    }
+
+    if ((length >= 0) && !acache.isFull) {
+        uint8_t *cacheBuffer = acache.buffer;
+        uint32_t offset = acache.readIndex;
+        uint32_t size = (acache.writeIndex - acache.readIndex);
+        if (size > 0) {
+            memcpy_s(cacheBuffer, acache.totalCacheSize, (const uint8_t *)cacheBuffer + offset, size);
+            MEDIA_INFO_LOG("rearranging the audio cache");
+        }
+        acache.readIndex = 0;
+        acache.writeIndex = 0;
+
+        if (cachedLen < stream.bufferLen) {
+            StreamBuffer str;
+            str.buffer = stream.buffer + cachedLen;
+            str.bufferLen = stream.bufferLen - cachedLen;
+            MEDIA_INFO_LOG("writing pending data to audio cache: %{public}d", str.bufferLen);
+            cachedLen += WriteToAudioCache(str);
+        }
     }
 
     pa_threaded_mainloop_unlock(mainLoop);
     pError = error;
-    return (stream.bufferLen - length);
+    return cachedLen;
 }
 
 int32_t AudioServiceClient::ReadStream(StreamBuffer &stream, bool isBlocking)
@@ -749,7 +899,7 @@ int32_t AudioServiceClient::GetMinimumBufferSize(size_t &minBufferSize)
     }
 
     if (eAudioClientType == AUDIO_SERVICE_CLIENT_PLAYBACK) {
-        minBufferSize = (size_t) bufferAttr->minreq;
+        minBufferSize = (size_t) MINIMUM_BUFFER_SIZE;
     }
 
     if (eAudioClientType == AUDIO_SERVICE_CLIENT_RECORD) {
@@ -773,7 +923,7 @@ int32_t AudioServiceClient::GetMinimumFrameCount(uint32_t &frameCount)
     }
 
     if (eAudioClientType == AUDIO_SERVICE_CLIENT_PLAYBACK) {
-        minBufferSize = (size_t) bufferAttr->minreq;
+        minBufferSize = (size_t) MINIMUM_BUFFER_SIZE;
     }
 
     if (eAudioClientType == AUDIO_SERVICE_CLIENT_RECORD) {

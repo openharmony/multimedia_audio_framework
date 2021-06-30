@@ -45,6 +45,14 @@ struct StreamBuffer {
     uint32_t bufferLen; // stream length, by bytes
 };
 
+struct AudioCache {
+    uint8_t *buffer;
+    uint32_t readIndex;
+    uint32_t writeIndex;
+    uint32_t totalCacheSize;
+    bool isFull;
+};
+
 class AudioRendererCallbacks {
 public:
     virtual ~AudioRendererCallbacks();
@@ -258,6 +266,7 @@ private:
     pa_stream *paStream;
     pa_sample_spec sampleSpec;
 
+    AudioCache acache;
     const void* internalReadBuffer;
     size_t internalRdBufLen;
     size_t internalRdBufIndex;
@@ -282,6 +291,11 @@ private:
     uint32_t underFlowCount;
     int32_t ConnectStreamToPA();
 
+    // Audio cache related functions. These APIs are applicable only for playback scenarios
+    int32_t InitializeAudioCache();
+    size_t WriteToAudioCache(const StreamBuffer &stream);
+    int32_t DrainAudioCache();
+
     // Error code used
     static const uint32_t AUDIO_CLIENT_SUCCESS = 0;
     static const uint32_t AUDIO_CLIENT_ERR = -1;
@@ -294,6 +308,7 @@ private:
 
 
     // Default values
+    static const uint32_t MINIMUM_BUFFER_SIZE = 1024;
     static const uint32_t DEFAULT_SAMPLING_RATE = 44100;
     static const uint8_t DEFAULT_CHANNEL_COUNT = 2;
     static const uint8_t DEFAULT_SAMPLE_SIZE = 2;
