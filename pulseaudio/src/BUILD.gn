@@ -23,9 +23,11 @@ config("pulsecommon_config") {
   include_dirs = [
     "$pulseaudio_dir/src",
     "$pulseaudio_dir/include",
-    "$pulseaudio_build_path",
+    "$pulseaudio_dir",
     "$pulseaudio_build_path/src",
+    "$pulseaudio_build_path/include",
     "$libsndfile_build_path/include",
+    "$pulseaudio_dir/src/pulse",
   ]
 
   cflags = [
@@ -54,7 +56,7 @@ ohos_source_set("pulsecommon_sources") {
     "$pulseaudio_dir/src/pulse/util.c",
     "$pulseaudio_dir/src/pulse/timeval.c",
     "$pulseaudio_dir/src/pulse/rtclock.c",
-    "$pulseaudio_dir/src/pulse/volume.c",
+    "$pulseaudio_build_path/src/pulse/ohos_pa_volume.c",
     "$pulseaudio_dir/src/pulsecore/authkey.c",
     "$pulseaudio_dir/src/pulsecore/conf-parser.c",
     "$pulseaudio_dir/src/pulsecore/core-error.c",

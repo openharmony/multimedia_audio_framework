@@ -34,7 +34,6 @@ REGISTER_SYSTEM_ABILITY_BY_ID(AudioServer, AUDIO_DISTRIBUTED_SERVICE_ID, true)
 
 #ifdef PA
 constexpr int PA_ARG_COUNT = 1;
-const int PA_DAEMON_THREAD_NAME_BUFFER = 15;
 
 void* AudioServer::paDaemonThread(void* arg)
 {
@@ -67,23 +66,11 @@ void AudioServer::OnStart()
     }
 
 #ifdef PA
-    char thread_name[PA_DAEMON_THREAD_NAME_BUFFER];
-
     int32_t ret = pthread_create(&m_paDaemonThread, nullptr, AudioServer::paDaemonThread, nullptr);
     if (ret != 0) {
         MEDIA_ERR_LOG("pthread_create failed %d", ret);
     }
     MEDIA_INFO_LOG("Created paDaemonThread\n");
-
-    ret = pthread_getname_np(m_paDaemonThread, thread_name, PA_DAEMON_THREAD_NAME_BUFFER - 1);
-    if (ret != 0) {
-        MEDIA_ERR_LOG("pthread_getname failed %d", ret);
-    }
-
-    ret = pthread_setname_np(m_paDaemonThread, "pulseaudio");
-    if (ret != 0) {
-        MEDIA_ERR_LOG("pthread_setname failed %d", ret);
-    }
 #endif
 }
 

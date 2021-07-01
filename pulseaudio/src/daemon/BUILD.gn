@@ -13,19 +13,17 @@
 
 import("//build/ohos.gni")
 
-pulseaudio_dir = "//foundation/multimedia/audio_standard/pulseaudio"
-pulseaudio_src_dir = "//third_party/pulseaudio"
-pulseaudio_build_path = "//third_party/pulseaudio"
+pulseaudio_build_path = "//foundation/multimedia/audio_standard/pulseaudio"
+pulseaudio_dir = "//third_party/pulseaudio"
 
 config("daemon_config") {
   visibility = [ ":*" ]
 
   include_dirs = [
-    "$pulseaudio_dir/include",
-    "$pulseaudio_src_dir/src/daemon",
-    "$pulseaudio_src_dir/src",
-    "$pulseaudio_build_path",
-    "$pulseaudio_build_path/src",
+    "$pulseaudio_build_path/include",
+    "$pulseaudio_dir/src/daemon",
+    "$pulseaudio_dir/src",
+    "$pulseaudio_dir",
   ]
 
   cflags = [
@@ -39,11 +37,11 @@ config("daemon_config") {
 
 ohos_source_set("pulseaudio_sources") {
   sources = [
-    "$pulseaudio_src_dir/src/daemon/caps.c",
-    "$pulseaudio_src_dir/src/daemon/cmdline.c",
-    "$pulseaudio_src_dir/src/daemon/cpulimit.c",
-    "$pulseaudio_dir/src/daemon/ohos_daemon-conf.c",
-    "$pulseaudio_dir/src/daemon/ohos_pa_main.c",
+    "$pulseaudio_dir/src/daemon/caps.c",
+    "$pulseaudio_dir/src/daemon/cmdline.c",
+    "$pulseaudio_dir/src/daemon/cpulimit.c",
+    "$pulseaudio_build_path/src/daemon/ohos_daemon-conf.c",
+    "$pulseaudio_build_path/src/daemon/ohos_pa_main.c",
   ]
 
   configs = [ ":daemon_config" ]
@@ -53,9 +51,9 @@ ohos_shared_library("pulseaudio") {
   ldflags = [ "-ffast-math" ]
   deps = [
     ":pulseaudio_sources",
-    "$pulseaudio_dir/src/pulse:pulse",
-    "$pulseaudio_dir/src/pulsecore:pulsecore",
-    "$pulseaudio_dir/src:pulsecommon",
+    "$pulseaudio_build_path/src/pulse:pulse",
+    "$pulseaudio_build_path/src/pulsecore:pulsecore",
+    "$pulseaudio_build_path/src:pulsecommon",
   ]
 
   part_name = "multimedia_audio_standard"

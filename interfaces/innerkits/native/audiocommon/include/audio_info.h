@@ -15,6 +15,11 @@
 #ifndef AUDIO_INFO_H
 #define AUDIO_INFO_H
 
+#ifdef __MUSL__
+#include <sys/time.h>
+#include <stdint.h>
+#endif // __MUSL__
+
 #include <unistd.h>
 
 namespace OHOS {
@@ -223,7 +228,6 @@ public:
     };
 };
 typedef void* AudioIOHandle;
-
 } // namespace AudioStandard
 } // namespace OHOS
 #endif // AUDIO_INFO_H

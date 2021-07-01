@@ -66,7 +66,7 @@ ohos_source_set("pulse_sources") {
     "$pulseaudio_dir/src/pulse/timeval.c",
     "$pulseaudio_dir/src/pulse/utf8.c",
     "$pulseaudio_dir/src/pulse/util.c",
-    "$pulseaudio_dir/src/pulse/volume.c",
+    "$pulseaudio_build_path/src/pulse/ohos_pa_volume.c",
     "$pulseaudio_dir/src/pulse/xmalloc.c",
   ]
 
