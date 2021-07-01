@@ -159,7 +159,8 @@ public:
     virtual bool Release() = 0;
 
     /**
-     * @brief Obtains the recorder buffer size.
+     * @brief Obtains a reasonable minimum buffer size for recorder, however, the recorder can
+     *        accept other read sizes as well.
      *
      * @param bufferSize Indicates a buffersize pointer value that wil be written.
      * @return Returns {@link SUCCESS} if bufferSize is successfully obtained; returns an error code

@@ -17,6 +17,8 @@
 #include "media_log.h"
 #include "securec.h"
 
+using namespace std;
+
 namespace OHOS {
 namespace AudioStandard {
 AudioRendererCallbacks::~AudioRendererCallbacks() = default;
@@ -268,10 +270,6 @@ void AudioServiceClient::ResetPAAudioClient()
     internalRdBufLen   = 0;
     underFlowCount     = 0;
 
-    if (acache.buffer) {
-        free(acache.buffer);
-    }
-
     acache.buffer = NULL;
     acache.readIndex = 0;
     acache.writeIndex = 0;
@@ -446,8 +444,17 @@ int32_t AudioServiceClient::InitializeAudioCache()
     CHECK_PA_STATUS_RET_IF_FAIL(mainLoop, context, paStream, AUDIO_CLIENT_PA_ERR);
 
     const pa_buffer_attr *bufferAttr = pa_stream_get_buffer_attr(paStream);
+    if (bufferAttr == NULL) {
+        MEDIA_ERR_LOG("pa stream get buffer attribute returned null");
+        return AUDIO_CLIENT_INIT_ERR;
+    }
 
-    acache.buffer = (uint8_t *) malloc(bufferAttr->minreq);
+    acache.buffer = make_unique<uint8_t[]>(bufferAttr->minreq);
+    if (acache.buffer == NULL) {
+        MEDIA_ERR_LOG("Allocate memory for buffer failed");
+        return AUDIO_CLIENT_INIT_ERR;
+    }
+
     acache.readIndex = 0;
     acache.writeIndex = 0;
     acache.totalCacheSize = bufferAttr->minreq;
@@ -504,7 +511,12 @@ int32_t AudioServiceClient::CreateStream(AudioStreamParams audioParams, AudioStr
     }
 
     if (eAudioClientType == AUDIO_SERVICE_CLIENT_PLAYBACK) {
-        InitializeAudioCache();
+        error = InitializeAudioCache();
+        if (error < 0) {
+            MEDIA_ERR_LOG("Initialize audio cache failed");
+            ResetPAAudioClient();
+            return AUDIO_CLIENT_CREATE_STREAM_ERR;
+        }
     }
 
     MEDIA_INFO_LOG("Created Stream");
@@ -624,6 +636,11 @@ int32_t AudioServiceClient::DrainStream()
 {
     int error;
 
+    if (eAudioClientType != AUDIO_SERVICE_CLIENT_PLAYBACK) {
+        MEDIA_ERR_LOG("Drain is not supported");
+        return AUDIO_CLIENT_ERR;
+    }
+
     error = DrainAudioCache();
     if (error != AUDIO_CLIENT_SUCCESS) {
         MEDIA_ERR_LOG("Audio cache drain failed");
@@ -666,14 +683,9 @@ int32_t AudioServiceClient::SetStreamVolume(uint32_t sessionID, uint32_t volume)
     return AUDIO_CLIENT_SUCCESS;
 }
 
-int32_t AudioServiceClient::DrainAudioCache()
+int32_t AudioServiceClient::PaWriteStream(const uint8_t *buffer, size_t &length)
 {
-    CHECK_PA_STATUS_RET_IF_FAIL(mainLoop, context, paStream, AUDIO_CLIENT_PA_ERR);
-    pa_threaded_mainloop_lock(mainLoop);
-
-    int32_t error;
-    size_t length = acache.writeIndex - acache.readIndex;
-    const uint8_t *buffer = acache.buffer;
+    int error = 0;
 
     while (length > 0) {
         size_t writableSize;
@@ -682,31 +694,56 @@ int32_t AudioServiceClient::DrainAudioCache()
             pa_threaded_mainloop_wait(mainLoop);
         }
 
+        MEDIA_INFO_LOG("Write stream: writable size = %{public}zu, length = %{public}zu",
+                       writableSize, length);
         if (writableSize > length) {
             writableSize = length;
         }
 
         writableSize = AlignToAudioFrameSize(writableSize, sampleSpec);
         if (writableSize == 0) {
+            MEDIA_ERR_LOG("Align to frame size failed");
+            error = AUDIO_CLIENT_WRITE_STREAM_ERR;
             break;
         }
 
-        error = pa_stream_write(paStream, (void *)buffer, writableSize, NULL, 0LL, PA_SEEK_RELATIVE);
+        error = pa_stream_write(paStream, (void *)buffer, writableSize, NULL, 0LL,
+                                PA_SEEK_RELATIVE);
         if (error < 0) {
+            MEDIA_ERR_LOG("Write stream failed");
+            error = AUDIO_CLIENT_WRITE_STREAM_ERR;
             break;
         }
 
-        MEDIA_INFO_LOG("writable size: %{public}zu  bytes to write: %{public}zu  return val: %{public}d", writableSize, length, error);
-
-        buffer = (const uint8_t *)buffer + writableSize;
+        MEDIA_INFO_LOG("Writable size: %{public}zu, bytes to write: %{public}zu, return val: %{public}d",
+                       writableSize, length, error);
+        buffer = buffer + writableSize;
         length -= writableSize;
         acache.readIndex += writableSize;
         acache.isFull = false;
     }
 
+    return error;
+}
+
+int32_t AudioServiceClient::DrainAudioCache()
+{
+    CHECK_PA_STATUS_RET_IF_FAIL(mainLoop, context, paStream, AUDIO_CLIENT_PA_ERR);
+    pa_threaded_mainloop_lock(mainLoop);
+
+    int32_t error = 0;
+    if (acache.buffer == NULL) {
+        MEDIA_ERR_LOG("Drain cache failed");
+        return AUDIO_CLIENT_ERR;
+    }
+
+    size_t length = acache.writeIndex - acache.readIndex;
+    const uint8_t *buffer = acache.buffer.get();
+
+    error = PaWriteStream(buffer, length);
+
     acache.readIndex = 0;
     acache.writeIndex = 0;
-    acache.isFull = false;
 
     pa_threaded_mainloop_unlock(mainLoop);
     return error;
@@ -714,8 +751,12 @@ int32_t AudioServiceClient::DrainAudioCache()
 
 size_t AudioServiceClient::WriteToAudioCache(const StreamBuffer &stream)
 {
+    if (stream.buffer == NULL) {
+        return 0;
+    }
+
     const uint8_t *inputBuffer = stream.buffer;
-    uint8_t *cacheBuffer = acache.buffer + acache.writeIndex;
+    uint8_t *cacheBuffer = acache.buffer.get() + acache.writeIndex;
 
     size_t inputLen = stream.bufferLen;
 
@@ -730,9 +771,11 @@ size_t AudioServiceClient::WriteToAudioCache(const StreamBuffer &stream)
             break;
         }
 
-        memcpy_s(cacheBuffer, acache.totalCacheSize, (const uint8_t *)inputBuffer, writableSize);
+        if (memcpy_s(cacheBuffer, acache.totalCacheSize, inputBuffer, writableSize)) {
+            break;
+        }
 
-        inputBuffer = (const uint8_t *)inputBuffer + writableSize;
+        inputBuffer = inputBuffer + writableSize;
         cacheBuffer = cacheBuffer + writableSize;
         inputLen -= writableSize;
         acache.writeIndex += writableSize;
@@ -747,6 +790,7 @@ size_t AudioServiceClient::WriteToAudioCache(const StreamBuffer &stream)
 
 size_t AudioServiceClient::WriteStream(const StreamBuffer &stream, int32_t &pError)
 {
+    lock_guard<mutex> lock(mtx);
     int error = 0;
     size_t cachedLen = WriteToAudioCache(stream);
 
@@ -758,44 +802,27 @@ size_t AudioServiceClient::WriteStream(const StreamBuffer &stream, int32_t &pErr
     CHECK_PA_STATUS_FOR_WRITE(mainLoop, context, paStream, pError, 0);
     pa_threaded_mainloop_lock(mainLoop);
 
-    const uint8_t *buffer = acache.buffer;
-    size_t length = acache.totalCacheSize;
-
-    while (length > 0) {
-        size_t writableSize;
-
-        while (!(writableSize = pa_stream_writable_size(paStream))) {
-            pa_threaded_mainloop_wait(mainLoop);
-        }
-
-        MEDIA_INFO_LOG("WriteStream writableSize = %{public}zu  length = %{public}zu", writableSize, length);
-        if (writableSize > length)
-            writableSize = length;
-
-        writableSize = AlignToAudioFrameSize(writableSize, sampleSpec);
-        if (writableSize == 0) {
-            break;
-        }
-
-        error = pa_stream_write(paStream, (void *)buffer, writableSize, NULL, 0LL, PA_SEEK_RELATIVE);
-        if (error < 0) {
-            break;
-        }
-
-        MEDIA_INFO_LOG("writable size: %{public}zu  bytes to write: %{public}zu  return val: %{public}d ", writableSize, length, error);
-
-        buffer = (const uint8_t*) buffer + writableSize;
-        length -= writableSize;
-        acache.readIndex += writableSize;
-        acache.isFull = false;
+    if (acache.buffer == NULL) {
+        MEDIA_ERR_LOG("Buffer is null");
+        pError = AUDIO_CLIENT_WRITE_STREAM_ERR;
+        return cachedLen;
     }
 
-    if ((length >= 0) && !acache.isFull) {
-        uint8_t *cacheBuffer = acache.buffer;
+    const uint8_t *buffer = acache.buffer.get();
+    size_t length = acache.totalCacheSize;
+
+    error = PaWriteStream(buffer, length);
+
+    if (!error && (length >= 0) && !acache.isFull) {
+        uint8_t *cacheBuffer = acache.buffer.get();
         uint32_t offset = acache.readIndex;
         uint32_t size = (acache.writeIndex - acache.readIndex);
         if (size > 0) {
-            memcpy_s(cacheBuffer, acache.totalCacheSize, (const uint8_t *)cacheBuffer + offset, size);
+            if (memcpy_s(cacheBuffer, acache.totalCacheSize, cacheBuffer + offset, size)) {
+                MEDIA_ERR_LOG("Update cache failed");
+                pError = AUDIO_CLIENT_WRITE_STREAM_ERR;
+                return cachedLen;
+            }
             MEDIA_INFO_LOG("rearranging the audio cache");
         }
         acache.readIndex = 0;

@@ -158,7 +158,8 @@ public:
     virtual bool Release() = 0;
 
     /**
-     * @brief Obtains the renderer buffer size.
+     * @brief Obtains a reasonable minimum buffer size for rendering, however, the renderer can
+     *        accept other write sizes as well.
      *
      * @param bufferSize Indicates the reference variable into which buffer size value wil be written.
      * @return Returns {@link SUCCESS} if bufferSize is successfully obtained; returns an error code

@@ -46,7 +46,7 @@ struct StreamBuffer {
 };
 
 struct AudioCache {
-    uint8_t *buffer;
+    std::unique_ptr<uint8_t[]> buffer;
     uint32_t readIndex;
     uint32_t writeIndex;
     uint32_t totalCacheSize;
@@ -266,6 +266,8 @@ private:
     pa_stream *paStream;
     pa_sample_spec sampleSpec;
 
+    std::mutex mtx;
+
     AudioCache acache;
     const void* internalReadBuffer;
     size_t internalRdBufLen;
@@ -295,6 +297,7 @@ private:
     int32_t InitializeAudioCache();
     size_t WriteToAudioCache(const StreamBuffer &stream);
     int32_t DrainAudioCache();
+    int32_t PaWriteStream(const uint8_t *buffer, size_t &length);
 
     // Error code used
     static const uint32_t AUDIO_CLIENT_SUCCESS = 0;
@@ -304,7 +307,8 @@ private:
     static const uint32_t AUDIO_CLIENT_CREATE_STREAM_ERR = -4;
     static const uint32_t AUDIO_CLIENT_START_STREAM_ERR = -5;
     static const uint32_t AUDIO_CLIENT_READ_STREAM_ERR = -6;
-    static const uint32_t AUDIO_CLIENT_PA_ERR = -7;
+    static const uint32_t AUDIO_CLIENT_WRITE_STREAM_ERR = -7;
+    static const uint32_t AUDIO_CLIENT_PA_ERR = -8;
 
 
     // Default values
