@@ -37,11 +37,11 @@
 #include <pulsecore/thread-mq.h>
 #include <pulsecore/rtpoll.h>
 
-#include <audio_manager.h>
-#include <audio_capturer_source_intf.h>
-
 #include "hdi_source.h"
 #include "media_log.h"
+
+static int pa_capturer_init(struct userdata *u);
+static void pa_capturer_exit(void);
 
 static void userdata_free(struct userdata *u) {
     pa_assert(u);
@@ -98,6 +98,7 @@ static int source_set_state_in_io_thread_cb(pa_source *s, pa_source_state_t new_
 
 static pa_hook_result_t source_output_fixate_hook_cb(pa_core *c, pa_source_output_new_data *data,
         struct userdata *u) {
+    int ret;
     MEDIA_DEBUG_LOG("HDI Source: Detected source output");
     pa_assert(data);
     pa_assert(u);
@@ -106,8 +107,17 @@ static pa_hook_result_t source_output_fixate_hook_cb(pa_core *c, pa_source_outpu
         // Signal Ready when a Source Output is connected
         if (!u->IsReady)
             u->IsReady = true;
+
+        ret = pa_capturer_init(u);
+        if (ret != 0) {
+            MEDIA_DEBUG_LOG("HDI Source: Cannot initialize Capturer! ret=%d", ret);
+            return PA_HOOK_OK;
+        }
+
+        u->timestamp = pa_rtclock_now();
         pa_source_suspend(u->source, false, PA_SUSPEND_IDLE);
     }
+
     return PA_HOOK_OK;
 }
 
@@ -126,21 +136,18 @@ static void thread_func(void *userdata) {
 
     for (;;) {
         int ret = 0;
-        int32_t retries = 0;
+        int retries = 0;
         uint64_t requestBytes;
         uint64_t replyBytes = 0;
         void *p;
 
-        MEDIA_DEBUG_LOG("HDI Source: replyBytes before read : %{public}llu", replyBytes);
         if (PA_SOURCE_IS_OPENED(u->source->thread_info.state) &&
-           (u->source->thread_info.state != PA_SOURCE_SUSPENDED && u->IsReady)) {
-            MEDIA_DEBUG_LOG("HDI Source: PA_SOURCE_IS_OPENED");
+            (u->source->thread_info.state != PA_SOURCE_SUSPENDED) && u->IsReady && u->IsCapturerInit) {
             pa_usec_t now;
             pa_memchunk chunk;
 
             now = pa_rtclock_now();
-            MEDIA_DEBUG_LOG("HDI Source: now : %{public}llu", now);
-            MEDIA_DEBUG_LOG("HDI Source: Is timer_elapsed : %{public}d", timer_elapsed);
+            MEDIA_DEBUG_LOG("HDI Source: now: %{public}llu timer_elapsed: %{public}d", now, timer_elapsed);
 
             if (timer_elapsed && (chunk.length = pa_usec_to_bytes(now - u->timestamp, &u->source->sample_spec)) > 0) {
                 chunk.length = u->buffer_size;
@@ -160,6 +167,7 @@ static void thread_func(void *userdata) {
                     pa_memblock_unref(chunk.memblock);
                     break;
                 }
+
                 if (replyBytes == 0) {
                     MEDIA_INFO_LOG("HDI Source: reply bytes 0");
                     if (retries < MAX_RETRIES) {
@@ -185,6 +193,12 @@ static void thread_func(void *userdata) {
 
             pa_rtpoll_set_timer_absolute(u->rtpoll, u->timestamp + u->block_usec);
         } else {
+            if (u->IsCapturerInit) {
+                u->IsCapturerInit = false;
+                pa_capturer_exit();
+                MEDIA_INFO_LOG("HDI Source: Capturer exit done");
+            }
+
             pa_rtpoll_set_timer_disabled(u->rtpoll);
             MEDIA_INFO_LOG("HDI Source: pa_rtpoll_set_timer_disabled done ");
         }
@@ -208,13 +222,47 @@ static void thread_func(void *userdata) {
     }
 }
 
+static int pa_capturer_init(struct userdata *u) {
+    int ret;
+
+    ret = AudioCapturerSourceInit(&u->attrs);
+    if (ret != 0) {
+        MEDIA_INFO_LOG("Audio capturer init failed!");
+        return ret;
+    }
+
+    ret = AudioCapturerSourceStart();
+    if (ret != 0) {
+        MEDIA_INFO_LOG("Audio capturer start failed!");
+        goto fail;
+    }
+
+    ret = AudioCapturerSourceSetVolume(DEFAULT_LEFT_VOLUME, DEFAULT_RIGHT_VOLUME);
+    if (ret != 0) {
+        MEDIA_INFO_LOG("audio capturer set volume failed!");
+        goto fail;
+    }
+
+    u->IsCapturerInit = true;
+    return ret;
+
+fail:
+    pa_capturer_exit();
+    return ret;
+}
+
+static void pa_capturer_exit() {
+    AudioCapturerSourceStop();
+    AudioCapturerSourceDeInit();
+}
+
 pa_source *pa_hdi_source_new(pa_module *m, pa_modargs *ma, const char*driver) {
     struct userdata *u = NULL;
     pa_sample_spec ss;
     char *thread_name = NULL;
     pa_channel_map map;
     pa_source_new_data data;
-    int32_t ret;
+    int ret;
 
     pa_assert(m);
     pa_assert(ma);
@@ -242,33 +290,13 @@ pa_source *pa_hdi_source_new(pa_module *m, pa_modargs *ma, const char*driver) {
     }
 
     u->buffer_size = DEFAULT_BUFFER_SIZE;
-
-    AudioSourceAttr attrs;
-    attrs.format = AUDIO_FORMAT_PCM_16_BIT;
-    attrs.channel = ss.channels;
-    attrs.sampleRate = ss.rate;
-
+    u->attrs.format = AUDIO_FORMAT_PCM_16_BIT;
+    u->attrs.channel = ss.channels;
+    u->attrs.sampleRate = ss.rate;
     MEDIA_INFO_LOG("AudioDeviceCreateCapture format: %{public}d, channel: %{public}d, sampleRate: %{public}d",
-           attrs.format, attrs.channel, attrs.sampleRate);
-
-    ret = AudioCapturerSourceInit(&attrs);
+                    u->attrs.format, u->attrs.channel, u->attrs.sampleRate);
+    ret = pa_capturer_init(u);
     if (ret != 0) {
-        MEDIA_INFO_LOG("Audio capture init failed!");
-        goto fail;
-    }
-
-    ret = AudioCapturerSourceStart();
-    if (ret != 0) {
-        MEDIA_INFO_LOG("Audio capture start failed!");
-        AudioCapturerSourceDeInit();
-        goto fail;
-    }
-
-    ret = AudioCapturerSourceSetVolume(VOLUME_VALUE, VOLUME_VALUE);
-    if (ret != 0) {
-        MEDIA_INFO_LOG("audio capture set volume failed!");
-        AudioCapturerSourceStop();
-        AudioCapturerSourceDeInit();
         goto fail;
     }
 
@@ -317,9 +345,10 @@ pa_source *pa_hdi_source_new(pa_module *m, pa_modargs *ma, const char*driver) {
 
     thread_name = pa_sprintf_malloc("hdi-source-record");
     if (!(u->thread = pa_thread_new(thread_name, thread_func, u))) {
-        MEDIA_INFO_LOG("Failed to create thread.");
+        MEDIA_INFO_LOG("Failed to create hdi-source-record thread!");
         goto fail;
     }
+
     pa_xfree(thread_name);
     thread_name = NULL;
     pa_source_put(u->source);
@@ -327,6 +356,9 @@ pa_source *pa_hdi_source_new(pa_module *m, pa_modargs *ma, const char*driver) {
 
 fail:
     pa_xfree(thread_name);
+
+    if (u->IsCapturerInit)
+        pa_capturer_exit();
 
     if (u)
         userdata_free(u);

@@ -60,7 +60,7 @@ public:
 private:
     const int32_t HALF_FACTOR = 2;
     const int32_t MAX_AUDIO_ADAPTER_NUM = 3;
-    const float MAX_VOLUME_LEVEL = 100.0f;
+    const float MAX_VOLUME_LEVEL = 15.0f;
 
     AudioSourceAttr attr_;
     bool started_;
