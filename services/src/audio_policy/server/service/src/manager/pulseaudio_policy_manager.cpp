@@ -20,10 +20,6 @@
 
 namespace OHOS {
 namespace AudioStandard {
-
-const float MAX_VOLUME = 1.0f;
-const float MIN_VOLUME = 0.0f;
-
 bool PulseAudioPolicyManager::Init()
 {
     mMainLoop = pa_threaded_mainloop_new();
@@ -62,7 +58,12 @@ bool PulseAudioPolicyManager::Init()
     }
 
     pa_threaded_mainloop_unlock(mMainLoop);
-    InitVolumeMap();
+
+    bool isFirstBoot = false;
+    InitAudioPolicyKvStore(isFirstBoot);
+    InitVolumeMap(isFirstBoot);
+    InitRingerMode(isFirstBoot);
+
     return true;
 }
 
@@ -100,7 +101,14 @@ int32_t PulseAudioPolicyManager::SetStreamVolume(AudioStreamType streamType, flo
         return ERROR;
     }
 
+    // Incase if KvStore didnot connect during  bootup
+    if (mAudioPolicyKvStore == nullptr) {
+        bool isFirstBoot = false;
+        InitAudioPolicyKvStore(isFirstBoot);
+    }
+
     mVolumeMap[streamType] = volume;
+    WriteVolumeToKvStore(streamType, volume);
 
     pa_operation *operation = pa_context_get_sink_input_info_list(mContext,
         PulseAudioPolicyManager::GetSinkInputInfoVolumeCb, reinterpret_cast<void*>(userData));
@@ -220,7 +228,6 @@ bool PulseAudioPolicyManager::IsStreamActive(AudioStreamType streamType)
     return (userData->isCorked) ? false : true;
 }
 
-
 int32_t PulseAudioPolicyManager::SetDeviceActive(AudioIOHandle ioHandle, DeviceType deviceType, std::string name, bool active)
 {
     pa_threaded_mainloop_lock(mMainLoop);
@@ -256,15 +263,26 @@ int32_t PulseAudioPolicyManager::SetDeviceActive(AudioIOHandle ioHandle, DeviceT
 int32_t PulseAudioPolicyManager::SetRingerMode(AudioRingerMode ringerMode)
 {
     mRingerMode = ringerMode;
-    return 0;
+
+    // Incase if KvStore didnot connect during  bootup
+    if (mAudioPolicyKvStore == nullptr) {
+        bool isFirstBoot = false;
+        InitAudioPolicyKvStore(isFirstBoot);
+    }
+
+    WriteRingerModeToKvStore(ringerMode);
+    return SUCCESS;
+}
+
+AudioRingerMode PulseAudioPolicyManager::GetRingerMode()
+{
+    return mRingerMode;
 }
 
 AudioIOHandle PulseAudioPolicyManager::OpenAudioPort(std::shared_ptr<AudioPortInfo> audioPortInfo)
 {
     std::string moduleArgs = GetModuleArgs(audioPortInfo);
-
     MEDIA_INFO_LOG("[PolicyManager] load-module %{public}s %{public}s", audioPortInfo->name, moduleArgs.c_str());
-
     pa_threaded_mainloop_lock(mMainLoop);
 
     std::shared_ptr<UserData> userData = std::make_shared<UserData>();
@@ -300,16 +318,12 @@ int32_t PulseAudioPolicyManager::CloseAudioPort(AudioIOHandle ioHandle)
 
     pa_operation_unref(operation);
     pa_threaded_mainloop_unlock(mMainLoop);
-
     return SUCCESS;
 }
 
 // Private Members
-
 bool PulseAudioPolicyManager::ConnectToPulseAudio(void)
 {
-    MEDIA_DEBUG_LOG("[PolicyManager] ConnectToPulseAudio++");
-
     if (mContext != NULL) {
         pa_context_disconnect (mContext);
         pa_context_set_state_callback (mContext, NULL, NULL);
@@ -322,7 +336,6 @@ bool PulseAudioPolicyManager::ConnectToPulseAudio(void)
     pa_proplist_sets(proplist, PA_PROP_APPLICATION_NAME, "PulseAudio Service");
     pa_proplist_sets(proplist, PA_PROP_APPLICATION_ID, "org.huawei.pulseaudio.service");
     mContext = pa_context_new_with_proplist(pa_threaded_mainloop_get_api(mMainLoop), NULL, proplist);
-
     pa_proplist_free(proplist);
 
     if (mContext == NULL) {
@@ -340,19 +353,13 @@ bool PulseAudioPolicyManager::ConnectToPulseAudio(void)
         }
     }
 
-    MEDIA_DEBUG_LOG("[PolicyManager] ConnectToPulseAudio--");
-
     return true;
 
 Fail:
     /* Make sure we don't get any further callbacks */
     pa_context_set_state_callback (mContext, NULL, NULL);
     pa_context_set_subscribe_callback (mContext, NULL, NULL);
-
     pa_context_unref (mContext);
-
-    MEDIA_DEBUG_LOG("[PolicyManager] ConnectToPulseAudio--");
-
     return false;
 }
 
@@ -439,10 +446,209 @@ AudioStreamType PulseAudioPolicyManager::GetStreamIDByType(std::string streamTyp
     return stream;
 }
 
-void PulseAudioPolicyManager::InitVolumeMap(void)
+bool PulseAudioPolicyManager::InitAudioPolicyKvStore(bool& isFirstBoot)
 {
-    mVolumeMap[STREAM_MUSIC] = MAX_VOLUME;
-    mVolumeMap[STREAM_RING] = MAX_VOLUME;
+    DistributedKvDataManager manager;
+    Options options;
+
+    options.createIfMissing = false;
+    options.encrypt = false;
+    options.autoSync = true;
+    options.kvStoreType = KvStoreType::MULTI_VERSION;
+
+    AppId appId;
+    appId.appId = "policymanager";
+    StoreId storeId;
+    storeId.storeId = "audiopolicy";
+
+    // open and initialize kvstore instance.
+    if (mAudioPolicyKvStore == nullptr) {
+        manager.GetKvStore(options, appId, storeId, [&](Status status, std::unique_ptr<KvStore> kvStore) {
+            if (status == Status::STORE_NOT_FOUND) {
+                MEDIA_ERR_LOG("[PolicyManager] InitAudioPolicyKvStore: STORE_NOT_FOUND!");
+                return;
+            } else {
+                mAudioPolicyKvStore = std::move(kvStore);
+            }
+        });
+    }
+
+    if (mAudioPolicyKvStore == nullptr) {
+        MEDIA_INFO_LOG("[PolicyManager] First Boot: Create AudioPolicyKvStore");
+        options.createIfMissing = true;
+        // [create and] open and initialize kvstore instance.
+        manager.GetKvStore(options, appId, storeId, [&](Status status, std::unique_ptr<KvStore> kvStore) {
+            if (status != Status::SUCCESS) {
+                MEDIA_ERR_LOG("[PolicyManager] Create AudioPolicyKvStore Failed!");
+                return;
+            }
+
+            mAudioPolicyKvStore = std::move(kvStore);
+            isFirstBoot = true;
+        });
+    }
+
+    if (mAudioPolicyKvStore == nullptr) {
+        MEDIA_ERR_LOG("[PolicyManager] InitAudioPolicyKvStore: Failed!");
+        return false;
+    }
+
+    return true;
+}
+
+void PulseAudioPolicyManager::InitVolumeMap(bool isFirstBoot)
+{
+    if (isFirstBoot == true) {
+        WriteVolumeToKvStore(STREAM_MUSIC, MAX_VOLUME);
+        WriteVolumeToKvStore(STREAM_RING, MAX_VOLUME);
+        MEDIA_INFO_LOG("[PolicyManager] Wrote default stream volumes to KvStore");
+    } else {
+        LoadVolumeMap();
+    }
+    return;
+}
+
+void PulseAudioPolicyManager::InitRingerMode(bool isFirstBoot)
+{
+    if (mAudioPolicyKvStore == nullptr) {
+        MEDIA_ERR_LOG("[PolicyManager] mAudioPolicyKvStore is null!");
+        return;
+    }
+
+    if (isFirstBoot == true) {
+        mRingerMode = RINGER_MODE_NORMAL;
+        WriteRingerModeToKvStore(RINGER_MODE_NORMAL);
+        MEDIA_INFO_LOG("[PolicyManager] Wrote default ringer mode to KvStore");
+    } else {
+        LoadRingerMode();
+    }
+}
+
+bool PulseAudioPolicyManager::LoadVolumeFromKvStore(std::unique_ptr<KvStoreSnapshot>& audioPolicyKvStoreSnapshot,
+                                                    AudioStreamType streamType)
+{
+    Key key;
+    Value value;
+
+    switch (streamType) {
+        case STREAM_MUSIC:
+            key = "music";
+            break;
+        case STREAM_RING:
+            key = "ring";
+            break;
+        default:
+            return false;
+    }
+
+    Status status = audioPolicyKvStoreSnapshot->Get(key, value);
+    if (status == Status::SUCCESS) {
+        float volume = TransferByteArrayToType<float>(value.Data());
+        mVolumeMap[streamType] = volume;
+        MEDIA_DEBUG_LOG("[PolicyManager] volume from kvStore %{public}f for streamType:%{public}d",
+                        volume, streamType);
+        return true;
+    }
+
+    return false;
+}
+
+bool PulseAudioPolicyManager::LoadVolumeMap(void)
+{
+    if (mAudioPolicyKvStore == nullptr) {
+        MEDIA_ERR_LOG("[PolicyManager] LoadVolumeMap: mAudioPolicyKvStore is null!");
+        return false;
+    }
+
+    std::unique_ptr<KvStoreSnapshot> audioPolicyKvStoreSnapshot;
+
+    // open and initialize kvstore snapshot instance.
+    mAudioPolicyKvStore->GetKvStoreSnapshot(nullptr,
+                                            [&](Status status, std::unique_ptr<KvStoreSnapshot> kvStoreSnapshot) {
+                                            audioPolicyKvStoreSnapshot = std::move(kvStoreSnapshot);
+                                            });
+    if (audioPolicyKvStoreSnapshot == nullptr) {
+        MEDIA_ERR_LOG("[PolicyManager] LoadVolumeMap: audioPolicyKvStoreSnapshot is null!");
+        return false;
+    }
+
+    if (!LoadVolumeFromKvStore(audioPolicyKvStoreSnapshot, STREAM_MUSIC))
+        MEDIA_ERR_LOG("[PolicyManager] LoadVolumeMap: Couldnot load volume for Music from kvStore!");
+
+    if (!LoadVolumeFromKvStore(audioPolicyKvStoreSnapshot, STREAM_RING))
+        MEDIA_ERR_LOG("[PolicyManager] LoadVolumeMap: Couldnot load volume for Ring from kvStore!");
+
+    mAudioPolicyKvStore->ReleaseKvStoreSnapshot(std::move(audioPolicyKvStoreSnapshot));
+    return true;
+}
+
+bool PulseAudioPolicyManager::LoadRingerMode(void)
+{
+    if (mAudioPolicyKvStore == nullptr) {
+        MEDIA_ERR_LOG("[PolicyManager] LoadRingerMap: mAudioPolicyKvStore is null!");
+        return false;
+    }
+
+    std::unique_ptr<KvStoreSnapshot> audioPolicyKvStoreSnapshot;
+
+    // open and initialize kvstore snapshot instance.
+    mAudioPolicyKvStore->GetKvStoreSnapshot(nullptr,
+                                            [&](Status status, std::unique_ptr<KvStoreSnapshot> kvStoreSnapshot) {
+                                            audioPolicyKvStoreSnapshot = std::move(kvStoreSnapshot);
+                                            });
+    if (audioPolicyKvStoreSnapshot == nullptr) {
+        MEDIA_ERR_LOG("[PolicyManager] LoadRingerMap: audioPolicyKvStoreSnapshot is null!");
+        return false;
+    }
+
+    // get ringer mode value from kvstore.
+    Key key = "ringermode";
+    Value value;
+    Status status = audioPolicyKvStoreSnapshot->Get(key, value);
+    if (status == Status::SUCCESS) {
+        mRingerMode = static_cast<AudioRingerMode>(TransferByteArrayToType<int>(value.Data()));
+        MEDIA_DEBUG_LOG("[PolicyManager] Ringer Mode from kvStore %{public}d", mRingerMode);
+    }
+
+    mAudioPolicyKvStore->ReleaseKvStoreSnapshot(std::move(audioPolicyKvStoreSnapshot));
+    return true;
+}
+
+void PulseAudioPolicyManager::WriteVolumeToKvStore(AudioStreamType streamType, float volume)
+{
+    if (mAudioPolicyKvStore == nullptr)
+        return;
+
+    Key key = GetStreamNameByStreamType(streamType);
+    Value value = Value(TransferTypeToByteArray<float>(volume));
+
+    Status status = mAudioPolicyKvStore->Put(key, value);
+    if (status == Status::SUCCESS) {
+        MEDIA_INFO_LOG("[PolicyManager] volume %{public}f for %{public}s updated in kvStore", volume,
+                    GetStreamNameByStreamType(streamType).c_str());
+    } else {
+        MEDIA_ERR_LOG("[PolicyManager] volume %{public}f for %{public}s failed to update in kvStore!", volume,
+                    GetStreamNameByStreamType(streamType).c_str());
+    }
+
+    return;
+}
+
+void PulseAudioPolicyManager::WriteRingerModeToKvStore(AudioRingerMode ringerMode)
+{
+    if (mAudioPolicyKvStore == nullptr)
+        return;
+
+    Key key = "ringermode";
+    Value value = Value(TransferTypeToByteArray<int>(ringerMode));
+
+    Status status = mAudioPolicyKvStore->Put(key, value);
+    if (status == Status::SUCCESS) {
+        MEDIA_INFO_LOG("[PolicyManager] Wrote RingerMode:%d to kvStore", ringerMode);
+    } else {
+        MEDIA_ERR_LOG("[PolicyManager] Writing RingerMode:%d to kvStore failed!", ringerMode);
+    }
+
     return;
 }
 

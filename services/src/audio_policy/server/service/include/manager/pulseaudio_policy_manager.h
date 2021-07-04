@@ -27,17 +27,22 @@ extern "C" {
 #include <list>
 #include <unordered_map>
 
+#include "distributed_kv_data_manager.h"
 #include "iaudio_policy.h"
+#include "types.h"
 
 namespace OHOS {
 namespace AudioStandard {
+using namespace OHOS::DistributedKv;
+
 class PulseAudioPolicyManager : public IAudioPolicyInterface {
 public:
     static constexpr char HDI_SINK[] = "libmodule-hdi-sink.z.so";
     static constexpr char HDI_SOURCE[] = "libmodule-hdi-source.z.so";
     static constexpr char PIPE_SINK[] = "libmodule-pipe-sink.z.so";
     static constexpr char PIPE_SOURCE[] = "libmodule-pipe-source.z.so";
-
+    static constexpr float MAX_VOLUME = 1.0f;
+    static constexpr float MIN_VOLUME = 0.0f;
     static constexpr uint32_t PA_CONNECT_RETRY_SLEEP_IN_MICRO_SECONDS = 500000;
 
     bool Init();
@@ -69,10 +74,7 @@ public:
 
     int32_t SetRingerMode(AudioRingerMode ringerMode);
 
-    AudioRingerMode GetRingerMode()
-    {
-        return mRingerMode;
-    }
+    AudioRingerMode GetRingerMode(void);
 
     // Static Member functions
     static void ContextStateCb(pa_context *c, void *userdata);
@@ -103,8 +105,11 @@ private:
     PulseAudioPolicyManager()
         : mContext(nullptr),
           mMainLoop(nullptr),
-          mRingerMode(RINGER_MODE_NORMAL)
+          mRingerMode(RINGER_MODE_NORMAL),
+          mAudioPolicyKvStore(nullptr)
     {
+        mVolumeMap[STREAM_MUSIC] = MAX_VOLUME;
+        mVolumeMap[STREAM_RING] = MAX_VOLUME;
     }
 
     virtual ~PulseAudioPolicyManager() {}
@@ -114,12 +119,21 @@ private:
     std::string GetModuleArgs(std::shared_ptr<AudioPortInfo> audioPortInfo);
     std::string GetStreamNameByStreamType(AudioStreamType streamType);
     AudioStreamType GetStreamIDByType(std::string streamType);
-    void InitVolumeMap(void);
+    bool InitAudioPolicyKvStore(bool& isFirstBoot);
+    void InitVolumeMap(bool isFirstBoot);
+    bool LoadVolumeMap(void);
+    void WriteVolumeToKvStore(AudioStreamType streamType, float volume);
+    bool LoadVolumeFromKvStore(std::unique_ptr<KvStoreSnapshot>& audioPolicyKvStoreSnapshot,
+                                AudioStreamType streamType);
+    void InitRingerMode(bool isFirstBoot);
+    bool LoadRingerMode(void);
+    void WriteRingerModeToKvStore(AudioRingerMode ringerMode);
 
     pa_context* mContext;
     pa_threaded_mainloop* mMainLoop;
     std::unordered_map<AudioStreamType, float> mVolumeMap;
     AudioRingerMode mRingerMode;
+    std::unique_ptr<KvStore> mAudioPolicyKvStore;
 };
 } // namespace AudioStandard
 } // namespace OHOS

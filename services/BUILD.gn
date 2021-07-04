@@ -99,6 +99,8 @@ config("audio_policy_public_config") {
     "//foundation/multimedia/audio_standard/services/include/audio_policy/client",
     "//foundation/multimedia/audio_standard/frameworks/innerkitsimpl/common/include",
     "//foundation/communication/ipc/interfaces/innerkits/ipc_core/include",
+    "//foundation/distributedschedule/samgr/interfaces/innerkits/samgr_proxy/include",
+    "//foundation/distributeddatamgr/distributeddatamgr/interfaces/innerkits/distributeddata/include",
     "//base/hiviewdfx/hilog/interfaces/native/innerkits/include",
     "//third_party/libxml2/include",
     "//third_party/pulseaudio/src",
@@ -137,6 +139,8 @@ ohos_shared_library("audio_policy_service") {
    "//utils/native/base:utils",
    "//foundation/multimedia/audio_standard/pulseaudio/src/pulse:pulse",
    "//third_party/libxml2:xml2",
+   "//foundation/distributeddatamgr/distributeddatamgr/interfaces/innerkits/distributeddata:distributeddata_inner",
+   "//foundation/distributeddatamgr/distributeddatamgr/services/distributeddataservice/adapter:distributeddata_adapter",
   ]
 
   external_deps = [
