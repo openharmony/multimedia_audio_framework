@@ -585,10 +585,15 @@ void PulseAudioPolicyManager::GetSinkInputInfoVolumeCb(pa_context *c, const pa_s
             vol = MIN_VOLUME;
         }
     }
+
     pa_cvolume cv = i->volume;
     int32_t volume = pa_sw_volume_from_linear(vol);
     pa_cvolume_set(&cv, i->channel_map.channels, volume);
     pa_operation_unref(pa_context_set_sink_input_volume(c, i->index, &cv, NULL, NULL));
+
+    if (i->mute) {
+        pa_operation_unref(pa_context_set_sink_input_mute(c, i->index, 0, NULL, NULL));
+    }
 
     MEDIA_INFO_LOG("[PolicyManager] Applied volume : %{public}f for stream : %{public}s, volumeInt%{public}d",
         userData->volume, i->name, volume);
