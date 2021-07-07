@@ -58,6 +58,7 @@ public:
     bool GetAudioTime(Timestamp &timestamp, Timestamp::Timestampbase base);
     int32_t GetBufferSize(size_t &bufferSize);
     int32_t GetFrameCount(uint32_t &frameCount);
+    int32_t GetLatency(uint64_t &latency);
 
     std::vector<AudioSampleFormat> GetSupportedFormats();
     std::vector<AudioChannel> GetSupportedChannels();

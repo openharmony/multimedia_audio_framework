@@ -192,6 +192,14 @@ public:
     int32_t GetCurrentTimeStamp(uint64_t &timeStamp);
 
     /**
+    * Provides the current latency for playback/record stream created using CreateStream
+    *
+    * @param latency will be filled up with the current latency in microseconds
+    * @return Returns {@code 0} if success; returns {@code -1} otherwise.
+    */
+    int32_t GetAudioLatency(uint64_t &latency);
+
+    /**
     * Provides the playback/record stream parameters created using CreateStream
     *
     * @param audioParams will be filled up with stream audio parameters

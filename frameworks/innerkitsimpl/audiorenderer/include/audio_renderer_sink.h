@@ -43,6 +43,7 @@ public:
     int32_t RenderFrame(char &frame, uint64_t len, uint64_t &writeLen);
     int32_t SetVolume(float left, float right);
     int32_t GetVolume(float &left, float &right);
+    int32_t GetLatency(uint32_t *latency);
     static AudioRendererSink* GetInstance(void);
     bool rendererInited_;
 private:
@@ -63,5 +64,4 @@ private:
 };
 }  // namespace AudioStandard
 }  // namespace OHOS
-
-#endif  // AUDIO_RENDERER_SINK_H
+#endif // AUDIO_RENDERER_SINK_H

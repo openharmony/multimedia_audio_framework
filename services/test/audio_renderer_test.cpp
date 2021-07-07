@@ -127,11 +127,18 @@ public:
         size_t bytesToWrite = 0;
         size_t bytesWritten = 0;
         size_t minBytes = 4;
+        uint64_t latency;
 
         while (!feof(wavFile)) {
             bytesToWrite = fread(buffer, 1, bufferLen, wavFile);
             bytesWritten = 0;
             MEDIA_INFO_LOG("AudioRendererTest: Bytes to write: %{public}d", bytesToWrite);
+
+            if (audioRenderer->GetLatency(latency)) {
+                MEDIA_ERR_LOG("AudioRendererTest: GetLatency failed");
+                return false;
+            }
+            MEDIA_INFO_LOG("AudioRendererTest: Latency: %{public}llu", latency);
 
             while ((bytesWritten < bytesToWrite) && ((bytesToWrite - bytesWritten) > minBytes)) {
                 bytesWritten += audioRenderer->Write(buffer + bytesWritten,

@@ -137,6 +137,15 @@ public:
     virtual bool GetAudioTime(Timestamp &timestamp, Timestamp::Timestampbase base) = 0;
 
     /**
+     * @brief Obtains the latency in microseconds.
+     *
+     * @param latency Indicates the reference variable into which latency value will be written.
+     * @return Returns {@link SUCCESS} if latency is successfully obtained, returns an error code
+     * defined in {@link audio_errors.h} otherwise.
+     */
+    virtual int32_t GetLatency(uint64_t &latency) = 0;
+
+    /**
      * @brief drain renderer buffer.
      *
      * @return Returns <b>true</b> if the buffer is successfully drained; returns <b>false</b> otherwise.

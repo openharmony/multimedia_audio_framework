@@ -273,6 +273,28 @@ int32_t AudioRendererSink::GetVolume(float &left, float &right)
     return SUCCESS;
 }
 
+int32_t AudioRendererSink::GetLatency(uint32_t *latency)
+{
+    if (audioRender_ == nullptr) {
+        MEDIA_ERR_LOG("AudioRendererSink: GetLatency failed audio render null");
+        return ERR_INVALID_HANDLE;
+    }
+
+    if (!latency) {
+        MEDIA_ERR_LOG("AudioRendererSink: GetLatency failed latency null");
+        return ERR_INVALID_PARAM;
+    }
+
+    uint32_t hdiLatency;
+    if (audioRender_->GetLatency(audioRender_, &hdiLatency) == 0) {
+        *latency = hdiLatency;
+        MEDIA_INFO_LOG("AudioRendererSink: Latency: %{public}u", *latency);
+        return SUCCESS;
+    } else {
+        return ERR_OPERATION_FAILED;
+    }
+}
+
 int32_t AudioRendererSink::Stop(void)
 {
     if (started_ && audioRender_ != nullptr) {
@@ -388,6 +410,24 @@ int32_t AudioRendererSinkSetVolume(float left, float right)
     }
 
     ret = g_audioRendrSinkInstance->SetVolume(left, right);
+    return ret;
+}
+
+int32_t AudioRendererSinkGetLatency(uint32_t *latency)
+{
+    int32_t ret;
+
+    if (!g_audioRendrSinkInstance->rendererInited_) {
+        MEDIA_ERR_LOG("audioRenderer Not Inited! Init the renderer first\n");
+        return ERR_NOT_STARTED;
+    }
+
+    if (!latency) {
+        MEDIA_ERR_LOG("AudioRendererSinkGetLatency failed latency null");
+        return ERR_INVALID_PARAM;
+    }
+
+    ret = g_audioRendrSinkInstance->GetLatency(latency);
     return ret;
 }
 

@@ -103,6 +103,15 @@ int32_t AudioStream::GetFrameCount(uint32_t &frameCount)
     return SUCCESS;
 }
 
+int32_t AudioStream::GetLatency(uint64_t &latency)
+{
+    if (GetAudioLatency(latency) != SUCCESS) {
+        return ERR_OPERATION_FAILED;
+    } else {
+        return SUCCESS;
+    }
+}
+
 vector<AudioSampleFormat> AudioStream::GetSupportedFormats()
 {
     return SUPPORTED_FORMATS;

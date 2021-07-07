@@ -219,9 +219,19 @@ static int SinkProcessMsg(pa_msgobject *o, int code, void *data, int64_t offset,
     struct Userdata *u = PA_SINK(o)->userdata;
     switch (code) {
         case PA_SINK_MESSAGE_GET_LATENCY: {
-            size_t n = 0;
-            n = n + u->memchunk.length;
-            *((int64_t*) data) = pa_bytes_to_usec(n, &u->sink->sample_spec);
+            int64_t latency;
+            uint32_t hdiLatency;
+
+            // Tries to fetch latency from HDI else will make an estimate based
+            // on samples to be rendered based on the timestamp and current time
+            if (AudioRendererSinkGetLatency(&hdiLatency) == 0) {
+                latency = (PA_USEC_PER_MSEC * hdiLatency);
+            } else {
+                pa_usec_t now = pa_rtclock_now();
+                latency = (now - u->timestamp);
+            }
+
+            *((int64_t *)data) = latency;
             return 0;
         }
         default:

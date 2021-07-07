@@ -1012,6 +1012,51 @@ int32_t AudioServiceClient::GetCurrentTimeStamp(uint64_t &timeStamp)
         return AUDIO_CLIENT_ERR;
 }
 
+int32_t AudioServiceClient::GetAudioLatency(uint64_t &latency)
+{
+    CHECK_PA_STATUS_RET_IF_FAIL(mainLoop, context, paStream, AUDIO_CLIENT_PA_ERR);
+    pa_usec_t paLatency;
+    pa_usec_t cacheLatency;
+    int32_t retVal = AUDIO_CLIENT_SUCCESS;
+    int negative;
+    bool getPALatency = false;
+
+    // Get PA latency
+    pa_threaded_mainloop_lock(mainLoop);
+    while (!getPALatency) {
+        if (pa_stream_get_latency(paStream, &paLatency, &negative) >= 0) {
+            if (negative) {
+                latency = 0;
+                retVal = AUDIO_CLIENT_ERR;
+                return retVal;
+            }
+            getPALatency = true;
+            break;
+        }
+        MEDIA_INFO_LOG("waiting for audio latency information");
+        pa_threaded_mainloop_wait(mainLoop);
+    }
+    pa_threaded_mainloop_unlock(mainLoop);
+
+    if (eAudioClientType == AUDIO_SERVICE_CLIENT_PLAYBACK) {
+        // Get audio write cache latency
+        cacheLatency = pa_bytes_to_usec((acache.totalCacheSize - acache.writeIndex), &sampleSpec);
+
+        // Total latency will be sum of audio write cache latency + PA latency
+        latency = paLatency + cacheLatency;
+        MEDIA_INFO_LOG("total latency: %{public}llu, pa latency: %{public}llu, cache latency: %{public}llu", latency, paLatency, cacheLatency);
+    } else if (eAudioClientType == AUDIO_SERVICE_CLIENT_RECORD) {
+        // Get audio read cache latency
+        cacheLatency = pa_bytes_to_usec(internalRdBufLen, &sampleSpec);
+
+        // Total latency will be sum of audio read cache latency + PA latency
+        latency = paLatency + cacheLatency;
+        MEDIA_INFO_LOG("total latency: %{public}llu, pa latency: %{public}llu", latency, paLatency);
+    }
+
+    return retVal;
+}
+
 void AudioServiceClient::RegisterAudioRendererCallbacks(const AudioRendererCallbacks &cb)
 {
     MEDIA_INFO_LOG("Registering audio render callbacks");

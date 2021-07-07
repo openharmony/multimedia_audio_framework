@@ -25,6 +25,7 @@ namespace AudioStandard {
 class AudioRendererPrivate : public AudioRenderer {
 public:
     int32_t GetFrameCount(uint32_t &frameCount) override;
+    int32_t GetLatency(uint64_t &latency) override;
     int32_t SetParams(const AudioRendererParams params) override;
     int32_t GetParams(AudioRendererParams &params) override;
     bool Start() override;
@@ -58,6 +59,11 @@ AudioRendererPrivate::AudioRendererPrivate(AudioStreamType audioStreamType)
 int32_t AudioRendererPrivate::GetFrameCount(uint32_t &frameCount)
 {
     return audioRenderer->GetFrameCount(frameCount);
+}
+
+int32_t AudioRendererPrivate::GetLatency(uint64_t &latency)
+{
+    return audioRenderer->GetLatency(latency);
 }
 
 int32_t AudioRendererPrivate::SetParams(const AudioRendererParams params)

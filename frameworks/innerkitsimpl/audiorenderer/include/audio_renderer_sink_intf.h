@@ -33,7 +33,8 @@ int32_t AudioRendererSinkStart(void);
 int32_t AudioRendererSinkStop(void);
 int32_t AudioRendererRenderFrame(char*, uint64_t, uint64_t*);
 int32_t AudioRendererSinkSetVolume(float, float);
+int32_t AudioRendererSinkGetLatency(uint32_t *);
 #ifdef __cplusplus
 }
 #endif
-#endif  // AUDIO_RENDERER_SINK_INTF_H
+#endif // AUDIO_RENDERER_SINK_INTF_H
