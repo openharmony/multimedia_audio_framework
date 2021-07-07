@@ -53,9 +53,13 @@ struct Userdata {
     pa_core *core;
     pa_module *module;
     pa_sink *sink;
+    pa_sample_spec ss;
+    pa_channel_map map;
+    bool isHDISinkInitialized;
 };
 
 static void UserdataFree(struct Userdata *u);
+static int32_t PrepareDevice(const pa_sample_spec *ss);
 
 static ssize_t RenderWrite(pa_memchunk *pchunk)
 {
@@ -250,8 +254,18 @@ static int SinkSetStateInIoThreadCb(pa_sink *s, pa_sink_state_t newState,
     pa_assert_se(u = s->userdata);
 
     if (s->thread_info.state == PA_SINK_SUSPENDED || s->thread_info.state == PA_SINK_INIT) {
-        if (PA_SINK_IS_OPENED(newState))
+        if (PA_SINK_IS_OPENED(newState)) {
             u->timestamp = pa_rtclock_now();
+            if (!u->isHDISinkInitialized) {
+                pa_log("Reinitializing HDI rendering device with rate: %d, channels: %d", u->ss.rate, u->ss.channels);
+                if (PrepareDevice(&u->ss) < 0) {
+                    pa_log_error("HDI renderer reinitialization failed");
+                } else {
+                    u->isHDISinkInitialized = true;
+                    pa_log("Successfully reinitialized HDI renderer");
+                }
+            }
+        }
     } else if (PA_SINK_IS_OPENED(s->thread_info.state)) {
         if (newState == PA_SINK_SUSPENDED) {
             // Continuously dropping data (clear counter on entering suspended state.
@@ -259,6 +273,12 @@ static int SinkSetStateInIoThreadCb(pa_sink *s, pa_sink_state_t newState,
                 pa_log_debug("HDI-sink continuously dropping data - clear statistics (%zu -> 0 bytes dropped)",
                              u->bytes_dropped);
                 u->bytes_dropped = 0;
+            }
+            if (u->isHDISinkInitialized) {
+                AudioRendererSinkStop();
+                AudioRendererSinkDeInit();
+                u->isHDISinkInitialized = false;
+                pa_log("Deinitialized HDI renderer");
             }
         }
     }
@@ -300,30 +320,33 @@ static int32_t PrepareDevice(const pa_sample_spec *ss)
     return 0;
 }
 
-static pa_sink* PaHdiSinkInit(pa_module *m, pa_modargs *ma, const char *driver)
+static pa_sink* PaHdiSinkInit(struct Userdata *u, pa_modargs *ma, const char *driver)
 {
-    pa_sample_spec ss;
     pa_sink_new_data data;
-    pa_channel_map map;
+    pa_module *m;
     pa_sink *sink = NULL;
 
-    ss = m->core->default_sample_spec;
-    map = m->core->default_channel_map;
-    if (pa_modargs_get_sample_spec_and_channel_map(ma, &ss, &map, PA_CHANNEL_MAP_DEFAULT) < 0) {
+    m = u->module;
+    u->ss = m->core->default_sample_spec;
+    u->map = m->core->default_channel_map;
+    if (pa_modargs_get_sample_spec_and_channel_map(ma, &u->ss, &u->map, PA_CHANNEL_MAP_DEFAULT) < 0) {
         pa_log("Failed to parse sample specification and channel map");
         goto fail;
     }
 
-    if (PrepareDevice(&ss) < 0)
+    pa_log("Initializing HDI rendering device with rate: %d, channels: %d", u->ss.rate, u->ss.channels);
+    if (PrepareDevice(&u->ss) < 0)
         goto fail;
 
+    u->isHDISinkInitialized = true;
+    pa_log("Initialization of HDI rendering device completed");
     pa_sink_new_data_init(&data);
     data.driver = driver;
     data.module = m;
 
     pa_sink_new_data_set_name(&data, pa_modargs_get_value(ma, "sink_name", DEFAULT_SINK_NAME));
-    pa_sink_new_data_set_sample_spec(&data, &ss);
-    pa_sink_new_data_set_channel_map(&data, &map);
+    pa_sink_new_data_set_sample_spec(&data, &u->ss);
+    pa_sink_new_data_set_channel_map(&data, &u->map);
     pa_proplist_sets(data.proplist, PA_PROP_DEVICE_STRING, DEFAULT_AUDIO_DEVICE_NAME);
     pa_proplist_setf(data.proplist, PA_PROP_DEVICE_DESCRIPTION, "HDI sink is %s",
                      DEFAULT_AUDIO_DEVICE_NAME);
@@ -364,7 +387,7 @@ pa_sink *PaHdiSinkNew(pa_module *m, pa_modargs *ma, const char *driver)
         goto fail;
     }
 
-    u->sink = PaHdiSinkInit(m, ma, driver);
+    u->sink = PaHdiSinkInit(u, ma, driver);
     if (!u->sink) {
         pa_log("Failed to create sink object");
         goto fail;
