@@ -28,6 +28,8 @@ namespace AudioStandard {
 #define DEEP_BUFFER_RENDER_PERIOD_SIZE 4096
 #define INT_32_MAX 0x7fffffff
 #define PERIOD_SIZE 1024
+#define PCM_8_BIT 8
+#define PCM_16_BIT 16
 
 namespace {
 const int32_t HALF_FACTOR = 2;
@@ -96,11 +98,11 @@ int32_t InitAttrs(struct AudioSampleAttributes *attrs)
     attrs->type = AUDIO_IN_MEDIA;
     attrs->period = DEEP_BUFFER_RENDER_PERIOD_SIZE;
     /* PERIOD_SIZE * 16 * attrs->channelCount / 8 */
-    attrs->frameSize = PERIOD_SIZE * 16 * attrs->channelCount / 8;
+    attrs->frameSize = PCM_16_BIT * attrs->channelCount / PCM_8_BIT;
     attrs->isBigEndian = false;
     attrs->isSignedData = true;
     /* DEEP_BUFFER_RENDER_PERIOD_SIZE / (16 * attrs->channelCount / 8) */
-    attrs->startThreshold = DEEP_BUFFER_RENDER_PERIOD_SIZE / (16 * attrs->channelCount / 8);
+    attrs->startThreshold = DEEP_BUFFER_RENDER_PERIOD_SIZE / (attrs->frameSize);
     attrs->stopThreshold = INT_32_MAX;
     attrs->silenceThreshold = 0;
 

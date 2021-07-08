@@ -79,16 +79,16 @@ int32_t InitAttrsCapture(struct AudioSampleAttributes *attrs)
     attrs->sampleRate = AUDIO_SAMPLE_RATE_48K;
     attrs->interleaved = 0;
     attrs->type = AUDIO_IN_MEDIA;
-    attrs->period = DEEP_BUFFER_RENDER_PERIOD_SIZE;
-     /* PERIOD_SIZE * 16 * attrs->channelCount / 8,Byte */
-    attrs->frameSize = 16 * attrs->channelCount / 8;
+    attrs->period = DEEP_BUFFER_CAPTURE_PERIOD_SIZE;
+     /* 16 * attrs->channelCount / 8,Byte */
+    attrs->frameSize = PCM_16_BIT * attrs->channelCount / PCM_8_BIT;
     attrs->isBigEndian = false;
     attrs->isSignedData = true;
-    /* DEEP_BUFFER_RENDER_PERIOD_SIZE / (16 * attrs->channelCount / 8) */
-    attrs->startThreshold = DEEP_BUFFER_RENDER_PERIOD_SIZE / (16 * attrs->channelCount / 8);
+    /* DEEP_BUFFER_CAPTURE_PERIOD_SIZE / (16 * attrs->channelCount / 8) */
+    attrs->startThreshold = DEEP_BUFFER_CAPTURE_PERIOD_SIZE / (attrs->frameSize);
     attrs->stopThreshold = INT_32_MAX;
     /* 16 * 1024 */
-    attrs->silenceThreshold = 16 * 1024;
+    attrs->silenceThreshold = AUDIO_BUFF_SIZE;
 
     return SUCCESS;
 }

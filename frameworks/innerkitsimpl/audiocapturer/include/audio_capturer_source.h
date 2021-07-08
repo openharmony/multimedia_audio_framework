@@ -24,10 +24,13 @@ namespace OHOS {
 namespace AudioStandard {
 #define AUDIO_CHANNELCOUNT 2
 #define AUDIO_SAMPLE_RATE_48K 48000
-#define DEEP_BUFFER_RENDER_PERIOD_SIZE 4096
+#define DEEP_BUFFER_CAPTURE_PERIOD_SIZE 4096
 #define INT_32_MAX 0x7fffffff
 #define PERIOD_SIZE 1024
 #define PATH_LEN 256
+#define AUDIO_BUFF_SIZE (16 * 1024)
+#define PCM_8_BIT 8
+#define PCM_16_BIT 16
 
 typedef struct {
     AudioFormat format;
