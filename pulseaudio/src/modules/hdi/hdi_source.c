@@ -99,6 +99,7 @@ static int source_set_state_in_io_thread_cb(pa_source *s, pa_source_state_t new_
 static pa_hook_result_t source_output_fixate_hook_cb(pa_core *c, pa_source_output_new_data *data,
         struct userdata *u) {
     int ret;
+
     MEDIA_DEBUG_LOG("HDI Source: Detected source output");
     pa_assert(data);
     pa_assert(u);
@@ -111,6 +112,31 @@ static pa_hook_result_t source_output_fixate_hook_cb(pa_core *c, pa_source_outpu
         ret = pa_capturer_init(u);
         if (ret != 0) {
             MEDIA_DEBUG_LOG("HDI Source: Cannot initialize Capturer! ret=%d", ret);
+            return PA_HOOK_OK;
+        }
+
+        u->timestamp = pa_rtclock_now();
+        pa_source_suspend(u->source, false, PA_SUSPEND_IDLE);
+    }
+
+    return PA_HOOK_OK;
+}
+
+static pa_hook_result_t source_output_move_finish_hook_cb(pa_core *c, pa_source_output *output, struct userdata *u) {
+    int ret;
+
+    MEDIA_DEBUG_LOG("HDI Source: Detected source move finish");
+    pa_assert(output);
+    pa_assert(u);
+
+    if (!strcmp(output->source->name, u->source->name)) {
+        // Signal Ready when a source output is connected
+        if (!u->IsReady)
+            u->IsReady = true;
+
+        ret = pa_capturer_init(u);
+        if (ret != 0) {
+            pa_log_error("HDI Source: Cannot initialize capturer! ret=%d", ret);
             return PA_HOOK_OK;
         }
 
@@ -342,6 +368,8 @@ pa_source *pa_hdi_source_new(pa_module *m, pa_modargs *ma, const char*driver) {
 
     pa_module_hook_connect(m, &m->core->hooks[PA_CORE_HOOK_SOURCE_OUTPUT_FIXATE], PA_HOOK_NORMAL,
                           (pa_hook_cb_t) source_output_fixate_hook_cb, u);
+    pa_module_hook_connect(m, &m->core->hooks[PA_CORE_HOOK_SOURCE_OUTPUT_MOVE_FINISH], PA_HOOK_NORMAL,
+                          (pa_hook_cb_t) source_output_move_finish_hook_cb, u);
 
     thread_name = pa_sprintf_malloc("hdi-source-record");
     if (!(u->thread = pa_thread_new(thread_name, thread_func, u))) {

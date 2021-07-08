@@ -78,12 +78,12 @@ int32_t AudioPolicyService::SetDeviceActive(DeviceType deviceType, bool active)
     AudioIOHandle ioHandle = GetAudioIOHandle(deviceType);
     list<DeviceType>& activeDevices = GetActiveDevicesList(deviceType);
 
-    if (active && deviceType == activeDevices.front()) {
-        MEDIA_DEBUG_LOG("[Policy Service] SetDeviceActive: deviceType %d already active", deviceType);
-        return SUCCESS;
-    }
-
     if (!active) {
+        if (activeDevices.size() <= 1) {
+            MEDIA_ERR_LOG("[Policy Service] Only one Active device. So cannot deactivate!");
+            return ERROR;
+        }
+
         for (list<DeviceType>::const_iterator iter = activeDevices.begin();
             iter != activeDevices.end(); ++iter) {
             if (*iter == deviceType) {
@@ -92,12 +92,10 @@ int32_t AudioPolicyService::SetDeviceActive(DeviceType deviceType, bool active)
         }
 
         deviceType = activeDevices.front();
-
         updateActiveDevices = false;
     }
 
     int32_t result = 0;
-
     switch (deviceType) {
         case BLUETOOTH_A2DP:
             result = mAudioPolicyManager.SetDeviceActive(ioHandle, deviceType, BLUEZ_SINK, active);
@@ -107,6 +105,9 @@ int32_t AudioPolicyService::SetDeviceActive(DeviceType deviceType, bool active)
             break;
         case MIC:
             result = mAudioPolicyManager.SetDeviceActive(ioHandle, deviceType, HDI_SOURCE, active);
+            break;
+        case BLUETOOTH_SCO:
+            result = mAudioPolicyManager.SetDeviceActive(ioHandle, deviceType, BLUEZ_SOURCE, active);
             break;
         default:
             result = ERR_DEVICE_NOT_SUPPORTED;
@@ -136,16 +137,24 @@ bool AudioPolicyService::IsDeviceActive(DeviceType deviceType) const
 
     switch (deviceType) {
         case SPEAKER:
-            if (deviceType == mActiveOutputDevices.front())
-                return true;
+        case BLUETOOTH_A2DP:
+            for (list<DeviceType>::const_iterator iter = mActiveOutputDevices.begin();
+                iter != mActiveOutputDevices.end(); ++iter) {
+                if (*iter == deviceType) {
+                    result = true;
+                    break;
+                }
+            }
             break;
         case MIC:
-            if (deviceType == mActiveInputDevices.front())
-                return true;
-            break;
-        case BLUETOOTH_A2DP:
-            if (deviceType == mActiveOutputDevices.front())
-                return true;
+        case BLUETOOTH_SCO:
+            for (list<DeviceType>::const_iterator iter = mActiveInputDevices.begin();
+                iter != mActiveInputDevices.end(); ++iter) {
+                if (*iter == deviceType) {
+                    result = true;
+                    break;
+                }
+            }
             break;
         default:
             break;
@@ -210,6 +219,9 @@ AudioIOHandle AudioPolicyService::GetAudioIOHandle(DeviceType deviceType)
             break;
         case MIC:
             ioHandle = mIOHandles[HDI_SOURCE];
+            break;
+        case BLUETOOTH_SCO:
+            ioHandle = mIOHandles[BLUEZ_SOURCE];
             break;
         default:
             ioHandle = mIOHandles[HDI_SINK];

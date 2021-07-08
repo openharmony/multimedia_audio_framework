@@ -33,6 +33,7 @@ public:
     static constexpr char HDI_SINK[] = "hdi_output";
     static constexpr char HDI_SOURCE[] = "hdi_input";
     static constexpr char BLUEZ_SINK[] = "fifo_output";
+    static constexpr char BLUEZ_SOURCE[] = "fifo_input";
 
     static AudioPolicyService& GetAudioPolicyService()
     {
@@ -85,13 +86,16 @@ private:
     {
         switch (deviceType) {
             case SPEAKER:
+            case BLUETOOTH_A2DP:
                 return mActiveOutputDevices;
             case MIC:
+            case BLUETOOTH_SCO:
                 return mActiveInputDevices;
             default:
                 return mActiveOutputDevices; // Default case return Output device
         }
     }
+
     IAudioPolicyInterface& mAudioPolicyManager;
     Parser& mConfigParser;
     std::unordered_map<std::string, AudioIOHandle> mIOHandles;

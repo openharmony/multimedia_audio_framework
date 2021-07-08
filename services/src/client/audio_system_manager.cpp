@@ -82,6 +82,7 @@ int32_t AudioSystemManager::SetDeviceActive(AudioDeviceDescriptor::DeviceType de
         case SPEAKER:
         case BLUETOOTH_A2DP:
         case MIC:
+        case BLUETOOTH_SCO:
             break;
         default:
             MEDIA_ERR_LOG("SetDeviceActive device=%{public}d not supported", deviceType);
@@ -99,6 +100,7 @@ bool AudioSystemManager::IsDeviceActive(AudioDeviceDescriptor::DeviceType device
         case SPEAKER:
         case BLUETOOTH_A2DP:
         case MIC:
+        case BLUETOOTH_SCO:
             break;
         default:
             MEDIA_ERR_LOG("IsDeviceActive device=%{public}d not supported", deviceType);
@@ -165,7 +167,7 @@ float AudioSystemManager::GetVolume(AudioSystemManager::AudioVolumeType volumeTy
             break;
         default:
             MEDIA_ERR_LOG("GetVolume volumeType=%{public}d not supported", volumeType);
-            return ERR_NOT_SUPPORTED;
+            return (float)ERR_NOT_SUPPORTED;
     }
 
     /* Call Audio Policy SetStreamMute */
