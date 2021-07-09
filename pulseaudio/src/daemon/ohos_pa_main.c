@@ -1011,7 +1011,7 @@ int ohos_pa_main(int argc, char *argv[]) {
 
     if (conf->use_pid_file) {
         int z;
-
+        pa_pid_file_remove();
         if ((z = pa_pid_file_create("pulseaudio")) != 0) {
 
             if (conf->cmd == PA_CMD_START && z > 0) {

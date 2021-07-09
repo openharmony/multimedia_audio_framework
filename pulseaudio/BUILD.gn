@@ -24,6 +24,7 @@ group("pulseaudio_packages") {
     "$pulseaudio_build_path/src/pulse:pulse",
     "$pulseaudio_build_path/src:pa_daemon_config",
     "$pulseaudio_build_path/src:pa_default_config",
+    "$pulseaudio_build_path/src:pa_client_config",
     "$pulseaudio_build_path/src/pulse:pulse-simple",
     "$pulseaudio_build_path/src/pulse:pulse-mainloop-glib",
     "$pulseaudio_build_path/src/pulsecore:pulsecore",
