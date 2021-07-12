@@ -15,7 +15,11 @@ import("//build/ohos.gni")
 AUDIO_POLICY_SERVER_DIR = "//foundation/multimedia/audio_standard/services/src/audio_policy/server"
 
 ohos_prebuilt_etc("pulseaudio.rc") {
-   source = "etc/pulseaudio.rc"
+   if (use_musl) {
+     source = "etc/pulseaudio.cfg"
+   } else {
+     source = "etc/pulseaudio.rc"
+   }
    relative_install_dir = "init"
    part_name = "multimedia_audio_standard"
    subsystem_name = "multimedia"
@@ -75,7 +79,11 @@ group("audio_policy_service_packages") {
 }
 
 ohos_prebuilt_etc("audio_policy.rc") {
-   source = "etc/audio_policy.rc"
+   if (use_musl) {
+     source = "etc/audio_policy.cfg"
+   } else {
+     source = "etc/audio_policy.rc"
+   }
    relative_install_dir = "init"
    part_name = "multimedia_audio_standard"
    subsystem_name = "multimedia"
