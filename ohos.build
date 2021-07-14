@@ -86,6 +86,9 @@
             "header_base": "//foundation/multimedia/audio_standard/interfaces/kits/js/audio_manager/include"
           }
         }
+      ],
+      "test_list": [
+        "//foundation/multimedia/audio_standard/frameworks/innerkitsimpl/test:audio_test"
       ]
     }
   }
