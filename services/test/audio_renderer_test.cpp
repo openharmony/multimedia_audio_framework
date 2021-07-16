@@ -136,7 +136,7 @@ public:
 
             if (audioRenderer->GetLatency(latency)) {
                 MEDIA_ERR_LOG("AudioRendererTest: GetLatency failed");
-                return false;
+                break;
             }
             MEDIA_INFO_LOG("AudioRendererTest: Latency: %{public}llu", latency);
 
@@ -144,6 +144,9 @@ public:
                 bytesWritten += audioRenderer->Write(buffer + bytesWritten,
                                                      bytesToWrite - bytesWritten);
                 MEDIA_INFO_LOG("AudioRendererTest: Bytes written: %{public}d", bytesWritten);
+                if (bytesWritten < 0) {
+                    break;
+                }
             }
         }
 

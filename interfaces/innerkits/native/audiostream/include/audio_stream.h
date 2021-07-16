@@ -81,6 +81,8 @@ private:
     AudioStreamType eStreamType_;
     AudioMode eMode_;
     State state_;
+    std::atomic<bool> isReadInProgress_;
+    std::atomic<bool> isWriteInProgress_;
 };
 } // namespace AudioStandard
 } // namespace OHOS

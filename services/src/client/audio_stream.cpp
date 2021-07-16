@@ -54,14 +54,18 @@ const vector<AudioSamplingRate> SUPPORTED_SAMPLING_RATES {
 
 AudioStream::AudioStream(AudioStreamType eStreamType, AudioMode eMode) : eStreamType_(eStreamType),
                                                                          eMode_(eMode),
-                                                                         state_(NEW)
+                                                                         state_(NEW),
+                                                                         isReadInProgress_(false),
+                                                                         isWriteInProgress_(false)
 {
     MEDIA_DEBUG_LOG("AudioStream ctor");
 }
 
 AudioStream::~AudioStream()
 {
-    ReleaseAudioStream();
+    if (state_ != RELEASED) {
+        ReleaseAudioStream();
+    }
 }
 
 State AudioStream::GetState()
@@ -230,12 +234,12 @@ int32_t AudioStream::SetAudioStreamInfo(const AudioStreamParams info)
 bool AudioStream::StartAudioStream()
 {
     if ((state_ != PREPARED) && (state_ != STOPPED)) {
-        MEDIA_ERR_LOG("StartAudioStream ILLEGAL_STATE state:%u", state_);
-        return ERR_ILLEGAL_STATE;
+        MEDIA_ERR_LOG("StartAudioStream Illegal state:%{public}u", state_);
+        return false;
     }
     int32_t ret = StartStream();
     if (ret != SUCCESS) {
-        MEDIA_ERR_LOG("StartStream Start failed:0x%x", ret);
+        MEDIA_ERR_LOG("StartStream Start failed:0x%{public}x", ret);
         return false;
     }
 
@@ -247,21 +251,23 @@ bool AudioStream::StartAudioStream()
 int32_t AudioStream::Read(uint8_t &buffer, size_t userSize, bool isBlockingRead)
 {
     if (userSize <= 0) {
-        MEDIA_ERR_LOG("Invalid userSize:%zu", userSize);
+        MEDIA_ERR_LOG("Invalid userSize:%{public}zu", userSize);
         return ERR_INVALID_PARAM;
     }
 
     if (state_ != RUNNING) {
-        MEDIA_ERR_LOG("ILLEGAL_STATE  state:%u", state_);
+        MEDIA_ERR_LOG("Read: State is not RUNNNIG. Illegal  state:%{public}u", state_);
         return ERR_ILLEGAL_STATE;
     }
 
     StreamBuffer stream;
     stream.buffer = &buffer;
     stream.bufferLen = userSize;
+    isReadInProgress_ = true;
     int32_t readLen = ReadStream(stream, isBlockingRead);
+    isReadInProgress_ = false;
     if (readLen < 0) {
-        MEDIA_ERR_LOG("ReadStream fail,ret:0x%x", readLen);
+        MEDIA_ERR_LOG("ReadStream fail,ret:0x%{public}x", readLen);
         return ERR_INVALID_READ;
     }
 
@@ -271,12 +277,12 @@ int32_t AudioStream::Read(uint8_t &buffer, size_t userSize, bool isBlockingRead)
 size_t AudioStream::Write(uint8_t *buffer, size_t buffer_size)
 {
     if ((buffer == nullptr) || (buffer_size <= 0)) {
-        MEDIA_ERR_LOG("Invalid buffer size:%zu", buffer_size);
+        MEDIA_ERR_LOG("Invalid buffer size:%{public}zu", buffer_size);
         return ERR_INVALID_PARAM;
     }
 
     if (state_ != RUNNING) {
-        MEDIA_ERR_LOG("ILLEGAL_STATE  state:%u", state_);
+        MEDIA_ERR_LOG("Write: Illegal  state:%{public}u", state_);
         return ERR_ILLEGAL_STATE;
     }
 
@@ -284,13 +290,15 @@ size_t AudioStream::Write(uint8_t *buffer, size_t buffer_size)
     StreamBuffer stream;
     stream.buffer = buffer;
     stream.bufferLen = buffer_size;
+    isWriteInProgress_ = true;
     size_t bytesWritten = WriteStream(stream, writeError);
+    isWriteInProgress_ = false;
     if (writeError != 0) {
         MEDIA_ERR_LOG("WriteStream fail,writeError:%{public}d", writeError);
         return ERR_WRITE_FAILED;
     }
     if (bytesWritten < 0) {
-        MEDIA_ERR_LOG("WriteStream fail,bytesWritten:0x%x", bytesWritten);
+        MEDIA_ERR_LOG("WriteStream fail,bytesWritten:0x%{public}x", bytesWritten);
         return ERR_INVALID_WRITE;
     }
 
@@ -300,31 +308,35 @@ size_t AudioStream::Write(uint8_t *buffer, size_t buffer_size)
 bool AudioStream::StopAudioStream()
 {
     if (state_ != RUNNING) {
-        MEDIA_ERR_LOG("ILLEGAL_STATE  state:%u", state_);
-        return ERR_ILLEGAL_STATE;
+        MEDIA_ERR_LOG("StopAudioStream: State is not RUNNING. Illegal state:%{public}u", state_);
+        return false;
+    }
+    State oldState = state_;
+    state_ = STOPPED; // Set it before stopping as Read/Write and Stop can be called from different threads
+    while (isReadInProgress_ || isWriteInProgress_) {
     }
 
     int32_t ret = StopStream();
     if (ret != SUCCESS) {
-        MEDIA_DEBUG_LOG("StreamStop fail,ret:0x%x", ret);
+        MEDIA_DEBUG_LOG("StreamStop fail,ret:0x%{public}x", ret);
+        state_ = oldState;
         return false;
     }
-
     MEDIA_INFO_LOG("StopAudioStream SUCCESS");
-    state_ = STOPPED;
+
     return true;
 }
 
 bool AudioStream::FlushAudioStream()
 {
     if (state_ != RUNNING) {
-        MEDIA_ERR_LOG("ILLEGAL_STATE  state:%u", state_);
-        return ERR_ILLEGAL_STATE;
+        MEDIA_ERR_LOG("FlushAudioStream: State is not RUNNING. Illegal state:%{public}u", state_);
+        return false;
     }
 
     int32_t ret = FlushStream();
     if (ret != SUCCESS) {
-        MEDIA_DEBUG_LOG("Flush stream fail,ret:0x%x", ret);
+        MEDIA_DEBUG_LOG("Flush stream fail,ret:0x%{public}x", ret);
         return false;
     }
 
@@ -335,13 +347,13 @@ bool AudioStream::FlushAudioStream()
 bool AudioStream::DrainAudioStream()
 {
     if (state_ != RUNNING) {
-        MEDIA_ERR_LOG("ILLEGAL_STATE  state:%u", state_);
-        return ERR_ILLEGAL_STATE;
+        MEDIA_ERR_LOG("DrainAudioStream: State is not RUNNING. Illegal  state:%{public}u", state_);
+        return false;
     }
 
     int32_t ret = DrainStream();
     if (ret != SUCCESS) {
-        MEDIA_DEBUG_LOG("Drain stream fail,ret:0x%x", ret);
+        MEDIA_DEBUG_LOG("Drain stream fail,ret:0x%{public}x", ret);
         return false;
     }
 
@@ -352,19 +364,18 @@ bool AudioStream::DrainAudioStream()
 bool AudioStream::ReleaseAudioStream()
 {
     if (state_ == RELEASED) {
-        MEDIA_ERR_LOG("illegal state: state = %u", state_);
+        MEDIA_ERR_LOG("Already Released. Illegal state: state = %{public}u", state_);
         return false;
     }
-
-    if (state_ == RUNNING && StopAudioStream()) {
-        MEDIA_ERR_LOG("Stop failed: %u", state_);
-        return false;
+    // If state_ is RUNNING try to Stop it first and Release
+    if (state_ == RUNNING) {
+        StopAudioStream();
     }
 
-    FlushStream();
     ReleaseStream();
     state_ = RELEASED;
     MEDIA_INFO_LOG("Release Audio stream SUCCESS");
+
     return true;
 }
 }
