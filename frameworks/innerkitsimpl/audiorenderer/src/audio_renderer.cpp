@@ -35,10 +35,6 @@ public:
     bool Stop() override;
     bool Release() override;
     int32_t GetBufferSize(size_t &bufferSize) override;
-    std::vector<AudioSampleFormat> GetSupportedFormats() override;
-    std::vector<AudioChannel> GetSupportedChannels() override;
-    std::vector<AudioEncodingType> GetSupportedEncodingTypes() override;
-    std::vector<AudioSamplingRate> GetSupportedSamplingRates() override;
 
     std::unique_ptr<AudioStream> audioRenderer;
 
@@ -129,24 +125,24 @@ int32_t AudioRendererPrivate::GetBufferSize(size_t &bufferSize)
     return audioRenderer->GetBufferSize(bufferSize);
 }
 
-std::vector<AudioSampleFormat> AudioRendererPrivate::GetSupportedFormats()
+std::vector<AudioSampleFormat> AudioRenderer::GetSupportedFormats()
 {
-    return audioRenderer->GetSupportedFormats();
+    return AUDIO_SUPPORTED_FORMATS;
 }
 
-std::vector<AudioSamplingRate> AudioRendererPrivate::GetSupportedSamplingRates()
+std::vector<AudioSamplingRate> AudioRenderer::GetSupportedSamplingRates()
 {
-    return audioRenderer->GetSupportedSamplingRates();
+    return AUDIO_SUPPORTED_SAMPLING_RATES;
 }
 
-std::vector<AudioChannel> AudioRendererPrivate::GetSupportedChannels()
+std::vector<AudioChannel> AudioRenderer::GetSupportedChannels()
 {
-    return audioRenderer->GetSupportedChannels();
+    return AUDIO_SUPPORTED_CHANNELS;
 }
 
-std::vector<AudioEncodingType> AudioRendererPrivate::GetSupportedEncodingTypes()
+std::vector<AudioEncodingType> AudioRenderer::GetSupportedEncodingTypes()
 {
-    return audioRenderer->GetSupportedEncodingTypes();
+    return AUDIO_SUPPORTED_ENCODING_TYPES;
 }
 }  // namespace AudioStandard
 }  // namespace OHOS

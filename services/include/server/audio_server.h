@@ -23,7 +23,6 @@
 #include "system_ability.h"
 #include "audio_system_manager.h"
 #include "audio_manager_base.h"
-#include "audio_device_descriptor.h"
 
 namespace OHOS {
 namespace AudioStandard {

@@ -48,26 +48,26 @@ public:
             streamType = static_cast<AudioStreamType>(strtol(argv[AudioTestConstants::SECOND_ARG_IDX], NULL, 10));
         unique_ptr<AudioRenderer> audioRenderer = AudioRenderer::Create(streamType);
 
-        vector<AudioSampleFormat> supportedFormatList = audioRenderer->GetSupportedFormats();
+        vector<AudioSampleFormat> supportedFormatList = AudioRenderer::GetSupportedFormats();
         MEDIA_INFO_LOG("AudioRendererTest: Supported formats:");
         for (auto i = supportedFormatList.begin(); i != supportedFormatList.end(); ++i) {
             MEDIA_INFO_LOG("AudioRendererTest: Format %{public}d", *i);
         }
 
-        vector<AudioChannel> supportedChannelList = audioRenderer->GetSupportedChannels();
+        vector<AudioChannel> supportedChannelList = AudioRenderer::GetSupportedChannels();
         MEDIA_INFO_LOG("AudioRendererTest: Supported channels:");
         for (auto i = supportedChannelList.begin(); i != supportedChannelList.end(); ++i) {
             MEDIA_INFO_LOG("AudioRendererTest: channel %{public}d", *i);
         }
 
         vector<AudioEncodingType> supportedEncodingTypes
-                                    = audioRenderer->GetSupportedEncodingTypes();
+                                    = AudioRenderer::GetSupportedEncodingTypes();
         MEDIA_INFO_LOG("AudioRendererTest: Supported encoding types:");
         for (auto i = supportedEncodingTypes.begin(); i != supportedEncodingTypes.end(); ++i) {
             MEDIA_INFO_LOG("AudioRendererTest: encoding type %{public}d", *i);
         }
 
-        vector<AudioSamplingRate> supportedSamplingRates = audioRenderer->GetSupportedSamplingRates();
+        vector<AudioSamplingRate> supportedSamplingRates = AudioRenderer::GetSupportedSamplingRates();
         MEDIA_INFO_LOG("AudioRendererTest: Supported sampling rates:");
         for (auto i = supportedSamplingRates.begin(); i != supportedSamplingRates.end(); ++i) {
             MEDIA_INFO_LOG("AudioRendererTest: sampling rate %{public}d", *i);

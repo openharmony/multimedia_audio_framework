@@ -14,9 +14,10 @@
  */
 
 #include "audio_errors.h"
-#include "audio_info.h"
 #include "audio_manager_proxy.h"
+#include "audio_policy_manager.h"
 #include "audio_system_manager.h"
+#include "audio_stream.h"
 #include "iservice_registry.h"
 #include "media_log.h"
 #include "system_ability_definition.h"
@@ -229,6 +230,40 @@ bool AudioSystemManager::IsMicrophoneMute()
 std::vector<sptr<AudioDeviceDescriptor>> AudioSystemManager::GetDevices(AudioDeviceDescriptor::DeviceFlag deviceFlag)
 {
     return g_sProxy->GetDevices(deviceFlag);
+}
+
+/**
+ * @brief The AudioDeviceDescriptor provides
+ *         different sets of audio devices and their roles
+ */
+AudioDeviceDescriptor::AudioDeviceDescriptor()
+{
+    MEDIA_DEBUG_LOG("AudioDeviceDescriptor constructor");
+    deviceType_ = DEVICE_TYPE_NONE;
+    deviceRole_ = DEVICE_ROLE_NONE;
+}
+
+AudioDeviceDescriptor::~AudioDeviceDescriptor()
+{
+    MEDIA_DEBUG_LOG("AudioDeviceDescriptor::~AudioDeviceDescriptor");
+}
+
+bool AudioDeviceDescriptor::Marshalling(Parcel &parcel) const
+{
+    MEDIA_DEBUG_LOG("AudioDeviceDescriptor::Marshalling called");
+    return parcel.WriteInt32(deviceType_) && parcel.WriteInt32(deviceRole_);
+}
+
+AudioDeviceDescriptor *AudioDeviceDescriptor::Unmarshalling(Parcel &in)
+{
+    MEDIA_DEBUG_LOG("AudioDeviceDescriptor::Unmarshalling called");
+    AudioDeviceDescriptor *audioDeviceDescriptor = new(std::nothrow) AudioDeviceDescriptor();
+    if (audioDeviceDescriptor == nullptr) {
+        return nullptr;
+    }
+    audioDeviceDescriptor->deviceType_ = static_cast<AudioDeviceDescriptor::DeviceType>(in.ReadInt32());
+    audioDeviceDescriptor->deviceRole_ = static_cast<AudioDeviceDescriptor::DeviceRole>(in.ReadInt32());
+    return audioDeviceDescriptor;
 }
 } // namespace AudioStandard
 } // namespace OHOS

@@ -37,26 +37,26 @@ public:
         MEDIA_INFO_LOG("TestCapture start ");
 
         unique_ptr<AudioRecorder> audioRecorder = AudioRecorder::Create(AudioStreamType::STREAM_MUSIC);
-        vector<AudioSampleFormat> supportedFormatList = audioRecorder->GetSupportedFormats();
+        vector<AudioSampleFormat> supportedFormatList = AudioRecorder::GetSupportedFormats();
         MEDIA_INFO_LOG("Supported formats:");
         for (auto i = supportedFormatList.begin(); i != supportedFormatList.end(); ++i) {
             MEDIA_INFO_LOG("Format %{public}d", *i);
         }
 
-        vector<AudioChannel> supportedChannelList = audioRecorder->GetSupportedChannels();
+        vector<AudioChannel> supportedChannelList = AudioRecorder::GetSupportedChannels();
         MEDIA_INFO_LOG("Supported channels:");
         for (auto i = supportedChannelList.begin(); i != supportedChannelList.end(); ++i) {
             MEDIA_INFO_LOG("channel %{public}d", *i);
         }
 
         vector<AudioEncodingType> supportedEncodingTypes
-                                    = audioRecorder->GetSupportedEncodingTypes();
+                                    = AudioRecorder::GetSupportedEncodingTypes();
         MEDIA_INFO_LOG("Supported encoding types:");
         for (auto i = supportedEncodingTypes.begin(); i != supportedEncodingTypes.end(); ++i) {
             MEDIA_INFO_LOG("encoding type %{public}d", *i);
         }
 
-        vector<AudioSamplingRate> supportedSamplingRates = audioRecorder->GetSupportedSamplingRates();
+        vector<AudioSamplingRate> supportedSamplingRates = AudioRecorder::GetSupportedSamplingRates();
         MEDIA_INFO_LOG("Supported sampling rates:");
         for (auto i = supportedSamplingRates.begin(); i != supportedSamplingRates.end(); ++i) {
             MEDIA_INFO_LOG("sampling rate %{public}d", *i);

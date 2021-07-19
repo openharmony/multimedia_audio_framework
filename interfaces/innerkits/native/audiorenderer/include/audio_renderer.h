@@ -171,28 +171,28 @@ public:
      *
      * @return Returns vector with supported formats.
      */
-    virtual std::vector<AudioSampleFormat> GetSupportedFormats() = 0;
+    static std::vector<AudioSampleFormat> GetSupportedFormats();
 
     /**
      * @brief Obtains the SupportedSamplingRates supported by renderer.
      *
      * @return Returns vector with supported SupportedSamplingRates.
      */
-    virtual std::vector<AudioSamplingRate> GetSupportedSamplingRates() = 0;
+    static std::vector<AudioSamplingRate> GetSupportedSamplingRates();
 
     /**
      * @brief Obtains the channels supported by renderer.
      *
      * @return Returns vector with supported channels.
      */
-    virtual std::vector<AudioChannel> GetSupportedChannels() = 0;
+    static std::vector<AudioChannel> GetSupportedChannels();
 
     /**
      * @brief Obtains the encoding types supported by renderer.
      *
      * @return Returns vector with supported encoding types.
      */
-    virtual std::vector<AudioEncodingType> GetSupportedEncodingTypes() = 0;
+    static std::vector<AudioEncodingType> GetSupportedEncodingTypes();
 
     virtual ~AudioRenderer();
 };

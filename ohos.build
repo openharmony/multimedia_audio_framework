@@ -29,12 +29,14 @@
           "header_files": [
               "audio_system_manager.h",
               "audio_session.h",
-              "audio_stream.h"
+              "audio_stream.h",
+              "audio_info.h"
           ],
             "header_base": [
               "//foundation/multimedia/audio_standard/interfaces/innerkits/native/audiomanager/include",
               "//foundation/multimedia/audio_standard/interfaces/innerkits/native/audiosession/include",
-              "//foundation/multimedia/audio_standard/interfaces/innerkits/native/audiostream/include"
+              "//foundation/multimedia/audio_standard/interfaces/innerkits/native/audiostream/include",
+              "//foundation/multimedia/audio_standard/interfaces/innerkits/native/audiocommon/include"
           ]
           }
         },

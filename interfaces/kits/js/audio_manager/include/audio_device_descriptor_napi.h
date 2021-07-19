@@ -18,7 +18,7 @@
 
 #include <iostream>
 #include <vector>
-#include "audio_device_descriptor.h"
+#include "audio_system_manager.h"
 #include "napi/native_api.h"
 #include "napi/native_node_api.h"
 

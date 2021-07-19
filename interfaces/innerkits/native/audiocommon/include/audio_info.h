@@ -20,6 +20,7 @@
 #include <stdint.h>
 #endif // __MUSL__
 
+#include <vector>
 #include <unistd.h>
 
 namespace OHOS {
@@ -226,6 +227,33 @@ public:
         /** Monotonically increasing time, excluding the system sleep time */
         MONOTONIC = 0
     };
+};
+
+// Supported audio parameters for both renderer and recorder
+const std::vector<AudioSampleFormat> AUDIO_SUPPORTED_FORMATS {
+    SAMPLE_U8,
+    SAMPLE_S16LE,
+    SAMPLE_S24LE,
+    SAMPLE_S32LE
+};
+
+const std::vector<AudioChannel> AUDIO_SUPPORTED_CHANNELS {
+    MONO,
+    STEREO
+};
+
+const std::vector<AudioEncodingType> AUDIO_SUPPORTED_ENCODING_TYPES {
+    ENCODING_PCM
+};
+
+const std::vector<AudioSamplingRate> AUDIO_SUPPORTED_SAMPLING_RATES {
+    SAMPLE_RATE_8000,
+    SAMPLE_RATE_11025,
+    SAMPLE_RATE_16000,
+    SAMPLE_RATE_22050,
+    SAMPLE_RATE_32000,
+    SAMPLE_RATE_44100,
+    SAMPLE_RATE_48000
 };
 typedef void* AudioIOHandle;
 } // namespace AudioStandard

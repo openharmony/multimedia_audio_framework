@@ -172,28 +172,28 @@ public:
      *
      * @return vector with recorder supported formats.
      */
-    virtual std::vector<AudioSampleFormat> GetSupportedFormats() = 0;
+    static std::vector<AudioSampleFormat> GetSupportedFormats();
 
     /**
      * @brief Obtains the recorder supported channels.
      *
      * @return vector with recorder supported channels.
      */
-    virtual std::vector<AudioChannel> GetSupportedChannels() = 0;
+    static std::vector<AudioChannel> GetSupportedChannels();
 
     /**
      * @brief Obtains the recorder supported encoding types.
      *
      * @return vector with recorder supported encoding types.
      */
-    virtual std::vector<AudioEncodingType> GetSupportedEncodingTypes() = 0;
+    static std::vector<AudioEncodingType> GetSupportedEncodingTypes();
 
     /**
      * @brief Obtains the recorder supported SupportedSamplingRates.
      *
      * @return vector with recorder supported SupportedSamplingRates.
      */
-    virtual std::vector<AudioSamplingRate> GetSupportedSamplingRates() = 0;
+    static std::vector<AudioSamplingRate> GetSupportedSamplingRates();
 
     virtual ~AudioRecorder();
 };

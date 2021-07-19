@@ -13,7 +13,6 @@
  * limitations under the License.
  */
 
-#include "audio_device_descriptor.h"
 #include "audio_manager_base.h"
 #include "audio_system_manager.h"
 #include "media_log.h"
