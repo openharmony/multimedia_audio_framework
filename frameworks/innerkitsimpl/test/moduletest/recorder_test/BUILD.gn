@@ -11,11 +11,22 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-group("audio_test") {
-    testonly = true
+import("//build/test.gni")
 
-    deps = [
-        "moduletest/renderer_test:moduletest",
-        "moduletest/recorder_test:audio_recorder_module_test"
-    ]
+module_output_path = "audio_standard/audio_recorder"
+
+ohos_moduletest("audio_recorder_module_test") {
+  module_out_path = module_output_path
+  include_dirs = [
+    "./include",
+    "//foundation/multimedia/audio_standard/interfaces/innerkits/native/audiocommon/include",
+  ]
+
+  sources = [
+    "src/audio_recorder_module_test.cpp",
+  ]
+
+  deps = [
+    "//foundation/multimedia/audio_standard/interfaces/innerkits/native/audiorecorder:audio_recorder",
+  ]
 }
