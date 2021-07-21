@@ -150,7 +150,7 @@ void XMLParser::ParseAudioPorts(xmlNode* node)
 
     for (; child; child = child->next) {
         if (!xmlStrcmp(child->name, reinterpret_cast<const xmlChar*>("AudioPort"))) {
-            std::shared_ptr<AudioPortInfo> portInfo = std::make_unique<AudioPortInfo>();
+            std::shared_ptr<AudioPortInfo> portInfo = std::make_shared<AudioPortInfo>();
             portInfo->type = TYPE_AUDIO_PORT;
 
             if (xmlHasProp(child, reinterpret_cast<xmlChar*>(const_cast<char*>("role")))) {
@@ -202,7 +202,7 @@ void XMLParser::ParseAudioPortPins(xmlNode* node)
 
     for (; child; child = child->next) {
         if (!xmlStrcmp(child->name, reinterpret_cast<const xmlChar*>("AudioPortPin"))) {
-            std::shared_ptr<AudioPortPinInfo> portInfo = std::make_unique<AudioPortPinInfo>();
+            std::shared_ptr<AudioPortPinInfo> portInfo = std::make_shared<AudioPortPinInfo>();
             portInfo->type = TYPE_AUDIO_PORT_PIN;
 
             if (xmlHasProp(child, reinterpret_cast<xmlChar*>(const_cast<char*>("role"))))

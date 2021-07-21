@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef I_ST_AUDIO_POLICY_BASE_H
-#define I_ST_AUDIO_POLICY_BASE_H
+#ifndef I_AUDIO_POLICY_BASE_H
+#define I_AUDIO_POLICY_BASE_H
 
 #include "audio_policy_types.h"
 #include "ipc_types.h"
@@ -47,14 +47,6 @@ public:
 public:
     DECLARE_INTERFACE_DESCRIPTOR(u"IAudioPolicy");
 };
-
-class AudioPolicyManagerStub : public IRemoteStub<IAudioPolicy> {
-public:
-    virtual int32_t OnRemoteRequest(uint32_t code, MessageParcel &data,
-                                MessageParcel &reply, MessageOption &option) override;
-    bool IsPermissionValid();
-};
 } // AudioStandard
 } // namespace OHOS
-
-#endif // I_ST_AUDIO_POLICY_BASE_H
+#endif // I_AUDIO_POLICY_BASE_H

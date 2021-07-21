@@ -19,12 +19,14 @@
 
 #include <stdio.h>
 
-#include <pulsecore/module.h>
-#include <pulsecore/modargs.h>
-#include <pulsecore/log.h>
 #include <pulsecore/macro.h>
+#include <pulsecore/modargs.h>
+#include <pulsecore/module.h>
+#include <pulsecore/log.h>
 
-#include "hdi_source.h"
+pa_source* pa_hdi_source_new(pa_module *m, pa_modargs *ma, const char*driver);
+
+void pa_hdi_source_free(pa_source *s);
 
 PA_MODULE_AUTHOR("OpenHarmony");
 PA_MODULE_DESCRIPTION("OpenHarmony HDI Source");
@@ -51,7 +53,7 @@ static const char * const VALID_MODARGS[] = {
     NULL
 };
 
-int pa__init(pa_module*m)
+int pa__init(pa_module *m)
 {
     pa_modargs *ma = NULL;
 

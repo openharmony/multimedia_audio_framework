@@ -23,31 +23,15 @@ using namespace OHOS;
 using namespace OHOS::AudioStandard;
 
 namespace AudioTestConstants {
-    constexpr int32_t SECOND_ARG_IDX = 2;
+    constexpr int32_t ARGS_INDEX_TWO = 2;
+    constexpr int32_t ARGS_COUNT_TWO = 2;
     constexpr int32_t SUCCESS = 0;
 }
 
 class AudioRendererTest {
 public:
-    bool TestPlayback(int argc, char *argv[]) const
+    void CheckSupportedParams() const
     {
-        MEDIA_INFO_LOG("AudioRendererTest: TestPlayback start ");
-
-        wav_hdr wavHeader;
-        size_t headerSize = sizeof(wav_hdr);
-        FILE* wavFile = fopen(argv[1], "rb");
-        if (wavFile == nullptr) {
-            MEDIA_INFO_LOG("AudioRendererTest: Unable to open wave file");
-            return false;
-        }
-        size_t bytesRead = fread(&wavHeader, 1, headerSize, wavFile);
-        MEDIA_INFO_LOG("AudioRendererTest: Header Read in bytes %{public}d", bytesRead);
-
-        AudioStreamType streamType = AudioStreamType::STREAM_MUSIC;
-        if (argc > 2)
-            streamType = static_cast<AudioStreamType>(strtol(argv[AudioTestConstants::SECOND_ARG_IDX], NULL, 10));
-        unique_ptr<AudioRenderer> audioRenderer = AudioRenderer::Create(streamType);
-
         vector<AudioSampleFormat> supportedFormatList = AudioRenderer::GetSupportedFormats();
         MEDIA_INFO_LOG("AudioRendererTest: Supported formats:");
         for (auto i = supportedFormatList.begin(); i != supportedFormatList.end(); ++i) {
@@ -72,15 +56,13 @@ public:
         for (auto i = supportedSamplingRates.begin(); i != supportedSamplingRates.end(); ++i) {
             MEDIA_INFO_LOG("AudioRendererTest: sampling rate %{public}d", *i);
         }
+    }
 
-        AudioRendererParams rendererParams;
-        rendererParams.sampleFormat = static_cast<AudioSampleFormat>(wavHeader.bitsPerSample);
-        rendererParams.sampleRate = static_cast<AudioSamplingRate>(wavHeader.SamplesPerSec);
-        rendererParams.channelCount = static_cast<AudioChannel>(wavHeader.NumOfChan);
-        rendererParams.encodingType = static_cast<AudioEncodingType>(ENCODING_PCM);
+    bool InitRender(const unique_ptr<AudioRenderer> &audioRenderer, const AudioRendererParams &rendererParams) const
+    {
         if (audioRenderer->SetParams(rendererParams) !=  AudioTestConstants::SUCCESS) {
             MEDIA_ERR_LOG("AudioRendererTest: Set audio renderer parameters failed");
-            if(!audioRenderer->Release()) {
+            if (!audioRenderer->Release()) {
                 MEDIA_ERR_LOG("AudioRendererTest: Release failed");
             }
             return false;
@@ -90,7 +72,7 @@ public:
         MEDIA_INFO_LOG("AudioRendererTest: Starting renderer");
         if (!audioRenderer->Start()) {
             MEDIA_ERR_LOG("AudioRendererTest: Start failed");
-            if(!audioRenderer->Release()) {
+            if (!audioRenderer->Release()) {
                 MEDIA_ERR_LOG("AudioRendererTest: Release failed");
             }
             return false;
@@ -103,10 +85,15 @@ public:
             MEDIA_INFO_LOG("AudioRendererTest: Get Audio format: %{public}d", paRendererParams.sampleFormat);
             MEDIA_INFO_LOG("AudioRendererTest: Get Audio sampling rate: %{public}d", paRendererParams.sampleRate);
             MEDIA_INFO_LOG("AudioRendererTest: Get Audio channels: %{public}d", paRendererParams.channelCount);
-        }
-        else {
+        } else {
             MEDIA_ERR_LOG("AudioRendererTest: Get Audio parameters failed");
         }
+
+        return true;
+    }
+
+    bool StartRender(const unique_ptr<AudioRenderer> &audioRenderer, FILE* wavFile) const
+    {
         size_t bufferLen;
         if (audioRenderer->GetBufferSize(bufferLen)) {
             MEDIA_ERR_LOG("AudioRendererTest:  GetMinimumBufferSize failed");
@@ -150,24 +137,65 @@ public:
             }
         }
 
-        if(!audioRenderer->Drain()) {
+        if (!audioRenderer->Drain()) {
             MEDIA_ERR_LOG("AudioRendererTest: Drain failed");
         }
+
         Timestamp timeStamp;
         if (audioRenderer->GetAudioTime(timeStamp, Timestamp::Timestampbase::MONOTONIC)) {
             MEDIA_INFO_LOG("AudioRendererTest: Timestamp seconds: %{public}ld", timeStamp.time.tv_sec);
             MEDIA_INFO_LOG("AudioRendererTest: Timestamp nanoseconds: %{public}ld", timeStamp.time.tv_nsec);
         }
+        free(buffer);
 
-        if(!audioRenderer->Stop()) {
+        return true;
+    }
+
+    bool TestPlayback(int argc, char *argv[]) const
+    {
+        MEDIA_INFO_LOG("AudioRendererTest: TestPlayback start ");
+
+        int numBase = 10;
+        wav_hdr wavHeader;
+        size_t headerSize = sizeof(wav_hdr);
+        FILE* wavFile = fopen(argv[1], "rb");
+        if (wavFile == nullptr) {
+            MEDIA_INFO_LOG("AudioRendererTest: Unable to open wave file");
+            return false;
+        }
+        size_t bytesRead = fread(&wavHeader, 1, headerSize, wavFile);
+        MEDIA_INFO_LOG("AudioRendererTest: Header Read in bytes %{public}d", bytesRead);
+
+        AudioStreamType streamType = AudioStreamType::STREAM_MUSIC;
+        if (argc > AudioTestConstants::ARGS_COUNT_TWO)
+            streamType = static_cast<AudioStreamType>(strtol(argv[AudioTestConstants::ARGS_INDEX_TWO], NULL, numBase));
+        unique_ptr<AudioRenderer> audioRenderer = AudioRenderer::Create(streamType);
+
+        CheckSupportedParams();
+
+        AudioRendererParams rendererParams;
+        rendererParams.sampleFormat = static_cast<AudioSampleFormat>(wavHeader.bitsPerSample);
+        rendererParams.sampleRate = static_cast<AudioSamplingRate>(wavHeader.SamplesPerSec);
+        rendererParams.channelCount = static_cast<AudioChannel>(wavHeader.NumOfChan);
+        rendererParams.encodingType = static_cast<AudioEncodingType>(ENCODING_PCM);
+        if (!InitRender(audioRenderer, rendererParams)) {
+            MEDIA_ERR_LOG("AudioRendererTest: Init render failed");
+            return false;
+        }
+
+        if (StartRender(audioRenderer, wavFile)) {
+            MEDIA_ERR_LOG("AudioRendererTest: Start render failed");
+            return false;
+        }
+
+        if (!audioRenderer->Stop()) {
             MEDIA_ERR_LOG("AudioRendererTest: Stop failed");
         }
 
-        if(!audioRenderer->Release()) {
+        if (!audioRenderer->Release()) {
             MEDIA_ERR_LOG("AudioRendererTest: Release failed");
         }
 
-        free(buffer);
         fclose(wavFile);
         MEDIA_INFO_LOG("AudioRendererTest: TestPlayback end");
 
@@ -179,7 +207,7 @@ int main(int argc, char *argv[])
 {
     MEDIA_INFO_LOG("AudioRendererTest: Render test in");
 
-    if ((argv == nullptr) || (argc < AudioTestConstants::SECOND_ARG_IDX)) {
+    if ((argv == nullptr) || (argc < AudioTestConstants::ARGS_INDEX_TWO)) {
         MEDIA_ERR_LOG("AudioRendererTest: argv is null");
         return 0;
     }

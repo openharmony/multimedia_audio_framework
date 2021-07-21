@@ -17,7 +17,7 @@
 #define ST_AUDIO_PORT_OBSERVER_H
 
 #include "audio_info.h"
-#include "iaudio_policy.h"
+#include "iaudio_policy_interface.h"
 
 namespace OHOS {
 namespace AudioStandard {

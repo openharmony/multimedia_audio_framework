@@ -799,7 +799,8 @@ napi_value AudioManagerNapi::SetRingerMode(napi_env env, napi_callback_info info
             env, nullptr, resource,
             [](napi_env env, void* data) {
                 auto context = static_cast<AudioManagerAsyncContext*>(data);
-                context->status = context->objectInfo->audioMngr_->SetRingerMode(static_cast<AudioRingerMode>(context->ringMode));
+                context->status =
+                    context->objectInfo->audioMngr_->SetRingerMode(static_cast<AudioRingerMode>(context->ringMode));
             },
             SetFunctionAsyncCallbackComplete, static_cast<void*>(asyncContext.get()), &asyncContext->work);
         if (status != napi_ok) {

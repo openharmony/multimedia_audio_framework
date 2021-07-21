@@ -14,6 +14,7 @@
  */
 
 #include <unistd.h>
+
 #include "audio_errors.h"
 #include "media_log.h"
 #include "pulseaudio_policy_manager.h"
@@ -89,18 +90,15 @@ void PulseAudioPolicyManager::Deinit(void)
 
 int32_t PulseAudioPolicyManager::SetStreamVolume(AudioStreamType streamType, float volume)
 {
+    std::unique_ptr<UserData> userData = std::make_unique<UserData>();
+    userData->thiz = this;
+    userData->volume = volume;
+    userData->streamType = streamType;
+
     if (mContext == NULL) {
         MEDIA_ERR_LOG("[PolicyManager] mContext is nullptr");
         return ERROR;
     }
-
-    UserData* userData = new UserData;
-    if (userData == nullptr)
-        return ERROR;
-
-    userData->thiz = this;
-    userData->volume = volume;
-    userData->streamType = streamType;
 
     // Incase if KvStore didnot connect during  bootup
     if (mAudioPolicyKvStore == nullptr) {
@@ -114,13 +112,13 @@ int32_t PulseAudioPolicyManager::SetStreamVolume(AudioStreamType streamType, flo
     pa_threaded_mainloop_lock(mMainLoop);
 
     pa_operation *operation = pa_context_get_sink_input_info_list(mContext,
-        PulseAudioPolicyManager::GetSinkInputInfoVolumeCb, reinterpret_cast<void*>(userData));
+        PulseAudioPolicyManager::GetSinkInputInfoVolumeCb, reinterpret_cast<void*>(userData.get()));
     if (operation == NULL) {
         MEDIA_ERR_LOG("[PolicyManager] pa_context_get_sink_input_info_list returned nullptr");
-        delete userData;
         pa_threaded_mainloop_unlock(mMainLoop);
         return ERROR;
     }
+    userData.release();
 
     while (pa_operation_get_state(operation) == PA_OPERATION_RUNNING) {
         pa_threaded_mainloop_wait(mMainLoop);
@@ -138,15 +136,15 @@ float PulseAudioPolicyManager::GetStreamVolume(AudioStreamType streamType)
 
 int32_t PulseAudioPolicyManager::SetStreamMute(AudioStreamType streamType, bool mute)
 {
+    std::unique_ptr<UserData> userData = std::make_unique<UserData>();
+    userData->thiz = this;
+    userData->mute = mute;
+    userData->streamType = streamType;
+
     if (mContext == NULL) {
         MEDIA_ERR_LOG("[PolicyManager] mContext is nullptr");
         return ERROR;
     }
-
-    std::shared_ptr<UserData> userData = std::make_shared<UserData>();
-    userData->thiz = this;
-    userData->mute = mute;
-    userData->streamType = streamType;
 
     pa_threaded_mainloop_lock(mMainLoop);
 
@@ -170,15 +168,15 @@ int32_t PulseAudioPolicyManager::SetStreamMute(AudioStreamType streamType, bool 
 
 bool PulseAudioPolicyManager::GetStreamMute(AudioStreamType streamType)
 {
+    std::unique_ptr<UserData> userData = std::make_unique<UserData>();
+    userData->thiz = this;
+    userData->streamType = streamType;
+    userData->mute = false;
+
     if (mContext == NULL) {
         MEDIA_ERR_LOG("[PolicyManager] mContext is nullptr");
         return false;
     }
-
-    std::shared_ptr<UserData> userData = std::make_shared<UserData>();
-    userData->thiz = this;
-    userData->streamType = streamType;
-    userData->mute = false;
 
     pa_threaded_mainloop_lock(mMainLoop);
 
@@ -202,20 +200,20 @@ bool PulseAudioPolicyManager::GetStreamMute(AudioStreamType streamType)
 
 bool PulseAudioPolicyManager::IsStreamActive(AudioStreamType streamType)
 {
+    std::unique_ptr<UserData> userData = std::make_unique<UserData>();
+    userData->thiz = this;
+    userData->streamType = streamType;
+    userData->isCorked = true;
+
     if (mContext == NULL) {
         MEDIA_ERR_LOG("[PolicyManager] mContext is nullptr");
         return false;
     }
 
-    std::shared_ptr<UserData> userData = std::make_shared<UserData>();
-    userData->thiz = this;
-    userData->streamType = streamType;
-    userData->isCorked = true;
-
     pa_threaded_mainloop_lock(mMainLoop);
 
-    pa_operation *operation = pa_context_get_sink_input_info_list(mContext,  PulseAudioPolicyManager::GetSinkInputInfoCorkStatusCb,
-        reinterpret_cast<void*>(userData.get()));
+    pa_operation *operation = pa_context_get_sink_input_info_list(mContext,
+        PulseAudioPolicyManager::GetSinkInputInfoCorkStatusCb, reinterpret_cast<void*>(userData.get()));
     if (operation == NULL) {
         MEDIA_ERR_LOG("[PolicyManager] pa_context_get_sink_input_info_list returned nullptr");
         pa_threaded_mainloop_unlock(mMainLoop);
@@ -235,7 +233,9 @@ bool PulseAudioPolicyManager::IsStreamActive(AudioStreamType streamType)
     return (userData->isCorked) ? false : true;
 }
 
-int32_t PulseAudioPolicyManager::SetDeviceActive(AudioIOHandle ioHandle, DeviceType deviceType, std::string name, bool active)
+
+int32_t PulseAudioPolicyManager::SetDeviceActive(AudioIOHandle ioHandle, DeviceType deviceType,
+                                                 std::string name, bool active)
 {
     pa_threaded_mainloop_lock(mMainLoop);
 
@@ -313,7 +313,7 @@ AudioIOHandle PulseAudioPolicyManager::OpenAudioPort(std::shared_ptr<AudioPortIn
 
     pa_threaded_mainloop_lock(mMainLoop);
 
-    std::shared_ptr<UserData> userData = std::make_shared<UserData>();
+    std::unique_ptr<UserData> userData = std::make_unique<UserData>();
     userData->thiz = this;
 
     pa_operation* operation = pa_context_load_module(mContext, audioPortInfo->name,  moduleArgs.c_str(), ModuleLoadCb,
@@ -689,16 +689,17 @@ void PulseAudioPolicyManager::WriteRingerModeToKvStore(AudioRingerMode ringerMod
 void PulseAudioPolicyManager::HandleSinkInputEvent(pa_context *c, pa_subscription_event_type_t t, uint32_t idx,
     void *userdata)
 {
-    UserData* userData = new UserData;
+    std::unique_ptr<UserData> userData = std::make_unique<UserData>();
     userData->thiz = this;
 
     if ((t & PA_SUBSCRIPTION_EVENT_TYPE_MASK) == PA_SUBSCRIPTION_EVENT_NEW) {
         pa_operation* operation = pa_context_get_sink_input_info(c, idx,
-            PulseAudioPolicyManager::GetSinkInputInfoVolumeCb, reinterpret_cast<void*>(userData));
+            PulseAudioPolicyManager::GetSinkInputInfoVolumeCb, reinterpret_cast<void*>(userData.get()));
         if (operation == NULL) {
             MEDIA_ERR_LOG("[PolicyManager] pa_context_get_sink_input_info_list returned nullptr");
             return;
         }
+        userData.release();
 
         pa_operation_unref(operation);
     }
@@ -831,12 +832,14 @@ void PulseAudioPolicyManager::GetSinkInputInfoVolumeCb(pa_context *c, const pa_s
     pa_cvolume_set(&cv, i->channel_map.channels, volume);
     pa_operation_unref(pa_context_set_sink_input_volume(c, i->index, &cv, NULL, NULL));
 
-    if (i->mute) {
-        pa_operation_unref(pa_context_set_sink_input_mute(c, i->index, 0, NULL, NULL));
+    if (streamID == userData->streamType) {
+        if (i->mute) {
+            pa_operation_unref(pa_context_set_sink_input_mute(c, i->index, 0, NULL, NULL));
+        }
     }
 
     MEDIA_INFO_LOG("[PolicyManager] Applied volume : %{public}f for stream : %{public}s, volumeInt%{public}d",
-        userData->volume, i->name, volume);
+        vol, i->name, volume);
 
     return;
 }

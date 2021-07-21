@@ -17,28 +17,60 @@
 #include <config.h>
 #endif
 
+#include <securec.h>
 #include <signal.h>
 #include <stdio.h>
-#include <securec.h>
 
 #include <pulse/rtclock.h>
 #include <pulse/timeval.h>
 #include <pulse/util.h>
 #include <pulse/xmalloc.h>
+
 #include <pulsecore/core.h>
-#include <pulsecore/module.h>
-#include <pulsecore/memchunk.h>
-#include <pulsecore/modargs.h>
 #include <pulsecore/core-rtclock.h>
 #include <pulsecore/core-util.h>
 #include <pulsecore/log.h>
 #include <pulsecore/macro.h>
+#include <pulsecore/memchunk.h>
+#include <pulsecore/modargs.h>
+#include <pulsecore/module.h>
+#include <pulsecore/rtpoll.h>
 #include <pulsecore/thread.h>
 #include <pulsecore/thread-mq.h>
-#include <pulsecore/rtpoll.h>
 
-#include "hdi_source.h"
+#include <audio_manager.h>
+
+#include <audio_capturer_source_intf.h>
+
 #include "media_log.h"
+
+#define DEFAULT_SOURCE_NAME "hdi_input"
+#define DEFAULT_AUDIO_DEVICE_NAME "Internal Mic"
+
+#define DEFAULT_BUFFER_SIZE (1024 * 16)
+#define MAX_VOLUME_VALUE 15.0
+#define DEFAULT_LEFT_VOLUME MAX_VOLUME_VALUE
+#define DEFAULT_RIGHT_VOLUME MAX_VOLUME_VALUE
+#define MAX_LATENCY_USEC (PA_USEC_PER_SEC * 2)
+#define MIN_LATENCY_USEC 500
+#define AUDIO_POINT_NUM  1024
+#define AUDIO_FRAME_NUM_IN_BUF 30
+
+struct userdata {
+    pa_core *core;
+    pa_module *module;
+    pa_source *source;
+    pa_thread *thread;
+    pa_thread_mq thread_mq;
+    pa_rtpoll *rtpoll;
+    size_t buffer_size;
+    pa_usec_t block_usec;
+    pa_usec_t timestamp;
+    AudioSourceAttr attrs;
+    // A flag to signal us to prevent silent record during bootup
+    bool IsReady;
+    bool IsCapturerInit;
+};
 
 static int pa_capturer_init(struct userdata *u);
 static void pa_capturer_exit(void);
@@ -71,21 +103,21 @@ static int source_process_msg(pa_msgobject *o, int code, void *data, int64_t off
 
     switch (code) {
         case PA_SOURCE_MESSAGE_GET_LATENCY: {
-             pa_usec_t now;
-             now = pa_rtclock_now();
-             *((int64_t*) data) = (int64_t)now - (int64_t)u->timestamp;
-             return 0;
+            pa_usec_t now;
+            now = pa_rtclock_now();
+            *((int64_t*) data) = (int64_t)now - (int64_t)u->timestamp;
+            return 0;
         }
         default: {
-             pa_log("source_process_msg default case");
-             return pa_source_process_msg(o, code, data, offset, chunk);
+            pa_log("source_process_msg default case");
+            return pa_source_process_msg(o, code, data, offset, chunk);
         }
     }
 }
 
 /* Called from the IO thread. */
 static int source_set_state_in_io_thread_cb(pa_source *s, pa_source_state_t new_state, pa_suspend_cause_t new_suspend_cause) {
-    struct userdata *u;
+    struct userdata *u = NULL;
     pa_assert(s);
     pa_assert_se(u = s->userdata);
     if (s->thread_info.state == PA_SOURCE_SUSPENDED || s->thread_info.state == PA_SOURCE_INIT) {
@@ -99,7 +131,6 @@ static int source_set_state_in_io_thread_cb(pa_source *s, pa_source_state_t new_
 static pa_hook_result_t source_output_fixate_hook_cb(pa_core *c, pa_source_output_new_data *data,
         struct userdata *u) {
     int ret;
-
     MEDIA_DEBUG_LOG("HDI Source: Detected source output");
     pa_assert(data);
     pa_assert(u);
@@ -160,12 +191,11 @@ static void thread_func(void *userdata) {
     u->timestamp = pa_rtclock_now();
     MEDIA_DEBUG_LOG("HDI Source: u->timestamp : %{public}llu", u->timestamp);
 
-    for (;;) {
+    while(true) {
         int ret = 0;
-        int retries = 0;
         uint64_t requestBytes;
         uint64_t replyBytes = 0;
-        void *p;
+        void *p = NULL;
 
         if (PA_SOURCE_IS_OPENED(u->source->thread_info.state) &&
             (u->source->thread_info.state != PA_SOURCE_SUSPENDED) && u->IsReady && u->IsCapturerInit) {
@@ -195,20 +225,12 @@ static void thread_func(void *userdata) {
                 }
 
                 if (replyBytes == 0) {
-                    MEDIA_INFO_LOG("HDI Source: reply bytes 0");
-                    if (retries < MAX_RETRIES) {
-                        usleep(FIVE_MSEC);
-                        ++retries;
-                        MEDIA_DEBUG_LOG("HDI Source: Requested data Length: %{public}llu bytes, Read: %{public}llu bytes. Sleep: %{public}d usec microseconds. Retry Times %{public}d", requestBytes, replyBytes, FIVE_MSEC, retries);
-                        continue;
-                    } else {
-                        MEDIA_ERR_LOG("HDI Source: Failed to read after %{public}d retries, Requested data Length: %{public}llu bytes, Read: %{public}llu bytes, %{public}d ret", retries, requestBytes, replyBytes, ret);
-                        pa_memblock_unref(chunk.memblock);
-                        break;
-                    }
+                    MEDIA_ERR_LOG("HDI Source: Failed to read, Requested data Length: %{public}llu bytes,"
+                        " Read: %{public}llu bytes, %{public}d ret", requestBytes, replyBytes, ret);
+                    pa_memblock_unref(chunk.memblock);
+                    break;
                 }
 
-                retries = 0;
                 chunk.index = 0;
                 chunk.length = replyBytes;
                 pa_source_post(u->source, &chunk);
@@ -234,7 +256,8 @@ static void thread_func(void *userdata) {
             /* If this was no regular exit from the loop we have to continue
             * processing messages until we received PA_MESSAGE_SHUTDOWN */
             MEDIA_INFO_LOG("HDI Source: pa_rtpoll_run ret:%{public}d failed", ret );
-            pa_asyncmsgq_post(u->thread_mq.outq, PA_MSGOBJECT(u->core), PA_CORE_MESSAGE_UNLOAD_MODULE, u->module, 0, NULL, NULL);
+            pa_asyncmsgq_post(u->thread_mq.outq, PA_MSGOBJECT(u->core), PA_CORE_MESSAGE_UNLOAD_MODULE, u->module,
+                0, NULL, NULL);
             pa_asyncmsgq_wait_for(u->thread_mq.inq, PA_MESSAGE_SHUTDOWN);
             return;
         }
@@ -242,7 +265,6 @@ static void thread_func(void *userdata) {
         timer_elapsed = pa_rtpoll_timer_elapsed(u->rtpoll);
 
         if (ret == 0) {
-            MEDIA_INFO_LOG("HDI Source: pa_rtpoll_run ret:%{public}d return", ret );
             return;
         }
     }
@@ -320,7 +342,7 @@ pa_source *pa_hdi_source_new(pa_module *m, pa_modargs *ma, const char*driver) {
     u->attrs.channel = ss.channels;
     u->attrs.sampleRate = ss.rate;
     MEDIA_INFO_LOG("AudioDeviceCreateCapture format: %{public}d, channel: %{public}d, sampleRate: %{public}d",
-                    u->attrs.format, u->attrs.channel, u->attrs.sampleRate);
+                   u->attrs.format, u->attrs.channel, u->attrs.sampleRate);
     ret = pa_capturer_init(u);
     if (ret != 0) {
         goto fail;
@@ -333,7 +355,7 @@ pa_source *pa_hdi_source_new(pa_module *m, pa_modargs *ma, const char*driver) {
     pa_proplist_sets(data.proplist, PA_PROP_DEVICE_STRING, DEFAULT_AUDIO_DEVICE_NAME);
     pa_proplist_setf(data.proplist, PA_PROP_DEVICE_DESCRIPTION, "HDI source %s", DEFAULT_AUDIO_DEVICE_NAME);
     pa_source_new_data_set_sample_spec(&data, &ss);
-    pa_source_new_data_set_channel_map(&data, &map);;
+    pa_source_new_data_set_channel_map(&data, &map);
     pa_proplist_setf(data.proplist, PA_PROP_DEVICE_BUFFERING_BUFFER_SIZE, "%lu", (unsigned long)u->buffer_size);
 
     if (pa_modargs_get_proplist(ma, "source_properties", data.proplist, PA_UPDATE_REPLACE) < 0) {
@@ -342,7 +364,7 @@ pa_source *pa_hdi_source_new(pa_module *m, pa_modargs *ma, const char*driver) {
         goto fail;
     }
 
-    u->source = pa_source_new(m->core, &data, PA_SOURCE_HARDWARE|PA_SOURCE_LATENCY);
+    u->source = pa_source_new(m->core, &data, PA_SOURCE_HARDWARE | PA_SOURCE_LATENCY);
     pa_source_new_data_done(&data);
 
     if (!u->source) {

@@ -16,8 +16,8 @@
 #include "audio_errors.h"
 #include "audio_manager_proxy.h"
 #include "audio_policy_manager.h"
-#include "audio_system_manager.h"
 #include "audio_stream.h"
+#include "audio_system_manager.h"
 #include "iservice_registry.h"
 #include "media_log.h"
 #include "system_ability_definition.h"
@@ -64,19 +64,19 @@ void AudioSystemManager::init()
     }
 }
 
-bool AudioSystemManager::SetRingerMode(AudioRingerMode ringMode)
+bool AudioSystemManager::SetRingerMode(AudioRingerMode ringMode) const
 {
     /* Call Audio Policy SetRingerMode */
     return AudioPolicyManager::GetInstance().SetRingerMode(ringMode);
 }
 
-AudioRingerMode AudioSystemManager::GetRingerMode()
+AudioRingerMode AudioSystemManager::GetRingerMode() const
 {
     /* Call Audio Policy GetRingerMode */
     return (AudioPolicyManager::GetInstance().GetRingerMode());
 }
 
-int32_t AudioSystemManager::SetDeviceActive(AudioDeviceDescriptor::DeviceType deviceType, bool flag)
+int32_t AudioSystemManager::SetDeviceActive(AudioDeviceDescriptor::DeviceType deviceType, bool flag) const
 {
     switch (deviceType) {
         case SPEAKER:
@@ -94,7 +94,7 @@ int32_t AudioSystemManager::SetDeviceActive(AudioDeviceDescriptor::DeviceType de
     return (AudioPolicyManager::GetInstance().SetDeviceActive(devType, flag));
 }
 
-bool AudioSystemManager::IsDeviceActive(AudioDeviceDescriptor::DeviceType deviceType)
+bool AudioSystemManager::IsDeviceActive(AudioDeviceDescriptor::DeviceType deviceType) const
 {
     switch (deviceType) {
         case SPEAKER:
@@ -112,7 +112,7 @@ bool AudioSystemManager::IsDeviceActive(AudioDeviceDescriptor::DeviceType device
     return (AudioPolicyManager::GetInstance().IsDeviceActive(devType));
 }
 
-bool AudioSystemManager::IsStreamActive(AudioSystemManager::AudioVolumeType volumeType)
+bool AudioSystemManager::IsStreamActive(AudioSystemManager::AudioVolumeType volumeType) const
 {
     switch (volumeType) {
         case STREAM_MUSIC:
@@ -127,17 +127,17 @@ bool AudioSystemManager::IsStreamActive(AudioSystemManager::AudioVolumeType volu
     return AudioPolicyManager::GetInstance().IsStreamActive(StreamVolType);
 }
 
-const std::string AudioSystemManager::GetAudioParameter(const std::string key)
+const std::string AudioSystemManager::GetAudioParameter(const std::string key) const
 {
     return g_sProxy->GetAudioParameter(key);
 }
 
-void AudioSystemManager::SetAudioParameter(const std::string key, const std::string value)
+void AudioSystemManager::SetAudioParameter(const std::string key, const std::string value) const
 {
     g_sProxy->SetAudioParameter(key, value);
 }
 
-int32_t AudioSystemManager::SetVolume(AudioSystemManager::AudioVolumeType volumeType, float volume)
+int32_t AudioSystemManager::SetVolume(AudioSystemManager::AudioVolumeType volumeType, float volume) const
 {
     /* Validate and return INVALID_PARAMS error */
     if ((volume < 0) || (volume > 1)) {
@@ -159,7 +159,7 @@ int32_t AudioSystemManager::SetVolume(AudioSystemManager::AudioVolumeType volume
     return AudioPolicyManager::GetInstance().SetStreamVolume(StreamVolType, volume);
 }
 
-float AudioSystemManager::GetVolume(AudioSystemManager::AudioVolumeType volumeType)
+float AudioSystemManager::GetVolume(AudioSystemManager::AudioVolumeType volumeType) const
 {
     switch (volumeType) {
         case STREAM_MUSIC:
@@ -175,17 +175,17 @@ float AudioSystemManager::GetVolume(AudioSystemManager::AudioVolumeType volumeTy
     return AudioPolicyManager::GetInstance().GetStreamVolume(StreamVolType);
 }
 
-float AudioSystemManager::GetMaxVolume(AudioSystemManager::AudioVolumeType volumeType)
+float AudioSystemManager::GetMaxVolume(AudioSystemManager::AudioVolumeType volumeType) const
 {
     return g_sProxy->GetMaxVolume(volumeType);
 }
 
-float AudioSystemManager::GetMinVolume(AudioSystemManager::AudioVolumeType volumeType)
+float AudioSystemManager::GetMinVolume(AudioSystemManager::AudioVolumeType volumeType) const
 {
     return g_sProxy->GetMinVolume(volumeType);
 }
 
-int32_t AudioSystemManager::SetMute(AudioSystemManager::AudioVolumeType volumeType, bool mute)
+int32_t AudioSystemManager::SetMute(AudioSystemManager::AudioVolumeType volumeType, bool mute) const
 {
     switch (volumeType) {
         case STREAM_MUSIC:
@@ -201,7 +201,7 @@ int32_t AudioSystemManager::SetMute(AudioSystemManager::AudioVolumeType volumeTy
     return AudioPolicyManager::GetInstance().SetStreamMute(StreamVolType, mute);
 }
 
-bool AudioSystemManager::IsStreamMute(AudioSystemManager::AudioVolumeType volumeType)
+bool AudioSystemManager::IsStreamMute(AudioSystemManager::AudioVolumeType volumeType) const
 {
     MEDIA_DEBUG_LOG("AudioSystemManager::GetMute Client");
 
@@ -219,17 +219,18 @@ bool AudioSystemManager::IsStreamMute(AudioSystemManager::AudioVolumeType volume
     return AudioPolicyManager::GetInstance().GetStreamMute(StreamVolType);
 }
 
-int32_t AudioSystemManager::SetMicrophoneMute(bool isMute)
+int32_t AudioSystemManager::SetMicrophoneMute(bool isMute) const
 {
     return g_sProxy->SetMicrophoneMute(isMute);
 }
 
-bool AudioSystemManager::IsMicrophoneMute()
+bool AudioSystemManager::IsMicrophoneMute() const
 {
     return g_sProxy->IsMicrophoneMute();
 }
 
 std::vector<sptr<AudioDeviceDescriptor>> AudioSystemManager::GetDevices(AudioDeviceDescriptor::DeviceFlag deviceFlag)
+    const
 {
     return g_sProxy->GetDevices(deviceFlag);
 }

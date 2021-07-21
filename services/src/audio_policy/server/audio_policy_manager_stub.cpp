@@ -14,95 +14,130 @@
  */
 
 #include "audio_errors.h"
-#include "audio_policy_base.h"
+#include "audio_policy_manager_stub.h"
 #include "audio_policy_server.h"
 #include "audio_policy_types.h"
 #include "media_log.h"
 
 namespace OHOS {
 namespace AudioStandard {
+void AudioPolicyManagerStub::SetStreamVolumeInternal(MessageParcel &data, MessageParcel &reply)
+{
+    AudioStreamType streamType = static_cast<AudioStreamType>(data.ReadInt32());
+    float volume = data.ReadFloat();
+    int result = SetStreamVolume(streamType, volume);
+    if (result == SUCCESS)
+        reply.WriteInt32(MEDIA_OK);
+    else
+        reply.WriteInt32(MEDIA_ERR);
+}
+
+void AudioPolicyManagerStub::SetRingerModeInternal(MessageParcel &data, MessageParcel &reply)
+{
+    AudioRingerMode rMode = static_cast<AudioRingerMode>(data.ReadInt32());
+    int32_t result = SetRingerMode(rMode);
+    reply.WriteInt32(result);
+}
+
+void AudioPolicyManagerStub::GetRingerModeInternal(MessageParcel &reply)
+{
+    AudioRingerMode rMode = GetRingerMode();
+    reply.WriteInt32(static_cast<int>(rMode));
+}
+
+void AudioPolicyManagerStub::GetStreamVolumeInternal(MessageParcel &data, MessageParcel &reply)
+{
+    AudioStreamType streamType = static_cast<AudioStreamType>(data.ReadInt32());
+    float volume = GetStreamVolume(streamType);
+    reply.WriteFloat(volume);
+}
+
+void AudioPolicyManagerStub::SetStreamMuteInternal(MessageParcel &data, MessageParcel &reply)
+{
+    AudioStreamType streamType = static_cast<AudioStreamType>(data.ReadInt32());
+    bool mute = data.ReadBool();
+    int result = SetStreamMute(streamType, mute);
+    if (result == SUCCESS)
+        reply.WriteInt32(MEDIA_OK);
+    else
+        reply.WriteInt32(MEDIA_ERR);
+}
+
+void AudioPolicyManagerStub::GetStreamMuteInternal(MessageParcel &data, MessageParcel &reply)
+{
+    AudioStreamType streamType = static_cast<AudioStreamType>(data.ReadInt32());
+    bool mute = GetStreamMute(streamType);
+    reply.WriteBool(mute);
+}
+
+void AudioPolicyManagerStub::IsStreamActiveInternal(MessageParcel &data, MessageParcel &reply)
+{
+    AudioStreamType streamType = static_cast<AudioStreamType>(data.ReadInt32());
+    bool isActive = IsStreamActive(streamType);
+    reply.WriteBool(isActive);
+}
+
+void AudioPolicyManagerStub::SetDeviceActiveInternal(MessageParcel &data, MessageParcel &reply)
+{
+    DeviceType deviceType = static_cast<DeviceType>(data.ReadInt32());
+    bool active = data.ReadBool();
+    int32_t result = SetDeviceActive(deviceType, active);
+    if (result == SUCCESS)
+        reply.WriteInt32(MEDIA_OK);
+    else
+        reply.WriteInt32(MEDIA_ERR);
+}
+
+void AudioPolicyManagerStub::IsDeviceActiveInternal(MessageParcel &data, MessageParcel &reply)
+{
+    DeviceType deviceType = static_cast<DeviceType>(data.ReadInt32());
+    bool result = IsDeviceActive(deviceType);
+    reply.WriteBool(result);
+}
+
 int AudioPolicyManagerStub::OnRemoteRequest(
     uint32_t code, MessageParcel &data, MessageParcel &reply, MessageOption &option)
 {
     switch (code) {
-        case SET_STREAM_VOLUME: {
-            AudioStreamType streamType = static_cast<AudioStreamType>(data.ReadInt32());
-            float volume = data.ReadFloat();
-            int result = SetStreamVolume(streamType, volume);
-            if (result == SUCCESS)
-                reply.WriteInt32(MEDIA_OK);
-            else
-                reply.WriteInt32(MEDIA_ERR);
+        case SET_STREAM_VOLUME:
+            SetStreamVolumeInternal(data, reply);
             break;
-        }
 
-        case SET_RINGER_MODE: {
-            AudioRingerMode rMode = static_cast<AudioRingerMode>(data.ReadInt32());
-            int32_t result = SetRingerMode(rMode);
-            reply.WriteInt32(result);
+        case SET_RINGER_MODE:
+            SetRingerModeInternal(data, reply);
             break;
-        }
 
-        case GET_RINGER_MODE: {
-            AudioRingerMode rMode = GetRingerMode();
-            reply.WriteInt32(static_cast<int>(rMode));
+        case GET_RINGER_MODE:
+            GetRingerModeInternal(reply);
             break;
-        }
 
-        case GET_STREAM_VOLUME: {
-            AudioStreamType streamType = static_cast<AudioStreamType>(data.ReadInt32());
-            float volume = GetStreamVolume(streamType);
-            reply.WriteFloat(volume);
+        case GET_STREAM_VOLUME:
+            GetStreamVolumeInternal(data, reply);
             break;
-        }
 
-        case SET_STREAM_MUTE: {
-            AudioStreamType streamType = static_cast<AudioStreamType>(data.ReadInt32());
-            bool mute = data.ReadBool();
-            int result = SetStreamMute(streamType, mute);
-            if (result == SUCCESS)
-                reply.WriteInt32(MEDIA_OK);
-            else
-                reply.WriteInt32(MEDIA_ERR);
+        case SET_STREAM_MUTE:
+            SetStreamMuteInternal(data, reply);
             break;
-        }
 
-        case GET_STREAM_MUTE: {
-            AudioStreamType streamType = static_cast<AudioStreamType>(data.ReadInt32());
-            bool mute = GetStreamMute(streamType);
-            reply.WriteBool(mute);
+        case GET_STREAM_MUTE:
+            GetStreamMuteInternal(data, reply);
             break;
-        }
 
-        case IS_STREAM_ACTIVE: {
-            AudioStreamType streamType = static_cast<AudioStreamType>(data.ReadInt32());
-            bool isActive = IsStreamActive(streamType);
-            reply.WriteBool(isActive);
+        case IS_STREAM_ACTIVE:
+            IsStreamActiveInternal(data, reply);
             break;
-        }
 
-        case SET_DEVICE_ACTIVE: {
-            DeviceType deviceType = static_cast<DeviceType>(data.ReadInt32());
-            bool active = data.ReadBool();
-            int32_t result = SetDeviceActive(deviceType, active);
-            if (result == SUCCESS)
-                reply.WriteInt32(MEDIA_OK);
-            else
-                reply.WriteInt32(MEDIA_ERR);
+        case SET_DEVICE_ACTIVE:
+            SetDeviceActiveInternal(data, reply);
             break;
-        }
 
-        case IS_DEVICE_ACTIVE: {
-            DeviceType deviceType = static_cast<DeviceType>(data.ReadInt32());
-            bool result = IsDeviceActive(deviceType);
-            reply.WriteBool(result);
+        case IS_DEVICE_ACTIVE:
+            IsDeviceActiveInternal(data, reply);
             break;
-        }
 
-        default: {
+        default:
             MEDIA_ERR_LOG("default case, need check AudioPolicyManagerStub");
             return IPCObjectStub::OnRemoteRequest(code, data, reply, option);
-        }
     }
     return MEDIA_OK;
 }

@@ -147,3 +147,4 @@ ohos_prebuilt_etc("pa_client_config") {
   module_install_dir = "etc/pulse"
   part_name = "multimedia_audio_standard"
 }
+

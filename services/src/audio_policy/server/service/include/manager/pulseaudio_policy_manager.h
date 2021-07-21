@@ -28,7 +28,7 @@ extern "C" {
 #include <unordered_map>
 
 #include "distributed_kv_data_manager.h"
-#include "iaudio_policy.h"
+#include "iaudio_policy_interface.h"
 #include "types.h"
 
 namespace OHOS {

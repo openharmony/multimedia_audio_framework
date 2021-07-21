@@ -58,6 +58,9 @@ private:
     struct AudioAdapter *audioAdapter_;
     struct AudioRender *audioRender_;
     void *handle_;
+
+    int32_t CreateRender(struct AudioPort &renderPort);
+    int32_t InitAudioManager();
 #ifdef DUMPFILE
     FILE *pfd;
 #endif // DUMPFILE

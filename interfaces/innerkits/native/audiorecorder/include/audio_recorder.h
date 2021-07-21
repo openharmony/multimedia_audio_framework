@@ -19,6 +19,7 @@
 #include <memory>
 
 #include "audio_info.h"
+#include "timestamp.h"
 
 namespace OHOS {
 namespace AudioStandard {
@@ -75,7 +76,7 @@ public:
      * @return Returns {@link SUCCESS} if frameCount is successfully obtained; returns an error code
      * defined in {@link audio_errors.h} otherwise.
      */
-    virtual int32_t GetFrameCount(uint32_t &frameCount) = 0;
+    virtual int32_t GetFrameCount(uint32_t &frameCount) const = 0;
 
     /**
      * @brief Sets audio record parameters.
@@ -85,25 +86,26 @@ public:
      * @return Returns {@link SUCCESS} if the setting is successful; returns an error code defined
      * in {@link audio_errors.h} otherwise.
      */
-    virtual int32_t SetParams(const AudioRecorderParams params) = 0;
+    virtual int32_t SetParams(const AudioRecorderParams params) const = 0;
 
     /**
      * @brief Obtains audio recorder parameters.
      *
      * This function can be called after {@link SetParams} is successful.
      *
-     * @param params Indicates information about audio recorder parameters. For details, see {@link AudioRecorderParams}.
+     * @param params Indicates information about audio recorder parameters.For details,see
+     * {@link AudioRecorderParams}.
      * @return Returns {@link SUCCESS} if the parameter information is successfully obtained; returns an error code
      * defined in {@link audio_errors.h} otherwise.
      */
-    virtual int32_t GetParams(AudioRecorderParams &params) = 0;
+    virtual int32_t GetParams(AudioRecorderParams &params) const = 0;
 
     /**
      * @brief Starts audio recording.
      *
      * @return Returns <b>true</b> if the recording is successfully started; returns <b>false</b> otherwise.
      */
-    virtual bool Start() = 0;
+    virtual bool Start() const = 0;
 
     /**
      * @brief record audio data.
@@ -119,14 +121,14 @@ public:
      * <b>ERR_ILLEGAL_STATE</b>: The <b>AudioRecorder</b> instance is not initialized.
      * <b>ERR_INVALID_READ</b>: The read size < 0.
      */
-    virtual int32_t Read(uint8_t &buffer, size_t userSize, bool isBlockingRead) = 0;
+    virtual int32_t Read(uint8_t &buffer, size_t userSize, bool isBlockingRead) const = 0;
 
     /**
      * @brief Obtains the audio record state.
      *
      * @return Returns the audio record state defined in {@link RecorderState}.
      */
-    virtual RecorderState GetStatus() = 0;
+    virtual RecorderState GetStatus() const = 0;
 
     /**
      * @brief Obtains the Timestamp.
@@ -136,27 +138,27 @@ public:
      * {@link Timestamp.Timestampbase#MONOTONIC}.
      * @return Returns <b>true</b> if the timestamp is successfully obtained; returns <b>false</b> otherwise.
      */
-    virtual bool GetAudioTime(Timestamp &timestamp, Timestamp::Timestampbase base) = 0;
+    virtual bool GetAudioTime(Timestamp &timestamp, Timestamp::Timestampbase base) const = 0;
 
     /**
      * @brief Stops audio recording.
      *
      * @return Returns <b>true</b> if the recording is successfully stopped; returns <b>false</b> otherwise.
      */
-    virtual bool Stop() = 0;
+    virtual bool Stop() const = 0;
     /**
      * @brief flush record stream.
      *
      * @return Returns <b>true</b> if the object is successfully flushed; returns <b>false</b> otherwise.
      */
-    virtual bool Flush() = 0;
+    virtual bool Flush() const = 0;
 
     /**
      * @brief Releases a local <b>AudioRecorder</b> object.
      *
      * @return Returns <b>true</b> if the object is successfully released; returns <b>false</b> otherwise.
      */
-    virtual bool Release() = 0;
+    virtual bool Release() const = 0;
 
     /**
      * @brief Obtains a reasonable minimum buffer size for recorder, however, the recorder can
@@ -166,7 +168,7 @@ public:
      * @return Returns {@link SUCCESS} if bufferSize is successfully obtained; returns an error code
      * defined in {@link audio_errors.h} otherwise.
      */
-    virtual int32_t GetBufferSize(size_t &bufferSize) = 0;
+    virtual int32_t GetBufferSize(size_t &bufferSize) const = 0;
 
     /**
      * @brief Obtains the recorder supported formats.

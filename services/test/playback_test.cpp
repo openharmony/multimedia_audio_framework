@@ -25,6 +25,8 @@ using namespace OHOS::AudioStandard;
 namespace {
 constexpr uint8_t DEFAULT_FORMAT = SAMPLE_S16LE;
 constexpr uint8_t DEFAULT_CHANNELS = 2;
+constexpr int32_t ARGS_INDEX_TWO = 2;
+constexpr int32_t ARGS_INDEX_THREE = 3;
 } // namespace
 
 class PlaybackTest : public AudioRendererCallbacks {
@@ -44,30 +46,8 @@ public:
     virtual void OnEventCb(AudioServiceEventTypes error) const{}
 };
 
-int main(int argc, char* argv[])
+static int32_t InitPlayback(std::unique_ptr<AudioServiceClient> &client, AudioStreamParams &audioParams)
 {
-    wav_hdr wavHeader;
-    size_t headerSize = sizeof(wav_hdr);
-    FILE* wavFile = fopen(argv[1], "rb");
-    if (wavFile == nullptr) {
-        fprintf(stderr, "Unable to open wave file");
-        return -1;
-    }
-
-    float volume = 0.5;
-    if (argc >= 3)
-        volume = strtof(argv[2], nullptr);
-
-    size_t bytesRead = fread(&wavHeader, 1, headerSize, wavFile);
-    MEDIA_INFO_LOG("Header Read in bytes %{public}d", bytesRead);
-    AudioStreamParams audioParams;
-    audioParams.format = DEFAULT_FORMAT;
-    audioParams.samplingRate = wavHeader.SamplesPerSec;
-    audioParams.channels = DEFAULT_CHANNELS;
-    StreamBuffer stream;
-    PlaybackTest customCb;
-
-    std::unique_ptr client = std::make_unique<AudioServiceClient>();
     if (client == nullptr) {
         MEDIA_ERR_LOG("Create AudioServiceClient instance failed");
         return -1;
@@ -77,6 +57,7 @@ int main(int argc, char* argv[])
     if (client->Initialize(AUDIO_SERVICE_CLIENT_PLAYBACK) < 0)
         return -1;
 
+    PlaybackTest customCb;
     client->RegisterAudioRendererCallbacks(customCb);
 
     MEDIA_INFO_LOG("Creating Stream");
@@ -87,10 +68,21 @@ int main(int argc, char* argv[])
     if (client->StartStream() < 0)
         return -1;
 
-    AudioSystemManager *audioSystemMgr = AudioSystemManager::GetInstance();
-    audioSystemMgr->SetVolume(AudioSystemManager::AudioVolumeType::STREAM_MUSIC, volume);
+    return 0;
+}
 
+int32_t StartPlayback(std::unique_ptr<AudioServiceClient> &client, FILE *wavFile)
+{
+    uint8_t* buffer = nullptr;
+    int32_t n = 2;
+    size_t bytesToWrite = 0;
+    size_t bytesWritten = 0;
+    size_t minBytes = 4;
+    int32_t writeError;
+    uint64_t timeStamp;
     size_t bufferLen;
+    StreamBuffer stream;
+
     if (client->GetMinimumBufferSize(bufferLen) < 0) {
         MEDIA_ERR_LOG(" GetMinimumBufferSize failed");
         return -1;
@@ -98,15 +90,7 @@ int main(int argc, char* argv[])
 
     MEDIA_DEBUG_LOG("minimum buffer length: %{public}zu", bufferLen);
 
-    uint8_t* buffer = nullptr;
-    int32_t n = 2;
     buffer = (uint8_t *) malloc(n * bufferLen);
-    size_t bytesToWrite = 0;
-    size_t bytesWritten = 0;
-    size_t minBytes = 4;
-    int32_t writeError;
-    uint64_t timeStamp;
-
     while (!feof(wavFile)) {
         bytesToWrite = fread(buffer, 1, bufferLen, wavFile);
         bytesWritten = 0;
@@ -120,10 +104,50 @@ int main(int argc, char* argv[])
         }
     }
 
+    free(buffer);
+
+    return 0;
+}
+
+int main(int argc, char* argv[])
+{
+    wav_hdr wavHeader;
+    size_t headerSize = sizeof(wav_hdr);
+    FILE* wavFile = fopen(argv[1], "rb");
+    if (wavFile == nullptr) {
+        fprintf(stderr, "Unable to open wave file");
+        return -1;
+    }
+
+    float volume = 0.5;
+    if (argc >= ARGS_INDEX_THREE) {
+        volume = strtof(argv[ARGS_INDEX_TWO], nullptr);
+    }
+
+    size_t bytesRead = fread(&wavHeader, 1, headerSize, wavFile);
+    MEDIA_INFO_LOG("Header Read in bytes %{public}d", bytesRead);
+    AudioStreamParams audioParams;
+    audioParams.format = DEFAULT_FORMAT;
+    audioParams.samplingRate = wavHeader.SamplesPerSec;
+    audioParams.channels = DEFAULT_CHANNELS;
+
+    std::unique_ptr client = std::make_unique<AudioServiceClient>();
+    if (InitPlayback(client, audioParams) < 0) {
+        MEDIA_INFO_LOG("Initialize playback failed");
+        return -1;
+    }
+
+    AudioSystemManager *audioSystemMgr = AudioSystemManager::GetInstance();
+    audioSystemMgr->SetVolume(AudioSystemManager::AudioVolumeType::STREAM_MUSIC, volume);
+
+    if (StartPlayback(client, wavFile) < 0) {
+        MEDIA_INFO_LOG("Start playback failed");
+        return -1;
+    }
+
     client->FlushStream();
     client->StopStream();
     client->ReleaseStream();
-    free(buffer);
     fclose(wavFile);
     MEDIA_INFO_LOG("Exit from test app");
     return 0;

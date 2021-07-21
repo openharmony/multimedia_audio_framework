@@ -130,7 +130,7 @@ bool AudioServer::IsMicrophoneMute()
     if (audioCapturerSourceInstance->capturerInited_ == false) {
         MEDIA_ERR_LOG("Capturer is not initialized. Start the recording first !");
     } else if (audioCapturerSourceInstance->GetMute(isMute)) {
-       MEDIA_ERR_LOG("GetMute status in capturer returned Error !");
+        MEDIA_ERR_LOG("GetMute status in capturer returned Error !");
     }
     
     return isMute;
@@ -140,7 +140,7 @@ std::vector<sptr<AudioDeviceDescriptor>> AudioServer::GetDevices(AudioDeviceDesc
 {
     MEDIA_DEBUG_LOG("GetDevices server");
     audioDeviceDescriptor_.clear();
-    AudioDeviceDescriptor *audioDescriptor = new(std::nothrow) AudioDeviceDescriptor();
+    sptr<AudioDeviceDescriptor> audioDescriptor = new(std::nothrow) AudioDeviceDescriptor();
     if (audioDescriptor == nullptr) {
         MEDIA_ERR_LOG("new AudioDeviceDescriptor fail");
         return audioDeviceDescriptor_;
@@ -152,8 +152,8 @@ std::vector<sptr<AudioDeviceDescriptor>> AudioServer::GetDevices(AudioDeviceDesc
         audioDescriptor->deviceType_ = AudioDeviceDescriptor::DeviceType::SPEAKER;
         audioDescriptor->deviceRole_ = AudioDeviceDescriptor::DeviceRole::OUTPUT_DEVICE;
     } else if (AudioDeviceDescriptor::DeviceFlag::ALL_DEVICES_FLAG == deviceFlag) {
-        AudioDeviceDescriptor *audioDescriptor_inputDevice = new(std::nothrow) AudioDeviceDescriptor();
-        AudioDeviceDescriptor *audioDescriptor_outputDevice = new(std::nothrow) AudioDeviceDescriptor();
+        sptr<AudioDeviceDescriptor> audioDescriptor_inputDevice = new(std::nothrow) AudioDeviceDescriptor();
+        sptr<AudioDeviceDescriptor> audioDescriptor_outputDevice = new(std::nothrow) AudioDeviceDescriptor();
         audioDescriptor_inputDevice->deviceType_ = AudioDeviceDescriptor::DeviceType::MIC;
         audioDescriptor_inputDevice->deviceRole_ = AudioDeviceDescriptor::DeviceRole::INPUT_DEVICE;
         audioDeviceDescriptor_.push_back(audioDescriptor_inputDevice);

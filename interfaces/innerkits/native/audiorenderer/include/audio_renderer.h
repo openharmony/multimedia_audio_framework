@@ -19,6 +19,7 @@
 #include<memory>
 
 #include "audio_info.h"
+#include "timestamp.h"
 
 namespace OHOS {
 namespace AudioStandard {
@@ -75,7 +76,7 @@ public:
      * @return Returns {@link SUCCESS} if frameCount is successfully obtained; returns an error code
      * defined in {@link audio_errors.h} otherwise.
      */
-    virtual int32_t GetFrameCount(uint32_t &frameCount) = 0;
+    virtual int32_t GetFrameCount(uint32_t &frameCount) const = 0;
 
     /**
      * @brief Sets audio renderer parameters.
@@ -85,25 +86,26 @@ public:
      * @return Returns {@link SUCCESS} if the setting is successful; returns an error code defined
      * in {@link audio_errors.h} otherwise.
      */
-    virtual int32_t SetParams(const AudioRendererParams params) = 0;
+    virtual int32_t SetParams(const AudioRendererParams params) const = 0;
 
     /**
      * @brief Obtains audio renderer parameters.
      *
      * This function can be called after {@link SetParams} is successful.
      *
-     * @param params Indicates information about audio renderer parameters. For details, see {@link AudioRendererParams}.
+     * @param params Indicates information about audio renderer parameters. For details, see
+     * {@link AudioRendererParams}.
      * @return Returns {@link SUCCESS} if the parameter information is successfully obtained; returns an error code
      * defined in {@link audio_errors.h} otherwise.
      */
-    virtual int32_t GetParams(AudioRendererParams &params) = 0;
+    virtual int32_t GetParams(AudioRendererParams &params) const = 0;
 
     /**
      * @brief Starts audio rendering.
      *
      * @return Returns <b>true</b> if the rendering is successfully started; returns <b>false</b> otherwise.
      */
-    virtual bool Start() = 0;
+    virtual bool Start() const = 0;
 
     /**
      * @brief Writes audio data.
@@ -117,14 +119,14 @@ public:
      * <b>ERR_INVALID_WRITE</b>: The written audio data size is < 0.
      * <b>ERR_WRITE_FAILED</b>: The audio data write failed .
      */
-    virtual int32_t  Write(uint8_t *buffer, size_t bufferSize) = 0;
+    virtual int32_t Write(uint8_t *buffer, size_t bufferSize) = 0;
 
     /**
      * @brief Obtains the audio renderer state.
      *
      * @return Returns the audio renderer state defined in {@link RendererState}.
      */
-    virtual RendererState GetStatus() = 0;
+    virtual RendererState GetStatus() const = 0;
 
     /**
      * @brief Obtains the timestamp.
@@ -134,7 +136,7 @@ public:
      * {@link Timestamp.Timestampbase#MONOTONIC}.
      * @return Returns <b>true</b> if the timestamp is successfully obtained; returns <b>false</b> otherwise.
      */
-    virtual bool GetAudioTime(Timestamp &timestamp, Timestamp::Timestampbase base) = 0;
+    virtual bool GetAudioTime(Timestamp &timestamp, Timestamp::Timestampbase base) const = 0;
 
     /**
      * @brief Obtains the latency in microseconds.
@@ -143,28 +145,28 @@ public:
      * @return Returns {@link SUCCESS} if latency is successfully obtained, returns an error code
      * defined in {@link audio_errors.h} otherwise.
      */
-    virtual int32_t GetLatency(uint64_t &latency) = 0;
+    virtual int32_t GetLatency(uint64_t &latency) const = 0;
 
     /**
      * @brief drain renderer buffer.
      *
      * @return Returns <b>true</b> if the buffer is successfully drained; returns <b>false</b> otherwise.
      */
-    virtual bool Drain() = 0;
+    virtual bool Drain() const = 0;
 
     /**
      * @brief Stops audio rendering.
      *
      * @return Returns <b>true</b> if the rendering is successfully stopped; returns <b>false</b> otherwise.
      */
-    virtual bool Stop() = 0;
+    virtual bool Stop() const = 0;
 
     /**
      * @brief Releases a local <b>AudioRenderer</b> object.
      *
      * @return Returns <b>true</b> if the object is successfully released; returns <b>false</b> otherwise.
      */
-    virtual bool Release() = 0;
+    virtual bool Release() const = 0;
 
     /**
      * @brief Obtains a reasonable minimum buffer size for rendering, however, the renderer can
@@ -174,7 +176,7 @@ public:
      * @return Returns {@link SUCCESS} if bufferSize is successfully obtained; returns an error code
      * defined in {@link audio_errors.h} otherwise.
      */
-    virtual int32_t GetBufferSize(size_t &bufferSize) = 0;
+    virtual int32_t GetBufferSize(size_t &bufferSize) const = 0;
 
         /**
      * @brief Obtains the foramts supported by renderer.

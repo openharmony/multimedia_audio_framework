@@ -30,13 +30,10 @@ namespace AudioTestConstants {
     constexpr int32_t SUCCESS = 0;
 }
 
-class StreamRecorderTest {
+class AudioRecorderTest {
 public:
-    bool TestRecord(int argc, char *argv[]) const
+    void CheckSupportedParams() const
     {
-        MEDIA_INFO_LOG("TestCapture start ");
-
-        unique_ptr<AudioRecorder> audioRecorder = AudioRecorder::Create(AudioStreamType::STREAM_MUSIC);
         vector<AudioSampleFormat> supportedFormatList = AudioRecorder::GetSupportedFormats();
         MEDIA_INFO_LOG("Supported formats:");
         for (auto i = supportedFormatList.begin(); i != supportedFormatList.end(); ++i) {
@@ -61,11 +58,10 @@ public:
         for (auto i = supportedSamplingRates.begin(); i != supportedSamplingRates.end(); ++i) {
             MEDIA_INFO_LOG("sampling rate %{public}d", *i);
         }
-        AudioRecorderParams recorderParams;
-        recorderParams.audioSampleFormat = SAMPLE_S16LE;
-        recorderParams.samplingRate =  static_cast<AudioSamplingRate>(atoi(argv[AudioTestConstants::SECOND_ARG_IDX]));
-        recorderParams.audioChannel = AudioChannel::STEREO;
-        recorderParams.audioEncoding = ENCODING_PCM;
+    }
+
+    bool InitRecord(const unique_ptr<AudioRecorder> &audioRecorder, const AudioRecorderParams &recorderParams) const
+    {
         if (audioRecorder->SetParams(recorderParams) != AudioTestConstants::SUCCESS) {
             MEDIA_ERR_LOG("Set audio stream parameters failed");
             audioRecorder->Release();
@@ -89,6 +85,11 @@ public:
             MEDIA_INFO_LOG("Get Audio channels: %{public}d", getRecorderParams.audioChannel);
         }
 
+        return true;
+    }
+
+    bool StartRecord(const unique_ptr<AudioRecorder> &audioRecorder, bool isBlocking, FILE *pFile) const
+    {
         size_t bufferLen;
         if (audioRecorder->GetBufferSize(bufferLen) < 0) {
             MEDIA_ERR_LOG(" GetMinimumBufferSize failed");
@@ -103,12 +104,8 @@ public:
         }
         MEDIA_INFO_LOG("Frame count: %{public}d", frameCount);
 
-        bool isBlocking = (atoi(argv[AudioTestConstants::THIRD_ARG_IDX]) == 1);
-        MEDIA_INFO_LOG("Is blocking read: %{public}s", isBlocking ? "true" : "false");
-
         uint8_t* buffer = nullptr;
         buffer = (uint8_t *) malloc(bufferLen);
-        FILE *pFile = fopen(argv[AudioTestConstants::SECOND_ARG_IDX - 1], "wb");
 
         size_t size = 1;
         size_t numBuffersToRecord = 1024;
@@ -136,6 +133,36 @@ public:
                 }
             }
         }
+        free(buffer);
+
+        return true;
+    }
+
+    bool TestRecord(int argc, char *argv[]) const
+    {
+        MEDIA_INFO_LOG("TestCapture start ");
+
+        unique_ptr<AudioRecorder> audioRecorder = AudioRecorder::Create(AudioStreamType::STREAM_MUSIC);
+
+        CheckSupportedParams();
+
+        AudioRecorderParams recorderParams;
+        recorderParams.audioSampleFormat = SAMPLE_S16LE;
+        recorderParams.samplingRate =  static_cast<AudioSamplingRate>(atoi(argv[AudioTestConstants::SECOND_ARG_IDX]));
+        recorderParams.audioChannel = AudioChannel::STEREO;
+        recorderParams.audioEncoding = ENCODING_PCM;
+        if (!InitRecord(audioRecorder, recorderParams)) {
+            MEDIA_ERR_LOG("Initialize record failed");
+            return false;
+        }
+
+        bool isBlocking = (atoi(argv[AudioTestConstants::THIRD_ARG_IDX]) == 1);
+        MEDIA_INFO_LOG("Is blocking read: %{public}s", isBlocking ? "true" : "false");
+        FILE *pFile = fopen(argv[AudioTestConstants::SECOND_ARG_IDX - 1], "wb");
+        if (!StartRecord(audioRecorder, isBlocking, pFile)) {
+            MEDIA_ERR_LOG("Start record failed");
+            return false;
+        }
 
         Timestamp timestamp;
         if (audioRecorder->GetAudioTime(timestamp, Timestamp::Timestampbase::MONOTONIC)) {
@@ -144,18 +171,17 @@ public:
         }
 
         fflush(pFile);
-        if(!audioRecorder->Flush()) {
+        if (!audioRecorder->Flush()) {
             MEDIA_ERR_LOG("AudioRecorderTest: flush failed");
         }
 
-        if(!audioRecorder->Stop()) {
+        if (!audioRecorder->Stop()) {
             MEDIA_ERR_LOG("AudioRecorderTest: Stop failed");
         }
 
-        if(!audioRecorder->Release()) {
+        if (!audioRecorder->Release()) {
             MEDIA_ERR_LOG("AudioRecorderTest: Release failed");
         }
-        free(buffer);
         fclose(pFile);
         MEDIA_INFO_LOG("TestCapture end");
 
@@ -177,7 +203,7 @@ int main(int argc, char *argv[])
     MEDIA_INFO_LOG("argv[2]=%{public}s", argv[AudioTestConstants::SECOND_ARG_IDX]);
     MEDIA_INFO_LOG("argv[3]=%{public}s", argv[AudioTestConstants::THIRD_ARG_IDX]);
 
-    StreamRecorderTest testObj;
+    AudioRecorderTest testObj;
     bool ret = testObj.TestRecord(argc, argv);
 
     return ret;

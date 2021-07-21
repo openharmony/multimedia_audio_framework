@@ -17,31 +17,11 @@
 
 #include "audio_errors.h"
 #include "audio_recorder.h"
+#include "audio_recorder_private.h"
 #include "audio_stream.h"
 
 namespace OHOS {
 namespace AudioStandard {
-
-class AudioRecorderPrivate : public AudioRecorder {
-public:
-    int32_t GetFrameCount(uint32_t &frameCount) override;
-    int32_t SetParams(const AudioRecorderParams params) override;
-    int32_t GetParams(AudioRecorderParams &params) override;
-    bool Start() override;
-    int32_t  Read(uint8_t &buffer, size_t userSize, bool isBlockingRead) override;
-    RecorderState GetStatus() override;
-    bool GetAudioTime(Timestamp &timestamp, Timestamp::Timestampbase base) override;
-    bool Stop() override;
-    bool Flush() override;
-    bool Release() override;
-    int32_t GetBufferSize(size_t &bufferSize) override;
-
-    std::unique_ptr<AudioStream> audioRecorder;
-
-    AudioRecorderPrivate(AudioStreamType audioStreamType);
-    virtual ~AudioRecorderPrivate();
-};
-
 AudioRecorder::~AudioRecorder() = default;
 AudioRecorderPrivate::~AudioRecorderPrivate() = default;
 
@@ -55,12 +35,12 @@ AudioRecorderPrivate::AudioRecorderPrivate(AudioStreamType audioStreamType)
     audioRecorder = std::make_unique<AudioStream>(audioStreamType, AUDIO_MODE_RECORD);
 }
 
-int32_t AudioRecorderPrivate::GetFrameCount(uint32_t &frameCount)
+int32_t AudioRecorderPrivate::GetFrameCount(uint32_t &frameCount) const
 {
     return audioRecorder->GetFrameCount(frameCount);
 }
 
-int32_t AudioRecorderPrivate::SetParams(const AudioRecorderParams params)
+int32_t AudioRecorderPrivate::SetParams(const AudioRecorderParams params) const
 {
     AudioStreamParams audioStreamParams;
     audioStreamParams.format = params.audioSampleFormat;
@@ -71,7 +51,7 @@ int32_t AudioRecorderPrivate::SetParams(const AudioRecorderParams params)
     return audioRecorder->SetAudioStreamInfo(audioStreamParams);
 }
 
-int32_t AudioRecorderPrivate::GetParams(AudioRecorderParams &params)
+int32_t AudioRecorderPrivate::GetParams(AudioRecorderParams &params) const
 {
     AudioStreamParams audioStreamParams;
     int32_t result = audioRecorder->GetAudioStreamInfo(audioStreamParams);
@@ -85,42 +65,42 @@ int32_t AudioRecorderPrivate::GetParams(AudioRecorderParams &params)
     return result;
 }
 
-bool AudioRecorderPrivate::Start()
+bool AudioRecorderPrivate::Start() const
 {
     return audioRecorder->StartAudioStream();
 }
 
-int32_t AudioRecorderPrivate::Read(uint8_t &buffer, size_t userSize, bool isBlockingRead)
+int32_t AudioRecorderPrivate::Read(uint8_t &buffer, size_t userSize, bool isBlockingRead) const
 {
     return audioRecorder->Read(buffer, userSize, isBlockingRead);
 }
 
-RecorderState AudioRecorderPrivate::GetStatus()
+RecorderState AudioRecorderPrivate::GetStatus() const
 {
     return (RecorderState)audioRecorder->GetState();
 }
 
-bool AudioRecorderPrivate::GetAudioTime(Timestamp &timestamp, Timestamp::Timestampbase base)
+bool AudioRecorderPrivate::GetAudioTime(Timestamp &timestamp, Timestamp::Timestampbase base) const
 {
-    return audioRecorder->GetAudioTime(timestamp,base);
+    return audioRecorder->GetAudioTime(timestamp, base);
 }
 
-bool AudioRecorderPrivate::Stop()
+bool AudioRecorderPrivate::Stop() const
 {
     return audioRecorder->StopAudioStream();
 }
 
-bool AudioRecorderPrivate::Flush()
+bool AudioRecorderPrivate::Flush() const
 {
     return audioRecorder->FlushAudioStream();
 }
 
-bool AudioRecorderPrivate::Release()
+bool AudioRecorderPrivate::Release() const
 {
     return audioRecorder->ReleaseAudioStream();
 }
 
-int32_t AudioRecorderPrivate::GetBufferSize(size_t &bufferSize)
+int32_t AudioRecorderPrivate::GetBufferSize(size_t &bufferSize) const
 {
     return audioRecorder->GetBufferSize(bufferSize);
 }

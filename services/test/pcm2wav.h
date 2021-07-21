@@ -15,10 +15,10 @@
 
 #ifndef PCM_2_WAV_H
 #define PCM_2_WAV_H
-typedef struct WAV_HEADER {
+struct WAV_HEADER {
     /* RIFF Chunk Descriptor */
     uint8_t RIFF[4] = {'R', 'I', 'F', 'F'}; // RIFF Header Magic header
-    uint32_t ChunkSize;                     // RIFF Chunk Size
+    uint32_t ChunkSize = 0; // RIFF Chunk Size
     uint8_t WAVE[4] = {'W', 'A', 'V', 'E'}; // WAVE Header
     /* "fmt" sub-chunk */
     uint8_t fmt[4] = {'f', 'm', 't', ' '}; // FMT header
@@ -31,6 +31,8 @@ typedef struct WAV_HEADER {
     uint16_t bitsPerSample = 16; // Number of bits per sample
     /* "data" sub-chunk */
     uint8_t Subchunk2ID[4] = {'d', 'a', 't', 'a'}; // "data"  string
-    uint32_t Subchunk2Size; // Sampled data length
-} wav_hdr;
+    uint32_t Subchunk2Size = 0; // Sampled data length
+};
+
+using wav_hdr = struct WAV_HEADER;
 #endif  // PCM_2_WAV_H

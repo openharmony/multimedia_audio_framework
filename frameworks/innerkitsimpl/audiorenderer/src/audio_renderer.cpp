@@ -17,32 +17,11 @@
 
 #include "audio_errors.h"
 #include "audio_renderer.h"
+#include "audio_renderer_private.h"
 #include "audio_stream.h"
 
 namespace OHOS {
 namespace AudioStandard {
-
-class AudioRendererPrivate : public AudioRenderer {
-public:
-    int32_t GetFrameCount(uint32_t &frameCount) override;
-    int32_t GetLatency(uint64_t &latency) override;
-    int32_t SetParams(const AudioRendererParams params) override;
-    int32_t GetParams(AudioRendererParams &params) override;
-    bool Start() override;
-    int32_t  Write(uint8_t *buffer, size_t bufferSize) override;
-    RendererState GetStatus() override;
-    bool GetAudioTime(Timestamp &timestamp, Timestamp::Timestampbase base) override;
-    bool Drain() override;
-    bool Stop() override;
-    bool Release() override;
-    int32_t GetBufferSize(size_t &bufferSize) override;
-
-    std::unique_ptr<AudioStream> audioRenderer;
-
-    AudioRendererPrivate(AudioStreamType audioStreamType);
-    virtual ~AudioRendererPrivate();
-};
-
 AudioRenderer::~AudioRenderer() = default;
 AudioRendererPrivate::~AudioRendererPrivate() = default;
 
@@ -56,17 +35,17 @@ AudioRendererPrivate::AudioRendererPrivate(AudioStreamType audioStreamType)
     audioRenderer = std::make_unique<AudioStream>(audioStreamType, AUDIO_MODE_PLAYBACK);
 }
 
-int32_t AudioRendererPrivate::GetFrameCount(uint32_t &frameCount)
+int32_t AudioRendererPrivate::GetFrameCount(uint32_t &frameCount) const
 {
     return audioRenderer->GetFrameCount(frameCount);
 }
 
-int32_t AudioRendererPrivate::GetLatency(uint64_t &latency)
+int32_t AudioRendererPrivate::GetLatency(uint64_t &latency) const
 {
     return audioRenderer->GetLatency(latency);
 }
 
-int32_t AudioRendererPrivate::SetParams(const AudioRendererParams params)
+int32_t AudioRendererPrivate::SetParams(const AudioRendererParams params) const
 {
     AudioStreamParams audioStreamParams;
     audioStreamParams.format = params.sampleFormat;
@@ -77,11 +56,11 @@ int32_t AudioRendererPrivate::SetParams(const AudioRendererParams params)
     return audioRenderer->SetAudioStreamInfo(audioStreamParams);
 }
 
-int32_t AudioRendererPrivate::GetParams(AudioRendererParams &params)
+int32_t AudioRendererPrivate::GetParams(AudioRendererParams &params) const
 {
     AudioStreamParams audioStreamParams;
     int32_t result = audioRenderer->GetAudioStreamInfo(audioStreamParams);
-    if(!result) {
+    if (!result) {
         params.sampleFormat = static_cast<AudioSampleFormat>(audioStreamParams.format);
         params.sampleRate = static_cast<AudioSamplingRate>(audioStreamParams.samplingRate);
         params.channelCount = static_cast<AudioChannel>(audioStreamParams.channels);
@@ -91,7 +70,7 @@ int32_t AudioRendererPrivate::GetParams(AudioRendererParams &params)
     return result;
 }
 
-bool AudioRendererPrivate::Start()
+bool AudioRendererPrivate::Start() const
 {
     return audioRenderer->StartAudioStream();
 }
@@ -101,32 +80,32 @@ int32_t AudioRendererPrivate::Write(uint8_t *buffer, size_t bufferSize)
     return audioRenderer->Write(buffer, bufferSize);
 }
 
-RendererState AudioRendererPrivate::GetStatus()
+RendererState AudioRendererPrivate::GetStatus() const
 {
     return static_cast<RendererState>(audioRenderer->GetState());
 }
 
-bool AudioRendererPrivate::GetAudioTime(Timestamp &timestamp, Timestamp::Timestampbase base)
+bool AudioRendererPrivate::GetAudioTime(Timestamp &timestamp, Timestamp::Timestampbase base) const
 {
-    return audioRenderer->GetAudioTime(timestamp,base);
+    return audioRenderer->GetAudioTime(timestamp, base);
 }
 
-bool AudioRendererPrivate::Drain()
+bool AudioRendererPrivate::Drain() const
 {
     return audioRenderer->DrainAudioStream();
 }
 
-bool AudioRendererPrivate::Stop()
+bool AudioRendererPrivate::Stop() const
 {
     return audioRenderer->StopAudioStream();
 }
 
-bool AudioRendererPrivate::Release()
+bool AudioRendererPrivate::Release() const
 {
     return audioRenderer->ReleaseAudioStream();
 }
 
-int32_t AudioRendererPrivate::GetBufferSize(size_t &bufferSize)
+int32_t AudioRendererPrivate::GetBufferSize(size_t &bufferSize) const
 {
     return audioRenderer->GetBufferSize(bufferSize);
 }

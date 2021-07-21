@@ -149,7 +149,7 @@ bool IsSamplingRateValid(uint32_t samplingRate)
 int32_t AudioStream::GetAudioStreamInfo(AudioStreamParams &audioStreamInfo)
 {
     MEDIA_INFO_LOG("AudioStream: GetAudioStreamInfo");
-    if(GetAudioStreamParams(audioStreamInfo) != 0) {
+    if (GetAudioStreamParams(audioStreamInfo) != 0) {
         return ERR_OPERATION_FAILED;
     }
 

@@ -19,7 +19,7 @@
 #include <mutex>
 #include <pthread.h>
 
-#include "audio_policy_base.h"
+#include "audio_policy_manager_stub.h"
 #include "audio_policy_service.h"
 #include "iremote_stub.h"
 #include "system_ability.h"

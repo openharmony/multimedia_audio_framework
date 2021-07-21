@@ -23,18 +23,16 @@
 
 namespace OHOS {
 namespace AudioStandard {
-#define AUDIO_CHANNELCOUNT 2
-#define AUDIO_SAMPLE_RATE_48K 48000
-#define DEEP_BUFFER_RENDER_PERIOD_SIZE 4096
-#define INT_32_MAX 0x7fffffff
-#define PERIOD_SIZE 1024
-#define PCM_8_BIT 8
-#define PCM_16_BIT 16
-
 namespace {
 const int32_t HALF_FACTOR = 2;
 const int32_t MAX_AUDIO_ADAPTER_NUM = 3;
 const float DEFAULT_VOLUME_LEVEL = 1.0f;
+const uint32_t AUDIO_CHANNELCOUNT = 2;
+const uint32_t AUDIO_SAMPLE_RATE_48K = 48000;
+const uint32_t DEEP_BUFFER_RENDER_PERIOD_SIZE = 4096;
+const uint32_t INT_32_MAX = 0x7fffffff;
+#define PCM_8_BIT 8
+#define PCM_16_BIT 16
 }
 
 #ifdef DUMPFILE
@@ -88,30 +86,27 @@ void AudioRendererSink::DeInit()
 #endif // DUMPFILE
 }
 
-int32_t InitAttrs(struct AudioSampleAttributes *attrs)
+int32_t InitAttrs(struct AudioSampleAttributes &attrs)
 {
     /* Initialization of audio parameters for playback */
-    attrs->format = AUDIO_FORMAT_PCM_16_BIT;
-    attrs->channelCount = AUDIO_CHANNELCOUNT;
-    attrs->sampleRate = AUDIO_SAMPLE_RATE_48K;
-    attrs->interleaved = 0;
-    attrs->type = AUDIO_IN_MEDIA;
-    attrs->period = DEEP_BUFFER_RENDER_PERIOD_SIZE;
-    /* PERIOD_SIZE * 16 * attrs->channelCount / 8 */
-    attrs->frameSize = PCM_16_BIT * attrs->channelCount / PCM_8_BIT;
-    attrs->isBigEndian = false;
-    attrs->isSignedData = true;
-    /* DEEP_BUFFER_RENDER_PERIOD_SIZE / (16 * attrs->channelCount / 8) */
-    attrs->startThreshold = DEEP_BUFFER_RENDER_PERIOD_SIZE / (attrs->frameSize);
-    attrs->stopThreshold = INT_32_MAX;
-    attrs->silenceThreshold = 0;
+    attrs.format = AUDIO_FORMAT_PCM_16_BIT;
+    attrs.channelCount = AUDIO_CHANNELCOUNT;
+    attrs.sampleRate = AUDIO_SAMPLE_RATE_48K;
+    attrs.interleaved = 0;
+    attrs.type = AUDIO_IN_MEDIA;
+    attrs.period = DEEP_BUFFER_RENDER_PERIOD_SIZE;
+    attrs.frameSize = PCM_16_BIT * attrs.channelCount / PCM_8_BIT;
+    attrs.isBigEndian = false;
+    attrs.isSignedData = true;
+    attrs.startThreshold = DEEP_BUFFER_RENDER_PERIOD_SIZE / (attrs.frameSize);
+    attrs.stopThreshold = INT_32_MAX;
+    attrs.silenceThreshold = 0;
 
     return SUCCESS;
 }
 
-static int32_t SwitchAdapter(struct AudioAdapterDescriptor *descs,
-    const char *adapterNameCase, enum AudioPortDirection portFlag,
-    struct AudioPort *renderPort, int32_t size)
+static int32_t SwitchAdapter(struct AudioAdapterDescriptor *descs, const char *adapterNameCase,
+    enum AudioPortDirection portFlag, struct AudioPort *renderPort, int32_t size)
 {
     for (int32_t index = 0; index < size; index++) {
         struct AudioAdapterDescriptor *desc = &descs[index];
@@ -134,12 +129,8 @@ static int32_t SwitchAdapter(struct AudioAdapterDescriptor *descs,
     return ERR_INVALID_INDEX;
 }
 
-int32_t AudioRendererSink::Init(AudioSinkAttr &attr)
+int32_t AudioRendererSink::InitAudioManager()
 {
-    attr_ = attr;
-    struct AudioPort renderPort;
-    const char *adapterNameCase = "usb";  // Set sound card information
-    enum AudioPortDirection port = PORT_OUT; // Set port information
     char resolvedPath[100] = "/system/lib/libhdi_audio.z.so";
     struct AudioManager *(*getAudioManager)() = nullptr;
 
@@ -148,17 +139,61 @@ int32_t AudioRendererSink::Init(AudioSinkAttr &attr)
         MEDIA_ERR_LOG("Open so Fail");
         return ERR_INVALID_HANDLE;
     }
+
     getAudioManager = (struct AudioManager* (*)())(dlsym(handle_, "GetAudioManagerFuncs"));
     audioManager_ = getAudioManager();
     if (audioManager_ == nullptr) {
         return ERR_INVALID_HANDLE;
     }
 
-    int32_t ret = 0;
+    return 0;
+}
+
+int32_t AudioRendererSink::CreateRender(struct AudioPort &renderPort)
+{
+    // Initialization port information, can fill through mode and other parameters
+    int32_t ret = audioAdapter_->InitAllPorts(audioAdapter_);
+    if (ret != 0) {
+        MEDIA_ERR_LOG("InitAllPorts failed");
+        return ERR_NOT_STARTED;
+    }
+
+    struct AudioSampleAttributes param;
+    InitAttrs(param);
+    param.sampleRate = attr_.sampleRate;
+    param.channelCount = attr_.channel;
+
+    struct AudioDeviceDescriptor deviceDesc;
+    deviceDesc.portId = renderPort.portId;
+    deviceDesc.pins = PIN_OUT_SPEAKER;
+    deviceDesc.desc = nullptr;
+    ret = audioAdapter_->CreateRender(audioAdapter_, &deviceDesc, &param, &audioRender_);
+    if (ret != 0 || audioRender_ == nullptr) {
+        MEDIA_ERR_LOG("AudioDeviceCreateRender failed");
+        audioManager_->UnloadAdapter(audioManager_, audioAdapter_);
+        return ERR_NOT_STARTED;
+    }
+
+    rendererInited_ = true;
+    return 0;
+}
+
+int32_t AudioRendererSink::Init(AudioSinkAttr &attr)
+{
+    attr_ = attr;
+    struct AudioPort renderPort;
+    const char *adapterNameCase = "usb";  // Set sound card information
+    enum AudioPortDirection port = PORT_OUT; // Set port information
+
+    if (InitAudioManager() != 0) {
+        MEDIA_ERR_LOG("Init audio manager Fail");
+        return ERR_NOT_STARTED;
+    }
+
     int32_t size = -1;
     struct AudioAdapterDescriptor *descs = nullptr;
     audioManager_->GetAllAdapters(audioManager_, &descs, &size);
-    if (size > MAX_AUDIO_ADAPTER_NUM || size == 0 || descs == nullptr || ret < 0) {
+    if (size > MAX_AUDIO_ADAPTER_NUM || size == 0 || descs == nullptr) {
         MEDIA_ERR_LOG("Get adapters Fail");
         return ERR_NOT_STARTED;
     }
@@ -180,29 +215,10 @@ int32_t AudioRendererSink::Init(AudioSinkAttr &attr)
         return ERR_NOT_STARTED;
     }
 
-    // Initialization port information, can fill through mode and other parameters
-    ret = audioAdapter_->InitAllPorts(audioAdapter_);
-    if (ret != 0) {
-        MEDIA_ERR_LOG("InitAllPorts failed");
+    if (CreateRender(renderPort) != 0) {
+        MEDIA_ERR_LOG("Create render failed");
         return ERR_NOT_STARTED;
     }
-
-    struct AudioSampleAttributes param;
-    InitAttrs(&param);
-    param.sampleRate = attr_.sampleRate;
-    param.channelCount = attr_.channel;
-
-    struct AudioDeviceDescriptor deviceDesc;
-    deviceDesc.portId = renderPort.portId;
-    deviceDesc.pins = PIN_OUT_SPEAKER;
-    deviceDesc.desc = nullptr;
-    ret = audioAdapter_->CreateRender(audioAdapter_, &deviceDesc, &param, &audioRender_);
-    if (ret != 0 || audioRender_ == nullptr) {
-        MEDIA_ERR_LOG("AudioDeviceCreateRender failed");
-        audioManager_->UnloadAdapter(audioManager_, audioAdapter_);
-        return ERR_NOT_STARTED;
-    }
-    rendererInited_ = true;
 
 #ifdef DUMPFILE
     pfd = fopen(g_audioOutTestFilePath, "wb+");

@@ -77,6 +77,9 @@ private:
 
     void *handle_;
 
+    int32_t CreateCapture(struct AudioPort &capturePort);
+    int32_t InitAudioManager();
+
 #ifdef CAPTURE_DUMP
     FILE *pfd;
 #endif

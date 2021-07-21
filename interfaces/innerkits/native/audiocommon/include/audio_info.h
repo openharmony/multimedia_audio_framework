@@ -16,7 +16,6 @@
 #define AUDIO_INFO_H
 
 #ifdef __MUSL__
-#include <sys/time.h>
 #include <stdint.h>
 #endif // __MUSL__
 
@@ -207,30 +206,6 @@ struct AudioStreamParams {
     uint8_t encoding;
     uint8_t format;
     uint8_t channels;
-};
-
-/**
- * @brief Represents Timestamp information, including the frame position information and high-resolution time source.
- */
-class Timestamp {
-public:
-    Timestamp() : framePosition(0)
-    {
-        time.tv_sec = 0;
-        time.tv_nsec = 0;
-    }
-    virtual ~Timestamp() = default;
-    uint32_t framePosition;
-    struct timespec time;
-
-    /**
-     * @brief Enumerates the time base of this <b>Timestamp</b>. Different timing methods are supported.
-     *
-     */
-    enum Timestampbase {
-        /** Monotonically increasing time, excluding the system sleep time */
-        MONOTONIC = 0
-    };
 };
 
 // Supported audio parameters for both renderer and recorder

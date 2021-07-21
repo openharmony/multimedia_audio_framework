@@ -27,7 +27,8 @@ const char *g_audioOutTestFilePath = "/data/local/tmp/audio_capture.pcm";
 #endif // CAPTURE_DUMP
 
 AudioCapturerSource::AudioCapturerSource()
-    : capturerInited_(false), started_(false), paused_(false), leftVolume_(MAX_VOLUME_LEVEL), rightVolume_(MAX_VOLUME_LEVEL),
+    : capturerInited_(false), started_(false), paused_(false),
+      leftVolume_(MAX_VOLUME_LEVEL), rightVolume_(MAX_VOLUME_LEVEL),
       audioManager_(nullptr), audioAdapter_(nullptr), audioCapture_(nullptr)
 {
     attr_ = {};
@@ -71,24 +72,22 @@ void AudioCapturerSource::DeInit()
 #endif // CAPTURE_DUMP
 }
 
-int32_t InitAttrsCapture(struct AudioSampleAttributes *attrs)
+int32_t InitAttrsCapture(struct AudioSampleAttributes &attrs)
 {
     /* Initialization of audio parameters for playback */
-    attrs->format = AUDIO_FORMAT_PCM_16_BIT;
-    attrs->channelCount = AUDIO_CHANNELCOUNT;
-    attrs->sampleRate = AUDIO_SAMPLE_RATE_48K;
-    attrs->interleaved = 0;
-    attrs->type = AUDIO_IN_MEDIA;
-    attrs->period = DEEP_BUFFER_CAPTURE_PERIOD_SIZE;
-     /* 16 * attrs->channelCount / 8,Byte */
-    attrs->frameSize = PCM_16_BIT * attrs->channelCount / PCM_8_BIT;
-    attrs->isBigEndian = false;
-    attrs->isSignedData = true;
-    /* DEEP_BUFFER_CAPTURE_PERIOD_SIZE / (16 * attrs->channelCount / 8) */
-    attrs->startThreshold = DEEP_BUFFER_CAPTURE_PERIOD_SIZE / (attrs->frameSize);
-    attrs->stopThreshold = INT_32_MAX;
+    attrs.format = AUDIO_FORMAT_PCM_16_BIT;
+    attrs.channelCount = AUDIO_CHANNELCOUNT;
+    attrs.sampleRate = AUDIO_SAMPLE_RATE_48K;
+    attrs.interleaved = 0;
+    attrs.type = AUDIO_IN_MEDIA;
+    attrs.period = DEEP_BUFFER_CAPTURE_PERIOD_SIZE;
+    attrs.frameSize = PCM_16_BIT * attrs.channelCount / PCM_8_BIT;
+    attrs.isBigEndian = false;
+    attrs.isSignedData = true;
+    attrs.startThreshold = DEEP_BUFFER_CAPTURE_PERIOD_SIZE / (attrs.frameSize);
+    attrs.stopThreshold = INT_32_MAX;
     /* 16 * 1024 */
-    attrs->silenceThreshold = AUDIO_BUFF_SIZE;
+    attrs.silenceThreshold = AUDIO_BUFF_SIZE;
 
     return SUCCESS;
 }
@@ -117,58 +116,30 @@ int32_t SwitchAdapterCapture(struct AudioAdapterDescriptor *descs, const char *a
     return ERR_INVALID_INDEX;
 }
 
-int32_t AudioCapturerSource::Init(AudioSourceAttr &attr)
+int32_t AudioCapturerSource::InitAudioManager()
 {
-    attr_ = attr;
-    int32_t ret;
-    int32_t index;
-    int32_t size = 0;
     char resolvedPath[100] = "/system/lib/libhdi_audio.z.so";
-    struct AudioPort audioPort;
-    struct AudioAdapterDescriptor *descs = nullptr;
-    struct AudioPort capturePort;
     struct AudioManager *(*getAudioManager)() = nullptr;
-    audioPort.dir = PORT_IN;
-    audioPort.portId = 0;
-    audioPort.portName = "AOP";
 
     handle_ = dlopen(resolvedPath, 1);
     if (handle_ == nullptr) {
         MEDIA_ERR_LOG("Open Capturer so Fail");
         return ERR_INVALID_HANDLE;
     }
+
     getAudioManager = (struct AudioManager *(*)())(dlsym(handle_, "GetAudioManagerFuncs"));
     audioManager_ = getAudioManager();
     if (audioManager_ == nullptr) {
         return ERR_INVALID_HANDLE;
     }
 
-    ret = audioManager_->GetAllAdapters(audioManager_, &descs, &size);
-    // adapters is 0~3
-    if (size > MAX_AUDIO_ADAPTER_NUM || size == 0 || descs == nullptr || ret < 0) {
-        MEDIA_ERR_LOG("Get adapters Fail");
-        return ERR_NOT_STARTED;
-    }
+    return 0;
+}
 
-    // Get qualified sound card and port
-    char adapterNameCase[PATH_LEN] = "internal";
-    index = SwitchAdapterCapture(descs, adapterNameCase, audioPort.dir, &capturePort, size);
-    if (index < 0) {
-        MEDIA_ERR_LOG("Switch Adapter Fail");
-        return ERR_NOT_STARTED;
-    }
-
-    struct AudioAdapterDescriptor *desc = &descs[index];
-    if (audioManager_->LoadAdapter(audioManager_, desc, &audioAdapter_) != 0) {
-        MEDIA_ERR_LOG("Load Adapter Fail");
-        return ERR_NOT_STARTED;
-    }
-    if (audioAdapter_ == nullptr) {
-        MEDIA_ERR_LOG("Load audio device failed");
-        return ERR_NOT_STARTED;
-    }
+int32_t AudioCapturerSource::CreateCapture(struct AudioPort &capturePort)
+{
     // Initialization port information, can fill through mode and other parameters
-    ret = audioAdapter_->InitAllPorts(audioAdapter_);
+    int32_t ret = audioAdapter_->InitAllPorts(audioAdapter_);
     if (ret != 0) {
         MEDIA_ERR_LOG("InitAllPorts failed");
         return ERR_DEVICE_INIT;
@@ -176,7 +147,7 @@ int32_t AudioCapturerSource::Init(AudioSourceAttr &attr)
 
     struct AudioSampleAttributes param;
     // User needs to set
-    InitAttrsCapture(&param);
+    InitAttrsCapture(param);
     param.sampleRate = attr_.sampleRate;
     param.format = attr_.format;
     param.channelCount = attr_.channel;
@@ -194,6 +165,52 @@ int32_t AudioCapturerSource::Init(AudioSourceAttr &attr)
 
     capturerInited_ = true;
 
+    return 0;
+}
+
+int32_t AudioCapturerSource::Init(AudioSourceAttr &attr)
+{
+    attr_ = attr;
+    int32_t ret;
+    int32_t index;
+    int32_t size = 0;
+    struct AudioAdapterDescriptor *descs = nullptr;
+    struct AudioPort capturePort;
+
+    if (InitAudioManager() != 0) {
+        MEDIA_ERR_LOG("Init audio manager Fail");
+        return ERR_INVALID_HANDLE;
+    }
+
+    ret = audioManager_->GetAllAdapters(audioManager_, &descs, &size);
+    // adapters is 0~3
+    if (size > MAX_AUDIO_ADAPTER_NUM || size == 0 || descs == nullptr || ret < 0) {
+        MEDIA_ERR_LOG("Get adapters Fail");
+        return ERR_NOT_STARTED;
+    }
+
+    // Get qualified sound card and port
+    char adapterNameCase[PATH_LEN] = "internal";
+    index = SwitchAdapterCapture(descs, adapterNameCase, PORT_IN, &capturePort, size);
+    if (index < 0) {
+        MEDIA_ERR_LOG("Switch Adapter Fail");
+        return ERR_NOT_STARTED;
+    }
+
+    struct AudioAdapterDescriptor *desc = &descs[index];
+    if (audioManager_->LoadAdapter(audioManager_, desc, &audioAdapter_) != 0) {
+        MEDIA_ERR_LOG("Load Adapter Fail");
+        return ERR_NOT_STARTED;
+    }
+    if (audioAdapter_ == nullptr) {
+        MEDIA_ERR_LOG("Load audio device failed");
+        return ERR_NOT_STARTED;
+    }
+
+    if (CreateCapture(capturePort) != 0) {
+        MEDIA_ERR_LOG("Create capture failed");
+        return ERR_NOT_STARTED;
+    }
 #ifdef CAPTURE_DUMP
     pfd = fopen(g_audioOutTestFilePath, "wb+");
     if (pfd == nullptr) {

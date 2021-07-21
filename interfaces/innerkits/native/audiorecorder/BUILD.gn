@@ -24,6 +24,7 @@ group("audio_recorder_test_packages") {
 config("audio_recorder_config") {
   include_dirs = [
     "//foundation/multimedia/audio_standard/interfaces/innerkits/native/audiorecorder/include",
+    "//foundation/multimedia/audio_standard/frameworks/innerkitsimpl/audiorecorder/include",
     "//foundation/multimedia/audio_standard/frameworks/innerkitsimpl/common/include",
     "//foundation/multimedia/audio_standard/interfaces/innerkits/native/audiocommon/include",
     "//foundation/multimedia/audio_standard/interfaces/innerkits/native/audiostream/include",

@@ -16,6 +16,8 @@
 #ifndef ST_AUDIO_CONFIG_H
 #define ST_AUDIO_CONFIG_H
 
+#include <string>
+
 #include "audio_info.h"
 
 #ifdef __cplusplus
@@ -91,8 +93,7 @@ public:
     virtual ~AudioPortInfo() {}
 };
 
-struct AudioPortPinInfo : public PortInfo
-{
+struct AudioPortPinInfo : public PortInfo {
 public:
     char* pinType;
     AudioPortPinInfo()

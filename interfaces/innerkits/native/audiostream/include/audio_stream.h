@@ -13,6 +13,7 @@
  * limitations under the License.
  */
 #include "audio_session.h"
+#include "timestamp.h"
 
 #ifndef AUDIO_STREAM_H
 #define AUDIO_STREAM_H

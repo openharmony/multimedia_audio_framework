@@ -18,6 +18,7 @@ pulseaudio_dir = "//third_party/pulseaudio"
 config("audio_renderer_config") {
   include_dirs = [
     "//foundation/multimedia/audio_standard/interfaces/innerkits/native/audiorecorder/include",
+    "//foundation/multimedia/audio_standard/frameworks/innerkitsimpl/audiorenderer/include",
     "//foundation/multimedia/audio_standard/frameworks/innerkitsimpl/common/include",
     "//foundation/multimedia/audio_standard/interfaces/innerkits/native/audiocommon/include",
     "//foundation/multimedia/audio_standard/interfaces/innerkits/native/audiostream/include",

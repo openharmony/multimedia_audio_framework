@@ -391,10 +391,10 @@ int32_t AudioServiceClient::ConnectStreamToPA()
     pa_threaded_mainloop_lock(mainLoop);
 
     pa_buffer_attr bufferAttr;
-    bufferAttr.fragsize =  (uint32_t) -1;
-    bufferAttr.prebuf = (uint32_t) -1;
-    bufferAttr.maxlength = (uint32_t) -1;
-    bufferAttr.tlength = (uint32_t) -1;
+    bufferAttr.fragsize = static_cast<uint32_t>(-1);
+    bufferAttr.prebuf = static_cast<uint32_t>(-1);
+    bufferAttr.maxlength = static_cast<uint32_t>(-1);
+    bufferAttr.tlength = static_cast<uint32_t>(-1);
     bufferAttr.minreq = pa_usec_to_bytes(LATENCY_IN_MSEC * PA_USEC_PER_MSEC, &sampleSpec);
     if (eAudioClientType == AUDIO_SERVICE_CLIENT_PLAYBACK)
         result = pa_stream_connect_playback(paStream, NULL, &bufferAttr,
@@ -842,6 +842,30 @@ size_t AudioServiceClient::WriteStream(const StreamBuffer &stream, int32_t &pErr
     return cachedLen;
 }
 
+int32_t AudioServiceClient::UpdateReadBuffer(uint8_t *buffer, size_t &length, size_t &readSize)
+{
+    size_t l = (internalRdBufLen < length) ? internalRdBufLen : length;
+    memcpy_s(buffer, length, (const uint8_t*) internalReadBuffer + internalRdBufIndex, l);
+
+    length -= l;
+    internalRdBufIndex += l;
+    internalRdBufLen -= l;
+    readSize += l;
+
+    if (!internalRdBufLen) {
+        int retVal = pa_stream_drop(paStream);
+        internalReadBuffer = NULL;
+        internalRdBufLen = 0;
+        internalRdBufIndex = 0;
+        if (retVal < 0) {
+            MEDIA_ERR_LOG("pa_stream_drop failed, retVal: %d", retVal);
+            return AUDIO_CLIENT_READ_STREAM_ERR;
+        }
+    }
+
+    return 0;
+}
+
 int32_t AudioServiceClient::ReadStream(StreamBuffer &stream, bool isBlocking)
 {
     uint8_t* buffer = stream.buffer;
@@ -852,8 +876,6 @@ int32_t AudioServiceClient::ReadStream(StreamBuffer &stream, bool isBlocking)
 
     pa_threaded_mainloop_lock(mainLoop);
     while (length > 0) {
-        size_t l;
-
         while (!internalReadBuffer) {
             int retVal = pa_stream_peek(paStream, &internalReadBuffer, &internalRdBufLen);
             if (retVal < 0) {
@@ -882,27 +904,11 @@ int32_t AudioServiceClient::ReadStream(StreamBuffer &stream, bool isBlocking)
             }
         }
 
-        l = (internalRdBufLen < length) ? internalRdBufLen : length;
-        memcpy_s(buffer, length, (const uint8_t*) internalReadBuffer + internalRdBufIndex, l);
-
-        buffer = (uint8_t*) buffer + l;
-        length -= l;
-
-        internalRdBufIndex += l;
-        internalRdBufLen -= l;
-        readSize += l;
-
-        if (!internalRdBufLen) {
-            int retVal = pa_stream_drop(paStream);
-            internalReadBuffer = NULL;
-            internalRdBufLen = 0;
-            internalRdBufIndex = 0;
-            if (retVal < 0) {
-                MEDIA_ERR_LOG("pa_stream_drop failed, retVal: %d", retVal);
-                pa_threaded_mainloop_unlock(mainLoop);
-                return AUDIO_CLIENT_READ_STREAM_ERR;
-            }
+        if (UpdateReadBuffer(buffer, length, readSize) != 0) {
+            pa_threaded_mainloop_unlock(mainLoop);
+            return AUDIO_CLIENT_READ_STREAM_ERR;
         }
+        buffer = stream.buffer + readSize;
     }
     pa_threaded_mainloop_unlock(mainLoop);
     return readSize;
@@ -1007,9 +1013,9 @@ int32_t AudioServiceClient::GetCurrentTimeStamp(uint64_t &timeStamp)
     if (!info) {
         retVal = AUDIO_CLIENT_ERR;
     } else {
-        if(eAudioClientType == AUDIO_SERVICE_CLIENT_PLAYBACK) {
+        if (eAudioClientType == AUDIO_SERVICE_CLIENT_PLAYBACK) {
             timeStamp = pa_bytes_to_usec(info->write_index, &sampleSpec);
-        } else if(eAudioClientType == AUDIO_SERVICE_CLIENT_RECORD) {
+        } else if (eAudioClientType == AUDIO_SERVICE_CLIENT_RECORD) {
             timeStamp = pa_bytes_to_usec(info->read_index, &sampleSpec);
         }
     }

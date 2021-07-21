@@ -18,7 +18,7 @@
 
 #include "audio_info.h"
 #include "audio_policy_manager_factory.h"
-#include "iaudio_policy.h"
+#include "iaudio_policy_interface.h"
 #include "iport_observer.h"
 #include "parser_factory.h"
 

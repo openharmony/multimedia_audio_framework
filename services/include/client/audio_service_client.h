@@ -42,7 +42,7 @@ typedef pa_client_info        ClientInfo;
 
 struct StreamBuffer {
     uint8_t *buffer; // the virtual address of stream
-    uint32_t bufferLen; // stream length, by bytes
+    uint32_t bufferLen; // stream length in bytes
 };
 
 struct AudioCache {
@@ -305,6 +305,8 @@ private:
     int32_t InitializeAudioCache();
     size_t WriteToAudioCache(const StreamBuffer &stream);
     int32_t DrainAudioCache();
+
+    int32_t UpdateReadBuffer(uint8_t *buffer, size_t &length, size_t &readSize);
     int32_t PaWriteStream(const uint8_t *buffer, size_t &length);
 
     // Error code used
@@ -318,7 +320,6 @@ private:
     static const uint32_t AUDIO_CLIENT_WRITE_STREAM_ERR = -7;
     static const uint32_t AUDIO_CLIENT_PA_ERR = -8;
 
-
     // Default values
     static const uint32_t MINIMUM_BUFFER_SIZE = 1024;
     static const uint32_t DEFAULT_SAMPLING_RATE = 44100;
@@ -331,7 +332,6 @@ private:
 
     // Resets PA audio client and free up resources if any with this API
     void ResetPAAudioClient();
-
 
     // Callbacks to be implemented
     static void PAStreamStateCb(pa_stream *stream, void *userdata);
