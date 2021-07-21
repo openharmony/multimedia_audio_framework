@@ -1000,16 +1000,22 @@ uint32_t AudioServiceClient::GetStreamVolume(uint32_t sessionID)
 int32_t AudioServiceClient::GetCurrentTimeStamp(uint64_t &timeStamp)
 {
     CHECK_PA_STATUS_RET_IF_FAIL(mainLoop, context, paStream, AUDIO_CLIENT_PA_ERR);
-    int32_t retVal = 0;
+    int32_t retVal = AUDIO_CLIENT_SUCCESS;
 
     pa_threaded_mainloop_lock(mainLoop);
-    retVal = pa_stream_get_time(paStream, &timeStamp);
+    const pa_timing_info *info = pa_stream_get_timing_info(paStream);
+    if (!info) {
+        retVal = AUDIO_CLIENT_ERR;
+    } else {
+        if(eAudioClientType == AUDIO_SERVICE_CLIENT_PLAYBACK) {
+            timeStamp = pa_bytes_to_usec(info->write_index, &sampleSpec);
+        } else if(eAudioClientType == AUDIO_SERVICE_CLIENT_RECORD) {
+            timeStamp = pa_bytes_to_usec(info->read_index, &sampleSpec);
+        }
+    }
     pa_threaded_mainloop_unlock(mainLoop);
 
-    if (retVal >= 0)
-        return AUDIO_CLIENT_SUCCESS;
-    else
-        return AUDIO_CLIENT_ERR;
+    return retVal;
 }
 
 int32_t AudioServiceClient::GetAudioLatency(uint64_t &latency)
