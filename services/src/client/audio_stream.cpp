@@ -16,6 +16,7 @@
 #include "audio_stream.h"
 #include <vector>
 #include "audio_errors.h"
+#include "audio_info.h"
 #include "media_log.h"
 
 using namespace std;
@@ -24,33 +25,6 @@ namespace OHOS {
 namespace AudioStandard {
 const unsigned long long TIME_CONVERSION_US_S = 1000000ULL; /* us to s */
 const unsigned long long TIME_CONVERSION_NS_US = 1000ULL; /* ns to us */
-
-// Supported audio parameters for both renderer and recorder
-const vector<AudioSampleFormat> SUPPORTED_FORMATS {
-    SAMPLE_U8,
-    SAMPLE_S16LE,
-    SAMPLE_S24LE,
-    SAMPLE_S32LE
-};
-
-const vector<AudioChannel> SUPPORTED_CHANNELS {
-    MONO,
-    STEREO
-};
-
-const vector<AudioEncodingType> SUPPORTED_ENCODING_TYPES {
-    ENCODING_PCM
-};
-
-const vector<AudioSamplingRate> SUPPORTED_SAMPLING_RATES {
-    SAMPLE_RATE_8000,
-    SAMPLE_RATE_11025,
-    SAMPLE_RATE_16000,
-    SAMPLE_RATE_22050,
-    SAMPLE_RATE_32000,
-    SAMPLE_RATE_44100,
-    SAMPLE_RATE_48000
-};
 
 AudioStream::AudioStream(AudioStreamType eStreamType, AudioMode eMode) : eStreamType_(eStreamType),
                                                                          eMode_(eMode),
@@ -118,36 +92,36 @@ int32_t AudioStream::GetLatency(uint64_t &latency)
 
 vector<AudioSampleFormat> AudioStream::GetSupportedFormats()
 {
-    return SUPPORTED_FORMATS;
+    return AUDIO_SUPPORTED_FORMATS;
 }
 
 vector<AudioChannel> AudioStream::GetSupportedChannels()
 {
-    return SUPPORTED_CHANNELS;
+    return AUDIO_SUPPORTED_CHANNELS;
 }
 
 vector<AudioEncodingType> AudioStream::GetSupportedEncodingTypes()
 {
-    return SUPPORTED_ENCODING_TYPES;
+    return AUDIO_SUPPORTED_ENCODING_TYPES;
 }
 
 vector<AudioSamplingRate> AudioStream::GetSupportedSamplingRates()
 {
-    return SUPPORTED_SAMPLING_RATES;
+    return AUDIO_SUPPORTED_SAMPLING_RATES;
 }
 
 bool IsFormatValid(uint8_t format)
 {
-    bool isValidFormat = (find(SUPPORTED_FORMATS.begin(), SUPPORTED_FORMATS.end(), format)
-                          != SUPPORTED_FORMATS.end());
+    bool isValidFormat = (find(AUDIO_SUPPORTED_FORMATS.begin(), AUDIO_SUPPORTED_FORMATS.end(), format)
+                          != AUDIO_SUPPORTED_FORMATS.end());
     MEDIA_DEBUG_LOG("AudioStream: IsFormatValid: %{public}s", isValidFormat ? "true" : "false");
     return isValidFormat;
 }
 
 bool IsChannelValid(uint8_t channel)
 {
-    bool isValidChannel = (find(SUPPORTED_CHANNELS.begin(), SUPPORTED_CHANNELS.end(), channel)
-                           != SUPPORTED_CHANNELS.end());
+    bool isValidChannel = (find(AUDIO_SUPPORTED_CHANNELS.begin(), AUDIO_SUPPORTED_CHANNELS.end(), channel)
+                           != AUDIO_SUPPORTED_CHANNELS.end());
     MEDIA_DEBUG_LOG("AudioStream: IsChannelValid: %{public}s", isValidChannel ? "true" : "false");
     return isValidChannel;
 }
@@ -155,8 +129,8 @@ bool IsChannelValid(uint8_t channel)
 bool IsEncodingTypeValid(uint8_t encodingType)
 {
     bool isValidEncodingType
-            = (find(SUPPORTED_ENCODING_TYPES.begin(), SUPPORTED_ENCODING_TYPES.end(), encodingType)
-               != SUPPORTED_ENCODING_TYPES.end());
+            = (find(AUDIO_SUPPORTED_ENCODING_TYPES.begin(), AUDIO_SUPPORTED_ENCODING_TYPES.end(), encodingType)
+               != AUDIO_SUPPORTED_ENCODING_TYPES.end());
     MEDIA_DEBUG_LOG("AudioStream: IsEncodingTypeValid: %{public}s",
                     isValidEncodingType ? "true" : "false");
     return isValidEncodingType;
@@ -165,8 +139,8 @@ bool IsEncodingTypeValid(uint8_t encodingType)
 bool IsSamplingRateValid(uint32_t samplingRate)
 {
     bool isValidSamplingRate
-            = (find(SUPPORTED_SAMPLING_RATES.begin(), SUPPORTED_SAMPLING_RATES.end(), samplingRate)
-               != SUPPORTED_SAMPLING_RATES.end());
+            = (find(AUDIO_SUPPORTED_SAMPLING_RATES.begin(), AUDIO_SUPPORTED_SAMPLING_RATES.end(), samplingRate)
+               != AUDIO_SUPPORTED_SAMPLING_RATES.end());
     MEDIA_DEBUG_LOG("AudioStream: IsSamplingRateValid: %{public}s",
                     isValidSamplingRate ? "true" : "false");
     return isValidSamplingRate;
