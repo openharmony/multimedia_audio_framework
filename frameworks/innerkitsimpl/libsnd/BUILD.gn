@@ -1,7 +1,7 @@
 import("//build/ohos.gni")
 
 libsndfile_dir = "//third_party/libsnd"
-libsndfile_build_path = "//foundation/multimedia/audio_standard/libsnd"
+libsndfile_build_path = "//foundation/multimedia/audio_standard/frameworks/innerkitsimpl/libsnd"
 
 config("sndfile_config") {
     visibility = [ ":*" ]

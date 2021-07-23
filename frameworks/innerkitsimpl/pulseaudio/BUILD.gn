@@ -13,8 +13,8 @@
 
 import("//build/ohos.gni")
 
-pulseaudio_build_path = "//foundation/multimedia/audio_standard/pulseaudio"
-libsndfile_build_path = "//foundation/multimedia/audio_standard/libsnd"
+pulseaudio_build_path = "//foundation/multimedia/audio_standard/frameworks/innerkitsimpl/pulseaudio"
+libsndfile_build_path = "//foundation/multimedia/audio_standard/frameworks/innerkitsimpl/libsnd"
 
 group("pulseaudio_packages") {
   deps = [
@@ -42,7 +42,7 @@ group("pulseaudio_packages") {
 }
 
 action("gen_config_header") {
-  script = "//foundation/multimedia/audio_standard/pulseaudio/ohos_paconfig.sh"
+  script = "$pulseaudio_build_path/ohos_paconfig.sh"
 
   args = [ rebase_path("//third_party/pulseaudio", root_build_dir), rebase_path( "${target_gen_dir}/", root_build_dir),]
 

@@ -14,7 +14,7 @@
 import("//build/ohos.gni")
 
 pulseaudio_dir = "//third_party/pulseaudio"
-pulseaudio_build_path = "//foundation/multimedia/audio_standard/pulseaudio"
+pulseaudio_build_path = "//foundation/multimedia/audio_standard/frameworks/innerkitsimpl/pulseaudio"
 
 group("audio_client_test_packages") {
   deps = [
@@ -69,7 +69,7 @@ ohos_shared_library("audio_client") {
 
   deps = [
     "//utils/native/base:utils",
-    "//foundation/multimedia/audio_standard/pulseaudio/src/pulse:pulse",
+    "//foundation/multimedia/audio_standard/frameworks/innerkitsimpl/pulseaudio/src/pulse:pulse",
     "//third_party/bounds_checking_function:libsec_static",
     "//foundation/multimedia/audio_standard/interfaces/innerkits/native/audiopolicy:audio_policy_client",
   ]

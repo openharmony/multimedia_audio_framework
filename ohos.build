@@ -11,7 +11,7 @@
         "//foundation/multimedia/audio_standard/sa_profile:audio_service_sa_profile",
         "//foundation/multimedia/audio_standard/interfaces/kits/js/audio_manager:audio",
         "//foundation/multimedia/audio_standard/interfaces/kits/js/audio_manager:audio_js",
-        "//foundation/multimedia/audio_standard/pulseaudio:pulseaudio_packages",
+        "//foundation/multimedia/audio_standard/frameworks/innerkitsimpl/pulseaudio:pulseaudio_packages",
         "//foundation/multimedia/audio_standard/interfaces/innerkits/native/audiomanager:audio_client_test_packages",
         "//foundation/multimedia/audio_standard/interfaces/innerkits/native/audiorecorder:audio_recorder_test_packages",
         "//foundation/multimedia/audio_standard/interfaces/innerkits/native/audiorenderer:audio_renderer_test",

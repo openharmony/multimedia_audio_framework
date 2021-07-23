@@ -13,7 +13,7 @@
 
 import("//build/ohos.gni")
 
-pulseaudio_build_path = "//foundation/multimedia/audio_standard/pulseaudio"
+pulseaudio_build_path = "//foundation/multimedia/audio_standard/frameworks/innerkitsimpl/pulseaudio"
 pulseaudio_dir = "//third_party/pulseaudio"
 
 config("daemon_config") {

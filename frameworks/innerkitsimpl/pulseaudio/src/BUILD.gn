@@ -14,8 +14,8 @@
 import("//build/ohos.gni")
 
 pulseaudio_dir = "//third_party/pulseaudio"
-pulseaudio_build_path = "//foundation/multimedia/audio_standard/pulseaudio"
-libsndfile_build_path = "//foundation/multimedia/audio_standard/libsnd"
+pulseaudio_build_path = "//foundation/multimedia/audio_standard/frameworks/innerkitsimpl/pulseaudio"
+libsndfile_build_path = "//foundation/multimedia/audio_standard/frameworks/innerkitsimpl/libsnd"
 
 config("pulsecommon_config") {
   visibility = [ ":*" ]
@@ -127,7 +127,7 @@ ohos_shared_library("pulsecommon") {
   part_name = "multimedia_audio_standard"
 }
 ohos_prebuilt_etc("pa_daemon_config") {
-  source = "//foundation/multimedia/audio_standard/pulseaudio/conf/daemon.conf"
+  source = "$pulseaudio_build_path/conf/daemon.conf"
 
   subsystem_name = "multimedia"
   module_install_dir = "etc/pulse"
@@ -135,14 +135,14 @@ ohos_prebuilt_etc("pa_daemon_config") {
 }
 
 ohos_prebuilt_etc("pa_default_config") {
-  source = "//foundation/multimedia/audio_standard/pulseaudio/conf/default.pa"
+  source = "$pulseaudio_build_path/conf/default.pa"
   subsystem_name = "multimedia"
   module_install_dir = "etc/pulse"
   part_name = "multimedia_audio_standard"
 }
 
 ohos_prebuilt_etc("pa_client_config") {
-  source = "//foundation/multimedia/audio_standard/pulseaudio/conf/client.conf"
+  source = "$pulseaudio_build_path/conf/client.conf"
   subsystem_name = "multimedia"
   module_install_dir = "etc/pulse"
   part_name = "multimedia_audio_standard"

@@ -14,8 +14,8 @@
 import("//build/ohos.gni")
 
 pulseaudio_dir = "//third_party/pulseaudio"
-pulseaudio_build_path = "//foundation/multimedia/audio_standard/pulseaudio"
-libsndfile_build_path = "//foundation/multimedia/audio_standard/libsnd"
+pulseaudio_build_path = "//foundation/multimedia/audio_standard/frameworks/innerkitsimpl/pulseaudio"
+libsndfile_build_path = "//foundation/multimedia/audio_standard/frameworks/innerkitsimpl/libsnd"
 
 config("pulsecore_config") {
   visibility = [ ":*" ]
