@@ -10,7 +10,7 @@
   - [Repositories Involved](#repositories-involved)
 
 ## Introduction<a name="introduction"></a>
-The **audio\_standard** repository is used to implement audio-related features, including audio playback, recording and volume and device management.
+The **audio\_standard** repository is used to implement audio-related features, including audio playback, recording, volume management and device management.
 
 **Figure  1**  Position in the subsystem architecture<a name="fig483116248288"></a>  
 
@@ -46,13 +46,12 @@ The structure of the repository directory is as follows:
 ```
 /foundation/multimedia/audio_standard  # Audio code
 ├── frameworks                         # Framework code
-│   ├── innerkitsimpl                  # Internal Native API Implementation
+│   ├── innerkitsimpl                  # Internal Native API Implementation.
+|   |                                    Pulseaudio and libsnd file build configuration.pulseaudio-hdi modules
 │   └── kitsimpl                       # External JS API Implementation
-├── interfaces                         # Interfaces code
+├── interfaces                         # Interfaces
 │   ├── innerkits                      # Internal Native APIs
 │   └── kits                           # External JS APIs
-├── libsnd                             # Libsndfile build configuration
-├── pulseaudio                         # Pulseaudio build configuration and pulseaudio-hdi modules
 ├── sa_profile                         # Service configuration profile
 ├── services                           # Service code
 ├── LICENSE                            # License file
@@ -63,10 +62,10 @@ The structure of the repository directory is as follows:
 ### Audio Playback<a name="audio-playback"></a>
 You can use APIs provided in this repository to convert audio data into audible analog signals, play the audio signals using output devices, and manage playback tasks. The following steps describe how to use  **AudioRenderer**  to develop the audio playback function:
 1. Use **Create** API with required stream type to get **AudioRenderer** instance.
-   ```
-       AudioStreamType streamType = STREAM_MUSIC; // example stream type
-	   std::unique_ptr<AudioRenderer> audioRenderer = AudioRenderer::Create(streamType);
-   ```
+    ```
+    AudioStreamType streamType = STREAM_MUSIC; // example stream type
+    std::unique_ptr<AudioRenderer> audioRenderer = AudioRenderer::Create(streamType);
+    ```
 2. (Optional) Static APIs **GetSupportedFormats**(), **GetSupportedChannels**(), **GetSupportedEncodingTypes**(), **GetSupportedSamplingRates**() can be used to get the supported values of the params.
 3. To Prepare the device, call **SetParams** on the instance.
     ```
@@ -80,22 +79,25 @@ You can use APIs provided in this repository to convert audio data into audible 
     ```
 4. (Optional) use audioRenderer->**GetParams**(rendererParams); to validate SetParams
 5. Call **audioRenderer->Start()** function on the AudioRenderer instance to start the playback task.
-6. Get the buffer size can be written, using **GetBufferSize**. Read the audio data to be played and transfer it into the bytes stream. Call the **Write** function repeatedly to write data untill all the data in the buffer is written.
-   ```
-   audioRenderer->GetBufferSize(bufferLen);
-   bytesToWrite = fread(buffer, 1, bufferLen, wavFile); // example shown reads audio data from a file
+6. Get the buffer length to be written, using **GetBufferSize** API .
+    ```
+    audioRenderer->GetBufferSize(bufferLen);
+    ```
+7. Read the audio data to be played from the source(example audio file) and transfer it into the bytes stream. Call the **Write** function repeatedly to write the render data.
+    ```
+    bytesToWrite = fread(buffer, 1, bufferLen, wavFile); 
     while ((bytesWritten < bytesToWrite) && ((bytesToWrite - bytesWritten) > minBytes)) {
         bytesWritten += audioRenderer->Write(buffer + bytesWritten, bytesToWrite - bytesWritten);
         if (bytesWritten < 0)
             break;
     }
     ```
-7. (Optional) Call audioRenderer->**Drain()** to drain the plackback stream.
+8. Call audioRenderer->**Drain**() to drain the playback stream.
 
-8. Call audioRenderer->**Stop()** function to Stop rendering.
-9. After the playback task is complete, call the audioRenderer->**Release**() function on the AudioRenderer instance to release the resources.
+9. Call audioRenderer->**Stop()** function to Stop rendering.
+10. After the playback task is complete, call the audioRenderer->**Release**() function on the AudioRenderer instance to release the resources.
 
-Provided the basic playback flow here. Please refer **audio_renderer.h** and **audio_info.h** for more useful APIs.
+Provided the basic playback usecase above. Please refer [**audio_renderer.h**](https://gitee.com/openharmony/multimedia_audio_standard/interfaces/innerkits/native/audiorenderer/include/audio_renderer.h) and [**audio_info.h**](https://gitee.com/openharmony/multimedia_audio_standard/interfaces/innerkits/native/audiocommon/include/audio_info.h) for more APIs.
 
 
 ### Audio Recording<a name="audio-recording"></a>
@@ -104,7 +106,7 @@ You can use the APIs provided in this repository for your application to record 
 1. Use **Create** API with required stream type to get **AudioRecorder** instance.
     ```
     AudioStreamType streamType = STREAM_MUSIC;
-	std::unique_ptr<AudioRecorder> audioRecorder = AudioRecorder::Create(streamType);
+    std::unique_ptr<AudioRecorder> audioRecorder = AudioRecorder::Create(streamType);
     ```
 2. (Optional) Static APIs **GetSupportedFormats**(), **GetSupportedChannels**(), **GetSupportedEncodingTypes**(), **GetSupportedSamplingRates()** can be used to get the supported values of the params.
 3. To Prepare the device, call **SetParams** on the instance.
@@ -119,9 +121,12 @@ You can use the APIs provided in this repository for your application to record 
     ```
 4. (Optional) use audioRecorder->**GetParams**(recorderParams) to validate SetParams()
 5. Call audioRenderer->**Start**() function on the AudioRecorder instance to start the recording task.
-6. Get the buffer size can be read, using GetBufferSize. Read the recorded audio data and converts it to a byte stream. Call the read function repeatedly to read data.
+6. Get the buffer length to be read, using **GetBufferSize** API. 
     ```
-    audioRecorder->GetBufferSize(bufferLen)
+    audioRecorder->GetBufferSize(bufferLen);
+    ```
+7. Read the recorded audio data and convert it to a byte stream. Call the read function repeatedly to read data untill you want to stop recording
+    ```
     bytesRead = audioRecorder->Read(*buffer, bufferLen, isBlocking); // set isBlocking = true/false for blocking/non-blocking read
     while (numBuffersToRecord) {
         bytesRead = audioRecorder->Read(*buffer, bufferLen, isBlockingRead);
@@ -133,14 +138,15 @@ You can use the APIs provided in this repository for your application to record 
         }
     }
     ```
-7. (Optional) Call audioRecorder->**Flush**() to flush the record buffer of this stream.
-8. Call the audioRecorder->**Stop**() function on the AudioRecorder instance to stop the recording.
-9. After the recording task is complete, call the audioRecorder->**Release**() function on the AudioRecorder instance to release resources.
+8. (Optional) Call audioRecorder->**Flush**() to flush the record buffer of this stream.
+9. Call the audioRecorder->**Stop**() function on the AudioRecorder instance to stop the recording.
+10. After the recording task is complete, call the audioRecorder->**Release**() function on the AudioRecorder instance to release resources.
 
+Provided the basic recording usecase above. Please refer [**audio_recorder.h**](https://gitee.com/openharmony/multimedia_audio_standard/interfaces/innerkits/native/audiorecorder/include/audio_recorder.h) and [**audio_info.h**](https://gitee.com/openharmony/multimedia_audio_standard/interfaces/innerkits/native/audiocommon/include/audio_info.h) for more APIs.
 
 ### Audio Management<a name="audio-management"></a>
 
-JS apps can use the APIs provided by auido manager to control the volume and the device.\
+JS apps can use the APIs provided by audio manager to control the volume and the device.\
 Please refer the following for JS usage of audio volume and device management:
  https://gitee.com/openharmony/docs/blob/master/en/application-dev/js-reference/audio-management.md
 
