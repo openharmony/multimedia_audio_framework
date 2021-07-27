@@ -12,12 +12,17 @@
 # limitations under the License.
 
 import("//build/ohos.gni")
+AUDIO_POLICY_SERVER_DIR = "//foundation/multimedia/audio_standard/services/src/audio_policy/server"
 
-ohos_prebuilt_etc("audio_service.rc") {
-  source = "etc/audio_service.rc"
-  relative_install_dir = "init"
-  part_name = "multimedia_audio_standard"
-  subsystem_name = "multimedia"
+ohos_prebuilt_etc("pulseaudio.rc") {
+   if (use_musl) {
+     source = "etc/pulseaudio.cfg"
+   } else {
+     source = "etc/pulseaudio.rc"
+   }
+   relative_install_dir = "init"
+   part_name = "multimedia_audio_standard"
+   subsystem_name = "multimedia"
 }
 
 config("audio_service_config") {
@@ -27,6 +32,9 @@ config("audio_service_config") {
     "include",
     "include/server",
     "//foundation/multimedia/audio_standard/frameworks/innerkitsimpl/common/include",
+    "//base/hiviewdfx/hilog/interfaces/native/innerkits/include",
+    "//foundation/multimedia/audio_standard/frameworks/innerkitsimpl/audiocapturer/include",
+    "//drivers/peripheral/audio/interfaces/include"
   ]
 
   if (target_cpu == "arm") {
@@ -45,17 +53,118 @@ ohos_shared_library("audio_service") {
   configs = [ ":audio_service_config" ]
 
   deps = [
-    "//foundation/multimedia/audio_standard/interfaces/innerkits/native/audiomanager:audio_client",
-    "//utils/native/base:utils",
+     "//utils/native/base:utils",
+     "//foundation/multimedia/audio_standard/interfaces/innerkits/native/audiomanager:audio_client",
+     "//foundation/multimedia/audio_standard/frameworks/innerkitsimpl/pulseaudio/src/daemon:pulseaudio",
+     "//foundation/multimedia/audio_standard/frameworks/innerkitsimpl/audiocapturer:audio_capturer_source",
   ]
 
   external_deps = [
-    "hiviewdfx_hilog_native:libhilog",
     "ipc:ipc_core",
-    "safwk:system_ability_fwk",
     "samgr_L2:samgr_proxy",
+    "safwk:system_ability_fwk",
+    "hiviewdfx_hilog_native:libhilog",
   ]
 
   subsystem_name = "multimedia"
+  part_name = "multimedia_audio_standard"
+}
+
+group("audio_policy_service_packages") {
+    deps = [
+            ":audio_policy.rc",
+            ":audio_policy_service",
+            ":audio_policy_config",
+    ]
+}
+
+ohos_prebuilt_etc("audio_policy.rc") {
+   if (use_musl) {
+     source = "etc/audio_policy.cfg"
+   } else {
+     source = "etc/audio_policy.rc"
+   }
+   relative_install_dir = "init"
+   part_name = "multimedia_audio_standard"
+   subsystem_name = "multimedia"
+}
+
+config("audio_policy_public_config") {
+  include_dirs = [
+    "//foundation/multimedia/audio_standard/services/include",
+    "//foundation/multimedia/audio_standard/services/include/client",
+    "//foundation/distributedschedule/safwk/services/safwk/include",
+    "//foundation/multimedia/audio_standard/frameworks/innerkitsimpl/common/include",
+    "//foundation/multimedia/audio_standard/interfaces/innerkits/native/audiocommon/include",
+    "//foundation/multimedia/audio_standard/interfaces/innerkits/native/audiomanager/include",
+    "//foundation/multimedia/audio_standard/services/src/audio_policy/server/service/include/common",
+    "//foundation/multimedia/audio_standard/services/src/audio_policy/server/service/include/interface",
+    "//foundation/multimedia/audio_standard/services/src/audio_policy/server/service/include/manager",
+    "//foundation/multimedia/audio_standard/services/src/audio_policy/server/service/include/config",
+    "//foundation/multimedia/audio_standard/services/src/audio_policy/server/service/include",
+    "//foundation/multimedia/audio_standard/services/include/audio_policy/common",
+    "//foundation/multimedia/audio_standard/services/include/audio_policy/server",
+    "//foundation/multimedia/audio_standard/services/include/audio_policy/client",
+    "//foundation/multimedia/audio_standard/frameworks/innerkitsimpl/common/include",
+    "//foundation/communication/ipc/interfaces/innerkits/ipc_core/include",
+    "//foundation/distributedschedule/samgr/interfaces/innerkits/samgr_proxy/include",
+    "//foundation/distributeddatamgr/distributeddatamgr/interfaces/innerkits/distributeddata/include",
+    "//base/hiviewdfx/hilog/interfaces/native/innerkits/include",
+    "//third_party/libxml2/include",
+    "//third_party/pulseaudio/src",
+    "//third_party/pulseaudio/confgure/src",
+    "//foundation/multimedia/audio_standard/frameworks/innerkitsimpl/pulseaudio/include",
+    "//utils/system/safwk/native/include",
+    "//utils/native/base/include",
+    "//third_party/bounds_checking_function/include",
+  ]
+
+  cflags = [
+        "-Wall",
+        "-Werror",
+  ]
+
+  if (target_cpu == "arm") {
+    cflags += [ "-DBINDER_IPC_32BIT" ]
+  }
+}
+
+ohos_shared_library("audio_policy_service") {
+  install_enable = true
+  sources = [
+    "//foundation/multimedia/audio_standard/services/src/audio_policy/server/audio_policy_server.cpp",
+    "//foundation/multimedia/audio_standard/services/src/audio_policy/server/audio_policy_manager_stub.cpp",
+    "//foundation/multimedia/audio_standard/services/src/audio_policy/server/service/src/audio_policy_service.cpp",
+    "//foundation/multimedia/audio_standard/services/src/audio_policy/server/service/src/manager/pulseaudio_policy_manager.cpp",
+    "//foundation/multimedia/audio_standard/services/src/audio_policy/server/service/src/config/xml_parser.cpp",
+  ]
+
+  public_configs = [
+    ":audio_policy_public_config",
+  ]
+
+  deps = [
+   "//utils/native/base:utils",
+   "//foundation/multimedia/audio_standard/frameworks/innerkitsimpl/pulseaudio/src/pulse:pulse",
+   "//third_party/libxml2:xml2",
+   "//foundation/distributeddatamgr/distributeddatamgr/interfaces/innerkits/distributeddata:distributeddata_inner",
+   "//foundation/distributeddatamgr/distributeddatamgr/services/distributeddataservice/adapter:distributeddata_adapter",
+  ]
+
+  external_deps = [
+    "ipc:ipc_core",
+    "samgr_L2:samgr_proxy",
+    "safwk:system_ability_fwk",
+    "hiviewdfx_hilog_native:libhilog",
+  ]
+  subsystem_name = "multimedia"
+  part_name = "multimedia_audio_standard"
+}
+
+ohos_prebuilt_etc("audio_policy_config") {
+  source = "$AUDIO_POLICY_SERVER_DIR/etc/audio_policy_config.xml"
+
+  subsystem_name = "multimedia"
+  module_install_dir = "etc/audio"
   part_name = "multimedia_audio_standard"
 }

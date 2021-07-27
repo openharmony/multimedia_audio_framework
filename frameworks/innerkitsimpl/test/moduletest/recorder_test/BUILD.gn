@@ -11,12 +11,22 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-service audio_service /system/bin/sa_main /system/profile/audio_service.xml
-    class z_core
-    user audioserver
-    group system shell
-    seclabel u:r:audiodistributedservice:s0
+import("//build/test.gni")
 
-on boot
-    start audio_service
+module_output_path = "audio_standard/audio_recorder"
 
+ohos_moduletest("audio_recorder_module_test") {
+  module_out_path = module_output_path
+  include_dirs = [
+    "./include",
+    "//foundation/multimedia/audio_standard/interfaces/innerkits/native/audiocommon/include",
+  ]
+
+  sources = [
+    "src/audio_recorder_module_test.cpp",
+  ]
+
+  deps = [
+    "//foundation/multimedia/audio_standard/interfaces/innerkits/native/audiorecorder:audio_recorder",
+  ]
+}

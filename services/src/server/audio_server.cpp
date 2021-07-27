@@ -13,31 +13,45 @@
  * limitations under the License.
  */
 
+#include "audio_capturer_source.h"
 #include "audio_server.h"
 #include "iservice_registry.h"
 #include "media_log.h"
 #include "system_ability_definition.h"
 
-using namespace std;
+#define PA
+#ifdef PA
+extern "C" {
+    extern int ohos_pa_main(int argc, char *argv[]);
+}
+#endif
 
 namespace OHOS {
-    std::unordered_map<int, int> AudioServer::AudioStreamVolumeMap = {
-        {AudioSvcManager::AudioVolumeType::STREAM_VOICE_CALL, MAX_VOLUME},
-        {AudioSvcManager::AudioVolumeType::STREAM_SYSTEM, MAX_VOLUME},
-        {AudioSvcManager::AudioVolumeType::STREAM_RING, MAX_VOLUME},
-        {AudioSvcManager::AudioVolumeType::STREAM_MUSIC, MAX_VOLUME},
-        {AudioSvcManager::AudioVolumeType::STREAM_ALARM, MAX_VOLUME},
-        {AudioSvcManager::AudioVolumeType::STREAM_NOTIFICATION, MAX_VOLUME},
-        {AudioSvcManager::AudioVolumeType::STREAM_BLUETOOTH_SCO, MAX_VOLUME},
-        {AudioSvcManager::AudioVolumeType::STREAM_DTMF, MAX_VOLUME},
-        {AudioSvcManager::AudioVolumeType::STREAM_TTS, MAX_VOLUME},
-        {AudioSvcManager::AudioVolumeType::STREAM_ACCESSIBILITY, MAX_VOLUME}
-        };
+namespace AudioStandard {
+std::map<std::string, std::string> AudioServer::audioParameters;
 
 REGISTER_SYSTEM_ABILITY_BY_ID(AudioServer, AUDIO_DISTRIBUTED_SERVICE_ID, true)
 
+#ifdef PA
+constexpr int PA_ARG_COUNT = 1;
+
+void* AudioServer::paDaemonThread(void* arg)
+{
+    /* Load the mandatory pulseaudio modules at start */
+    char *argv[] = {
+        (char*)"pulseaudio",
+    };
+
+    MEDIA_INFO_LOG("Calling ohos_pa_main\n");
+    ohos_pa_main(PA_ARG_COUNT, argv);
+    MEDIA_INFO_LOG("Exiting ohos_pa_main\n");
+
+    return nullptr;
+}
+#endif
+
 AudioServer::AudioServer(int32_t systemAbilityId, bool runOnCreate)
-        : SystemAbility(systemAbilityId, runOnCreate)
+    : SystemAbility(systemAbilityId, runOnCreate)
 {}
 
 void AudioServer::OnDump()
@@ -50,52 +64,106 @@ void AudioServer::OnStart()
     if (res) {
         MEDIA_DEBUG_LOG("AudioService OnStart res=%{public}d", res);
     }
+
+#ifdef PA
+    int32_t ret = pthread_create(&m_paDaemonThread, nullptr, AudioServer::paDaemonThread, nullptr);
+    if (ret != 0) {
+        MEDIA_ERR_LOG("pthread_create failed %d", ret);
+    }
+    MEDIA_INFO_LOG("Created paDaemonThread\n");
+#endif
 }
 
 void AudioServer::OnStop()
 {
     MEDIA_DEBUG_LOG("AudioService OnStop");
+
 }
 
-
-void AudioServer::SetVolume(AudioSvcManager::AudioVolumeType volumeType, int32_t volume)
+void AudioServer::SetAudioParameter(const std::string key, const std::string value)
 {
-    MEDIA_DEBUG_LOG("set volume server");
-    AudioServer::AudioStreamVolumeMap[volumeType] = volume;
+    MEDIA_DEBUG_LOG("server: set audio parameter");
+    AudioServer::audioParameters[key] = value;
 }
 
-int32_t AudioServer::GetVolume(AudioSvcManager::AudioVolumeType volumeType)
+const std::string AudioServer::GetAudioParameter(const std::string key)
 {
-    MEDIA_DEBUG_LOG("GetVolume server volumeType=%{public}d", volumeType);
-    int volume = AudioServer::AudioStreamVolumeMap[volumeType];
-    MEDIA_DEBUG_LOG("GetVolume server volume=%{public}d", volume);
-    return volume;
+    MEDIA_DEBUG_LOG("server: get audio parameter");
+
+    if (AudioServer::audioParameters.count(key)) {
+        return AudioServer::audioParameters[key];
+    } else {
+        const std::string value = "";
+        return value;
+    }
 }
 
-int32_t AudioServer::GetMaxVolume(AudioSvcManager::AudioVolumeType volumeType)
+float AudioServer::GetMaxVolume(AudioSystemManager::AudioVolumeType volumeType)
 {
     MEDIA_DEBUG_LOG("GetMaxVolume server");
     return MAX_VOLUME;
 }
 
-int32_t AudioServer::GetMinVolume(AudioSvcManager::AudioVolumeType volumeType)
+float AudioServer::GetMinVolume(AudioSystemManager::AudioVolumeType volumeType)
 {
     MEDIA_DEBUG_LOG("GetMinVolume server");
     return MIN_VOLUME;
+}
+
+int32_t AudioServer::SetMicrophoneMute(bool isMute)
+{
+    AudioCapturerSource* audioCapturerSourceInstance = AudioCapturerSource::GetInstance();
+
+    if (audioCapturerSourceInstance->capturerInited_ == false) {
+            MEDIA_ERR_LOG("Capturer is not initialized. Start the recording first !");
+            return ERR_INVALID_OPERATION;
+    }
+    
+    return audioCapturerSourceInstance->SetMute(isMute);
+}
+
+bool AudioServer::IsMicrophoneMute()
+{
+    AudioCapturerSource* audioCapturerSourceInstance = AudioCapturerSource::GetInstance();
+    bool isMute = false;
+
+    if (audioCapturerSourceInstance->capturerInited_ == false) {
+        MEDIA_ERR_LOG("Capturer is not initialized. Start the recording first !");
+    } else if (audioCapturerSourceInstance->GetMute(isMute)) {
+        MEDIA_ERR_LOG("GetMute status in capturer returned Error !");
+    }
+    
+    return isMute;
 }
 
 std::vector<sptr<AudioDeviceDescriptor>> AudioServer::GetDevices(AudioDeviceDescriptor::DeviceFlag deviceFlag)
 {
     MEDIA_DEBUG_LOG("GetDevices server");
     audioDeviceDescriptor_.clear();
-    AudioDeviceDescriptor *audioDescriptor = new(std::nothrow) AudioDeviceDescriptor();
+    sptr<AudioDeviceDescriptor> audioDescriptor = new(std::nothrow) AudioDeviceDescriptor();
     if (audioDescriptor == nullptr) {
         MEDIA_ERR_LOG("new AudioDeviceDescriptor fail");
         return audioDeviceDescriptor_;
     }
-    audioDescriptor->deviceType_ = AudioDeviceDescriptor::DeviceType::MIC;
-    audioDescriptor->deviceRole_ = AudioDeviceDescriptor::DeviceRole::INPUT_DEVICE;
+    if (AudioDeviceDescriptor::DeviceFlag::INPUT_DEVICES_FLAG == deviceFlag) {
+        audioDescriptor->deviceType_ = AudioDeviceDescriptor::DeviceType::MIC;
+        audioDescriptor->deviceRole_ = AudioDeviceDescriptor::DeviceRole::INPUT_DEVICE;
+    } else if (AudioDeviceDescriptor::DeviceFlag::OUTPUT_DEVICES_FLAG == deviceFlag) {
+        audioDescriptor->deviceType_ = AudioDeviceDescriptor::DeviceType::SPEAKER;
+        audioDescriptor->deviceRole_ = AudioDeviceDescriptor::DeviceRole::OUTPUT_DEVICE;
+    } else if (AudioDeviceDescriptor::DeviceFlag::ALL_DEVICES_FLAG == deviceFlag) {
+        sptr<AudioDeviceDescriptor> audioDescriptor_inputDevice = new(std::nothrow) AudioDeviceDescriptor();
+        sptr<AudioDeviceDescriptor> audioDescriptor_outputDevice = new(std::nothrow) AudioDeviceDescriptor();
+        audioDescriptor_inputDevice->deviceType_ = AudioDeviceDescriptor::DeviceType::MIC;
+        audioDescriptor_inputDevice->deviceRole_ = AudioDeviceDescriptor::DeviceRole::INPUT_DEVICE;
+        audioDeviceDescriptor_.push_back(audioDescriptor_inputDevice);
+        audioDescriptor_outputDevice->deviceType_ = AudioDeviceDescriptor::DeviceType::SPEAKER;
+        audioDescriptor_outputDevice->deviceRole_ = AudioDeviceDescriptor::DeviceRole::OUTPUT_DEVICE;
+        audioDeviceDescriptor_.push_back(audioDescriptor_outputDevice);
+        return audioDeviceDescriptor_;
+    }
     audioDeviceDescriptor_.push_back(audioDescriptor);
     return audioDeviceDescriptor_;
 }
+} // namespace AudioStandard
 } // namespace OHOS

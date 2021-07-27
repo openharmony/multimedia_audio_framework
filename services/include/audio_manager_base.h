@@ -20,38 +20,40 @@
 #include "iremote_broker.h"
 #include "iremote_proxy.h"
 #include "iremote_stub.h"
-#include "audio_svc_manager.h"
+#include "audio_system_manager.h"
 
 namespace OHOS {
+namespace AudioStandard {
 class IStandardAudioService : public IRemoteBroker {
 public:
-    /**
-     * Set Volume.
-     *
-     * @return Returns ERR_OK on success, others on failure.
-     */
-    virtual void SetVolume(AudioSvcManager::AudioVolumeType volumeType, int32_t volume) = 0;
-
-    /**
-     * Obtains current volume.
-     *
-     * @return Returns the current volume.
-     */
-    virtual int GetVolume(AudioSvcManager::AudioVolumeType volumeType) = 0;
-
     /**
      * Obtains max volume.
      *
      * @return Returns the max volume.
      */
-    virtual int GetMaxVolume(AudioSvcManager::AudioVolumeType volumeType) = 0;
+    virtual float GetMaxVolume(AudioSystemManager::AudioVolumeType volumeType) = 0;
 
     /**
      * Obtains min volume.
      *
      * @return Returns the min volume.
      */
-    virtual int GetMinVolume(AudioSvcManager::AudioVolumeType volumeType) = 0;
+    virtual float GetMinVolume(AudioSystemManager::AudioVolumeType volumeType) = 0;
+    
+    /**
+     * Sets Microphone Mute status.
+     *
+     * @param isMute Mute status true or false to be set.
+     * @return Returns 0 if success. Otherise returns Errocode defined in audio_errors.h.
+     */
+    virtual int32_t SetMicrophoneMute(bool isMute) = 0;
+
+     /**
+     * Gets Microphone Mute status.
+     *
+     * @return Returns true or false
+     */
+    virtual bool IsMicrophoneMute() = 0;
 
     /**
      * Obtains device array.
@@ -60,12 +62,31 @@ public:
      */
     virtual std::vector<sptr<AudioDeviceDescriptor>> GetDevices(AudioDeviceDescriptor::DeviceFlag deviceFlag) = 0;
 
+    /**
+     * Set Audio Parameter.
+     *
+     * @param  key for the audio parameter to be set
+     * @param  value associated with the key for the audio parameter to be set
+     * @return none.
+     */
+    virtual void SetAudioParameter(const std::string key, const std::string value) = 0;
+
+    /**
+     * Get Audio Parameter.
+     *
+     * @param  key for the audio parameter to be set
+     * @return Returns value associated to the key requested.
+     */
+    virtual const std::string GetAudioParameter(const std::string key) = 0;
+
     enum {
-        SET_VOLUME = 0,
-        GET_VOLUME = 1,
-        GET_MAX_VOLUME = 2,
-        GET_MIN_VOLUME = 3,
-        GET_DEVICES = 4,
+        GET_MAX_VOLUME = 0,
+        GET_MIN_VOLUME = 1,
+        GET_DEVICES = 2,
+        GET_AUDIO_PARAMETER = 3,
+        SET_AUDIO_PARAMETER = 4,
+        SET_MICROPHONE_MUTE = 5,
+        IS_MICROPHONE_MUTE = 6
     };
 
 public:
@@ -78,5 +99,6 @@ public:
                                 MessageParcel &reply, MessageOption &option) override;
     bool IsPermissionValid();
 };
+} // namespace AudioStandard
 } // namespace OHOS
 #endif // I_ST_AUDIO_MANAGER_BASE_H

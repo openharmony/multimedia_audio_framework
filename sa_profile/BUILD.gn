@@ -18,3 +18,9 @@ ohos_sa_profile("audio_service_sa_profile") {
 
   part_name = "multimedia_audio_standard"
 }
+
+ohos_sa_profile("audio_policy_service_sa_profile") {
+  sources = [ "3009.xml" ]
+
+  part_name = "multimedia_audio_standard"
+}

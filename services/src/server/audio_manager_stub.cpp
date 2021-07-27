@@ -14,11 +14,11 @@
  */
 
 #include "audio_manager_base.h"
-#include "audio_svc_manager.h"
-#include "audio_device_descriptor.h"
+#include "audio_system_manager.h"
 #include "media_log.h"
 
 namespace OHOS {
+namespace AudioStandard {
 int AudioManagerStub::OnRemoteRequest(
     uint32_t code, MessageParcel &data, MessageParcel &reply, MessageOption &option)
 {
@@ -27,49 +27,28 @@ int AudioManagerStub::OnRemoteRequest(
         MEDIA_ERR_LOG("caller app not acquired audio permission");
         return MEDIA_PERMISSION_DENIED;
     }
+
     switch (code) {
-        case SET_VOLUME: {
-            MEDIA_DEBUG_LOG("SET_VOLUME AudioManagerStub");
-            int volumeType = data.ReadInt32();
-            MEDIA_DEBUG_LOG("SET_VOLUME volumeType received from client= %{public}d", volumeType);
-            AudioSvcManager::AudioVolumeType volumeStreamConfig =
-                   static_cast<AudioSvcManager::AudioVolumeType>(volumeType);
-            MEDIA_DEBUG_LOG("SET_VOLUME volumeType= %{public}d", volumeStreamConfig);
-            int vol = data.ReadInt32();
-            SetVolume(volumeStreamConfig, vol);
-            return MEDIA_OK;
-        }
-        case GET_VOLUME: {
-            MEDIA_DEBUG_LOG("GET_VOLUME AudioManagerStub");
-            int volumeType = data.ReadInt32();
-            MEDIA_DEBUG_LOG("GET_VOLUME volumeType received from client= %{public}d", volumeType);
-            AudioSvcManager::AudioVolumeType volumeStreamConfig =
-                   static_cast<AudioSvcManager::AudioVolumeType>(volumeType);
-            MEDIA_DEBUG_LOG("GET_VOLUME volumeType= %{public}d", volumeStreamConfig);
-            int ret = GetVolume(volumeStreamConfig);
-            reply.WriteInt32(ret);
-            return MEDIA_OK;
-        }
         case GET_MAX_VOLUME: {
             MEDIA_DEBUG_LOG("GET_MAX_VOLUME AudioManagerStub");
             int volumeType = data.ReadInt32();
             MEDIA_DEBUG_LOG("GET_MAX_VOLUME volumeType received from client= %{public}d", volumeType);
-            AudioSvcManager::AudioVolumeType volumeStreamConfig =
-                   static_cast<AudioSvcManager::AudioVolumeType>(volumeType);
+            AudioSystemManager::AudioVolumeType volumeStreamConfig =
+                   static_cast<AudioSystemManager::AudioVolumeType>(volumeType);
             MEDIA_DEBUG_LOG("GET_MAX_VOLUME volumeType= %{public}d", volumeStreamConfig);
-            int ret = GetMaxVolume(volumeStreamConfig);
-            reply.WriteInt32(ret);
+            float ret = GetMaxVolume(volumeStreamConfig);
+            reply.WriteFloat(ret);
             return MEDIA_OK;
         }
         case GET_MIN_VOLUME: {
             MEDIA_DEBUG_LOG("GET_MIN_VOLUME AudioManagerStub");
             int volumeType = data.ReadInt32();
             MEDIA_DEBUG_LOG("GET_MIN_VOLUME volumeType received from client= %{public}d", volumeType);
-            AudioSvcManager::AudioVolumeType volumeStreamConfig =
-                   static_cast<AudioSvcManager::AudioVolumeType>(volumeType);
+            AudioSystemManager::AudioVolumeType volumeStreamConfig =
+                   static_cast<AudioSystemManager::AudioVolumeType>(volumeType);
             MEDIA_DEBUG_LOG("GET_MIN_VOLUME volumeType= %{public}d", volumeStreamConfig);
-            int ret = GetMinVolume(volumeStreamConfig);
-            reply.WriteInt32(ret);
+            float ret = GetMinVolume(volumeStreamConfig);
+            reply.WriteFloat(ret);
             return MEDIA_OK;
         }
         case GET_DEVICES: {
@@ -86,6 +65,37 @@ int AudioManagerStub::OnRemoteRequest(
             }
             return MEDIA_OK;
         }
+        case SET_AUDIO_PARAMETER: {
+            MEDIA_DEBUG_LOG("SET_AUDIO_PARAMETER AudioManagerStub");
+            const std::string key = data.ReadString();
+            const std::string value = data.ReadString();
+            MEDIA_DEBUG_LOG("SET_AUDIO_PARAMETER key-value pair from client= %{public}s, %{public}s",
+                            key.c_str(), value.c_str());
+            SetAudioParameter(key, value);
+            return MEDIA_OK;
+        }
+        case GET_AUDIO_PARAMETER: {
+            MEDIA_DEBUG_LOG("GET_AUDIO_PARAMETER AudioManagerStub");
+            const std::string key = data.ReadString();
+            MEDIA_DEBUG_LOG("GET_AUDIO_PARAMETER key received from client= %{public}s", key.c_str());
+            const std::string value = GetAudioParameter(key);
+            reply.WriteString(value);
+            return MEDIA_OK;
+        }
+        case SET_MICROPHONE_MUTE: {
+            MEDIA_DEBUG_LOG("SET_MICROPHONE_MUTE AudioManagerStub");
+            bool isMute = data.ReadBool();
+            MEDIA_DEBUG_LOG("SET_MICROPHONE_MUTE isMute value from client= %{public}d", isMute);
+            int32_t result = SetMicrophoneMute(isMute);
+            reply.WriteInt32(result);
+            return MEDIA_OK;
+        }
+        case IS_MICROPHONE_MUTE: {
+            MEDIA_DEBUG_LOG("IS_MICROPHONE_MUTE AudioManagerStub");
+            bool isMute = IsMicrophoneMute();
+            reply.WriteBool(isMute);
+            return MEDIA_OK;
+        }
         default: {
             MEDIA_ERR_LOG("default case, need check AudioManagerStub");
             return IPCObjectStub::OnRemoteRequest(code, data, reply, option);
@@ -97,4 +107,5 @@ bool AudioManagerStub::IsPermissionValid()
 {
     return true;
 }
+} // namespace AudioStandard
 } // namespace OHOS

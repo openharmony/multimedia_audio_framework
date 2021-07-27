@@ -27,6 +27,7 @@ namespace Audio {
     } while (0)
 
 using namespace OHOS::Media;
+using namespace OHOS::AudioStandard;
 static AudioManager *g_audioManager = nullptr;
 AudioSource::AudioSource()
     : initialized_(false),

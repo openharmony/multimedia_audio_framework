@@ -20,6 +20,7 @@
 namespace OHOS {
 namespace Audio {
 using namespace OHOS::Media;
+using namespace OHOS::AudioStandard;
 
 constexpr uint32_t AUDIO_READ_STREAM_TIME_OUT_MS = 1000; /* 1S */
 

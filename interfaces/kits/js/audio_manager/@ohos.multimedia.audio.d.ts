@@ -12,199 +12,349 @@
 * See the License for the specific language governing permissions and
 * limitations under the License.
 */
-
-import {ErrorCallback, AsyncCallback} from './basic';
+import {ErrorCallback, AsyncCallback, Callback} from './basic';
+import {VideoPlayer, AudioPlayer} from '@ohos.Multimedia.media'
 /**
  * @name audio
  * @since 6
  * @sysCap SystemCapability.Multimedia.Audio
- * @import import audio from '@ohos.multimedia.audio';
+ * @import import audio from '@ohos.Multimedia.audio';
  * @permission
  */
 declare namespace audio {
 
-    /**
-     * get the audiomanager of the audio
-     * @devices
-     * @sysCap SystemCapability.Multimedia.Audio
-     */
-    function getAudioManager(): AudioManager;
+  /**
+   * Obtains an AudioManager instance.
+   * @sysCap SystemCapability.Multimedia.Audio
+   * @devices
+   */
+  function getAudioManager(): AudioManager;
 
+  /**
+   * Enumerates audio stream types.
+   * @devices
+   * @sysCap SystemCapability.Multimedia.Audio
+   */
+  enum AudioVolumeType {
     /**
-     * the type of audio stream
-     * @devices
-     * @sysCap SystemCapability.Multimedia.Audio
+     * Audio streams for media purpose
      */
-    enum AudioVolumeType {
-        /**
-         * the media stream
-         */
-        MEDIA = 1,
-        /**
-         * the ringtone stream
-         */
-        RINGTONE = 2,
-    }
+    MEDIA = 1,
+    /**
+     * Audio streams for ring tones
+     */
+    RINGTONE = 2,
+  }
 
+  /**
+   * Enumerates audio device flags.
+   * @devices
+   * @sysCap SystemCapability.Multimedia.Audio
+   */
+  enum DeviceFlag {
     /**
-     * the flag type of device
-     * @devices
-     * @sysCap SystemCapability.Multimedia.Audio
+     * Output devices
      */
-    enum DeviceFlag {
-        /**
-         * the device flag of output
-         */
-        OUTPUT_DEVICES_FLAG = 1,
-        /**
-         * the device flag of input
-         */
-        INPUT_DEVICES_FLAG = 2,
-        /**
-         * the device flag of all devices
-         */
-        ALL_DEVICES_FLAG = 3,
-    }
+    OUTPUT_DEVICES_FLAG = 1,
     /**
-     * the role of device
-     * @devices
-     * @sysCap SystemCapability.Multimedia.Audio
+     * Input devices
      */
-    enum DeviceRole {
-        /**
-         * the role of input devices
-         */
-        INPUT_DEVICE = 1,
-        /**
-         * the role of output devices
-         */
-        OUTPUT_DEVICE = 2,
-    }
+    INPUT_DEVICES_FLAG = 2,
     /**
-     * the type of device
-     * @devices
-     * @sysCap SystemCapability.Multimedia.Audio
+     * All devices
      */
-    enum DeviceType {
-        /**
-         * invalid
-         */
-        INVALID = 0,
-        /**
-         * speaker
-         */
-        SPEAKER = 1,
-        /**
-         * wired headset
-         */
-        WIRED_HEADSET = 2,
-        /**
-         * bluetooth sco
-         */
-        BLUETOOTH_SCO = 3,
-        /**
-         * bluetooth a2dp
-         */
-        BLUETOOTH_A2DP = 4,
-        /**
-         * mic
-         */
-        MIC = 5,
-    }
+    ALL_DEVICES_FLAG = 3,
+  }
+  /**
+   * Enumerates device roles.
+   * @devices
+   * @sysCap SystemCapability.Multimedia.Audio
+   */
+  enum DeviceRole {
     /**
-     * the audiomanager of the audio
-     * @devices
-     * @sysCap SystemCapability.Multimedia.Audio
+     * Input role
      */
-    interface AudioManager {
-        /**
-         * set the volume of the audiovolumetype
-         * @devices
-         * @sysCap SystemCapability.Multimedia.Audio
-         */
-        setVolume(audioType: AudioVolumeType,volume: number,callback: AsyncCallback<void>): void;
-        /**
-         * set the volume of the audiovolumetype
-         * @devices
-         * @sysCap SystemCapability.Multimedia.Audio
-         */
-        setVolume(audioType: AudioVolumeType,volume: number): Promise<void>;
-        /**
-         * get the volume of the audiovolumetype
-         * @devices
-         * @sysCap SystemCapability.Multimedia.Audio
-         */
-        getVolume(audioType: AudioVolumeType, callback: AsyncCallback<number>): void;
-        /**
-         * get the volume of the audiovolumetype
-         * @devices
-         * @sysCap SystemCapability.Multimedia.Audio
-         */
-        getVolume(audioType: AudioVolumeType): Promise<number>;
-        /**
-         * get the min volume of the audiovolumetype
-         * @devices
-         * @sysCap SystemCapability.Multimedia.Audio
-         */
-        getMinVolume(audioType: AudioVolumeType, callback: AsyncCallback<number>): void
-        /**
-         * get the min volume of the audiovolumetype
-         * @devices
-         * @sysCap SystemCapability.Multimedia.Audio
-         */
-        getMinVolume(audioType: AudioVolumeType): Promise<number>;
-        /**
-         * get the max volume of the audiovolumetype
-         * @devices
-         * @sysCap SystemCapability.Multimedia.Audio
-         */
-        getMaxVolume(audioType: AudioVolumeType, callback: AsyncCallback<number>): void
-        /**
-         * get the max volume of the audiovolumetype
-         * @devices
-         * @sysCap SystemCapability.Multimedia.Audio
-         */
-        getMaxVolume(audioType: AudioVolumeType): Promise<number>;
-        /**
-         * get the device list of the audio devices by the audio flag
-         * @devices
-         * @sysCap SystemCapability.Multimedia.Audio
-         */
-        getDevices(deviceFlag: DeviceFlag, callback: AsyncCallback<AudioDeviceDescriptors>): void;
-        /**
-         * get the device list of the audio devices by the audio flag
-         * @devices
-         * @sysCap SystemCapability.Multimedia.Audio
-         */
-        getDevices(deviceFlag: DeviceFlag): Promise<AudioDeviceDescriptors>;
-    }
+    INPUT_DEVICE = 1,
+    /**
+     * Output role
+     */
+    OUTPUT_DEVICE = 2,
+  }
+  /**
+   * Enumerates device types.
+   * @devices
+   * @sysCap SystemCapability.Multimedia.Audio
+   */
+  enum DeviceType {
+    /**
+     * Invalid device
+     */
+    INVALID = 0,
+    /**
+     * Speaker
+     */
+    SPEAKER = 1,
+    /**
+     * Wired headset
+     */
+    WIRED_HEADSET = 2,
+    /**
+     * Bluetooth device using the synchronous connection oriented link (SCO)
+     */
+    BLUETOOTH_SCO = 3,
+    /**
+     * Bluetooth device using advanced audio distribution profile (A2DP)
+     */
+    BLUETOOTH_A2DP = 4,
+    /**
+     * Microphone
+     */
+    MIC = 5,
+  }
+  /**
+   * 音频铃声枚举.
+   * @devices
+   * @sysCap SystemCapability.Multimedia.Audio
+   */
+  enum AudioRingMode {
+    /**
+     * 正常铃声模式
+     */
+    RINGER_MODE_NORMAL = 0,
+    /**
+     * 静音铃声模式
+     */
+    RINGER_MODE_SILENT = 1,
+    /**
+     * 振动铃声模式
+     */
+    RINGER_MODE_VIBRATE = 2,
+  }
 
+  /**
+   * Manages audio volume and audio device information.
+   * @devices
+   * @sysCap SystemCapability.Multimedia.Audio
+   */
+  interface AudioManager {
     /**
-     * the Descriptor of the device
+     * Sets volume for a stream. This method uses an asynchronous callback to return the execution result.
      * @devices
      * @sysCap SystemCapability.Multimedia.Audio
      */
-    interface AudioDeviceDescriptor {
-        /**
-         * the role of device
-         * @devices
-         * @sysCap SystemCapability.Multimedia.Audio
-         */
-        readonly deviceRole: DeviceRole;
-        /**
-         * the type of device
-         * @devices
-         * @sysCap SystemCapability.Multimedia.Audio
-         */
-        readonly deviceType: DeviceType;
-    }
+    setVolume(audioType: AudioVolumeType, volume: number,callback: AsyncCallback<void>): void;
+    /**
+     * Sets volume for a stream. This method uses a promise to return the execution result.
+     * @devices
+     * @sysCap SystemCapability.Multimedia.Audio
+     */
+    setVolume(audioType: AudioVolumeType, volume: number): Promise<void>;
+    /**
+     * Obtains volume of a stream. This method uses an asynchronous callback to return the execution result.
+     * @devices
+     * @sysCap SystemCapability.Multimedia.Audio
+     */
+    getVolume(audioType: AudioVolumeType, callback: AsyncCallback<number>): void;
+    /**
+     * Obtains the volume of a stream. This method uses a promise to return the execution result.
+     * @devices
+     * @sysCap SystemCapability.Multimedia.Audio
+     */
+    getVolume(audioType: AudioVolumeType): Promise<number>;
+    /**
+     * Obtains the minimum volume allowed for a stream. This method uses an asynchronous callback to return the execution result.
+     * @devices
+     * @sysCap SystemCapability.Multimedia.Audio
+     */
+    getMinVolume(audioType: AudioVolumeType, callback: AsyncCallback<number>): void
+    /**
+     * Obtains the minimum volume allowed for a stream. This method uses a promise to return the execution result.
+     * @devices
+     * @sysCap SystemCapability.Multimedia.Audio
+     */
+    getMinVolume(audioType: AudioVolumeType): Promise<number>;
+    /**
+     * Obtains the maximum volume allowed for a stream. This method uses an asynchronous callback to return the execution result.
+     * @devices
+     * @sysCap SystemCapability.Multimedia.Audio
+     */
+    getMaxVolume(audioType: AudioVolumeType, callback: AsyncCallback<number>): void
+    /**
+     * Obtains the maximum volume allowed for a stream. This method uses a promise to return the execution result.
+     * @devices
+     * @sysCap SystemCapability.Multimedia.Audio
+     */
+    getMaxVolume(audioType: AudioVolumeType): Promise<number>;
+    /**
+     * Obtains the audio devices of a specified flag. This method uses an asynchronous callback to return the execution result.
+     * @devices
+     * @sysCap SystemCapability.Multimedia.Audio
+     */
+    getDevices(deviceFlag: DeviceFlag, callback: AsyncCallback<AudioDeviceDescriptors>): void
+    /**
+     * Obtains the audio devices with a specified flag. This method uses a promise to return the execution result.
+     * @devices
+     * @sysCap SystemCapability.Multimedia.Audio
+     */
+    getDevices(deviceFlag: DeviceFlag): Promise<AudioDeviceDescriptors>;
+    /**
+     * 回调方式获取铃声模式。
+     * @sysCap SystemCapability.Multimedia.Audio
+     * @devices
+     */
+    getRingerMode(callback: AsyncCallback<AudioRingMode>): void;
+    /**
+     * promise方式获取铃声模式。
+     * @sysCap SystemCapability.Multimedia.Audio
+     * @devices
+     */
+    getRingerMode(): Promise<AudioRingMode>;
+    /**
+     * 设置铃声模式，回调方式返回是否成功。
+     * @sysCap SystemCapability.Multimedia.Audio
+     * @devices
+     */
+    setRingerMode(mode: AudioRingMode, callback: AsyncCallback<void>): void;
+    /**
+     * 设置铃声模式，promise方式返回是否成功。
+     * @sysCap SystemCapability.Multimedia.Audio
+     * @devices
+     */
+    setRingerMode(mode: AudioRingMode): Promise<void>;
+    /**
+     * 判断流是否静音，回调方式返回。
+     * @sysCap SystemCapability.Multimedia.Audio
+     * @devices
+     */
+    isStreamMute(volumeType: AudioVolumeType, callback: AsyncCallback<boolean>): void;
+    /**
+     * 判断流是否静音，promise方式返回。
+     * @sysCap SystemCapability.Multimedia.Audio
+     * @devices
+     */
+    isStreamMute(volumeType: AudioVolumeType): Promise<boolean>;
+    /**
+     * 判断流是否激活，回调方式返回。
+     * @sysCap SystemCapability.Multimedia.Audio
+     * @devices
+     */
+    isStreamActive(volumeType: AudioVolumeType, callback: AsyncCallback<boolean>): void;
+    /**
+     * 判断流是否激活，promise方式返回。
+     * @sysCap SystemCapability.Multimedia.Audio
+     * @devices
+     */
+    isStreamActive(volumeType: AudioVolumeType): Promise<boolean>;
+    /**
+     * 判断麦克风是否静音，回调方式返回。
+     * @sysCap SystemCapability.Multimedia.Audio
+     * @devices
+     */
+    isMicrophoneMute(callback: AsyncCallback<boolean>): void;
+    /**
+     * 判断麦克风是否静音，promise方式返回。
+     * @sysCap SystemCapability.Multimedia.Audio
+     * @devices
+     */
+    isMicrophoneMute(): Promise<boolean>;
+    /**
+     * 设置流静音，回调方式返回。
+     * @sysCap SystemCapability.Multimedia.Audio
+     * @devices
+     */
+	 setStreamMute(volumeType: AudioVolumeType, mute: boolean, callback: AsyncCallback<void>) : void;
+    /**
+     * 设置流静音，promise方式返回。
+     * @sysCap SystemCapability.Multimedia.Audio
+     * @devices
+     */
+    setStreamMute(volumeType: AudioVolumeType, mute: boolean): Promise<void>;
+    /**
+     * 设置麦克风是否静音，回调方式返回。
+     * @sysCap SystemCapability.Multimedia.Audio
+     * @devices
+     */
+    setMicrophoneMute(isMute: boolean, callback: AsyncCallback<void>): void;
+    /**
+     * 设置麦克风是否静音，promise方式返回。
+     * @sysCap SystemCapability.Multimedia.Audio
+     * @devices
+     */
+    setMicrophoneMute(isMute: boolean): Promise<void>;
+    /**
+     * 设备是否激活，回调方式返回。
+     * @sysCap SystemCapability.Multimedia.Audio
+     * @devices
+     */
+    isDeviceActive(deviceType: DeviceType, callback: AsyncCallback<boolean>): void;
+    /**
+     * 设备是否激活，promise方式返回。
+     * @sysCap SystemCapability.Multimedia.Audio
+     * @devices
+     */
+    isDeviceActive(deviceType: DeviceType): Promise<boolean>;
+    /**
+     * 设置设备激活，回调方式返回。
+     * @sysCap SystemCapability.Multimedia.Audio
+     * @devices
+     */
+    setDeviceActive(deviceType: DeviceType, active: boolean, callback: AsyncCallback<boolean>): void;
+    /**
+     * 设置设备激活，promise方式返回。
+     * @sysCap SystemCapability.Multimedia.Audio
+     * @devices
+     */
+    setDeviceActive(deviceType: DeviceType, active: boolean): Promise<boolean>;
+    /**
+     * 获取音频参数，回调方式返回。
+     * @sysCap SystemCapability.Multimedia.Audio
+     * @devices
+     */
+    getAudioParameter(key: string, callback: AsyncCallback<string>): void;
+    /**
+     * 获取音频参数，promise方式返回。
+     * @sysCap SystemCapability.Multimedia.Audio
+     * @devices
+     */
+    getAudioParameter(key: string): Promise<string>;
+    /**
+     * 设置音频参数，回调方式返回。
+     * @sysCap SystemCapability.Multimedia.Audio
+     * @devices
+     */
+    setAudioParameter(key: string, value: string, callback: AsyncCallback<void>): void;
+    /**
+     * 设置音频参数，回调方式返回。
+     * @sysCap SystemCapability.Multimedia.Audio
+     * @devices
+     */
+    setAudioParameter(key: string, value: string): Promise<void>;
+  }
 
+  /**
+   * Describes an audio device.
+   * @devices
+   * @sysCap SystemCapability.Multimedia.Audio
+   */
+  interface AudioDeviceDescriptor {
     /**
-     * the Descriptor list of the devices
+     * Audio device role
      * @devices
-     * @sysCap SystemCapability.Multimedia.Audio
      */
-    type AudioDeviceDescriptors = Array<Readonly<AudioDeviceDescriptor>>;
+    readonly deviceRole: DeviceRole;
+    /**
+     * Audio device type
+     * @devices
+     */
+    readonly deviceType: DeviceType;
+  }
+
+  /**
+   * A queue of AudioDeviceDescriptor, which is read-only.
+   * @devices
+   * @sysCap SystemCapability.Multimedia.Audio
+   */
+  type AudioDeviceDescriptors = Array<Readonly<AudioDeviceDescriptor>>;
 }
 
 export default audio;

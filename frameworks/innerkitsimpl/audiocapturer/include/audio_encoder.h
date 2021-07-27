@@ -21,7 +21,7 @@
 #include <time.h>
 #include <memory>
 #include <vector>
-#include "media_errors.h"
+#include "audio_errors.h"
 #include "media_info.h"
 #include "format.h"
 #include "codec_interface.h"
