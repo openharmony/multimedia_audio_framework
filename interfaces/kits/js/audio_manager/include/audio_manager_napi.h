@@ -32,14 +32,20 @@ public:
     ~AudioManagerNapi();
 
     enum AudioVolumeType {
-        MEDIA = 1,
-        RINGTONE = 2
+        RINGTONE = 2,
+        MEDIA = 3
     };
 
     enum DeviceFlag {
         OUTPUT_DEVICES_FLAG = 1,
         INPUT_DEVICES_FLAG = 2,
         ALL_DEVICES_FLAG = 3
+    };
+
+    enum AudioRingMode {
+        RINGER_MODE_SILENT = 0,
+        RINGER_MODE_VIBRATE,
+        RINGER_MODE_NORMAL
     };
 
     static napi_value Init(napi_env env, napi_value exports);
