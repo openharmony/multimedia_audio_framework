@@ -25,7 +25,7 @@ Sampling is a process to obtain discrete-time signals by extracting samples from
 
 -   **Sampling rate**
 
-Sampling rate is the number of samples extracted from a continuous signal per second to form a discrete signal. It is measured in Hz. Generally, human hearing range is from 20 Hz to 20 kHz. Common audio sampling rates include 8 kHz, 11.025 kHz, 22.05 kHz, 16 kHz, 37.8 kHz, 44.1 kHz, 48 kHz, 96 kHz, and 192 kHz.
+Sampling rate is the number of samples extracted from a continuous signal per second to form a discrete signal. It is measured in Hz. Generally, human hearing range is from 20 Hz to 20 kHz. Common audio sampling rates include 8 kHz, 11.025 kHz, 22.05 kHz, 16 kHz, 37.8 kHz, 44.1 kHz, 48 kHz, and 96 kHz.
 
 -   **Channel**
 
@@ -47,7 +47,7 @@ The structure of the repository directory is as follows:
 /foundation/multimedia/audio_standard  # Audio code
 ├── frameworks                         # Framework code
 │   ├── innerkitsimpl                  # Internal Native API Implementation.
-|   |                                    Pulseaudio and libsnd file build configuration.pulseaudio-hdi modules
+|   |                                    Pulseaudio, libsndfile build configuration and pulseaudio-hdi modules
 │   └── kitsimpl                       # External JS API Implementation
 ├── interfaces                         # Interfaces
 │   ├── innerkits                      # Internal Native APIs
@@ -77,15 +77,15 @@ You can use APIs provided in this repository to convert audio data into audible 
 
     audioRenderer->SetParams(rendererParams);
     ```
-4. (Optional) use audioRenderer->**GetParams**(rendererParams); to validate SetParams
+4. (Optional) use audioRenderer->**GetParams**(rendererParams) to validate SetParams
 5. Call **audioRenderer->Start()** function on the AudioRenderer instance to start the playback task.
 6. Get the buffer length to be written, using **GetBufferSize** API .
     ```
     audioRenderer->GetBufferSize(bufferLen);
     ```
-7. Read the audio data to be played from the source(example audio file) and transfer it into the bytes stream. Call the **Write** function repeatedly to write the render data.
+7. Read the audio data to be played from the source(for example, an audio file) and transfer it into the bytes stream. Call the **Write** function repeatedly to write the render data.
     ```
-    bytesToWrite = fread(buffer, 1, bufferLen, wavFile); 
+    bytesToWrite = fread(buffer, 1, bufferLen, wavFile);
     while ((bytesWritten < bytesToWrite) && ((bytesToWrite - bytesWritten) > minBytes)) {
         bytesWritten += audioRenderer->Write(buffer + bytesWritten, bytesToWrite - bytesWritten);
         if (bytesWritten < 0)
@@ -97,7 +97,7 @@ You can use APIs provided in this repository to convert audio data into audible 
 9. Call audioRenderer->**Stop()** function to Stop rendering.
 10. After the playback task is complete, call the audioRenderer->**Release**() function on the AudioRenderer instance to release the resources.
 
-Provided the basic playback usecase above. Please refer [**audio_renderer.h**](https://gitee.com/openharmony/multimedia_audio_standard/interfaces/innerkits/native/audiorenderer/include/audio_renderer.h) and [**audio_info.h**](https://gitee.com/openharmony/multimedia_audio_standard/interfaces/innerkits/native/audiocommon/include/audio_info.h) for more APIs.
+Provided the basic playback usecase above. Please refer [**audio_renderer.h**](https://gitee.com/openharmony/multimedia_audio_standard/blob/master/interfaces/innerkits/native/audiorenderer/include/audio_renderer.h) and [**audio_info.h**](https://gitee.com/openharmony/multimedia_audio_standard/blob/master/interfaces/innerkits/native/audiocommon/include/audio_info.h) for more APIs.
 
 
 ### Audio Recording<a name="audio-recording"></a>
@@ -142,14 +142,12 @@ You can use the APIs provided in this repository for your application to record 
 9. Call the audioRecorder->**Stop**() function on the AudioRecorder instance to stop the recording.
 10. After the recording task is complete, call the audioRecorder->**Release**() function on the AudioRecorder instance to release resources.
 
-Provided the basic recording usecase above. Please refer [**audio_recorder.h**](https://gitee.com/openharmony/multimedia_audio_standard/interfaces/innerkits/native/audiorecorder/include/audio_recorder.h) and [**audio_info.h**](https://gitee.com/openharmony/multimedia_audio_standard/interfaces/innerkits/native/audiocommon/include/audio_info.h) for more APIs.
+Provided the basic recording usecase above. Please refer [**audio_recorder.h**](https://gitee.com/openharmony/multimedia_audio_standard/blob/master/interfaces/innerkits/native/audiorecorder/include/audio_recorder.h) and [**audio_info.h**](https://gitee.com/openharmony/multimedia_audio_standard/blob/master/interfaces/innerkits/native/audiocommon/include/audio_info.h) for more APIs.
 
 ### Audio Management<a name="audio-management"></a>
 
 JS apps can use the APIs provided by audio manager to control the volume and the device.\
-Please refer the following for JS usage of audio volume and device management:
- https://gitee.com/openharmony/docs/blob/master/en/application-dev/js-reference/audio-management.md
-
+Please refer [**audio-management.md**](https://gitee.com/openharmony/docs/blob/master/en/application-dev/js-reference/audio-management.md) for JS usage of audio volume and device management.
 
 ## Repositories Involved<a name="repositories-involved"></a>
 

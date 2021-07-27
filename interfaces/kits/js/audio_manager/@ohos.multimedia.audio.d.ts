@@ -13,7 +13,7 @@
 * limitations under the License.
 */
 import {ErrorCallback, AsyncCallback, Callback} from './basic';
-import {VideoPlayer, AudioPlayer} from '@ohos.Multimedia.media'
+import {VideoPlayer, AudioPlayer} from './@ohos.multimedia.media'
 /**
  * @name audio
  * @since 6
@@ -25,8 +25,8 @@ declare namespace audio {
 
   /**
    * Obtains an AudioManager instance.
-   * @sysCap SystemCapability.Multimedia.Audio
    * @devices
+   * @sysCap SystemCapability.Multimedia.Audio
    */
   function getAudioManager(): AudioManager;
 
@@ -36,14 +36,14 @@ declare namespace audio {
    * @sysCap SystemCapability.Multimedia.Audio
    */
   enum AudioVolumeType {
-    /**
-     * Audio streams for media purpose
-     */
-    MEDIA = 1,
-    /**
+	/**
      * Audio streams for ring tones
      */
     RINGTONE = 2,
+    /**
+     * Audio streams for media purpose
+     */
+    MEDIA = 3,
   }
 
   /**
@@ -112,23 +112,23 @@ declare namespace audio {
     MIC = 5,
   }
   /**
-   * 音频铃声枚举.
+   * Enumerates Audio Ringer modes
    * @devices
    * @sysCap SystemCapability.Multimedia.Audio
    */
   enum AudioRingMode {
     /**
-     * 正常铃声模式
+     * Silent mode
      */
-    RINGER_MODE_NORMAL = 0,
+    RINGER_MODE_SILENT = 0,
     /**
-     * 静音铃声模式
+     * Vibration mode
      */
-    RINGER_MODE_SILENT = 1,
-    /**
-     * 振动铃声模式
+    RINGER_MODE_VIBRATE,
+	 /**
+     * Normal mode
      */
-    RINGER_MODE_VIBRATE = 2,
+    RINGER_MODE_NORMAL,
   }
 
   /**
@@ -142,193 +142,193 @@ declare namespace audio {
      * @devices
      * @sysCap SystemCapability.Multimedia.Audio
      */
-    setVolume(audioType: AudioVolumeType, volume: number,callback: AsyncCallback<void>): void;
+    setVolume(volumeType: AudioVolumeType, volume: number, callback: AsyncCallback<void>): void;
     /**
      * Sets volume for a stream. This method uses a promise to return the execution result.
      * @devices
      * @sysCap SystemCapability.Multimedia.Audio
      */
-    setVolume(audioType: AudioVolumeType, volume: number): Promise<void>;
+    setVolume(volumeType: AudioVolumeType, volume: number): Promise<void>;
     /**
      * Obtains volume of a stream. This method uses an asynchronous callback to return the execution result.
      * @devices
      * @sysCap SystemCapability.Multimedia.Audio
      */
-    getVolume(audioType: AudioVolumeType, callback: AsyncCallback<number>): void;
+    getVolume(volumeType: AudioVolumeType, callback: AsyncCallback<number>): void;
     /**
      * Obtains the volume of a stream. This method uses a promise to return the execution result.
      * @devices
      * @sysCap SystemCapability.Multimedia.Audio
      */
-    getVolume(audioType: AudioVolumeType): Promise<number>;
+    getVolume(volumeType: AudioVolumeType): Promise<number>;
     /**
      * Obtains the minimum volume allowed for a stream. This method uses an asynchronous callback to return the execution result.
      * @devices
      * @sysCap SystemCapability.Multimedia.Audio
      */
-    getMinVolume(audioType: AudioVolumeType, callback: AsyncCallback<number>): void
+    getMinVolume(volumeType: AudioVolumeType, callback: AsyncCallback<number>): void;
     /**
      * Obtains the minimum volume allowed for a stream. This method uses a promise to return the execution result.
      * @devices
      * @sysCap SystemCapability.Multimedia.Audio
      */
-    getMinVolume(audioType: AudioVolumeType): Promise<number>;
+    getMinVolume(volumeType: AudioVolumeType): Promise<number>;
     /**
      * Obtains the maximum volume allowed for a stream. This method uses an asynchronous callback to return the execution result.
      * @devices
      * @sysCap SystemCapability.Multimedia.Audio
      */
-    getMaxVolume(audioType: AudioVolumeType, callback: AsyncCallback<number>): void
+    getMaxVolume(volumeType: AudioVolumeType, callback: AsyncCallback<number>): void;
     /**
      * Obtains the maximum volume allowed for a stream. This method uses a promise to return the execution result.
      * @devices
      * @sysCap SystemCapability.Multimedia.Audio
      */
-    getMaxVolume(audioType: AudioVolumeType): Promise<number>;
+    getMaxVolume(volumeType: AudioVolumeType): Promise<number>;
+    /**
+     * Sets the stream to mute. This method uses an asynchronous callback to return the execution result.
+     * @sysCap SystemCapability.Multimedia.Audio
+     * @devices
+     */
+    mute(volumeType: AudioVolumeType, mute: boolean, callback: AsyncCallback<void>): void;
+    /**
+     * Sets the stream to mute. This method uses a promise to return the execution result.
+	   * @devices
+     * @sysCap SystemCapability.Multimedia.Audio
+     */
+    mute(volumeType: AudioVolumeType, mute: boolean): Promise<void>;
+	  /**
+     * Checks whether the stream is muted. This method uses an asynchronous callback to return the execution result.
+	   * @devices
+     * @sysCap SystemCapability.Multimedia.Audio
+     */
+    isMute(volumeType: AudioVolumeType, callback: AsyncCallback<boolean>): void;
+    /**
+     * Checks whether the stream is muted. This method uses a promise to return the execution result.
+	   * @devices
+     * @sysCap SystemCapability.Multimedia.Audio
+     */
+    isMute(volumeType: AudioVolumeType): Promise<boolean>;
+    /**
+     * Checks whether the stream is active. This method uses an asynchronous callback to return the execution result.
+	   * @devices
+     * @sysCap SystemCapability.Multimedia.Audio
+     */
+    isActive(volumeType: AudioVolumeType, callback: AsyncCallback<boolean>): void;
+    /**
+     * Checks whether the stream is active. This method uses a promise to return the execution result.
+	   * @devices
+     * @sysCap SystemCapability.Multimedia.Audio
+     */
+    isActive(volumeType: AudioVolumeType): Promise<boolean>;
+	  /**
+     * Mute/Unmutes the microphone. This method uses an asynchronous callback to return the execution result.
+	   * @devices
+     * @sysCap SystemCapability.Multimedia.Audio
+     */
+    setMicrophoneMute(mute: boolean, callback: AsyncCallback<void>): void;
+    /**
+     * Mute/Unmutes the microphone. This method uses a promise to return the execution result.
+	   * @devices
+     * @sysCap SystemCapability.Multimedia.Audio
+     */
+    setMicrophoneMute(mute: boolean): Promise<void>;
+    /**
+     * Checks whether the microphone is muted. This method uses an asynchronous callback to return the execution result.
+	   * @devices
+     * @sysCap SystemCapability.Multimedia.Audio
+     */
+    isMicrophoneMute(callback: AsyncCallback<boolean>): void;
+    /**
+     * Checks whether the microphone is muted. This method uses a promise to return the execution result.
+	   * @devices
+     * @sysCap SystemCapability.Multimedia.Audio
+     */
+    isMicrophoneMute(): Promise<boolean>;
+	  /**
+     * Sets the ringer mode. This method uses an asynchronous callback to return the execution result.
+	   * @devices
+     * @sysCap SystemCapability.Multimedia.Audio
+     */
+    setRingerMode(mode: AudioRingMode, callback: AsyncCallback<void>): void;
+    /**
+     * Sets the ringer mode. This method uses a promise to return the execution result.
+	   * @devices
+     * @sysCap SystemCapability.Multimedia.Audio
+     */
+    setRingerMode(mode: AudioRingMode): Promise<void>;
+	  /**
+     * Gets the ringer mode. This method uses an asynchronous callback to return the execution result.
+	   * @devices
+     * @sysCap SystemCapability.Multimedia.Audio
+     */
+    getRingerMode(callback: AsyncCallback<AudioRingMode>): void;
+    /**
+     * Gets the ringer mode. This method uses a promise to return the execution result.
+	   * @devices
+     * @sysCap SystemCapability.Multimedia.Audio
+     */
+    getRingerMode(): Promise<AudioRingMode>;
+	  /**
+     * Sets the audio parameter. This method uses an asynchronous callback to return the execution result.
+	   * @devices
+     * @sysCap SystemCapability.Multimedia.Audio
+     */
+    setAudioParameter(key: string, value: string, callback: AsyncCallback<void>): void;
+    /**
+     * Sets the audio parameter. This method uses a promise to return the execution result.
+	   * @devices
+     * @sysCap SystemCapability.Multimedia.Audio
+     */
+    setAudioParameter(key: string, value: string): Promise<void>;
+	  /**
+     * Gets the audio parameter. This method uses an asynchronous callback to return the execution result.
+	   * @devices
+     * @sysCap SystemCapability.Multimedia.Audio
+     */
+    getAudioParameter(key: string, callback: AsyncCallback<string>): void;
+    /**
+     * Gets the audio parameter. This method uses a promise to return the execution result.
+	   * @devices
+     * @sysCap SystemCapability.Multimedia.Audio
+     */
+    getAudioParameter(key: string): Promise<string>;
     /**
      * Obtains the audio devices of a specified flag. This method uses an asynchronous callback to return the execution result.
      * @devices
      * @sysCap SystemCapability.Multimedia.Audio
      */
-    getDevices(deviceFlag: DeviceFlag, callback: AsyncCallback<AudioDeviceDescriptors>): void
+    getDevices(deviceFlag: DeviceFlag, callback: AsyncCallback<AudioDeviceDescriptors>): void;
     /**
      * Obtains the audio devices with a specified flag. This method uses a promise to return the execution result.
      * @devices
      * @sysCap SystemCapability.Multimedia.Audio
      */
     getDevices(deviceFlag: DeviceFlag): Promise<AudioDeviceDescriptors>;
+	  /**
+     * Activates the device. This method uses an asynchronous callback to return the execution result.
+	   * @devices
+     * @sysCap SystemCapability.Multimedia.Audio
+     */
+    setDeviceActive(deviceType: DeviceType, active: boolean, callback: AsyncCallback<void>): void;
     /**
-     * 回调方式获取铃声模式。
+     * Activates the device. This method uses a promise to return the execution result.
      * @sysCap SystemCapability.Multimedia.Audio
      * @devices
      */
-    getRingerMode(callback: AsyncCallback<AudioRingMode>): void;
+    setDeviceActive(deviceType: DeviceType, active: boolean): Promise<void>;
     /**
-     * promise方式获取铃声模式。
-     * @sysCap SystemCapability.Multimedia.Audio
-     * @devices
-     */
-    getRingerMode(): Promise<AudioRingMode>;
-    /**
-     * 设置铃声模式，回调方式返回是否成功。
-     * @sysCap SystemCapability.Multimedia.Audio
-     * @devices
-     */
-    setRingerMode(mode: AudioRingMode, callback: AsyncCallback<void>): void;
-    /**
-     * 设置铃声模式，promise方式返回是否成功。
-     * @sysCap SystemCapability.Multimedia.Audio
-     * @devices
-     */
-    setRingerMode(mode: AudioRingMode): Promise<void>;
-    /**
-     * 判断流是否静音，回调方式返回。
-     * @sysCap SystemCapability.Multimedia.Audio
-     * @devices
-     */
-    isStreamMute(volumeType: AudioVolumeType, callback: AsyncCallback<boolean>): void;
-    /**
-     * 判断流是否静音，promise方式返回。
-     * @sysCap SystemCapability.Multimedia.Audio
-     * @devices
-     */
-    isStreamMute(volumeType: AudioVolumeType): Promise<boolean>;
-    /**
-     * 判断流是否激活，回调方式返回。
-     * @sysCap SystemCapability.Multimedia.Audio
-     * @devices
-     */
-    isStreamActive(volumeType: AudioVolumeType, callback: AsyncCallback<boolean>): void;
-    /**
-     * 判断流是否激活，promise方式返回。
-     * @sysCap SystemCapability.Multimedia.Audio
-     * @devices
-     */
-    isStreamActive(volumeType: AudioVolumeType): Promise<boolean>;
-    /**
-     * 判断麦克风是否静音，回调方式返回。
-     * @sysCap SystemCapability.Multimedia.Audio
-     * @devices
-     */
-    isMicrophoneMute(callback: AsyncCallback<boolean>): void;
-    /**
-     * 判断麦克风是否静音，promise方式返回。
-     * @sysCap SystemCapability.Multimedia.Audio
-     * @devices
-     */
-    isMicrophoneMute(): Promise<boolean>;
-    /**
-     * 设置流静音，回调方式返回。
-     * @sysCap SystemCapability.Multimedia.Audio
-     * @devices
-     */
-	 setStreamMute(volumeType: AudioVolumeType, mute: boolean, callback: AsyncCallback<void>) : void;
-    /**
-     * 设置流静音，promise方式返回。
-     * @sysCap SystemCapability.Multimedia.Audio
-     * @devices
-     */
-    setStreamMute(volumeType: AudioVolumeType, mute: boolean): Promise<void>;
-    /**
-     * 设置麦克风是否静音，回调方式返回。
-     * @sysCap SystemCapability.Multimedia.Audio
-     * @devices
-     */
-    setMicrophoneMute(isMute: boolean, callback: AsyncCallback<void>): void;
-    /**
-     * 设置麦克风是否静音，promise方式返回。
-     * @sysCap SystemCapability.Multimedia.Audio
-     * @devices
-     */
-    setMicrophoneMute(isMute: boolean): Promise<void>;
-    /**
-     * 设备是否激活，回调方式返回。
+     * Checks whether the device is active. This method uses an asynchronous callback to return the execution result.
      * @sysCap SystemCapability.Multimedia.Audio
      * @devices
      */
     isDeviceActive(deviceType: DeviceType, callback: AsyncCallback<boolean>): void;
     /**
-     * 设备是否激活，promise方式返回。
+     * Checks whether the device is active. This method uses a promise to return the execution result.
      * @sysCap SystemCapability.Multimedia.Audio
      * @devices
      */
     isDeviceActive(deviceType: DeviceType): Promise<boolean>;
-    /**
-     * 设置设备激活，回调方式返回。
-     * @sysCap SystemCapability.Multimedia.Audio
-     * @devices
-     */
-    setDeviceActive(deviceType: DeviceType, active: boolean, callback: AsyncCallback<boolean>): void;
-    /**
-     * 设置设备激活，promise方式返回。
-     * @sysCap SystemCapability.Multimedia.Audio
-     * @devices
-     */
-    setDeviceActive(deviceType: DeviceType, active: boolean): Promise<boolean>;
-    /**
-     * 获取音频参数，回调方式返回。
-     * @sysCap SystemCapability.Multimedia.Audio
-     * @devices
-     */
-    getAudioParameter(key: string, callback: AsyncCallback<string>): void;
-    /**
-     * 获取音频参数，promise方式返回。
-     * @sysCap SystemCapability.Multimedia.Audio
-     * @devices
-     */
-    getAudioParameter(key: string): Promise<string>;
-    /**
-     * 设置音频参数，回调方式返回。
-     * @sysCap SystemCapability.Multimedia.Audio
-     * @devices
-     */
-    setAudioParameter(key: string, value: string, callback: AsyncCallback<void>): void;
-    /**
-     * 设置音频参数，回调方式返回。
-     * @sysCap SystemCapability.Multimedia.Audio
-     * @devices
-     */
-    setAudioParameter(key: string, value: string): Promise<void>;
   }
 
   /**

@@ -92,11 +92,11 @@ static AudioSystemManager::AudioVolumeType GetNativeAudioVolumeType(int32_t volu
     AudioSystemManager::AudioVolumeType result = AudioSystemManager::STREAM_MUSIC;
 
     switch (volumeType) {
-        case AudioManagerNapi::MEDIA:
-            result = AudioSystemManager::STREAM_MUSIC;
-            break;
         case AudioManagerNapi::RINGTONE:
             result = AudioSystemManager::STREAM_RING;
+            break;
+        case AudioManagerNapi::MEDIA:
+            result = AudioSystemManager::STREAM_MUSIC;
             break;
         default:
             result = AudioSystemManager::STREAM_MUSIC;
@@ -154,6 +154,53 @@ static AudioDeviceDescriptor::DeviceFlag GetNativeDeviceFlag(int32_t deviceFlag)
         default:
             result = AudioDeviceDescriptor::ALL_DEVICES_FLAG;
             HiLog::Error(LABEL, "Unknown device flag!, %{public}d", deviceFlag);
+            break;
+    }
+
+    return result;
+}
+
+
+static AudioRingerMode GetNativeAudioRingerMode(int32_t ringMode)
+{
+    AudioRingerMode result = RINGER_MODE_NORMAL;
+
+    switch (ringMode) {
+        case AudioManagerNapi::RINGER_MODE_SILENT:
+            result = RINGER_MODE_SILENT;
+            break;
+        case AudioManagerNapi::RINGER_MODE_VIBRATE:
+            result = RINGER_MODE_VIBRATE;
+            break;
+        case AudioManagerNapi::RINGER_MODE_NORMAL:
+            result = RINGER_MODE_NORMAL;
+            break;
+        default:
+            result = RINGER_MODE_NORMAL;
+            HiLog::Error(LABEL, "Unknown ringer mode requested by JS, Set it to default RINGER_MODE_NORMAL!");
+            break;
+    }
+
+    return result;
+}
+
+static AudioManagerNapi::AudioRingMode GetJsAudioRingMode(int32_t ringerMode)
+{
+    AudioManagerNapi::AudioRingMode result = AudioManagerNapi::RINGER_MODE_NORMAL;
+
+    switch (ringerMode) {
+        case RINGER_MODE_SILENT:
+            result = AudioManagerNapi::RINGER_MODE_SILENT;
+            break;
+        case RINGER_MODE_VIBRATE:
+            result = AudioManagerNapi::RINGER_MODE_VIBRATE;
+            break;
+        case RINGER_MODE_NORMAL:
+            result = AudioManagerNapi::RINGER_MODE_NORMAL;
+            break;
+        default:
+            result = AudioManagerNapi::RINGER_MODE_NORMAL;
+            HiLog::Error(LABEL, "Unknown ringer mode returned from native, Set it to default RINGER_MODE_NORMAL!");
             break;
     }
 
@@ -409,9 +456,9 @@ napi_value AudioManagerNapi::Init(napi_env env, napi_value exports)
         DECLARE_NAPI_FUNCTION("getMaxVolume", GetMaxVolume),
         DECLARE_NAPI_FUNCTION("getMinVolume", GetMinVolume),
         DECLARE_NAPI_FUNCTION("getDevices", GetDevices),
-        DECLARE_NAPI_FUNCTION("setStreamMute", SetStreamMute),
-        DECLARE_NAPI_FUNCTION("isStreamMute", IsStreamMute),
-        DECLARE_NAPI_FUNCTION("isStreamActive", IsStreamActive),
+        DECLARE_NAPI_FUNCTION("mute", SetStreamMute),
+        DECLARE_NAPI_FUNCTION("isMute", IsStreamMute),
+        DECLARE_NAPI_FUNCTION("isActive", IsStreamActive),
         DECLARE_NAPI_FUNCTION("setRingerMode", SetRingerMode),
         DECLARE_NAPI_FUNCTION("getRingerMode", GetRingerMode),
         DECLARE_NAPI_FUNCTION("setDeviceActive", SetDeviceActive),
@@ -800,7 +847,7 @@ napi_value AudioManagerNapi::SetRingerMode(napi_env env, napi_callback_info info
             [](napi_env env, void* data) {
                 auto context = static_cast<AudioManagerAsyncContext*>(data);
                 context->status =
-                    context->objectInfo->audioMngr_->SetRingerMode(static_cast<AudioRingerMode>(context->ringMode));
+                    context->objectInfo->audioMngr_->SetRingerMode(GetNativeAudioRingerMode(context->ringMode));
             },
             SetFunctionAsyncCallbackComplete, static_cast<void*>(asyncContext.get()), &asyncContext->work);
         if (status != napi_ok) {
@@ -855,7 +902,7 @@ napi_value AudioManagerNapi::GetRingerMode(napi_env env, napi_callback_info info
             env, nullptr, resource,
             [](napi_env env, void* data) {
                 auto context = static_cast<AudioManagerAsyncContext*>(data);
-                context->ringMode = context->objectInfo->audioMngr_->GetRingerMode();
+                context->ringMode = GetJsAudioRingMode(context->objectInfo->audioMngr_->GetRingerMode());
                 context->intValue = context->ringMode;
                 context->status = 0;
             },
