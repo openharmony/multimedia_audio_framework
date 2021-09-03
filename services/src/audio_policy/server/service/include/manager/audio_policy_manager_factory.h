@@ -17,7 +17,7 @@
 #define ST_AUDIO_POLICY_MANAGER_FACTORY_H
 
 #include <memory>
-#include "pulseaudio_policy_manager.h"
+#include "audio_adapter_manager.h"
 
 namespace OHOS {
 namespace AudioStandard {
@@ -25,7 +25,7 @@ class AudioPolicyManagerFactory {
 public:
     static IAudioPolicyInterface& GetAudioPolicyManager(void)
     {
-        return PulseAudioPolicyManager::GetInstance();
+        return AudioAdapterManager::GetInstance();
     }
 };
 } // namespace AudioStandard

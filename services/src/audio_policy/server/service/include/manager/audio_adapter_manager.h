@@ -13,20 +13,13 @@
  * limitations under the License.
  */
 
-#ifndef ST_PULSEAUDIO_POLICY_MANAGER_H
-#define ST_PULSEAUDIO_POLICY_MANAGER_H
-
-#ifdef __cplusplus
-extern "C" {
-#endif
-#include <pulse/pulseaudio.h>
-#ifdef __cplusplus
-}
-#endif
+#ifndef ST_AUDIO_ADAPTER_MANAGER_H
+#define ST_AUDIO_ADAPTER_MANAGER_H
 
 #include <list>
 #include <unordered_map>
 
+#include "audio_service_adapter.h"
 #include "distributed_kv_data_manager.h"
 #include "iaudio_policy_interface.h"
 #include "types.h"
@@ -35,7 +28,7 @@ namespace OHOS {
 namespace AudioStandard {
 using namespace OHOS::DistributedKv;
 
-class PulseAudioPolicyManager : public IAudioPolicyInterface {
+class AudioAdapterManager : public IAudioPolicyInterface {
 public:
     static constexpr char HDI_SINK[] = "libmodule-hdi-sink.z.so";
     static constexpr char HDI_SOURCE[] = "libmodule-hdi-source.z.so";
@@ -43,7 +36,6 @@ public:
     static constexpr char PIPE_SOURCE[] = "libmodule-pipe-source.z.so";
     static constexpr float MAX_VOLUME = 1.0f;
     static constexpr float MIN_VOLUME = 0.0f;
-    static constexpr uint32_t PA_CONNECT_RETRY_SLEEP_IN_MICRO_SECONDS = 500000;
 
     bool Init();
     void Deinit(void);
@@ -52,8 +44,8 @@ public:
 
     static IAudioPolicyInterface& GetInstance()
     {
-        static PulseAudioPolicyManager policyManager;
-        return policyManager;
+        static AudioAdapterManager audioAdapterManager;
+        return audioAdapterManager;
     }
 
     int32_t SetStreamVolume(AudioStreamType streamType, float volume);
@@ -76,25 +68,9 @@ public:
 
     AudioRingerMode GetRingerMode(void);
 
-    // Static Member functions
-    static void ContextStateCb(pa_context *c, void *userdata);
-
-    static void SubscribeCb(pa_context *c, pa_subscription_event_type_t t, uint32_t idx, void *userdata);
-
-    static void ModuleLoadCb(pa_context *c, uint32_t idx, void *userdata);
-
-    static void GetSinkInputInfoVolumeCb(pa_context *c, const pa_sink_input_info *i, int eol, void *userdata);
-
-    static void GetSinkInputInfoCb(pa_context *c, const pa_sink_input_info *i, int eol, void *userdata);
-
-    static void GetSinkInputInfoMuteCb(pa_context *c, const pa_sink_input_info *i, int eol, void *userdata);
-
-    static void GetSinkInputInfoMuteStatusCb(pa_context *c, const pa_sink_input_info *i, int eol, void *userdata);
-
-    static void GetSinkInputInfoCorkStatusCb(pa_context *c, const pa_sink_input_info *i, int eol, void *userdata);
 private:
     struct UserData {
-        PulseAudioPolicyManager* thiz;
+        AudioAdapterManager *thiz;
         AudioStreamType streamType;
         float volume;
         bool mute;
@@ -102,20 +78,17 @@ private:
         uint32_t idx;
     };
 
-    PulseAudioPolicyManager()
-        : mContext(nullptr),
-          mMainLoop(nullptr),
-          mRingerMode(RINGER_MODE_NORMAL),
+    AudioAdapterManager()
+        : mRingerMode(RINGER_MODE_NORMAL),
           mAudioPolicyKvStore(nullptr)
     {
         mVolumeMap[STREAM_MUSIC] = MAX_VOLUME;
         mVolumeMap[STREAM_RING] = MAX_VOLUME;
     }
 
-    virtual ~PulseAudioPolicyManager() {}
+    virtual ~AudioAdapterManager() {}
 
     bool ConnectToPulseAudio(void);
-    void HandleSinkInputEvent(pa_context *c, pa_subscription_event_type_t t, uint32_t idx, void *userdata);
     std::string GetModuleArgs(std::shared_ptr<AudioPortInfo> audioPortInfo);
     std::string GetStreamNameByStreamType(AudioStreamType streamType);
     AudioStreamType GetStreamIDByType(std::string streamType);
@@ -128,12 +101,12 @@ private:
     bool LoadRingerMode(void);
     void WriteRingerModeToKvStore(AudioRingerMode ringerMode);
 
-    pa_context* mContext;
-    pa_threaded_mainloop* mMainLoop;
+    std::unique_ptr<AudioServiceAdapter> mAudioServiceAdapter;
     std::unordered_map<AudioStreamType, float> mVolumeMap;
     AudioRingerMode mRingerMode;
     std::unique_ptr<SingleKvStore> mAudioPolicyKvStore;
+    friend class PolicyCallbackImpl;
 };
 } // namespace AudioStandard
 } // namespace OHOS
-#endif // ST_PULSEAUDIO_POLICY_MANAGER_H
+#endif // ST_PULSEAUDIO_ADAPTER_MANAGER_H
