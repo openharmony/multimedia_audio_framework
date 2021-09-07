@@ -89,6 +89,7 @@ private:
     State state_;
     std::atomic<bool> isReadInProgress_;
     std::atomic<bool> isWriteInProgress_;
+    uint64_t resetTimestamp_;
 };
 } // namespace AudioStandard
 } // namespace OHOS
