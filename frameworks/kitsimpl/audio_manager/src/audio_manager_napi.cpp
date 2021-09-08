@@ -28,6 +28,7 @@ napi_ref AudioManagerNapi::audioVolumeTypeRef_ = nullptr;
 napi_ref AudioManagerNapi::deviceFlagRef_ = nullptr;
 napi_ref AudioManagerNapi::deviceRoleRef_ = nullptr;
 napi_ref AudioManagerNapi::deviceTypeRef_ = nullptr;
+napi_ref AudioManagerNapi::activeDeviceTypeRef_ = nullptr;
 napi_ref AudioManagerNapi::audioRingModeRef_ = nullptr;
 
 #define GET_PARAMS(env, info, num) \
@@ -105,60 +106,6 @@ static AudioSystemManager::AudioVolumeType GetNativeAudioVolumeType(int32_t volu
 
     return result;
 }
-
-static AudioDeviceDescriptor::DeviceType GetNativeDeviceType(int32_t deviceType)
-{
-    AudioDeviceDescriptor::DeviceType result = AudioDeviceDescriptor::DEVICE_TYPE_NONE;
-
-    switch (deviceType) {
-        case AudioDeviceDescriptorNapi::SPEAKER:
-            result = AudioDeviceDescriptor::SPEAKER;
-            break;
-        case AudioDeviceDescriptorNapi::WIRED_HEADSET:
-            result = AudioDeviceDescriptor::WIRED_HEADSET;
-            break;
-        case AudioDeviceDescriptorNapi::BLUETOOTH_SCO:
-            result = AudioDeviceDescriptor::BLUETOOTH_SCO;
-            break;
-        case AudioDeviceDescriptorNapi::BLUETOOTH_A2DP:
-            result = AudioDeviceDescriptor::BLUETOOTH_A2DP;
-            break;
-        case AudioDeviceDescriptorNapi::MIC:
-            result = AudioDeviceDescriptor::MIC;
-            break;
-        case AudioDeviceDescriptorNapi::INVALID:
-        default:
-            result = AudioDeviceDescriptor::DEVICE_TYPE_NONE;
-            HiLog::Error(LABEL, "Unknown device type!");
-            break;
-    }
-
-    return result;
-}
-
-static AudioDeviceDescriptor::DeviceFlag GetNativeDeviceFlag(int32_t deviceFlag)
-{
-    AudioDeviceDescriptor::DeviceFlag result = AudioDeviceDescriptor::ALL_DEVICES_FLAG;
-
-    switch (deviceFlag) {
-        case AudioManagerNapi::OUTPUT_DEVICES_FLAG:
-            result = AudioDeviceDescriptor::OUTPUT_DEVICES_FLAG;
-            break;
-        case AudioManagerNapi::INPUT_DEVICES_FLAG:
-            result = AudioDeviceDescriptor::INPUT_DEVICES_FLAG;
-            break;
-        case AudioManagerNapi::ALL_DEVICES_FLAG:
-            result = AudioDeviceDescriptor::ALL_DEVICES_FLAG;
-            break;
-        default:
-            result = AudioDeviceDescriptor::ALL_DEVICES_FLAG;
-            HiLog::Error(LABEL, "Unknown device flag!, %{public}d", deviceFlag);
-            break;
-    }
-
-    return result;
-}
-
 
 static AudioRingerMode GetNativeAudioRingerMode(int32_t ringMode)
 {
@@ -269,15 +216,15 @@ napi_value AudioManagerNapi::CreateDeviceFlagObject(napi_env env)
 
     status = napi_create_object(env, &result);
     if (status == napi_ok) {
-        for (int i = AudioManagerNapi::OUTPUT_DEVICES_FLAG; i <= AudioManagerNapi::ALL_DEVICES_FLAG; i++) {
+        for (int i = AudioDeviceDescriptor::DEVICE_FLAG_NONE + 1; i < AudioDeviceDescriptor::DEVICE_FLAG_MAX; i++) {
             switch (i) {
-                case AudioManagerNapi::OUTPUT_DEVICES_FLAG:
+                case AudioDeviceDescriptor::OUTPUT_DEVICES_FLAG:
                     propName = "OUTPUT_DEVICES_FLAG";
                     break;
-                case AudioManagerNapi::INPUT_DEVICES_FLAG:
+                case AudioDeviceDescriptor::INPUT_DEVICES_FLAG:
                     propName = "INPUT_DEVICES_FLAG";
                     break;
-                case AudioManagerNapi::ALL_DEVICES_FLAG:
+                case AudioDeviceDescriptor::ALL_DEVICES_FLAG:
                     propName = "ALL_DEVICES_FLAG";
                     break;
                 default:
@@ -313,12 +260,12 @@ napi_value AudioManagerNapi::CreateDeviceRoleObject(napi_env env)
 
     status = napi_create_object(env, &result);
     if (status == napi_ok) {
-        for (int i = AudioDeviceDescriptorNapi::INPUT_DEVICE; i <= AudioDeviceDescriptorNapi::OUTPUT_DEVICE; i++) {
+        for (int i = AudioDeviceDescriptor::DEVICE_ROLE_NONE + 1; i < AudioDeviceDescriptor::DEVICE_ROLE_MAX; i++) {
             switch (i) {
-                case AudioDeviceDescriptorNapi::INPUT_DEVICE:
+                case AudioDeviceDescriptor::INPUT_DEVICE:
                     propName = "INPUT_DEVICE";
                     break;
-                case AudioDeviceDescriptorNapi::OUTPUT_DEVICE:
+                case AudioDeviceDescriptor::OUTPUT_DEVICE:
                     propName = "OUTPUT_DEVICE";
                     break;
                 default:
@@ -354,24 +301,27 @@ napi_value AudioManagerNapi::CreateDeviceTypeObject(napi_env env)
 
     status = napi_create_object(env, &result);
     if (status == napi_ok) {
-        for (int i = AudioDeviceDescriptorNapi::INVALID; i <= AudioDeviceDescriptorNapi::MIC; i++) {
+        for (int i = AudioDeviceDescriptor::DEVICE_TYPE_NONE + 1; i < AudioDeviceDescriptor::DEVICE_TYPE_MAX; i++) {
             switch (i) {
-                case AudioDeviceDescriptorNapi::INVALID:
+                case AudioDeviceDescriptor::INVALID:
                     propName = "INVALID";
                     break;
-                case AudioDeviceDescriptorNapi::SPEAKER:
+                case AudioDeviceDescriptor::EARPIECE:
+                    propName = "EARPIECE";
+                    break;
+                case AudioDeviceDescriptor::SPEAKER:
                     propName = "SPEAKER";
                     break;
-                case AudioDeviceDescriptorNapi::WIRED_HEADSET:
+                case AudioDeviceDescriptor::WIRED_HEADSET:
                     propName = "WIRED_HEADSET";
                     break;
-                case AudioDeviceDescriptorNapi::BLUETOOTH_SCO:
+                case AudioDeviceDescriptor::BLUETOOTH_SCO:
                     propName = "BLUETOOTH_SCO";
                     break;
-                case AudioDeviceDescriptorNapi::BLUETOOTH_A2DP:
+                case AudioDeviceDescriptor::BLUETOOTH_A2DP:
                     propName = "BLUETOOTH_A2DP";
                     break;
-                case AudioDeviceDescriptorNapi::MIC:
+                case AudioDeviceDescriptor::MIC:
                     propName = "MIC";
                     break;
                 default:
@@ -393,6 +343,47 @@ napi_value AudioManagerNapi::CreateDeviceTypeObject(napi_env env)
         }
     }
     HiLog::Error(LABEL, "CreateDeviceTypeObject is Failed!");
+    napi_get_undefined(env, &result);
+
+    return result;
+}
+
+napi_value AudioManagerNapi::CreateActiveDeviceTypeObject(napi_env env)
+{
+    napi_value result = nullptr;
+    napi_status status;
+    int32_t refCount = 1;
+    string propName;
+
+    status = napi_create_object(env, &result);
+    if (status == napi_ok) {
+        for (int i = ACTIVE_DEVICE_TYPE_NONE + 1; i < ACTIVE_DEVICE_TYPE_MAX; i++) {
+            switch (i) {
+                case SPEAKER:
+                    propName = "SPEAKER";
+                    break;
+                case BLUETOOTH_SCO:
+                    propName = "BLUETOOTH_SCO";
+                    break;
+                default:
+                    HiLog::Error(LABEL, "No prop with this value!");
+                    continue;
+            }
+            status = AddNamedProperty(env, result, propName, i);
+            if (status != napi_ok) {
+                HiLog::Error(LABEL, "Failed to add named prop!");
+                break;
+            }
+            propName.clear();
+        }
+        if (status == napi_ok) {
+            status = napi_create_reference(env, result, refCount, &activeDeviceTypeRef_);
+            if (status == napi_ok) {
+                return result;
+            }
+        }
+    }
+    HiLog::Error(LABEL, "CreateActiveDeviceTypeObject is Failed!");
     napi_get_undefined(env, &result);
 
     return result;
@@ -474,6 +465,7 @@ napi_value AudioManagerNapi::Init(napi_env env, napi_value exports)
         DECLARE_NAPI_PROPERTY("DeviceFlag", CreateDeviceFlagObject(env)),
         DECLARE_NAPI_PROPERTY("DeviceRole", CreateDeviceRoleObject(env)),
         DECLARE_NAPI_PROPERTY("DeviceType", CreateDeviceTypeObject(env)),
+        DECLARE_NAPI_PROPERTY("ActiveDeviceType", CreateActiveDeviceTypeObject(env)),
         DECLARE_NAPI_PROPERTY("AudioRingMode", CreateAudioRingModeObject(env))
     };
 
@@ -1133,7 +1125,7 @@ napi_value AudioManagerNapi::SetDeviceActive(napi_env env, napi_callback_info in
             [](napi_env env, void *data) {
                 auto context = static_cast<AudioManagerAsyncContext*>(data);
                 context->status = context->objectInfo->audioMngr_->SetDeviceActive(
-                    GetNativeDeviceType(context->deviceType), context->isActive);
+                    static_cast<ActiveDeviceType>(context->deviceType), context->isActive);
             },
             SetFunctionAsyncCallbackComplete, static_cast<void*>(asyncContext.get()), &asyncContext->work);
         if (status != napi_ok) {
@@ -1192,7 +1184,7 @@ napi_value AudioManagerNapi::IsDeviceActive(napi_env env, napi_callback_info inf
             [](napi_env env, void *data) {
                 auto context = static_cast<AudioManagerAsyncContext*>(data);
                 context->isActive =
-                    context->objectInfo->audioMngr_->IsDeviceActive(GetNativeDeviceType(context->deviceType));
+                    context->objectInfo->audioMngr_->IsDeviceActive(static_cast<ActiveDeviceType>(context->deviceType));
                 context->isTrue = context->isActive;
                 context->status = 0;
             },
@@ -1646,8 +1638,8 @@ napi_value AudioManagerNapi::GetDevices(napi_env env, napi_callback_info info)
             env, nullptr, resource,
             [](napi_env env, void *data) {
                 auto context = static_cast<AudioManagerAsyncContext*>(data);
-                context->deviceDescriptors =
-                    context->objectInfo->audioMngr_->GetDevices(GetNativeDeviceFlag(context->deviceFlag));
+                context->deviceDescriptors = context->objectInfo->audioMngr_->GetDevices(
+                    static_cast<AudioDeviceDescriptor::DeviceFlag>(context->deviceFlag));
                 context->status = 0;
             },
             GetDevicesAsyncCallbackComplete, static_cast<void*>(asyncContext.get()), &asyncContext->work);

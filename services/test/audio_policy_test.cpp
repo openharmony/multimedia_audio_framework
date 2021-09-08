@@ -41,7 +41,7 @@ static void PrintUsage(void)
     cout << "\taudio_policy_test - Audio Policy Test " << endl << endl;
     cout << "SYNOPSIS" << endl << endl;
     cout << "\t#include <audio_system_manager.h>" << endl << endl;
-    cout << "\t./audio_playback_test [OPTIONS]..." << endl << endl;
+    cout << "\t./audio_policy_test [OPTIONS]..." << endl << endl;
     cout << "DESCRIPTION" << endl << endl;
     cout << "\tControls audio volume, audio routing, audio mute" << endl << endl;
     cout << "-V\n\tSets Volume for streams, -S to setStream" << endl << endl;
@@ -52,9 +52,8 @@ static void PrintUsage(void)
     cout << "\t3\tRING" << endl << endl;
     cout << "-D\n\tSets Device Active" << endl << endl;
     cout << "\tSupported Devices are" << endl << endl;
-    cout << "\t0\tSPEAKER" << endl << endl;
-    cout << "\t3\tBLUETOOTH_A2DP" << endl << endl;
-    cout << "\t4\tMIC" << endl << endl;
+    cout << "\t2\tSPEAKER" << endl << endl;
+    cout << "\t7\tBLUETOOTH_SCO" << endl << endl;
     cout << "-d\n\tGets Device Active" << endl << endl;
     cout << "-M\n\tSets Mute for streams, -S to setStream" << endl << endl;
     cout << "-m\n\tGets Mute for streams, -S to setStream" << endl << endl;
@@ -118,7 +117,7 @@ static void SetDeviceActive(const AudioSystemManager *audioSystemMgr, int argc, 
     }
     cout << "Active : " << active << endl << endl;
 
-    int32_t result = audioSystemMgr->SetDeviceActive(AudioDeviceDescriptor::DeviceType(device),
+    int32_t result = audioSystemMgr->SetDeviceActive(ActiveDeviceType(device),
         (active) ? true : false);
     cout << "Set DeviceActive Result: " << result << endl;
 }
@@ -126,7 +125,7 @@ static void SetDeviceActive(const AudioSystemManager *audioSystemMgr, int argc, 
 static void IsDeviceActive(const AudioSystemManager *audioSystemMgr)
 {
     int device = strtol(optarg, nullptr, AudioPolicyTest::OPT_ARG_BASE);
-    bool devActiveStatus = audioSystemMgr->IsDeviceActive(AudioDeviceDescriptor::DeviceType(device));
+    bool devActiveStatus = audioSystemMgr->IsDeviceActive(ActiveDeviceType(device));
     cout << "GetDevice Active : " << devActiveStatus << endl;
 }
 

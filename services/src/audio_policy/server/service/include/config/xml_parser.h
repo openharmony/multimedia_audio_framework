@@ -57,7 +57,7 @@ private:
     void ParseDefaultInputDevice(xmlNode* node);
     void ParseAudioPorts(xmlNode* node);
     void ParseAudioPortPins(xmlNode* node);
-    DeviceType GetDeviceType(xmlChar* device);
+    InternalDeviceType GetDeviceType(xmlChar *device);
 
     IPortObserver& mPortObserver;
     xmlDoc* mDoc;

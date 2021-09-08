@@ -29,9 +29,10 @@ struct PolicyParam {
     float volume;
     AudioStreamType streamType;
     AudioRingerMode ringerMode;
-    AudioStandard::DeviceType deviceType;
-    AudioStandard::AudioDeviceDescriptor::DeviceFlag deviceFlag;
-    AudioStandard::AudioDeviceDescriptor::DeviceRole deviceRole;
+    ActiveDeviceType actDeviceType;
+    AudioDeviceDescriptor::DeviceType deviceType;
+    AudioDeviceDescriptor::DeviceFlag deviceFlag;
+    AudioDeviceDescriptor::DeviceRole deviceRole;
     bool active;
     bool mute;
     string key;

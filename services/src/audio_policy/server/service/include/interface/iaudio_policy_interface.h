@@ -18,6 +18,7 @@
 
 #include "audio_config.h"
 #include "audio_info.h"
+#include "audio_policy_manager.h"
 #include "audio_policy_types.h"
 
 #include <memory>
@@ -45,7 +46,8 @@ public:
 
     virtual int32_t CloseAudioPort(AudioIOHandle ioHandle) = 0;
 
-    virtual int32_t SetDeviceActive(AudioIOHandle ioHandle, DeviceType deviceType, std::string name, bool active) = 0;
+    virtual int32_t SetDeviceActive(AudioIOHandle ioHandle, InternalDeviceType deviceType,
+                                    std::string name, bool active) = 0;
 
     virtual int32_t SetRingerMode(AudioRingerMode ringerMode) = 0;
 

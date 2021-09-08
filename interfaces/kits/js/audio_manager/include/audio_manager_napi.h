@@ -36,12 +36,6 @@ public:
         MEDIA = 3
     };
 
-    enum DeviceFlag {
-        OUTPUT_DEVICES_FLAG = 1,
-        INPUT_DEVICES_FLAG = 2,
-        ALL_DEVICES_FLAG = 3
-    };
-
     enum AudioRingMode {
         RINGER_MODE_SILENT = 0,
         RINGER_MODE_VIBRATE,
@@ -77,6 +71,7 @@ private:
     static napi_value CreateDeviceFlagObject(napi_env env);
     static napi_value CreateDeviceRoleObject(napi_env env);
     static napi_value CreateDeviceTypeObject(napi_env env);
+    static napi_value CreateActiveDeviceTypeObject(napi_env env);
     static napi_value CreateAudioRingModeObject(napi_env env);
 
     static napi_ref sConstructor_;
@@ -84,6 +79,7 @@ private:
     static napi_ref deviceFlagRef_;
     static napi_ref deviceRoleRef_;
     static napi_ref deviceTypeRef_;
+    static napi_ref activeDeviceTypeRef_;
     static napi_ref audioRingModeRef_;
 
     AudioSystemManager *audioMngr_;

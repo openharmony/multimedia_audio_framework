@@ -99,6 +99,7 @@ config("audio_policy_public_config") {
     "//foundation/multimedia/audio_standard/frameworks/innerkitsimpl/common/include",
     "//foundation/multimedia/audio_standard/interfaces/innerkits/native/audioadapter/include",
     "//foundation/multimedia/audio_standard/interfaces/innerkits/native/audiocommon/include",
+    "//foundation/multimedia/audio_standard/interfaces/innerkits/native/audiopolicy/include",
     "//foundation/multimedia/audio_standard/interfaces/innerkits/native/audiomanager/include",
     "//foundation/multimedia/audio_standard/services/src/audio_policy/server/service/include/common",
     "//foundation/multimedia/audio_standard/services/src/audio_policy/server/service/include/interface",

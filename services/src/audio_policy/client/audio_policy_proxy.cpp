@@ -130,7 +130,7 @@ bool AudioPolicyProxy::IsStreamActive(AudioStreamType streamType)
     return reply.ReadBool();
 }
 
-int32_t AudioPolicyProxy::SetDeviceActive(DeviceType deviceType, bool active)
+int32_t AudioPolicyProxy::SetDeviceActive(InternalDeviceType deviceType, bool active)
 {
     MessageParcel data;
     MessageParcel reply;
@@ -146,7 +146,7 @@ int32_t AudioPolicyProxy::SetDeviceActive(DeviceType deviceType, bool active)
     return reply.ReadInt32();
 }
 
-bool AudioPolicyProxy::IsDeviceActive(DeviceType deviceType)
+bool AudioPolicyProxy::IsDeviceActive(InternalDeviceType deviceType)
 {
     MessageParcel data;
     MessageParcel reply;

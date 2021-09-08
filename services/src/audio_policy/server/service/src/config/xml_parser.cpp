@@ -227,13 +227,14 @@ void XMLParser::ParseAudioPortPins(xmlNode* node)
     return;
 }
 
-DeviceType XMLParser::GetDeviceType(xmlChar* device)
+InternalDeviceType XMLParser::GetDeviceType(xmlChar *device)
 {
     if (!xmlStrcmp(device, reinterpret_cast<const xmlChar*>("Speaker")))
-        return SPEAKER;
+        return InternalDeviceType::SPEAKER;
     if (!xmlStrcmp(device, reinterpret_cast<const xmlChar*>("Built-In Mic")))
-        return MIC;
-    return DEVICE_TYPE_NONE;
+        return InternalDeviceType::MIC;
+
+    return InternalDeviceType::DEVICE_TYPE_NONE;
 }
 } // namespace AudioStandard
 } // namespace OHOS

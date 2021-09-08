@@ -77,12 +77,12 @@ bool AudioPolicyServer::IsStreamActive(AudioStreamType streamType)
     return mPolicyService.IsStreamActive(streamType);
 }
 
-int32_t AudioPolicyServer::SetDeviceActive(DeviceType deviceType, bool active)
+int32_t AudioPolicyServer::SetDeviceActive(InternalDeviceType deviceType, bool active)
 {
     return mPolicyService.SetDeviceActive(deviceType, active);
 }
 
-bool AudioPolicyServer::IsDeviceActive(DeviceType deviceType)
+bool AudioPolicyServer::IsDeviceActive(InternalDeviceType deviceType)
 {
     return mPolicyService.IsDeviceActive(deviceType);
 }

@@ -23,7 +23,7 @@ using namespace testing::ext;
 namespace OHOS {
 namespace AudioStandard {
 namespace V1_0 {
-void AudioPolicyTest::SetUpTestCase(void) 
+void AudioPolicyTest::SetUpTestCase(void)
 {
     ASSERT_NE(nullptr, AudioSystemManager::GetInstance());
 }
@@ -37,11 +37,11 @@ void AudioPolicyTest::TearDown(void) {}
 namespace {
 const PolicyParam VOLUME_PARAMS[] = {
     {
-        .volume = 0.5,
+        .volume = 8,
         .streamType = STREAM_MUSIC
     },
     {
-        .volume = 0.5,
+        .volume = 8,
         .streamType = STREAM_RING
     }
 };
@@ -68,45 +68,25 @@ const PolicyParam STREAM_PARAMS[] = {
     }
 };
 
-const PolicyParam DEVICE_PARAMS[] = {
+const PolicyParam ACTIVE_DEVICE_PARAMS[] = {
     {
-        .deviceType = SPEAKER,
+        .actDeviceType = SPEAKER,
         .active = true
     },
     {
-        .deviceType = MIC,
+        .actDeviceType = BLUETOOTH_SCO,
         .active = true
     },
     {
-        .deviceType = BLUETOOTH_A2DP,
-        .active = true
-    },
-    {
-        .deviceType = BLUETOOTH_A2DP,
+        .actDeviceType = BLUETOOTH_SCO,
         .active = false
     },
     {
-        .deviceType = BLUETOOTH_SCO,
+        .actDeviceType = SPEAKER,
         .active = true
     },
     {
-        .deviceType = BLUETOOTH_SCO,
-        .active = false
-    },
-    {
-        .deviceType = MIC,
-        .active = true
-    },
-    {
-        .deviceType = BLUETOOTH_SCO,
-        .active = true
-    },
-    {
-        .deviceType = SPEAKER,
-        .active = true
-    },
-    {
-        .deviceType = BLUETOOTH_A2DP,
+        .actDeviceType = BLUETOOTH_SCO,
         .active = true
     },
 };
@@ -158,12 +138,12 @@ const PolicyParam AUDIO_PARAMS[] = {
 
 const PolicyParam DEVICES_PARAMS[] = {
     {
-        .deviceType = MIC,
+        .deviceType = AudioDeviceDescriptor::MIC,
         .deviceFlag = AudioDeviceDescriptor::DeviceFlag::INPUT_DEVICES_FLAG,
         .deviceRole = AudioDeviceDescriptor::DeviceRole::INPUT_DEVICE
     },
     {
-        .deviceType = SPEAKER,
+        .deviceType = AudioDeviceDescriptor::SPEAKER,
         .deviceFlag = AudioDeviceDescriptor::DeviceFlag::OUTPUT_DEVICES_FLAG,
         .deviceRole = AudioDeviceDescriptor::DeviceRole::OUTPUT_DEVICE
     }
@@ -195,7 +175,6 @@ INSTANTIATE_TEST_CASE_P(
  * Get Volume
  *
  */
-
 class AudioPolicyGetVolumeTest : public AudioPolicyTest {};
 
 HWTEST_P(AudioPolicyGetVolumeTest, GetVolume, TestSize.Level1)
@@ -230,12 +209,11 @@ HWTEST_P(AudioPolicySetMuteTest, SetMute, TestSize.Level1)
     EXPECT_EQ(MEDIA_OK, AudioSystemManager::GetInstance()->SetMute(volumeType, mute));
 }
 
-
 INSTANTIATE_TEST_CASE_P(
     SetMute,
     AudioPolicySetMuteTest,
     ValuesIn(MUTE_PARAMS));
-    
+
 /*
  * Is Mute
  *
@@ -288,7 +266,7 @@ class AudioPolicySetDeviceActiveTest : public AudioPolicyTest {};
 HWTEST_P(AudioPolicySetDeviceActiveTest, SetDeviceActive, TestSize.Level1)
 {
     PolicyParam params = GetParam();
-    AudioDeviceDescriptor::DeviceType deviceType = static_cast<AudioDeviceDescriptor::DeviceType>(params.deviceType);
+    ActiveDeviceType deviceType = params.actDeviceType;
     bool active = params.active;
 
     EXPECT_EQ(MEDIA_OK, AudioSystemManager::GetInstance()->SetDeviceActive(deviceType, active));
@@ -297,31 +275,29 @@ HWTEST_P(AudioPolicySetDeviceActiveTest, SetDeviceActive, TestSize.Level1)
 INSTANTIATE_TEST_CASE_P(
     SetDeviceActive,
     AudioPolicySetDeviceActiveTest,
-    ValuesIn(DEVICE_PARAMS));
-    
+    ValuesIn(ACTIVE_DEVICE_PARAMS));
+
 /*
  * Is Device Active
  *
  */
-
 class AudioPolicyIsDeviceActiveTest : public AudioPolicyTest {};
 
 HWTEST_P(AudioPolicyIsDeviceActiveTest, IsDeviceActive, TestSize.Level1)
 {
     PolicyParam params = GetParam();
-    AudioDeviceDescriptor::DeviceType deviceType = static_cast<AudioDeviceDescriptor::DeviceType>(params.deviceType);
+    ActiveDeviceType deviceType = params.actDeviceType;
     bool active = params.active;
 
     EXPECT_EQ(MEDIA_OK, AudioSystemManager::GetInstance()->SetDeviceActive(deviceType, active));
     EXPECT_EQ(active, AudioSystemManager::GetInstance()->IsDeviceActive(deviceType));
 }
 
-
 INSTANTIATE_TEST_CASE_P(
     IsDeviceActive,
     AudioPolicyIsDeviceActiveTest,
-    ValuesIn(DEVICE_PARAMS));
-    
+    ValuesIn(ACTIVE_DEVICE_PARAMS));
+
 /*
  * Set Ringer Mode
  *
@@ -341,12 +317,11 @@ INSTANTIATE_TEST_CASE_P(
     SetRingerMode,
     AudioPolicySetRingerModeTest,
     ValuesIn(RINGER_MODE_PARAMS));
-    
+
 /*
  * Get Ringer Mode
  *
  */
-
 class AudioPolicyGetRingerModeTest : public AudioPolicyTest {};
 
 HWTEST_P(AudioPolicyGetRingerModeTest, GetRingerMode, TestSize.Level1)
@@ -362,7 +337,6 @@ INSTANTIATE_TEST_CASE_P(
     GetRingerMode,
     AudioPolicyGetRingerModeTest,
     ValuesIn(RINGER_MODE_PARAMS));
-
 
 /*
  * Set microphone mute
@@ -474,9 +448,9 @@ class AudioPolicyGetDevicesTest : public AudioPolicyTest {};
 HWTEST_P(AudioPolicyGetDevicesTest, GetDevices, TestSize.Level1)
 {
     PolicyParam params = GetParam();
-    AudioDeviceDescriptor::DeviceFlag deviceFlag = static_cast<AudioDeviceDescriptor::DeviceFlag>(params.deviceFlag);
-    AudioDeviceDescriptor::DeviceType deviceType = static_cast<AudioDeviceDescriptor::DeviceType>(params.deviceType);
-    AudioDeviceDescriptor::DeviceRole deviceRole = static_cast<AudioDeviceDescriptor::DeviceRole>(params.deviceRole);
+    AudioDeviceDescriptor::DeviceFlag deviceFlag = params.deviceFlag;
+    AudioDeviceDescriptor::DeviceType deviceType = params.deviceType;
+    AudioDeviceDescriptor::DeviceRole deviceRole = params.deviceRole;
     vector<sptr<AudioDeviceDescriptor>> audioDeviceDescriptors
         = AudioSystemManager::GetInstance()->GetDevices(deviceFlag);
     sptr<AudioDeviceDescriptor> audioDeviceDescriptor = audioDeviceDescriptors[0];

@@ -91,25 +91,44 @@ declare namespace audio {
      */
     INVALID = 0,
     /**
+     * earpiece
+     */
+    EARPIECE = 1,
+    /**
      * Speaker
      */
-    SPEAKER = 1,
+    SPEAKER = 2,
     /**
      * Wired headset
      */
-    WIRED_HEADSET = 2,
+    WIRED_HEADSET = 3,
     /**
      * Bluetooth device using the synchronous connection oriented link (SCO)
      */
-    BLUETOOTH_SCO = 3,
+    BLUETOOTH_SCO = 7,
     /**
      * Bluetooth device using advanced audio distribution profile (A2DP)
      */
-    BLUETOOTH_A2DP = 4,
+    BLUETOOTH_A2DP = 8,
     /**
      * Microphone
      */
-    MIC = 5,
+    MIC = 15,
+  }
+  /**
+   * Enumerates Active device types.
+   * @devices
+   * @sysCap SystemCapability.Multimedia.Audio
+   */
+   enum ActiveDeviceType {
+    /**
+     * Speaker
+     */
+    SPEAKER = 2,
+    /**
+     * Bluetooth device using the synchronous connection oriented link (SCO)
+     */
+    BLUETOOTH_SCO = 7,
   }
   /**
    * Enumerates Audio Ringer modes
@@ -310,25 +329,25 @@ declare namespace audio {
 	   * @devices
      * @sysCap SystemCapability.Multimedia.Audio
      */
-    setDeviceActive(deviceType: DeviceType, active: boolean, callback: AsyncCallback<void>): void;
+    setDeviceActive(deviceType: ActiveDeviceType, active: boolean, callback: AsyncCallback<void>): void;
     /**
      * Activates the device. This method uses a promise to return the execution result.
      * @sysCap SystemCapability.Multimedia.Audio
      * @devices
      */
-    setDeviceActive(deviceType: DeviceType, active: boolean): Promise<void>;
+    setDeviceActive(deviceType: ActiveDeviceType, active: boolean): Promise<void>;
     /**
      * Checks whether the device is active. This method uses an asynchronous callback to return the execution result.
      * @sysCap SystemCapability.Multimedia.Audio
      * @devices
      */
-    isDeviceActive(deviceType: DeviceType, callback: AsyncCallback<boolean>): void;
+    isDeviceActive(deviceType: ActiveDeviceType, callback: AsyncCallback<boolean>): void;
     /**
      * Checks whether the device is active. This method uses a promise to return the execution result.
      * @sysCap SystemCapability.Multimedia.Audio
      * @devices
      */
-    isDeviceActive(deviceType: DeviceType): Promise<boolean>;
+    isDeviceActive(deviceType: ActiveDeviceType): Promise<boolean>;
   }
 
   /**

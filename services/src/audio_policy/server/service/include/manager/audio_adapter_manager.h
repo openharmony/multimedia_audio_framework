@@ -62,7 +62,7 @@ public:
 
     int32_t CloseAudioPort(AudioIOHandle ioHandle);
 
-    int32_t SetDeviceActive(AudioIOHandle ioHandle, DeviceType deviceType, std::string name, bool active);
+    int32_t SetDeviceActive(AudioIOHandle ioHandle, InternalDeviceType deviceType, std::string name, bool active);
 
     int32_t SetRingerMode(AudioRingerMode ringerMode);
 

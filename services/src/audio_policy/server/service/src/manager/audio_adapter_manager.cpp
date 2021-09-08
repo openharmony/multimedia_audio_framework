@@ -100,16 +100,15 @@ bool AudioAdapterManager::IsStreamActive(AudioStreamType streamType)
     bool result = mAudioServiceAdapter->IsStreamActive(streamType);
     return result;
 }
-int32_t AudioAdapterManager::SetDeviceActive(AudioIOHandle ioHandle, DeviceType deviceType,
+int32_t AudioAdapterManager::SetDeviceActive(AudioIOHandle ioHandle, InternalDeviceType deviceType,
     std::string name, bool active)
 {
     switch (deviceType) {
-        case SPEAKER:
-        case BLUETOOTH_A2DP: {
+        case InternalDeviceType::SPEAKER:
+        case InternalDeviceType::BLUETOOTH_SCO: {
             return mAudioServiceAdapter->SetDefaultSink(name);
         }
-        case MIC:
-        case BLUETOOTH_SCO: {
+        case InternalDeviceType::MIC: {
             return mAudioServiceAdapter->SetDefaultSource(name);
         }
         default:
