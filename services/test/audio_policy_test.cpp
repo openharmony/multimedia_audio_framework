@@ -57,6 +57,8 @@ static void PrintUsage(void)
     cout << "-d\n\tGets Device Active" << endl << endl;
     cout << "-M\n\tSets Mute for streams, -S to setStream" << endl << endl;
     cout << "-m\n\tGets Mute for streams, -S to setStream" << endl << endl;
+    cout << "-U\n\t Mutes the Microphone" << endl << endl;
+    cout << "-u\n\t Checks if the Microphone is muted " << endl << endl;
     cout << "-R\n\tSets RingerMode" << endl << endl;
     cout << "-r\n\tGets RingerMode status" << endl << endl;
     cout << "-s\n\tGet Stream Status" << endl << endl;
@@ -89,6 +91,19 @@ static void HandleMute(const AudioSystemManager *audioSystemMgr, int streamType,
         int32_t result = audioSystemMgr->SetMute(static_cast<AudioSystemManager::AudioVolumeType>(streamType),
             (mute) ? true : false);
         cout << "Set Mute Result: " << result << endl;
+    }
+}
+
+static void HandleMicMute(const AudioSystemManager *audioSystemMgr, char option)
+{
+    if (option == 'u') {
+        bool muteStatus = audioSystemMgr->IsMicrophoneMute();
+        cout << "Is Mic Mute : " << muteStatus << endl;
+    } else {
+        int mute = strtol(optarg, nullptr, AudioPolicyTest::OPT_ARG_BASE);
+        cout << "Set Mic Mute : " << mute << endl;
+        int32_t result = audioSystemMgr->SetMicrophoneMute((mute) ? true : false);
+        cout << "Set Mic Mute Result: " << result << endl;
     }
 }
 
@@ -169,7 +184,7 @@ int main(int argc, char* argv[])
 
     int streamType = static_cast<int32_t>(AudioSystemManager::AudioVolumeType::STREAM_MUSIC);
     AudioSystemManager *audioSystemMgr = AudioSystemManager::GetInstance();
-    while ((opt = getopt(argc, argv, ":V:S:D:M:R:d:s:vmr")) != -1) {
+    while ((opt = getopt(argc, argv, ":V:U:S:D:M:R:d:s:vmru")) != -1) {
         switch (opt) {
             case 'V':
             case 'v':
@@ -178,6 +193,10 @@ int main(int argc, char* argv[])
             case 'M':
             case 'm':
                 HandleMute(audioSystemMgr, streamType, opt);
+                break;
+            case 'U':
+            case 'u':
+                HandleMicMute(audioSystemMgr, opt);
                 break;
             case 'S':
                 SetStreamType(streamType);

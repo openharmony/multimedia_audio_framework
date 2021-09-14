@@ -26,6 +26,8 @@ namespace AudioStandard {
 const char *g_audioOutTestFilePath = "/data/local/tmp/audio_capture.pcm";
 #endif // CAPTURE_DUMP
 
+bool AudioCapturerSource::micMuteState_ = false;
+
 AudioCapturerSource::AudioCapturerSource()
     : capturerInited_(false), started_(false), paused_(false), leftVolume_(MAX_VOLUME_LEVEL),
       rightVolume_(MAX_VOLUME_LEVEL), audioManager_(nullptr), audioAdapter_(nullptr), audioCapture_(nullptr),
@@ -262,7 +264,6 @@ int32_t AudioCapturerSource::Start(void)
             return ERR_NOT_STARTED;
         }
         started_ = true;
-        audioCapture_->volume.SetVolume(reinterpret_cast<AudioHandle>(audioCapture_), MAX_VOLUME_LEVEL);
     }
 
     return SUCCESS;
@@ -315,6 +316,7 @@ int32_t AudioCapturerSource::SetMute(bool isMute)
         return ERR_OPERATION_FAILED;
     }
 
+    micMuteState_ = isMute;
     return SUCCESS;
 }
 
@@ -489,6 +491,25 @@ int32_t AudioCapturerSourceGetVolume(float *left, float *right)
         return ERR_DEVICE_INIT;
     }
     ret = g_audioCaptureSourceInstance->GetVolume(*left, *right);
+
+    return ret;
+}
+
+bool AudioCapturerSourceIsMuteRequired(void)
+{
+    return AudioCapturerSource::micMuteState_;
+}
+
+int32_t AudioCapturerSourceSetMute(bool isMute)
+{
+    int32_t ret;
+
+    if (!g_audioCaptureSourceInstance->capturerInited_) {
+        MEDIA_ERR_LOG("audioCapturer Not Inited! Init the capturer first\n");
+        return ERR_DEVICE_INIT;
+    }
+
+    ret = g_audioCaptureSourceInstance->SetMute(isMute);
 
     return ret;
 }

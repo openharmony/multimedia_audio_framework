@@ -252,19 +252,26 @@ static int pa_capturer_init(struct userdata *u) {
 
     ret = AudioCapturerSourceInit(&u->attrs);
     if (ret != 0) {
-        MEDIA_INFO_LOG("Audio capturer init failed!");
+        MEDIA_ERR_LOG("Audio capturer init failed!");
         return ret;
-    }
-
-    ret = AudioCapturerSourceStart();
-    if (ret != 0) {
-        MEDIA_INFO_LOG("Audio capturer start failed!");
-        goto fail;
     }
 
     ret = AudioCapturerSourceSetVolume(DEFAULT_LEFT_VOLUME, DEFAULT_RIGHT_VOLUME);
     if (ret != 0) {
-        MEDIA_INFO_LOG("audio capturer set volume failed!");
+        MEDIA_ERR_LOG("audio capturer set volume failed!");
+        goto fail;
+    }
+
+    bool muteState = AudioCapturerSourceIsMuteRequired();
+    ret = AudioCapturerSourceSetMute(muteState);
+    if (ret != 0) {
+        MEDIA_ERR_LOG("audio capturer set muteState: %d failed!", muteState);
+        goto fail;
+    }
+
+    ret = AudioCapturerSourceStart();
+    if (ret != 0) {
+        MEDIA_ERR_LOG("Audio capturer start failed!");
         goto fail;
     }
 
