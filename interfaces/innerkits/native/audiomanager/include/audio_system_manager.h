@@ -29,17 +29,25 @@ class AudioDeviceDescriptor : public Parcelable {
 public:
 enum DeviceFlag {
         /**
+         * Device flag none.
+         */
+        DEVICE_FLAG_NONE = -1,
+        /**
          * Indicates all output audio devices.
          */
-        OUTPUT_DEVICES_FLAG = 0,
+        OUTPUT_DEVICES_FLAG = 1,
         /**
          * Indicates all input audio devices.
          */
-        INPUT_DEVICES_FLAG = 1,
+        INPUT_DEVICES_FLAG = 2,
         /**
          * Indicates all audio devices.
          */
-        ALL_DEVICES_FLAG = 2
+        ALL_DEVICES_FLAG = 3,
+        /**
+         * Device flag max count.
+         */
+        DEVICE_FLAG_MAX
 };
 
 enum DeviceRole {
@@ -50,11 +58,15 @@ enum DeviceRole {
         /**
          * Input device role.
          */
-        INPUT_DEVICE = 0,
+        INPUT_DEVICE = 1,
         /**
          * Output device role.
          */
-        OUTPUT_DEVICE = 1
+        OUTPUT_DEVICE = 2,
+        /**
+         * Device role max count.
+         */
+        DEVICE_ROLE_MAX
 };
 
 enum DeviceType {
@@ -63,25 +75,37 @@ enum DeviceType {
          */
         DEVICE_TYPE_NONE = -1,
         /**
+         * Indicates invalid device
+         */
+        INVALID = 0,
+        /**
+         * Indicates earpiece
+         */
+        EARPIECE = 1,
+        /**
          * Indicates a speaker built in a device.
          */
-        SPEAKER = 0,
+        SPEAKER = 2,
         /**
          * Indicates a headset, which is the combination of a pair of headphones and a microphone.
          */
-        WIRED_HEADSET = 1,
+        WIRED_HEADSET = 3,
         /**
          * Indicates a Bluetooth device used for telephony.
          */
-        BLUETOOTH_SCO = 2,
+        BLUETOOTH_SCO = 7,
         /**
          * Indicates a Bluetooth device supporting the Advanced Audio Distribution Profile (A2DP).
          */
-        BLUETOOTH_A2DP = 3,
+        BLUETOOTH_A2DP = 8,
         /**
          * Indicates a microphone built in a device.
          */
-        MIC = 4
+        MIC = 15,
+        /**
+         * Indicates device type max count.
+         */
+        DEVICE_TYPE_MAX
 };
 
     DeviceType getType();
@@ -157,8 +181,8 @@ enum AudioVolumeType {
     std::vector<sptr<AudioDeviceDescriptor>> GetDevices(AudioDeviceDescriptor::DeviceFlag deviceFlag) const;
     const std::string GetAudioParameter(const std::string key) const;
     void SetAudioParameter(const std::string key, const std::string value) const;
-    int32_t SetDeviceActive(AudioDeviceDescriptor::DeviceType deviceType, bool flag) const;
-    bool IsDeviceActive(AudioDeviceDescriptor::DeviceType deviceType) const;
+    int32_t SetDeviceActive(ActiveDeviceType deviceType, bool flag) const;
+    bool IsDeviceActive(ActiveDeviceType deviceType) const;
     bool IsStreamActive(AudioSystemManager::AudioVolumeType volumeType) const;
     bool SetRingerMode(AudioRingerMode ringMode) const;
     AudioRingerMode GetRingerMode() const;

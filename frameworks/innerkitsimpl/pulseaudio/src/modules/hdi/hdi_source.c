@@ -64,8 +64,6 @@ struct userdata {
     pa_usec_t block_usec;
     pa_usec_t timestamp;
     AudioSourceAttr attrs;
-    // A flag to signal us to prevent silent record during bootup
-    bool IsReady;
     bool IsCapturerInit;
 };
 
@@ -102,7 +100,7 @@ static int source_process_msg(pa_msgobject *o, int code, void *data, int64_t off
         case PA_SOURCE_MESSAGE_GET_LATENCY: {
             pa_usec_t now;
             now = pa_rtclock_now();
-            *((int64_t*) data) = (int64_t)now - (int64_t)u->timestamp;
+            *((int64_t*)data) = (int64_t)now - (int64_t)u->timestamp;
             return 0;
         }
         default: {
@@ -114,66 +112,41 @@ static int source_process_msg(pa_msgobject *o, int code, void *data, int64_t off
 
 /* Called from the IO thread. */
 static int source_set_state_in_io_thread_cb(pa_source *s, pa_source_state_t new_state,
-        pa_suspend_cause_t new_suspend_cause) {
+    pa_suspend_cause_t new_suspend_cause) {
     struct userdata *u = NULL;
     pa_assert(s);
     pa_assert_se(u = s->userdata);
-    if (s->thread_info.state == PA_SOURCE_SUSPENDED || s->thread_info.state == PA_SOURCE_INIT) {
-        if (PA_SOURCE_IS_OPENED(new_state))
-            u->timestamp = pa_rtclock_now();
+
+    if ((s->thread_info.state == PA_SOURCE_SUSPENDED || s->thread_info.state == PA_SOURCE_INIT) &&
+        PA_SOURCE_IS_OPENED(new_state)) {
+        u->timestamp = pa_rtclock_now();
+        if (new_state == PA_SOURCE_RUNNING && !u->IsCapturerInit) {
+            if (pa_capturer_init(u)) {
+                MEDIA_ERR_LOG("HDI capturer reinitialization failed");
+                return -PA_ERR_IO;
+            }
+            u->IsCapturerInit = true;
+            MEDIA_DEBUG_LOG("Successfully reinitialized HDI renderer");
+        }
+    } else if (s->thread_info.state == PA_SOURCE_IDLE) {
+        if (new_state == PA_SOURCE_SUSPENDED) {
+            if (u->IsCapturerInit) {
+                pa_capturer_exit();
+                u->IsCapturerInit = false;
+                MEDIA_DEBUG_LOG("Deinitialized HDI capturer");
+            }
+        } else if (new_state == PA_SOURCE_RUNNING && !u->IsCapturerInit) {
+            MEDIA_DEBUG_LOG("Idle to Running reinitializing HDI capturing device");
+            if (pa_capturer_init(u)) {
+                MEDIA_ERR_LOG("Idle to Running HDI capturer reinitialization failed");
+                return -PA_ERR_IO;
+            }
+            u->IsCapturerInit = true;
+            MEDIA_DEBUG_LOG("Idle to RunningsSuccessfully reinitialized HDI renderer");
+        }
     }
 
     return 0;
-}
-
-static pa_hook_result_t source_output_fixate_hook_cb(pa_core *c, pa_source_output_new_data *data,
-        struct userdata *u) {
-    int ret;
-    MEDIA_DEBUG_LOG("HDI Source: Detected source output");
-    pa_assert(data);
-    pa_assert(u);
-
-    if (!strcmp(u->source->name, data->source->name)) {
-        // Signal Ready when a Source Output is connected
-        if (!u->IsReady)
-            u->IsReady = true;
-
-        ret = pa_capturer_init(u);
-        if (ret != 0) {
-            MEDIA_DEBUG_LOG("HDI Source: Cannot initialize Capturer! ret=%d", ret);
-            return PA_HOOK_OK;
-        }
-
-        u->timestamp = pa_rtclock_now();
-        pa_source_suspend(u->source, false, PA_SUSPEND_IDLE);
-    }
-
-    return PA_HOOK_OK;
-}
-
-static pa_hook_result_t source_output_move_finish_hook_cb(pa_core *c, pa_source_output *output, struct userdata *u) {
-    int ret;
-
-    MEDIA_DEBUG_LOG("HDI Source: Detected source move finish");
-    pa_assert(output);
-    pa_assert(u);
-
-    if (!strcmp(output->source->name, u->source->name)) {
-        // Signal Ready when a source output is connected
-        if (!u->IsReady)
-            u->IsReady = true;
-
-        ret = pa_capturer_init(u);
-        if (ret != 0) {
-            pa_log_error("HDI Source: Cannot initialize capturer! ret=%d", ret);
-            return PA_HOOK_OK;
-        }
-
-        u->timestamp = pa_rtclock_now();
-        pa_source_suspend(u->source, false, PA_SUSPEND_IDLE);
-    }
-
-    return PA_HOOK_OK;
 }
 
 static int get_capturer_frame_from_hdi(pa_memchunk *chunk, struct userdata *u) {
@@ -194,7 +167,7 @@ static int get_capturer_frame_from_hdi(pa_memchunk *chunk, struct userdata *u) {
     pa_memblock_release(chunk->memblock);
     MEDIA_DEBUG_LOG("HDI Source: request bytes: %{public}" PRIu64 ", replyBytes: %{public}" PRIu64,
             requestBytes, replyBytes);
-    if(replyBytes > requestBytes) {
+    if (replyBytes > requestBytes) {
         MEDIA_ERR_LOG("HDI Source: Error replyBytes > requestBytes. Requested data Length: "
                 "%{public}" PRIu64 ", Read: %{public}" PRIu64 " bytes", requestBytes, replyBytes);
         pa_memblock_unref(chunk->memblock);
@@ -229,11 +202,10 @@ static void thread_func(void *userdata) {
     u->timestamp = pa_rtclock_now();
     MEDIA_DEBUG_LOG("HDI Source: u->timestamp : %{public}" PRIu64, u->timestamp);
 
-    while(true) {
+    while (true) {
         int ret = 0;
 
-        if (PA_SOURCE_IS_OPENED(u->source->thread_info.state) &&
-            (u->source->thread_info.state != PA_SOURCE_SUSPENDED) && u->IsReady && u->IsCapturerInit) {
+        if (PA_SOURCE_IS_RUNNING(u->source->thread_info.state) && u->IsCapturerInit) {
             pa_memchunk chunk;
             pa_usec_t now;
 
@@ -252,12 +224,6 @@ static void thread_func(void *userdata) {
 
             pa_rtpoll_set_timer_absolute(u->rtpoll, u->timestamp + u->block_usec);
         } else {
-            if (u->IsCapturerInit) {
-                u->IsCapturerInit = false;
-                pa_capturer_exit();
-                MEDIA_INFO_LOG("HDI Source: Capturer exit done");
-            }
-
             pa_rtpoll_set_timer_disabled(u->rtpoll);
             MEDIA_INFO_LOG("HDI Source: pa_rtpoll_set_timer_disabled done ");
         }
@@ -266,7 +232,7 @@ static void thread_func(void *userdata) {
         if ((ret = pa_rtpoll_run(u->rtpoll)) < 0) {
             /* If this was no regular exit from the loop we have to continue
             * processing messages until we received PA_MESSAGE_SHUTDOWN */
-            MEDIA_INFO_LOG("HDI Source: pa_rtpoll_run ret:%{public}d failed", ret );
+            MEDIA_INFO_LOG("HDI Source: pa_rtpoll_run ret:%{public}d failed", ret);
             pa_asyncmsgq_post(u->thread_mq.outq, PA_MSGOBJECT(u->core), PA_CORE_MESSAGE_UNLOAD_MODULE, u->module,
                 0, NULL, NULL);
             pa_asyncmsgq_wait_for(u->thread_mq.inq, PA_MESSAGE_SHUTDOWN);
@@ -286,19 +252,26 @@ static int pa_capturer_init(struct userdata *u) {
 
     ret = AudioCapturerSourceInit(&u->attrs);
     if (ret != 0) {
-        MEDIA_INFO_LOG("Audio capturer init failed!");
+        MEDIA_ERR_LOG("Audio capturer init failed!");
         return ret;
-    }
-
-    ret = AudioCapturerSourceStart();
-    if (ret != 0) {
-        MEDIA_INFO_LOG("Audio capturer start failed!");
-        goto fail;
     }
 
     ret = AudioCapturerSourceSetVolume(DEFAULT_LEFT_VOLUME, DEFAULT_RIGHT_VOLUME);
     if (ret != 0) {
-        MEDIA_INFO_LOG("audio capturer set volume failed!");
+        MEDIA_ERR_LOG("audio capturer set volume failed!");
+        goto fail;
+    }
+
+    bool muteState = AudioCapturerSourceIsMuteRequired();
+    ret = AudioCapturerSourceSetMute(muteState);
+    if (ret != 0) {
+        MEDIA_ERR_LOG("audio capturer set muteState: %d failed!", muteState);
+        goto fail;
+    }
+
+    ret = AudioCapturerSourceStart();
+    if (ret != 0) {
+        MEDIA_ERR_LOG("Audio capturer start failed!");
         goto fail;
     }
 
@@ -310,14 +283,13 @@ fail:
     return ret;
 }
 
-static void pa_capturer_exit() {
+static void pa_capturer_exit(void) {
     AudioCapturerSourceStop();
     AudioCapturerSourceDeInit();
 }
 
-
 static int pa_set_source_properties(pa_module *m, pa_modargs *ma, pa_sample_spec *ss, pa_channel_map *map,
-        struct userdata *u) {
+    struct userdata *u) {
     pa_source_new_data data;
 
     pa_source_new_data_init(&data);
@@ -387,9 +359,6 @@ pa_source *pa_hdi_source_new(pa_module *m, pa_modargs *ma, const char*driver) {
     u->module = m;
     u->rtpoll = pa_rtpoll_new();
 
-    // Set IsReady to false at start. will be made true when a Source Output is connected
-    u->IsReady = false;
-
     if (pa_thread_mq_init(&u->thread_mq, m->core->mainloop, u->rtpoll) < 0) {
         MEDIA_INFO_LOG("pa_thread_mq_init() failed.");
         goto fail;
@@ -410,11 +379,6 @@ pa_source *pa_hdi_source_new(pa_module *m, pa_modargs *ma, const char*driver) {
     if (ret != 0) {
         goto fail;
     }
-
-    pa_module_hook_connect(m, &m->core->hooks[PA_CORE_HOOK_SOURCE_OUTPUT_FIXATE], PA_HOOK_NORMAL,
-                          (pa_hook_cb_t) source_output_fixate_hook_cb, u);
-    pa_module_hook_connect(m, &m->core->hooks[PA_CORE_HOOK_SOURCE_OUTPUT_MOVE_FINISH], PA_HOOK_NORMAL,
-                          (pa_hook_cb_t) source_output_move_finish_hook_cb, u);
 
     thread_name = pa_sprintf_malloc("hdi-source-record");
     if (!(u->thread = pa_thread_new(thread_name, thread_func, u))) {

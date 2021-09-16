@@ -18,9 +18,12 @@
 
 #include <cstdint>
 #include "audio_info.h"
+#include "audio_system_manager.h"
 
 namespace OHOS {
 namespace AudioStandard {
+using InternalDeviceType = AudioDeviceDescriptor::DeviceType;
+
 class AudioPolicyManager {
 public:
     static AudioPolicyManager& GetInstance()
@@ -39,9 +42,9 @@ public:
 
     bool IsStreamActive(AudioStreamType streamType);
 
-    int32_t SetDeviceActive(DeviceType deviceType, bool active);
+    int32_t SetDeviceActive(InternalDeviceType deviceType, bool active);
 
-    bool IsDeviceActive(DeviceType deviceType);
+    bool IsDeviceActive(InternalDeviceType deviceType);
 
     int32_t SetRingerMode(AudioRingerMode ringMode);
 

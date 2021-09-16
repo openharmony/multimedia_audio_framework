@@ -34,6 +34,8 @@ int32_t AudioCapturerSourceStart(void);
 int32_t AudioCapturerSourceStop(void);
 int32_t AudioCapturerSourceFrame(char *, uint64_t, uint64_t *);
 int32_t AudioCapturerSourceSetVolume(float, float);
+bool AudioCapturerSourceIsMuteRequired(void);
+int32_t AudioCapturerSourceSetMute(bool);
 int32_t AudioCapturerSourceGetVolume(float *left, float *right);
 #ifdef __cplusplus
 }

@@ -17,6 +17,7 @@
 #define I_AUDIO_POLICY_BASE_H
 
 #include "audio_policy_types.h"
+#include "audio_policy_manager.h"
 #include "ipc_types.h"
 #include "iremote_broker.h"
 #include "iremote_proxy.h"
@@ -37,9 +38,9 @@ public:
 
     virtual bool IsStreamActive(AudioStreamType streamType) = 0;
 
-    virtual int32_t SetDeviceActive(DeviceType deviceType, bool active) = 0;
+    virtual int32_t SetDeviceActive(InternalDeviceType deviceType, bool active) = 0;
 
-    virtual bool IsDeviceActive(DeviceType deviceType) = 0;
+    virtual bool IsDeviceActive(InternalDeviceType deviceType) = 0;
 
     virtual int32_t SetRingerMode(AudioRingerMode ringMode) = 0;
 

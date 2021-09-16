@@ -24,48 +24,11 @@
 
 namespace OHOS {
 namespace AudioStandard {
-// Audio Device Types
-enum DeviceType {
-    /**
-    * Indicates device type none.
-    */
-    DEVICE_TYPE_NONE = -1,
-    /**
-    * Indicates a speaker built in a device.
-    */
-    SPEAKER = 0,
-    /**
-    * Indicates a headset, which is the combination of a pair of headphones and a microphone.
-    */
-    WIRED_HEADSET = 1,
-    /**
-    * Indicates a Bluetooth device used for telephony.
-    */
-    BLUETOOTH_SCO = 2,
-    /**
-    * Indicates a Bluetooth device supporting the Advanced Audio Distribution Profile (A2DP).
-    */
-    BLUETOOTH_A2DP = 3,
-    /**
-    * Indicates a microphone built in a device.
-    */
-    MIC = 4
-};
-
-// Audio Role
-enum DeviceRole {
-    /**
-     * Device role none.
-     */
-    DEVICE_ROLE_NONE = -1,
-    /**
-     * Input device role.
-     */
-    INPUT_DEVICE = 0,
-    /**
-     * Output device role.
-     */
-    OUTPUT_DEVICE = 1
+enum ActiveDeviceType {
+    ACTIVE_DEVICE_TYPE_NONE = -1,
+    SPEAKER = 2,
+    BLUETOOTH_SCO = 7,
+    ACTIVE_DEVICE_TYPE_MAX
 };
 
 enum AudioStreamType {
@@ -238,6 +201,7 @@ const std::vector<AudioSamplingRate> AUDIO_SUPPORTED_SAMPLING_RATES {
     SAMPLE_RATE_64000,
     SAMPLE_RATE_96000
 };
+
 typedef uint32_t AudioIOHandle;
 } // namespace AudioStandard
 } // namespace OHOS

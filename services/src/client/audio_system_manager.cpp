@@ -76,12 +76,10 @@ AudioRingerMode AudioSystemManager::GetRingerMode() const
     return (AudioPolicyManager::GetInstance().GetRingerMode());
 }
 
-int32_t AudioSystemManager::SetDeviceActive(AudioDeviceDescriptor::DeviceType deviceType, bool flag) const
+int32_t AudioSystemManager::SetDeviceActive(ActiveDeviceType deviceType, bool flag) const
 {
     switch (deviceType) {
         case SPEAKER:
-        case BLUETOOTH_A2DP:
-        case MIC:
         case BLUETOOTH_SCO:
             break;
         default:
@@ -90,16 +88,13 @@ int32_t AudioSystemManager::SetDeviceActive(AudioDeviceDescriptor::DeviceType de
     }
 
     /* Call Audio Policy SetDeviceActive */
-    DeviceType devType = (DeviceType)deviceType;
-    return (AudioPolicyManager::GetInstance().SetDeviceActive(devType, flag));
+    return (AudioPolicyManager::GetInstance().SetDeviceActive(static_cast<InternalDeviceType>(deviceType), flag));
 }
 
-bool AudioSystemManager::IsDeviceActive(AudioDeviceDescriptor::DeviceType deviceType) const
+bool AudioSystemManager::IsDeviceActive(ActiveDeviceType deviceType) const
 {
     switch (deviceType) {
         case SPEAKER:
-        case BLUETOOTH_A2DP:
-        case MIC:
         case BLUETOOTH_SCO:
             break;
         default:
@@ -108,8 +103,7 @@ bool AudioSystemManager::IsDeviceActive(AudioDeviceDescriptor::DeviceType device
     }
 
     /* Call Audio Policy IsDeviceActive */
-    DeviceType devType = (DeviceType)deviceType;
-    return (AudioPolicyManager::GetInstance().IsDeviceActive(devType));
+    return (AudioPolicyManager::GetInstance().IsDeviceActive(static_cast<InternalDeviceType>(deviceType)));
 }
 
 bool AudioSystemManager::IsStreamActive(AudioSystemManager::AudioVolumeType volumeType) const

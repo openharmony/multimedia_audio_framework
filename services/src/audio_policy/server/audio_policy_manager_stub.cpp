@@ -79,7 +79,7 @@ void AudioPolicyManagerStub::IsStreamActiveInternal(MessageParcel &data, Message
 
 void AudioPolicyManagerStub::SetDeviceActiveInternal(MessageParcel &data, MessageParcel &reply)
 {
-    DeviceType deviceType = static_cast<DeviceType>(data.ReadInt32());
+    InternalDeviceType deviceType = static_cast<InternalDeviceType>(data.ReadInt32());
     bool active = data.ReadBool();
     int32_t result = SetDeviceActive(deviceType, active);
     if (result == SUCCESS)
@@ -90,7 +90,7 @@ void AudioPolicyManagerStub::SetDeviceActiveInternal(MessageParcel &data, Messag
 
 void AudioPolicyManagerStub::IsDeviceActiveInternal(MessageParcel &data, MessageParcel &reply)
 {
-    DeviceType deviceType = static_cast<DeviceType>(data.ReadInt32());
+    InternalDeviceType deviceType = static_cast<InternalDeviceType>(data.ReadInt32());
     bool result = IsDeviceActive(deviceType);
     reply.WriteBool(result);
 }

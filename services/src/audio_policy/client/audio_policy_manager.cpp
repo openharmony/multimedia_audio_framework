@@ -78,12 +78,12 @@ bool AudioPolicyManager::IsStreamActive(AudioStreamType streamType)
     return g_sProxy->IsStreamActive(streamType);
 }
 
-int32_t AudioPolicyManager::SetDeviceActive(DeviceType deviceType, bool active)
+int32_t AudioPolicyManager::SetDeviceActive(InternalDeviceType deviceType, bool active)
 {
     return g_sProxy->SetDeviceActive(deviceType, active);
 }
 
-bool AudioPolicyManager::IsDeviceActive(DeviceType deviceType)
+bool AudioPolicyManager::IsDeviceActive(InternalDeviceType deviceType)
 {
     return g_sProxy->IsDeviceActive(deviceType);
 }

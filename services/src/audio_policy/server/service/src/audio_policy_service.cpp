@@ -67,21 +67,18 @@ bool AudioPolicyService::IsStreamActive(AudioStreamType streamType) const
     return mAudioPolicyManager.IsStreamActive(streamType);
 }
 
-std::string AudioPolicyService::GetPortName(DeviceType deviceType)
+std::string AudioPolicyService::GetPortName(InternalDeviceType deviceType)
 {
     std::string portName = PORT_NONE;
     switch (deviceType) {
-        case BLUETOOTH_A2DP:
+        case InternalDeviceType::BLUETOOTH_SCO:
             portName = BLUEZ_SINK;
             break;
-        case SPEAKER:
+        case InternalDeviceType::SPEAKER:
             portName = HDI_SINK;
             break;
-        case MIC:
+        case InternalDeviceType::MIC:
             portName = HDI_SOURCE;
-            break;
-        case BLUETOOTH_SCO:
-            portName = BLUEZ_SOURCE;
             break;
         default:
             portName = PORT_NONE;
@@ -90,16 +87,16 @@ std::string AudioPolicyService::GetPortName(DeviceType deviceType)
     return portName;
 }
 
-int32_t AudioPolicyService::SetDeviceActive(DeviceType deviceType, bool active)
+int32_t AudioPolicyService::SetDeviceActive(InternalDeviceType deviceType, bool active)
 {
     MEDIA_DEBUG_LOG("[Policy Service] deviceType %{public}d, activate?: %{public}d", deviceType, active);
 
-    if (deviceType == DEVICE_TYPE_NONE)
+    if (deviceType == InternalDeviceType::DEVICE_TYPE_NONE)
         return ERR_DEVICE_NOT_SUPPORTED;
 
     bool updateActiveDevices = true;
     AudioIOHandle ioHandle = GetAudioIOHandle(deviceType);
-    list<DeviceType> &activeDevices = GetActiveDevicesList(deviceType);
+    list<InternalDeviceType> &activeDevices = GetActiveDevicesList(deviceType);
 
     if (!active) {
         if (activeDevices.size() <= 1) {
@@ -107,7 +104,7 @@ int32_t AudioPolicyService::SetDeviceActive(DeviceType deviceType, bool active)
             return ERROR;
         }
 
-        list<DeviceType>::const_iterator iter = activeDevices.begin();
+        list<InternalDeviceType>::const_iterator iter = activeDevices.begin();
         while (iter != activeDevices.end()) {
             if (*iter == deviceType) {
                 iter = activeDevices.erase(iter);
@@ -134,7 +131,7 @@ int32_t AudioPolicyService::SetDeviceActive(DeviceType deviceType, bool active)
     }
 
     if (updateActiveDevices) {
-        list<DeviceType>::const_iterator iter = activeDevices.begin();
+        list<InternalDeviceType>::const_iterator iter = activeDevices.begin();
         while (iter != activeDevices.end()) {
             if (*iter == deviceType) {
                 iter = activeDevices.erase(iter);
@@ -148,25 +145,15 @@ int32_t AudioPolicyService::SetDeviceActive(DeviceType deviceType, bool active)
     return SUCCESS;
 }
 
-bool AudioPolicyService::IsDeviceActive(DeviceType deviceType) const
+bool AudioPolicyService::IsDeviceActive(InternalDeviceType deviceType) const
 {
     bool result = false;
 
     switch (deviceType) {
-        case SPEAKER:
-        case BLUETOOTH_A2DP:
-            for (list<DeviceType>::const_iterator iter = mActiveOutputDevices.begin();
+        case InternalDeviceType::SPEAKER:
+        case InternalDeviceType::BLUETOOTH_SCO:
+            for (list<InternalDeviceType>::const_iterator iter = mActiveOutputDevices.begin();
                 iter != mActiveOutputDevices.end(); ++iter) {
-                if (*iter == deviceType) {
-                    result = true;
-                    break;
-                }
-            }
-            break;
-        case MIC:
-        case BLUETOOTH_SCO:
-            for (list<DeviceType>::const_iterator iter = mActiveInputDevices.begin();
-                iter != mActiveInputDevices.end(); ++iter) {
                 if (*iter == deviceType) {
                     result = true;
                     break;
@@ -204,7 +191,7 @@ void AudioPolicyService::OnAudioPortPinAvailable(shared_ptr<AudioPortPinInfo> po
     return;
 }
 
-void AudioPolicyService::OnDefaultOutputPortPin(DeviceType deviceType)
+void AudioPolicyService::OnDefaultOutputPortPin(InternalDeviceType deviceType)
 {
     AudioIOHandle ioHandle = GetAudioIOHandle(deviceType);
     mAudioPolicyManager.SetDeviceActive(ioHandle, deviceType, HDI_SINK, true);
@@ -213,7 +200,7 @@ void AudioPolicyService::OnDefaultOutputPortPin(DeviceType deviceType)
     return;
 }
 
-void AudioPolicyService::OnDefaultInputPortPin(DeviceType deviceType)
+void AudioPolicyService::OnDefaultInputPortPin(InternalDeviceType deviceType)
 {
     MEDIA_DEBUG_LOG("OnDefaultInputPortPin DeviceType: %{public}d", deviceType);
     AudioIOHandle ioHandle = GetAudioIOHandle(deviceType);
@@ -223,22 +210,18 @@ void AudioPolicyService::OnDefaultInputPortPin(DeviceType deviceType)
 }
 
 // private methods
-AudioIOHandle AudioPolicyService::GetAudioIOHandle(DeviceType deviceType)
+AudioIOHandle AudioPolicyService::GetAudioIOHandle(InternalDeviceType deviceType)
 {
     AudioIOHandle ioHandle;
     switch (deviceType) {
-        case SPEAKER:
-        case WIRED_HEADSET:
+        case InternalDeviceType::SPEAKER:
             ioHandle = mIOHandles[HDI_SINK];
             break;
-        case BLUETOOTH_A2DP:
+        case InternalDeviceType::BLUETOOTH_SCO:
             ioHandle = mIOHandles[BLUEZ_SINK];
             break;
-        case MIC:
+        case InternalDeviceType::MIC:
             ioHandle = mIOHandles[HDI_SOURCE];
-            break;
-        case BLUETOOTH_SCO:
-            ioHandle = mIOHandles[BLUEZ_SOURCE];
             break;
         default:
             ioHandle = mIOHandles[HDI_SINK];

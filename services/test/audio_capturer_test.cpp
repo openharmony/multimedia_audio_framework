@@ -25,8 +25,8 @@ using namespace OHOS::AudioStandard;
 namespace AudioTestConstants {
     constexpr int32_t SECOND_ARG_IDX = 2;
     constexpr int32_t THIRD_ARG_IDX = 3;
-    constexpr int32_t PAUSE_BUFFER_POSITION = 512;
-    constexpr int32_t PAUSE_READ_TIME_SECONDS = 2;
+    constexpr int32_t PAUSE_BUFFER_POSITION = 128;
+    constexpr int32_t PAUSE_READ_TIME_SECONDS = 10;
     constexpr int32_t SUCCESS = 0;
 }
 
@@ -96,20 +96,14 @@ public:
             return false;
         }
 
-        uint32_t frameCount;
-        if (audioCapturer->GetFrameCount(frameCount) < 0) {
-            MEDIA_ERR_LOG(" GetMinimumFrameCount failed");
-            return false;
-        }
-
-        uint8_t* buffer = (uint8_t *) malloc(bufferLen);
+        uint8_t* buffer = (uint8_t *)malloc(bufferLen);
         if (buffer == nullptr) {
             MEDIA_ERR_LOG("AudioCapturerTest: Failed to allocate buffer");
             return false;
         }
 
         size_t size = 1;
-        size_t numBuffersToCapture = 1024;
+        size_t numBuffersToCapture = 256;
         while (numBuffersToCapture) {
             size_t bytesRead = 0;
             while (bytesRead < bufferLen) {
@@ -124,18 +118,23 @@ public:
             if (bytesRead < 0) {
                 MEDIA_ERR_LOG("Bytes read failed. error code %{public}zu", bytesRead);
                 break;
-            } else if (bytesRead > 0) {
-                fwrite(buffer, size, bytesRead, pFile);
-                numBuffersToCapture--;
-                if ((numBuffersToCapture == AudioTestConstants::PAUSE_BUFFER_POSITION)
-                    && (audioCapturer->Stop())) {
-                    MEDIA_INFO_LOG("Audio capture stopped for 2 seconds");
-                    sleep(AudioTestConstants::PAUSE_READ_TIME_SECONDS);
-                    if (!audioCapturer->Start()) {
-                        MEDIA_ERR_LOG("resume stream failed");
-                        audioCapturer->Release();
-                        break;
-                    }
+            } else if (bytesRead == 0) {
+                continue;
+            }
+
+            if (fwrite(buffer, size, bytesRead, pFile) != bytesRead) {
+                MEDIA_ERR_LOG("error occured in fwrite");
+            }
+            numBuffersToCapture--;
+            if ((numBuffersToCapture == AudioTestConstants::PAUSE_BUFFER_POSITION)
+                && (audioCapturer->Stop())) {
+                MEDIA_INFO_LOG("Audio capture stopped for %{public}d seconds",
+                               AudioTestConstants::PAUSE_READ_TIME_SECONDS);
+                sleep(AudioTestConstants::PAUSE_READ_TIME_SECONDS);
+                if (!audioCapturer->Start()) {
+                    MEDIA_ERR_LOG("resume stream failed");
+                    audioCapturer->Release();
+                    break;
                 }
             }
         }

@@ -50,55 +50,6 @@ void AudioDeviceDescriptorNapi::Destructor(napi_env env, void *nativeObject, voi
     }
 }
 
-static AudioDeviceDescriptorNapi::DeviceType GetJSDeviceType(AudioDeviceDescriptor::DeviceType deviceType)
-{
-    AudioDeviceDescriptorNapi::DeviceType result;
-
-    switch (deviceType) {
-        case AudioDeviceDescriptor::SPEAKER:
-            result = AudioDeviceDescriptorNapi::SPEAKER;
-            break;
-        case AudioDeviceDescriptor::WIRED_HEADSET:
-            result = AudioDeviceDescriptorNapi::WIRED_HEADSET;
-            break;
-        case AudioDeviceDescriptor::BLUETOOTH_SCO:
-            result = AudioDeviceDescriptorNapi::BLUETOOTH_SCO;
-            break;
-        case AudioDeviceDescriptor::BLUETOOTH_A2DP:
-            result = AudioDeviceDescriptorNapi::BLUETOOTH_A2DP;
-            break;
-        case AudioDeviceDescriptor::MIC:
-            result = AudioDeviceDescriptorNapi::MIC;
-            break;
-        default:
-            result = AudioDeviceDescriptorNapi::INVALID;
-            HiLog::Error(LABEL, "Unknown device type!");
-            break;
-    }
-
-    return result;
-}
-
-static AudioDeviceDescriptorNapi::DeviceRole GetJSDeviceRole(AudioDeviceDescriptor::DeviceRole deviceRole)
-{
-    AudioDeviceDescriptorNapi::DeviceRole result;
-
-    switch (deviceRole) {
-        case AudioDeviceDescriptor::INPUT_DEVICE:
-            result = AudioDeviceDescriptorNapi::INPUT_DEVICE;
-            break;
-        case AudioDeviceDescriptor::OUTPUT_DEVICE:
-            result = AudioDeviceDescriptorNapi::OUTPUT_DEVICE;
-            break;
-        default:
-            result = AudioDeviceDescriptorNapi::INPUT_DEVICE;
-            HiLog::Error(LABEL, "Unknown device role!");
-            break;
-    }
-
-    return result;
-}
-
 napi_value AudioDeviceDescriptorNapi::Init(napi_env env, napi_value exports)
 {
     napi_status status;
@@ -193,7 +144,7 @@ napi_value AudioDeviceDescriptorNapi::GetDeviceRole(napi_env env, napi_callback_
     status = napi_unwrap(env, thisVar, (void **)&deviceDescriptor);
     if (status == napi_ok) {
         deviceRole = deviceDescriptor->audioDescriptor_->deviceRole_;
-        status = napi_create_int32(env, GetJSDeviceRole(deviceRole), &jsResult);
+        status = napi_create_int32(env, deviceRole, &jsResult);
         if (status == napi_ok) {
             return jsResult;
         }
@@ -216,7 +167,7 @@ napi_value AudioDeviceDescriptorNapi::GetDeviceType(napi_env env, napi_callback_
     status = napi_unwrap(env, thisVar, (void **)&deviceDescriptor);
     if (status == napi_ok) {
         deviceType = deviceDescriptor->audioDescriptor_->deviceType_;
-        status = napi_create_int32(env, GetJSDeviceType(deviceType), &jsResult);
+        status = napi_create_int32(env, deviceType, &jsResult);
         if (status == napi_ok) {
             return jsResult;
         }

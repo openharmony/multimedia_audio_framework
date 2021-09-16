@@ -30,7 +30,8 @@ AudioStream::AudioStream(AudioStreamType eStreamType, AudioMode eMode) : eStream
                                                                          eMode_(eMode),
                                                                          state_(NEW),
                                                                          isReadInProgress_(false),
-                                                                         isWriteInProgress_(false)
+                                                                         isWriteInProgress_(false),
+                                                                         resetTimestamp_(0)
 {
     MEDIA_DEBUG_LOG("AudioStream ctor");
 }
@@ -52,9 +53,9 @@ bool AudioStream::GetAudioTime(Timestamp &timestamp, Timestamp::Timestampbase ba
     uint64_t paTimeStamp = 0;
     if (GetCurrentTimeStamp(paTimeStamp) == SUCCESS) {
         MEDIA_DEBUG_LOG("AudioStream: GetAudioTime in microseconds: %{public}" PRIu64, paTimeStamp);
-        timestamp.time.tv_sec = static_cast<time_t>(paTimeStamp / TIME_CONVERSION_US_S);
+        timestamp.time.tv_sec = static_cast<time_t>((paTimeStamp - resetTimestamp_) / TIME_CONVERSION_US_S);
         timestamp.time.tv_nsec
-            = static_cast<time_t>((paTimeStamp - (timestamp.time.tv_sec * TIME_CONVERSION_US_S))
+            = static_cast<time_t>(((paTimeStamp - resetTimestamp_) - (timestamp.time.tv_sec * TIME_CONVERSION_US_S))
                                   * TIME_CONVERSION_NS_US);
         return true;
     }
@@ -211,6 +212,11 @@ bool AudioStream::StartAudioStream()
         MEDIA_ERR_LOG("StartAudioStream Illegal state:%{public}u", state_);
         return false;
     }
+
+    if (state_ == STOPPED && GetCurrentTimeStamp(resetTimestamp_)) {
+        MEDIA_ERR_LOG("Failed to get timestamp after stop needed for resetting");
+    }
+
     int32_t ret = StartStream();
     if (ret != SUCCESS) {
         MEDIA_ERR_LOG("StartStream Start failed:%{public}d", ret);

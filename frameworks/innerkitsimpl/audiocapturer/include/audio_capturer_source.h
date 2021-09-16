@@ -59,6 +59,7 @@ public:
 
     static AudioCapturerSource* GetInstance(void);
     bool capturerInited_;
+    static bool micMuteState_;
 
 private:
     const int32_t HALF_FACTOR = 2;

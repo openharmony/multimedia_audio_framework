@@ -55,9 +55,9 @@ public:
 
     bool IsStreamActive(AudioStreamType streamType) const;
 
-    int32_t SetDeviceActive(DeviceType deviceType, bool active);
+    int32_t SetDeviceActive(InternalDeviceType deviceType, bool active);
 
-    bool IsDeviceActive(DeviceType deviceType) const;
+    bool IsDeviceActive(InternalDeviceType deviceType) const;
 
     int32_t SetRingerMode(AudioRingerMode ringMode);
 
@@ -68,9 +68,9 @@ public:
 
     void OnAudioPortPinAvailable(std::shared_ptr<AudioPortPinInfo> portInfo);
 
-    void OnDefaultOutputPortPin(DeviceType device);
+    void OnDefaultOutputPortPin(InternalDeviceType device);
 
-    void OnDefaultInputPortPin(DeviceType device);
+    void OnDefaultInputPortPin(InternalDeviceType device);
 
 private:
 
@@ -82,15 +82,14 @@ private:
 
     virtual ~AudioPolicyService() {}
 
-    AudioIOHandle GetAudioIOHandle(DeviceType deviceType);
-    std::list<DeviceType>& GetActiveDevicesList(DeviceType deviceType)
+    AudioIOHandle GetAudioIOHandle(InternalDeviceType deviceType);
+    std::list<InternalDeviceType>& GetActiveDevicesList(InternalDeviceType deviceType)
     {
         switch (deviceType) {
-            case SPEAKER:
-            case BLUETOOTH_A2DP:
+            case InternalDeviceType::SPEAKER:
+            case InternalDeviceType::BLUETOOTH_SCO:
                 return mActiveOutputDevices;
-            case MIC:
-            case BLUETOOTH_SCO:
+            case InternalDeviceType::MIC:
                 return mActiveInputDevices;
             default:
                 return mActiveOutputDevices; // Default case return Output device
@@ -100,9 +99,9 @@ private:
     IAudioPolicyInterface& mAudioPolicyManager;
     Parser& mConfigParser;
     std::unordered_map<std::string, AudioIOHandle> mIOHandles;
-    std::list<DeviceType> mActiveOutputDevices;
-    std::list<DeviceType> mActiveInputDevices;
-    std::string GetPortName(DeviceType deviceType);
+    std::list<InternalDeviceType> mActiveOutputDevices;
+    std::list<InternalDeviceType> mActiveInputDevices;
+    std::string GetPortName(InternalDeviceType deviceType);
 };
 } // namespace AudioStandard
 } // namespace OHOS

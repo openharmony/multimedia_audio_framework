@@ -114,10 +114,11 @@ int32_t AudioServer::SetMicrophoneMute(bool isMute)
     AudioCapturerSource* audioCapturerSourceInstance = AudioCapturerSource::GetInstance();
 
     if (audioCapturerSourceInstance->capturerInited_ == false) {
-            MEDIA_ERR_LOG("Capturer is not initialized. Start the recording first !");
-            return ERR_INVALID_OPERATION;
+            MEDIA_INFO_LOG("Capturer is not initialized. Set the flag mute state flag");
+            AudioCapturerSource::micMuteState_ = isMute;
+            return 0;
     }
-    
+
     return audioCapturerSourceInstance->SetMute(isMute);
 }
 
@@ -127,11 +128,14 @@ bool AudioServer::IsMicrophoneMute()
     bool isMute = false;
 
     if (audioCapturerSourceInstance->capturerInited_ == false) {
-        MEDIA_ERR_LOG("Capturer is not initialized. Start the recording first !");
-    } else if (audioCapturerSourceInstance->GetMute(isMute)) {
+        MEDIA_INFO_LOG("Capturer is not initialized. Get the mic mute state flag value!");
+        return AudioCapturerSource::micMuteState_;
+    }
+
+    if (audioCapturerSourceInstance->GetMute(isMute)) {
         MEDIA_ERR_LOG("GetMute status in capturer returned Error !");
     }
-    
+
     return isMute;
 }
 

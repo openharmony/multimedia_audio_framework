@@ -36,9 +36,9 @@ public:
 
     bool IsStreamActive(AudioStreamType streamType) override;
 
-    int32_t SetDeviceActive(DeviceType deviceType, bool active) override;
+    int32_t SetDeviceActive(InternalDeviceType deviceType, bool active) override;
 
-    bool IsDeviceActive(DeviceType deviceType) override;
+    bool IsDeviceActive(InternalDeviceType deviceType) override;
 
     int32_t SetRingerMode(AudioRingerMode ringMode) override;
 

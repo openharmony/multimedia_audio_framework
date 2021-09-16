@@ -31,20 +31,6 @@ public:
     AudioDeviceDescriptorNapi();
     ~AudioDeviceDescriptorNapi();
 
-    enum DeviceType {
-        INVALID = 0,
-        SPEAKER = 1,
-        WIRED_HEADSET = 2,
-        BLUETOOTH_SCO = 3,
-        BLUETOOTH_A2DP = 4,
-        MIC = 5
-    };
-
-    enum DeviceRole {
-        INPUT_DEVICE = 1,
-        OUTPUT_DEVICE = 2
-    };
-
     static napi_value Init(napi_env env, napi_value exports);
     static napi_value CreateAudioDeviceDescriptorWrapper(napi_env env,
         sptr<AudioDeviceDescriptor> deviceDescriptor);
