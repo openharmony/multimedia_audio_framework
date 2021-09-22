@@ -388,7 +388,7 @@ HWTEST_P(AudioPolicyVolumeRangeTest, GetMaxVolume, TestSize.Level1)
     PolicyParam params = GetParam();
     AudioSystemManager::AudioVolumeType volumeType
         = static_cast<AudioSystemManager::AudioVolumeType>(params.streamType);
-    EXPECT_EQ(1.0, AudioSystemManager::GetInstance()->GetMaxVolume(volumeType));
+    EXPECT_EQ(15, AudioSystemManager::GetInstance()->GetMaxVolume(volumeType));
 }
 
 HWTEST_P(AudioPolicyVolumeRangeTest, GetMinVolume, TestSize.Level1)
