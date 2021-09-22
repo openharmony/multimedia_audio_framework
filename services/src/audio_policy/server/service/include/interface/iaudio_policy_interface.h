@@ -42,7 +42,7 @@ public:
 
     virtual bool IsStreamActive(AudioStreamType streamType) = 0;
 
-    virtual AudioIOHandle OpenAudioPort(std::shared_ptr<AudioPortInfo> audioPortInfo) = 0;
+    virtual AudioIOHandle OpenAudioPort(std::unique_ptr<AudioPortInfo> &audioPortInfo) = 0;
 
     virtual int32_t CloseAudioPort(AudioIOHandle ioHandle) = 0;
 

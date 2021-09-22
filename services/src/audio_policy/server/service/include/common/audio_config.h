@@ -47,12 +47,12 @@ enum PortType {
 class PortInfo {
 public:
     PortType type;
-    char* name;
-    char* role;
-    char* rate;
-    char* channels;
-    char* buffer_size;
-    char* fileName;
+    char *name;
+    char *role;
+    char *rate;
+    char *channels;
+    char *buffer_size;
+    char *fileName;
 
     PortInfo()
         : type(TYPE_AUDIO_PORT_INVALID),
@@ -91,7 +91,7 @@ public:
 
 struct AudioPortPinInfo : public PortInfo {
 public:
-    char* pinType;
+    char *pinType;
     AudioPortPinInfo()
         : pinType(nullptr)
     {

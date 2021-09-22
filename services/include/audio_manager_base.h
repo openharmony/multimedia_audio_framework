@@ -39,7 +39,7 @@ public:
      * @return Returns the min volume.
      */
     virtual int32_t GetMinVolume(AudioSystemManager::AudioVolumeType volumeType) = 0;
-    
+
     /**
      * Sets Microphone Mute status.
      *

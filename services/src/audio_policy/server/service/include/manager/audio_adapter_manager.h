@@ -34,6 +34,8 @@ public:
     static constexpr char HDI_SOURCE[] = "libmodule-hdi-source.z.so";
     static constexpr char PIPE_SINK[] = "libmodule-pipe-sink.z.so";
     static constexpr char PIPE_SOURCE[] = "libmodule-pipe-source.z.so";
+    static constexpr uint32_t KVSTORE_CONNECT_RETRY_COUNT = 5;
+    static constexpr uint32_t KVSTORE_CONNECT_RETRY_DELAY_TIME = 200000;
     static constexpr float MAX_VOLUME = 1.0f;
     static constexpr float MIN_VOLUME = 0.0f;
 
@@ -58,7 +60,7 @@ public:
 
     bool IsStreamActive(AudioStreamType streamType);
 
-    AudioIOHandle OpenAudioPort(std::shared_ptr<AudioPortInfo> audioPortInfo);
+    AudioIOHandle OpenAudioPort(std::unique_ptr<AudioPortInfo> &audioPortInfo);
 
     int32_t CloseAudioPort(AudioIOHandle ioHandle);
 
@@ -67,6 +69,8 @@ public:
     int32_t SetRingerMode(AudioRingerMode ringerMode);
 
     AudioRingerMode GetRingerMode(void);
+
+    virtual ~AudioAdapterManager() {}
 
 private:
     struct UserData {
@@ -86,10 +90,8 @@ private:
         mVolumeMap[STREAM_RING] = MAX_VOLUME;
     }
 
-    virtual ~AudioAdapterManager() {}
-
     bool ConnectToPulseAudio(void);
-    std::string GetModuleArgs(std::shared_ptr<AudioPortInfo> audioPortInfo);
+    std::string GetModuleArgs(std::unique_ptr<AudioPortInfo> &audioPortInfo);
     std::string GetStreamNameByStreamType(AudioStreamType streamType);
     AudioStreamType GetStreamIDByType(std::string streamType);
     bool InitAudioPolicyKvStore(bool& isFirstBoot);
@@ -106,6 +108,32 @@ private:
     AudioRingerMode mRingerMode;
     std::unique_ptr<SingleKvStore> mAudioPolicyKvStore;
     friend class PolicyCallbackImpl;
+};
+
+class PolicyCallbackImpl : public AudioServiceAdapterCallback {
+public:
+    explicit PolicyCallbackImpl(std::unique_ptr<AudioAdapterManager> &audioAdapterManager)
+    {
+        audioAdapterManager_ = std::move(audioAdapterManager);
+    }
+
+    ~PolicyCallbackImpl()
+    {
+        audioAdapterManager_ = nullptr;
+    }
+
+    float OnGetVolumeCb(std::string streamType)
+    {
+        if (audioAdapterManager_->mRingerMode != RINGER_MODE_NORMAL) {
+            if (!streamType.compare("ring")) {
+                return AudioAdapterManager::MIN_VOLUME;
+            }
+        }
+        AudioStreamType streamID = audioAdapterManager_->GetStreamIDByType(streamType);
+        return audioAdapterManager_->mVolumeMap[streamID];
+    }
+private:
+    std::unique_ptr<AudioAdapterManager> audioAdapterManager_;
 };
 } // namespace AudioStandard
 } // namespace OHOS

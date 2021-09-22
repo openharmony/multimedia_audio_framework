@@ -335,7 +335,7 @@ static int pa_set_source_properties(pa_module *m, pa_modargs *ma, pa_sample_spec
     return 0;
 }
 
-pa_source *pa_hdi_source_new(pa_module *m, pa_modargs *ma, const char*driver) {
+pa_source *pa_hdi_source_new(pa_module *m, pa_modargs *ma, const char *driver) {
     struct userdata *u = NULL;
     pa_sample_spec ss;
     char *thread_name = NULL;

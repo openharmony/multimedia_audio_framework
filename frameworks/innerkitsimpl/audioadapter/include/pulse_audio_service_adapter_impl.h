@@ -16,24 +16,19 @@
 #ifndef ST_PULSEAUDIO_AUDIO_SERVICE_ADAPTER_H
 #define ST_PULSEAUDIO_AUDIO_SERVICE_ADAPTER_H
 
-#ifdef __cplusplus
-extern "C" {
-#endif
 #include <pulse/pulseaudio.h>
-#ifdef __cplusplus
-}
-#endif
+
 #include "audio_service_adapter.h"
 
 namespace OHOS {
 namespace AudioStandard {
 class PulseAudioServiceAdapterImpl : public AudioServiceAdapter {
 public:
-    PulseAudioServiceAdapterImpl(AudioServiceAdapterCallback *cb);
+    PulseAudioServiceAdapterImpl(std::unique_ptr<AudioServiceAdapterCallback> &cb);
     ~PulseAudioServiceAdapterImpl();
 
     bool Connect() override;
-    int32_t OpenAudioPort(char *audioPortName, std::string moduleArgs) override;
+    int32_t OpenAudioPort(std::string audioPortName, std::string moduleArgs) override;
     int32_t CloseAudioPort(int32_t audioHandleIndex) override;
     int32_t SetDefaultSink(std::string name) override;
     int32_t SetDefaultSource(std::string name) override;

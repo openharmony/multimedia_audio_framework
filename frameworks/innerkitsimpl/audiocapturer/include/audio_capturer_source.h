@@ -57,7 +57,7 @@ public:
     int32_t SetMute(bool isMute);
     int32_t GetMute(bool &isMute);
 
-    static AudioCapturerSource* GetInstance(void);
+    static AudioCapturerSource *GetInstance(void);
     bool capturerInited_;
     static bool micMuteState_;
 

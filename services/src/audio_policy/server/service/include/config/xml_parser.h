@@ -16,14 +16,8 @@
 #ifndef ST_XML_PARSER_H
 #define ST_XML_PARSER_H
 
-#ifdef __cplusplus
-extern "C" {
-#endif
 #include <libxml/parser.h>
 #include <libxml/tree.h>
-#ifdef __cplusplus
-}
-#endif
 
 #include "audio_config.h"
 #include "iport_observer.h"
@@ -39,7 +33,7 @@ public:
     bool Parse() final;
     void Destroy() final;
 
-    explicit XMLParser(IPortObserver& observer)
+    explicit XMLParser(IPortObserver &observer)
         : mPortObserver(observer),
           mDoc(nullptr)
     {
@@ -50,17 +44,17 @@ public:
         Destroy();
     }
 private:
-    bool ParseInternal(xmlNode* node);
-    NodeName GetNodeNameAsInt(xmlNode* node);
-    void ParseBuiltInDevices(xmlNode* node);
-    void ParseDefaultOutputDevice(xmlNode* node);
-    void ParseDefaultInputDevice(xmlNode* node);
-    void ParseAudioPorts(xmlNode* node);
-    void ParseAudioPortPins(xmlNode* node);
-    InternalDeviceType GetDeviceType(xmlChar *device);
+    bool ParseInternal(xmlNode &node);
+    NodeName GetNodeNameAsInt(xmlNode &node);
+    void ParseBuiltInDevices(xmlNode &node);
+    void ParseDefaultOutputDevice(xmlNode &node);
+    void ParseDefaultInputDevice(xmlNode &node);
+    void ParseAudioPorts(xmlNode &node);
+    void ParseAudioPortPins(xmlNode &node);
+    InternalDeviceType GetDeviceType(xmlChar &device);
 
-    IPortObserver& mPortObserver;
-    xmlDoc* mDoc;
+    IPortObserver &mPortObserver;
+    xmlDoc *mDoc;
 };
 } // namespace AudioStandard
 } // namespace OHOS

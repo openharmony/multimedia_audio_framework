@@ -96,7 +96,7 @@ public:
             return false;
         }
 
-        uint8_t* buffer = (uint8_t *)malloc(bufferLen);
+        auto buffer = std::make_unique<uint8_t[]>(bufferLen);
         if (buffer == nullptr) {
             MEDIA_ERR_LOG("AudioCapturerTest: Failed to allocate buffer");
             return false;
@@ -107,7 +107,7 @@ public:
         while (numBuffersToCapture) {
             size_t bytesRead = 0;
             while (bytesRead < bufferLen) {
-                int32_t len = audioCapturer->Read(*(buffer + bytesRead), bufferLen - bytesRead, isBlocking);
+                int32_t len = audioCapturer->Read(*(buffer.get() + bytesRead), bufferLen - bytesRead, isBlocking);
                 if (len >= 0) {
                     bytesRead += len;
                 } else {
@@ -122,7 +122,7 @@ public:
                 continue;
             }
 
-            if (fwrite(buffer, size, bytesRead, pFile) != bytesRead) {
+            if (fwrite(buffer.get(), size, bytesRead, pFile) != bytesRead) {
                 MEDIA_ERR_LOG("error occured in fwrite");
             }
             numBuffersToCapture--;
@@ -138,7 +138,6 @@ public:
                 }
             }
         }
-        free(buffer);
 
         return true;
     }

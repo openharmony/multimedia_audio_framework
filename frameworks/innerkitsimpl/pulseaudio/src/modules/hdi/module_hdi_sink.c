@@ -21,7 +21,7 @@
 #include <pulsecore/module.h>
 #include <pulsecore/sink.h>
 
-pa_sink* PaHdiSinkNew(pa_module *m, pa_modargs *ma, const char *driver);
+pa_sink *PaHdiSinkNew(pa_module *m, pa_modargs *ma, const char *driver);
 void PaHdiSinkFree(pa_sink *s);
 
 PA_MODULE_AUTHOR("OpenHarmony");

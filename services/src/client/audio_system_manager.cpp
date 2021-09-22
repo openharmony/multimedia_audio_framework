@@ -38,7 +38,7 @@ AudioSystemManager::~AudioSystemManager()
     MEDIA_DEBUG_LOG("AudioSystemManager::~AudioSystemManager");
 }
 
-AudioSystemManager* AudioSystemManager::GetInstance()
+AudioSystemManager *AudioSystemManager::GetInstance()
 {
     static AudioSystemManager audioManager;
     return &audioManager;

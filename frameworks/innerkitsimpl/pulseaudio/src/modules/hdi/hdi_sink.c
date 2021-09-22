@@ -78,7 +78,7 @@ static ssize_t RenderWrite(pa_memchunk *pchunk)
     while (true) {
         uint64_t writeLen = 0;
 
-        ret = AudioRendererRenderFrame((char *) p + index, (uint64_t)length, &writeLen);
+        ret = AudioRendererRenderFrame((char *)p + index, (uint64_t)length, &writeLen);
         if (writeLen > length) {
             pa_log_error("Error writeLen > actual bytes. Length: %zu, Written: %" PRIu64 " bytes, %d ret",
                          length, writeLen, ret);

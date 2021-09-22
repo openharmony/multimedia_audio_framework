@@ -12,6 +12,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+#ifndef AUDIO_CAPTURER_MODULE_TEST_H
+#define AUDIO_CAPTURER_MODULE_TEST_H
 
 #include "audio_capturer.h"
 #include "gtest/gtest.h"
@@ -33,3 +35,5 @@ public:
 };
 } // namespace AudioStandard
 } // namespace OHOS
+
+#endif // AUDIO_CAPTURER_MODULE_TEST_H

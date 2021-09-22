@@ -102,9 +102,9 @@ public:
     }
 
     bool TestPauseStop(const unique_ptr<AudioRenderer> &audioRenderer, bool &pauseTested, bool &stopTested,
-                       FILE *wavFile) const
+                       FILE &wavFile) const
     {
-        uint64_t currFilePos = ftell(wavFile);
+        uint64_t currFilePos = ftell(&wavFile);
         if (!stopTested && (currFilePos > AudioTestConstants::STOP_BUFFER_POSITION) && audioRenderer->Stop()) {
             stopTested = true;
             sleep(AudioTestConstants::STOP_RENDER_TIME_SECONDS);
@@ -167,7 +167,7 @@ public:
         }
 
         int32_t n = 2;
-        uint8_t *buffer = (uint8_t *) malloc(n * bufferLen);
+        auto buffer = std::make_unique<uint8_t[]>(n * bufferLen);
         if (buffer == nullptr) {
             MEDIA_ERR_LOG("AudioRendererTest: Failed to allocate buffer");
             return false;
@@ -181,11 +181,11 @@ public:
         bool pauseTested = false;
 
         while (!feof(wavFile)) {
-            bytesToWrite = fread(buffer, 1, bufferLen, wavFile);
+            bytesToWrite = fread(buffer.get(), 1, bufferLen, wavFile);
             bytesWritten = 0;
             MEDIA_INFO_LOG("AudioRendererTest: Bytes to write: %{public}zu", bytesToWrite);
 
-            if (!TestPauseStop(audioRenderer, pauseTested, stopTested, wavFile)) {
+            if (!TestPauseStop(audioRenderer, pauseTested, stopTested, *wavFile)) {
                 break;
             }
 
@@ -195,7 +195,7 @@ public:
             }
 
             while ((bytesWritten < bytesToWrite) && ((bytesToWrite - bytesWritten) > minBytes)) {
-                bytesWritten += audioRenderer->Write(buffer + bytesWritten,
+                bytesWritten += audioRenderer->Write(buffer.get() + bytesWritten,
                                                      bytesToWrite - bytesWritten);
                 MEDIA_INFO_LOG("AudioRendererTest: Bytes written: %{public}zu", bytesWritten);
                 if (bytesWritten < 0) {
@@ -209,8 +209,6 @@ public:
         if (!audioRenderer->Drain()) {
             MEDIA_ERR_LOG("AudioRendererTest: Drain failed");
         }
-
-        free(buffer);
 
         return true;
     }

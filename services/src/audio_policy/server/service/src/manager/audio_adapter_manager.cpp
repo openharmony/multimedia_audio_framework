@@ -22,31 +22,11 @@
 
 namespace OHOS {
 namespace AudioStandard {
-class PolicyCallbackImpl : public AudioServiceAdapterCallback {
-public:
-    explicit PolicyCallbackImpl(AudioAdapterManager *audioAdapterManager)
-    {
-        audioAdapterManager_ = audioAdapterManager;
-    }
-
-    float OnGetVolumeCb(std::string streamType)
-    {
-        if (audioAdapterManager_->mRingerMode != RINGER_MODE_NORMAL) {
-            if (!streamType.compare("ring")) {
-                return AudioAdapterManager::MIN_VOLUME;
-            }
-        }
-        AudioStreamType streamID = audioAdapterManager_->GetStreamIDByType(streamType);
-        return audioAdapterManager_->mVolumeMap[streamID];
-    }
-private:
-    AudioAdapterManager *audioAdapterManager_;
-};
-
 bool AudioAdapterManager::Init()
 {
-    PolicyCallbackImpl *policyCallbackImpl = new PolicyCallbackImpl(this);
-    mAudioServiceAdapter = AudioServiceAdapter::CreateAudioAdapter(policyCallbackImpl);
+    std::unique_ptr<AudioAdapterManager> audioAdapterManager(this);
+    std::unique_ptr<PolicyCallbackImpl> policyCallbackImpl = std::make_unique<PolicyCallbackImpl>(audioAdapterManager);
+    mAudioServiceAdapter = AudioServiceAdapter::CreateAudioAdapter(std::move(policyCallbackImpl));
     bool result = mAudioServiceAdapter->Connect();
     if (!result) {
         MEDIA_ERR_LOG("[AudioAdapterManager] Error in connecting audio adapter");
@@ -100,6 +80,7 @@ bool AudioAdapterManager::IsStreamActive(AudioStreamType streamType)
     bool result = mAudioServiceAdapter->IsStreamActive(streamType);
     return result;
 }
+
 int32_t AudioAdapterManager::SetDeviceActive(AudioIOHandle ioHandle, InternalDeviceType deviceType,
     std::string name, bool active)
 {
@@ -136,7 +117,7 @@ AudioRingerMode AudioAdapterManager::GetRingerMode()
     return mRingerMode;
 }
 
-AudioIOHandle AudioAdapterManager::OpenAudioPort(std::shared_ptr<AudioPortInfo> audioPortInfo)
+AudioIOHandle AudioAdapterManager::OpenAudioPort(std::unique_ptr<AudioPortInfo> &audioPortInfo)
 {
     std::string moduleArgs = GetModuleArgs(audioPortInfo);
     MEDIA_INFO_LOG("[AudioAdapterManager] load-module %{public}s %{public}s", audioPortInfo->name, moduleArgs.c_str());
@@ -161,7 +142,7 @@ int32_t AudioAdapterManager::CloseAudioPort(AudioIOHandle ioHandle)
 }
 
 // Private Members
-std::string AudioAdapterManager::GetModuleArgs(std::shared_ptr<AudioPortInfo> audioPortInfo)
+std::string AudioAdapterManager::GetModuleArgs(std::unique_ptr<AudioPortInfo> &audioPortInfo)
 {
     std::string args;
 
@@ -262,34 +243,53 @@ bool AudioAdapterManager::InitAudioPolicyKvStore(bool& isFirstBoot)
     appId.appId = "policymanager";
     StoreId storeId;
     storeId.storeId = "audiopolicy";
+    Status status = Status::SUCCESS;
 
     // open and initialize kvstore instance.
     if (mAudioPolicyKvStore == nullptr) {
-        manager.GetSingleKvStore(
-            options, appId, storeId, [&](Status status, std::unique_ptr<SingleKvStore> singleKvStore) {
-            if (status == Status::STORE_NOT_FOUND) {
-                MEDIA_ERR_LOG("[AudioAdapterManager] InitAudioPolicyKvStore: STORE_NOT_FOUND!");
-                return;
+        uint32_t retries = 0;
+
+        do {
+            manager.GetSingleKvStore(
+                options, appId, storeId, [&](Status paramStatus, std::unique_ptr<SingleKvStore> singleKvStore) {
+                status = paramStatus;
+
+                if (status == Status::SUCCESS) {
+                    mAudioPolicyKvStore = std::move(singleKvStore);
+                } else if (status == Status::STORE_NOT_FOUND) {
+                    MEDIA_ERR_LOG("[AudioAdapterManager] InitAudioPolicyKvStore: STORE_NOT_FOUND!");
+                    return;
+                } else {
+                    MEDIA_ERR_LOG("[AudioAdapterManager] InitAudioPolicyKvStore: Kvstore Connect failed! Retrying.");
+                    return;
+                }
+            });
+
+            if ((status == Status::SUCCESS) || (status == Status::STORE_NOT_FOUND)) {
+                break;
             } else {
-                mAudioPolicyKvStore = std::move(singleKvStore);
+                retries++;
+                usleep(KVSTORE_CONNECT_RETRY_DELAY_TIME);
             }
-        });
+        } while (retries <= KVSTORE_CONNECT_RETRY_COUNT);
     }
 
     if (mAudioPolicyKvStore == nullptr) {
-        MEDIA_INFO_LOG("[AudioAdapterManager] First Boot: Create AudioPolicyKvStore");
-        options.createIfMissing = true;
-        // [create and] open and initialize kvstore instance.
-        manager.GetSingleKvStore(
-            options, appId, storeId, [&](Status status, std::unique_ptr<SingleKvStore> singleKvStore) {
-            if (status != Status::SUCCESS) {
-                MEDIA_ERR_LOG("[AudioAdapterManager] Create AudioPolicyKvStore Failed!");
-                return;
-            }
+        if (status == Status::STORE_NOT_FOUND) {
+            MEDIA_INFO_LOG("[AudioAdapterManager] First Boot: Create AudioPolicyKvStore");
+            options.createIfMissing = true;
+            // [create and] open and initialize kvstore instance.
+            manager.GetSingleKvStore(
+                options, appId, storeId, [&](Status status, std::unique_ptr<SingleKvStore> singleKvStore) {
+                if (status != Status::SUCCESS) {
+                    MEDIA_ERR_LOG("[AudioAdapterManager] Create AudioPolicyKvStore Failed!");
+                    return;
+                }
 
-            mAudioPolicyKvStore = std::move(singleKvStore);
-            isFirstBoot = true;
-        });
+                mAudioPolicyKvStore = std::move(singleKvStore);
+                isFirstBoot = true;
+            });
+        }
     }
 
     if (mAudioPolicyKvStore == nullptr) {

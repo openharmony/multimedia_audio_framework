@@ -12,11 +12,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#include "audio_session.h"
-#include "timestamp.h"
-
 #ifndef AUDIO_STREAM_H
 #define AUDIO_STREAM_H
+
+#include "audio_session.h"
+#include "timestamp.h"
 
 namespace OHOS {
 namespace AudioStandard {

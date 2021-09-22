@@ -23,8 +23,8 @@ namespace OHOS {
 namespace AudioStandard {
 class IPortObserver {
 public:
-    virtual void OnAudioPortAvailable(std::shared_ptr<AudioPortInfo> portInfo) = 0;
-    virtual void OnAudioPortPinAvailable(std::shared_ptr<AudioPortPinInfo> portInfo) = 0;
+    virtual void OnAudioPortAvailable(std::unique_ptr<AudioPortInfo> portInfo) = 0;
+    virtual void OnAudioPortPinAvailable(std::unique_ptr<AudioPortPinInfo> portInfo) = 0;
     virtual void OnDefaultOutputPortPin(InternalDeviceType device) = 0;
     virtual void OnDefaultInputPortPin(InternalDeviceType device) = 0;
 };

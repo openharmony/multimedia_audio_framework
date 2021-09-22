@@ -133,7 +133,7 @@ napi_value AudioDeviceDescriptorNapi::CreateAudioDeviceDescriptorWrapper(napi_en
 napi_value AudioDeviceDescriptorNapi::GetDeviceRole(napi_env env, napi_callback_info info)
 {
     napi_status status;
-    AudioDeviceDescriptorNapi* deviceDescriptor = nullptr;
+    AudioDeviceDescriptorNapi *deviceDescriptor = nullptr;
     size_t argc = 0;
     napi_value thisVar = nullptr;
     AudioDeviceDescriptor::DeviceRole deviceRole;

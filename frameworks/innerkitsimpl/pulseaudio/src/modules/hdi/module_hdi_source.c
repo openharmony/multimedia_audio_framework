@@ -17,14 +17,12 @@
 #include <config.h>
 #endif
 
-#include <stdio.h>
-
 #include <pulsecore/macro.h>
 #include <pulsecore/modargs.h>
 #include <pulsecore/module.h>
 #include <pulsecore/log.h>
 
-pa_source* pa_hdi_source_new(pa_module *m, pa_modargs *ma, const char*driver);
+pa_source *pa_hdi_source_new(pa_module *m, pa_modargs *ma, const char *driver);
 
 void pa_hdi_source_free(pa_source *s);
 
@@ -91,7 +89,7 @@ int pa__get_n_used(pa_module *m)
     return pa_source_linked_by(source);
 }
 
-void pa__done(pa_module*m)
+void pa__done(pa_module *m)
 {
     pa_source *source = NULL;
 

@@ -33,6 +33,8 @@ public:
      * @return Returns volume level in float
      */
     virtual float OnGetVolumeCb(std::string streamType) = 0;
+
+    virtual ~AudioServiceAdapterCallback() {};
 };
 
 class AudioServiceAdapter {
@@ -43,7 +45,7 @@ public:
      * @param cb callback reference for AudioServiceAdapterCallback class
      * @return Returns instance of class that extends AudioServiceAdapter
     */
-    static std::unique_ptr<AudioServiceAdapter> CreateAudioAdapter(AudioServiceAdapterCallback *cb);
+    static std::unique_ptr<AudioServiceAdapter> CreateAudioAdapter(std::unique_ptr<AudioServiceAdapterCallback> cb);
 
     /**
      * @brief Connect to underlining audio server
@@ -62,7 +64,7 @@ public:
      * @return Returns module index if module loaded sucessfully; returns an error code
      * defined in {@link audio_errors.h} otherwise.
      */
-    virtual int32_t OpenAudioPort(char *audioPortName, std::string moduleArgs) = 0;
+    virtual int32_t OpenAudioPort(std::string audioPortName, std::string moduleArgs) = 0;
 
     /**
      * @brief closes/unloads the audio modules loaded.
