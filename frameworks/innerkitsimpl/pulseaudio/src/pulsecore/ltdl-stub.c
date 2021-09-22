@@ -15,33 +15,38 @@
 
 #include "config.h"
 #include <dlfcn.h>
-#include "ltdl.h"
 #include <pulsecore/core-util.h>
+#include "ltdl.h"
 
 #define SYSTEM_LIB_PATH "/system/lib/"
 
-lt_dlhandle lt_dlopenext(const char *filename) {
+lt_dlhandle lt_dlopenext(const char *filename)
+{
     pa_assert(filename);
     return (dlopen(filename, RTLD_NOW));
 }
 
-void* lt_dlsym(lt_dlhandle handle, const char *symbol) {
+void *lt_dlsym(lt_dlhandle handle, const char *symbol)
+{
     pa_assert(handle);
     pa_assert(symbol);
 
     return (dlsym(handle, symbol));
 }
 
-int lt_dlclose(lt_dlhandle handle) {
+int lt_dlclose(lt_dlhandle handle)
+{
     pa_assert(handle);
     return (dlclose(handle));
 }
 
-const char *lt_dlerror(void) {
+const char *lt_dlerror(void)
+{
     return dlerror();
 }
 
-const char* lt_dlgetsearchpath() {
-    const char* path = SYSTEM_LIB_PATH;
+const char *lt_dlgetsearchpath(void)
+{
+    const char *path = SYSTEM_LIB_PATH;
     return path;
 }

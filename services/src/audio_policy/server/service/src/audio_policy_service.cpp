@@ -179,14 +179,14 @@ AudioRingerMode AudioPolicyService::GetRingerMode() const
 
 // Parser callbacks
 
-void AudioPolicyService::OnAudioPortAvailable(shared_ptr<AudioPortInfo> portInfo)
+void AudioPolicyService::OnAudioPortAvailable(unique_ptr<AudioPortInfo> portInfo)
 {
     AudioIOHandle ioHandle = mAudioPolicyManager.OpenAudioPort(portInfo);
     mIOHandles[portInfo->name] = ioHandle;
     return;
 }
 
-void AudioPolicyService::OnAudioPortPinAvailable(shared_ptr<AudioPortPinInfo> portInfo)
+void AudioPolicyService::OnAudioPortPinAvailable(unique_ptr<AudioPortPinInfo> portInfo)
 {
     return;
 }

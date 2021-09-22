@@ -13,6 +13,9 @@
  * limitations under the License.
  */
 
+#ifndef AUDIO_CAPTURER_PRIVATE_H
+#define AUDIO_CAPTURER_PRIVATE_H
+
 #include "audio_capturer.h"
 #include "audio_stream.h"
 
@@ -39,3 +42,5 @@ public:
 };
 }  // namespace AudioStandard
 }  // namespace OHOS
+
+#endif // AUDIO_CAPTURER_PRIVATE_H

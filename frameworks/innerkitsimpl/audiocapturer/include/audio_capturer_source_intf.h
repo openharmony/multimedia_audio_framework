@@ -28,12 +28,12 @@ typedef struct {
     float volume;
 } AudioSourceAttr;
 
-int32_t AudioCapturerSourceInit(AudioSourceAttr *);
+int32_t AudioCapturerSourceInit(AudioSourceAttr *attr);
 void AudioCapturerSourceDeInit(void);
 int32_t AudioCapturerSourceStart(void);
 int32_t AudioCapturerSourceStop(void);
-int32_t AudioCapturerSourceFrame(char *, uint64_t, uint64_t *);
-int32_t AudioCapturerSourceSetVolume(float, float);
+int32_t AudioCapturerSourceFrame(char *frame, uint64_t requestBytes, uint64_t *replyBytes);
+int32_t AudioCapturerSourceSetVolume(float left, float right);
 bool AudioCapturerSourceIsMuteRequired(void);
 int32_t AudioCapturerSourceSetMute(bool);
 int32_t AudioCapturerSourceGetVolume(float *left, float *right);

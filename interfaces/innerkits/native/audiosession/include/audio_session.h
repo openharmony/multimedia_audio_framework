@@ -33,18 +33,18 @@ class AudioSession : public AudioServiceClient {
 public:
     uint32_t GetSessionID();
 
-    AudioDevDescriptor* GetActiveAudioSinkDevice(uint32_t sessionID);
-    AudioDevDescriptor* GetActiveAudioSourceDevice(uint32_t sessionID);
+    AudioDevDescriptor *GetActiveAudioSinkDevice(uint32_t sessionID);
+    AudioDevDescriptor *GetActiveAudioSourceDevice(uint32_t sessionID);
 
-    bool SetActiveAudioSinkDevice(uint32_t sessionID, const AudioDevDescriptor& audioDesc);
-    bool SetActiveAudioSourceDevice(uint32_t sessionID, const AudioDevDescriptor& audioDesc);
+    bool SetActiveAudioSinkDevice(uint32_t sessionID, const AudioDevDescriptor &audioDesc);
+    bool SetActiveAudioSourceDevice(uint32_t sessionID, const AudioDevDescriptor &audioDesc);
     float GetAudioStreamVolume(uint32_t sessionID);
     float GetAudioDeviceVolume(uint32_t sessionID);
     bool SetAudioStreamVolume(uint32_t sessionID, float volume);
     bool SetAudioDeviceVolume(uint32_t sessionID, float volume);
 
 private:
-    AudioSession* CreateSession(SessionType eSession);
+    AudioSession *CreateSession(SessionType eSession);
 };
 } // namespace AudioStandard
 } // namespace OHOS

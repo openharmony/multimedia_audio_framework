@@ -44,7 +44,7 @@ AudioCapturerSource::~AudioCapturerSource()
     DeInit();
 }
 
-AudioCapturerSource* AudioCapturerSource::GetInstance()
+AudioCapturerSource *AudioCapturerSource::GetInstance()
 {
     static AudioCapturerSource audioCapturer_;
     return &audioCapturer_;
@@ -408,7 +408,7 @@ extern "C" {
 
 using namespace OHOS::AudioStandard;
 
-AudioCapturerSource* g_audioCaptureSourceInstance = AudioCapturerSource::GetInstance();
+AudioCapturerSource *g_audioCaptureSourceInstance = AudioCapturerSource::GetInstance();
 
 int32_t AudioCapturerSourceInit(AudioSourceAttr *attr)
 {

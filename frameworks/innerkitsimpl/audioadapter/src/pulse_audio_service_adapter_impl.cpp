@@ -22,21 +22,23 @@
 #include "audio_errors.h"
 #include "media_log.h"
 
+using namespace std;
+
 namespace OHOS {
 namespace AudioStandard {
-static AudioServiceAdapterCallback *mAudioServiceAdapterCallback;
+static unique_ptr<AudioServiceAdapterCallback> mAudioServiceAdapterCallback;
 
 AudioServiceAdapter::~AudioServiceAdapter() = default;
 PulseAudioServiceAdapterImpl::~PulseAudioServiceAdapterImpl() = default;
 
-std::unique_ptr<AudioServiceAdapter> AudioServiceAdapter::CreateAudioAdapter(AudioServiceAdapterCallback *cb)
+unique_ptr<AudioServiceAdapter> AudioServiceAdapter::CreateAudioAdapter(unique_ptr<AudioServiceAdapterCallback> cb)
 {
-    return std::make_unique<PulseAudioServiceAdapterImpl>(cb);
+    return make_unique<PulseAudioServiceAdapterImpl>(cb);
 }
 
-PulseAudioServiceAdapterImpl::PulseAudioServiceAdapterImpl(AudioServiceAdapterCallback *cb)
+PulseAudioServiceAdapterImpl::PulseAudioServiceAdapterImpl(unique_ptr<AudioServiceAdapterCallback> &cb)
 {
-    mAudioServiceAdapterCallback = cb;
+    mAudioServiceAdapterCallback = move(cb);
 }
 
 bool PulseAudioServiceAdapterImpl::Connect()
@@ -84,11 +86,11 @@ bool PulseAudioServiceAdapterImpl::Connect()
 
 bool PulseAudioServiceAdapterImpl::ConnectToPulseAudio()
 {
-    std::unique_ptr<UserData> userData = std::make_unique<UserData>();
+    unique_ptr<UserData> userData = make_unique<UserData>();
     userData->thiz = this;
 
     if (mContext != NULL) {
-        pa_context_disconnect (mContext);
+        pa_context_disconnect(mContext);
         pa_context_set_state_callback(mContext, NULL, NULL);
         pa_context_set_subscribe_callback(mContext, NULL, NULL);
         pa_context_unref(mContext);
@@ -124,14 +126,14 @@ Fail:
     return false;
 }
 
-int32_t PulseAudioServiceAdapterImpl::OpenAudioPort(char *audioPortName, std::string moduleArgs)
+int32_t PulseAudioServiceAdapterImpl::OpenAudioPort(string audioPortName, string moduleArgs)
 {
-    std::unique_ptr<UserData> userData = std::make_unique<UserData>();
+    unique_ptr<UserData> userData = make_unique<UserData>();
     userData->thiz = this;
 
     pa_threaded_mainloop_lock(mMainLoop);
-    pa_operation *operation = pa_context_load_module(mContext, audioPortName, moduleArgs.c_str(), PaModuleLoadCb,
-        reinterpret_cast<void*>(userData.get()));
+    pa_operation *operation = pa_context_load_module(mContext, audioPortName.c_str(), moduleArgs.c_str(),
+        PaModuleLoadCb, reinterpret_cast<void*>(userData.get()));
     if (operation == NULL) {
         MEDIA_ERR_LOG("[PulseAudioServiceAdapterImpl] pa_context_load_module returned nullptr");
         pa_threaded_mainloop_unlock(mMainLoop);
@@ -164,7 +166,7 @@ int32_t PulseAudioServiceAdapterImpl::CloseAudioPort(int32_t audioHandleIndex)
     return SUCCESS;
 }
 
-int32_t PulseAudioServiceAdapterImpl::SetDefaultSink(std::string name)
+int32_t PulseAudioServiceAdapterImpl::SetDefaultSink(string name)
 {
     pa_threaded_mainloop_lock(mMainLoop);
     pa_operation *operation = pa_context_set_default_sink(mContext, name.c_str(), NULL, NULL);
@@ -179,8 +181,7 @@ int32_t PulseAudioServiceAdapterImpl::SetDefaultSink(std::string name)
     return SUCCESS;
 }
 
-
-int32_t PulseAudioServiceAdapterImpl::SetDefaultSource(std::string name)
+int32_t PulseAudioServiceAdapterImpl::SetDefaultSource(string name)
 {
     pa_threaded_mainloop_lock(mMainLoop);
     pa_operation *operation = pa_context_set_default_source(mContext, name.c_str(), NULL, NULL);
@@ -197,7 +198,7 @@ int32_t PulseAudioServiceAdapterImpl::SetDefaultSource(std::string name)
 
 int32_t PulseAudioServiceAdapterImpl::SetVolume(AudioStreamType streamType, float volume)
 {
-    std::unique_ptr<UserData> userData = std::make_unique<UserData>();
+    unique_ptr<UserData> userData = make_unique<UserData>();
     userData->thiz = this;
     userData->volume = volume;
     userData->streamType = streamType;
@@ -226,7 +227,7 @@ int32_t PulseAudioServiceAdapterImpl::SetVolume(AudioStreamType streamType, floa
 
 int32_t PulseAudioServiceAdapterImpl::SetMute(AudioStreamType streamType, bool mute)
 {
-    std::unique_ptr<UserData> userData = std::make_unique<UserData>();
+    unique_ptr<UserData> userData = make_unique<UserData>();
     userData->thiz = this;
     userData->mute = mute;
     userData->streamType = streamType;
@@ -257,7 +258,7 @@ int32_t PulseAudioServiceAdapterImpl::SetMute(AudioStreamType streamType, bool m
 
 bool PulseAudioServiceAdapterImpl::IsMute(AudioStreamType streamType)
 {
-    std::unique_ptr<UserData> userData = std::make_unique<UserData>();
+    unique_ptr<UserData> userData = make_unique<UserData>();
     userData->thiz = this;
     userData->streamType = streamType;
     userData->mute = false;
@@ -289,7 +290,7 @@ bool PulseAudioServiceAdapterImpl::IsMute(AudioStreamType streamType)
 
 bool PulseAudioServiceAdapterImpl::IsStreamActive(AudioStreamType streamType)
 {
-    std::unique_ptr<UserData> userData = std::make_unique<UserData>();
+    unique_ptr<UserData> userData = make_unique<UserData>();
     userData->thiz = this;
     userData->streamType = streamType;
     userData->isCorked = true;
@@ -340,7 +341,7 @@ void PulseAudioServiceAdapterImpl::Disconnect()
     return;
 }
 
-std::string PulseAudioServiceAdapterImpl::GetNameByStreamType(AudioStreamType streamType)
+string PulseAudioServiceAdapterImpl::GetNameByStreamType(AudioStreamType streamType)
 {
     switch (streamType) {
         case STREAM_MUSIC:
@@ -360,20 +361,23 @@ std::string PulseAudioServiceAdapterImpl::GetNameByStreamType(AudioStreamType st
     }
 }
 
-AudioStreamType PulseAudioServiceAdapterImpl::GetIdByStreamType(std::string streamType)
+AudioStreamType PulseAudioServiceAdapterImpl::GetIdByStreamType(string streamType)
 {
-    AudioStreamType stream = STREAM_MUSIC;
+    AudioStreamType stream;
 
-    if (!streamType.compare(std::string("music")))
+    if (!streamType.compare(string("music"))) {
         stream = STREAM_MUSIC;
-    else if (!streamType.compare(std::string("ring")))
+    } else if (!streamType.compare(string("ring"))) {
         stream = STREAM_RING;
-    else if (!streamType.compare(std::string("system")))
+    } else if (!streamType.compare(string("system"))) {
         stream = STREAM_SYSTEM;
-    else if (!streamType.compare(std::string("notification")))
+    } else if (!streamType.compare(string("notification"))) {
         stream = STREAM_NOTIFICATION;
-    else if (!streamType.compare(std::string("alarm")))
+    } else if (!streamType.compare(string("alarm"))) {
         stream = STREAM_ALARM;
+    } else {
+        stream = STREAM_MUSIC;
+    }
 
     return stream;
 }
@@ -385,7 +389,7 @@ void PulseAudioServiceAdapterImpl::PaGetSinkInputInfoMuteStatusCb(pa_context *c,
     PulseAudioServiceAdapterImpl *thiz = userData->thiz;
 
     if (eol < 0) {
-        MEDIA_ERR_LOG("[PulseAudioServiceAdapterImpl] Failed to get sink input information: %s",
+        MEDIA_ERR_LOG("[PulseAudioServiceAdapterImpl] Failed to get sink input information: %{public}s",
             pa_strerror(pa_context_errno(c)));
         return;
     }
@@ -406,7 +410,7 @@ void PulseAudioServiceAdapterImpl::PaGetSinkInputInfoMuteStatusCb(pa_context *c,
         return;
     }
 
-    std::string streamType(streamtype);
+    string streamType(streamtype);
     if (!streamType.compare(thiz->GetNameByStreamType(userData->streamType))) {
         userData->mute = i->mute;
         MEDIA_INFO_LOG("[PulseAudioServiceAdapterImpl] Mute : %{public}d for stream : %{public}s",
@@ -423,7 +427,7 @@ void PulseAudioServiceAdapterImpl::PaGetSinkInputInfoMuteCb(pa_context *c, const
     PulseAudioServiceAdapterImpl *thiz = userData->thiz;
 
     if (eol < 0) {
-        MEDIA_ERR_LOG("[PulseAudioServiceAdapterImpl] Failed to get sink input information: %s",
+        MEDIA_ERR_LOG("[PulseAudioServiceAdapterImpl] Failed to get sink input information: %{public}s",
             pa_strerror(pa_context_errno(c)));
         return;
     }
@@ -444,7 +448,7 @@ void PulseAudioServiceAdapterImpl::PaGetSinkInputInfoMuteCb(pa_context *c, const
         return;
     }
 
-    std::string streamType(streamtype);
+    string streamType(streamtype);
     if (!streamType.compare(thiz->GetNameByStreamType(userData->streamType))) {
         pa_operation_unref(pa_context_set_sink_input_mute(c, i->index, (userData->mute) ? 1 : 0, NULL, NULL));
         MEDIA_INFO_LOG("[PulseAudioServiceAdapterImpl] Applied Mute : %{public}d for stream : %{public}s",
@@ -495,7 +499,7 @@ void PulseAudioServiceAdapterImpl::PaModuleLoadCb(pa_context *c, uint32_t idx, v
 {
     UserData *userData = reinterpret_cast<UserData*>(userdata);
     if (idx == PA_INVALID_INDEX) {
-        MEDIA_ERR_LOG("[PulseAudioServiceAdapterImpl] Failure: %s", pa_strerror(pa_context_errno(c)));
+        MEDIA_ERR_LOG("[PulseAudioServiceAdapterImpl] Failure: %{public}s", pa_strerror(pa_context_errno(c)));
         userData->idx = PA_INVALID_INDEX;
     } else {
         userData->idx = idx;
@@ -514,7 +518,7 @@ void PulseAudioServiceAdapterImpl::PaGetSinkInputInfoVolumeCb(pa_context *c, con
     MEDIA_ERR_LOG("[PulseAudioServiceAdapterImpl] GetSinkInputInfoVolumeCb");
     if (eol < 0) {
         delete userData;
-        MEDIA_ERR_LOG("[PulseAudioServiceAdapterImpl] Failed to get sink input information: %s",
+        MEDIA_ERR_LOG("[PulseAudioServiceAdapterImpl] Failed to get sink input information: %{public}s",
             pa_strerror(pa_context_errno(c)));
         return;
     }
@@ -537,8 +541,8 @@ void PulseAudioServiceAdapterImpl::PaGetSinkInputInfoVolumeCb(pa_context *c, con
         return;
     }
 
-    std::string streamType(streamtype);
-    float volumeFactor = std::atof(streamVolume);
+    string streamType(streamtype);
+    float volumeFactor = atof(streamVolume);
     AudioStreamType streamID = thiz->GetIdByStreamType(streamType);
     float volumeCb = mAudioServiceAdapterCallback->OnGetVolumeCb(streamtype);
     float vol = volumeCb * volumeFactor;
@@ -566,7 +570,7 @@ void PulseAudioServiceAdapterImpl::PaGetSinkInputInfoCorkStatusCb(pa_context *c,
     PulseAudioServiceAdapterImpl *thiz = userData->thiz;
 
     if (eol < 0) {
-        MEDIA_ERR_LOG("[PulseAudioServiceAdapterImpl] Failed to get sink input information: %s",
+        MEDIA_ERR_LOG("[PulseAudioServiceAdapterImpl] Failed to get sink input information: %{public}s",
             pa_strerror(pa_context_errno(c)));
         return;
     }
@@ -587,7 +591,7 @@ void PulseAudioServiceAdapterImpl::PaGetSinkInputInfoCorkStatusCb(pa_context *c,
         return;
     }
 
-    std::string streamType(streamtype);
+    string streamType(streamtype);
     if (!streamType.compare(thiz->GetNameByStreamType(userData->streamType))) {
         userData->isCorked = i->corked;
         MEDIA_INFO_LOG("[PulseAudioServiceAdapterImpl] corked : %{public}d for stream : %{public}s",
@@ -600,7 +604,7 @@ void PulseAudioServiceAdapterImpl::PaGetSinkInputInfoCorkStatusCb(pa_context *c,
 void PulseAudioServiceAdapterImpl::PaSubscribeCb(pa_context *c, pa_subscription_event_type_t t, uint32_t idx,
     void *userdata)
 {
-    std::unique_ptr<UserData> userData = std::make_unique<UserData>();
+    unique_ptr<UserData> userData = make_unique<UserData>();
     PulseAudioServiceAdapterImpl *thiz = reinterpret_cast<PulseAudioServiceAdapterImpl*>(userdata);
     userData->thiz = thiz;
     switch (t & PA_SUBSCRIPTION_EVENT_FACILITY_MASK) {

@@ -35,6 +35,7 @@ int32_t AudioManagerProxy::GetMaxVolume(AudioSystemManager::AudioVolumeType volu
         MEDIA_ERR_LOG("Get max volume failed, error: %d", error);
         return error;
     }
+
     int32_t volume = reply.ReadInt32();
     return volume;
 }
@@ -67,8 +68,8 @@ int32_t AudioManagerProxy::SetMicrophoneMute(bool isMute)
         MEDIA_ERR_LOG("SetMicrophoneMute failed, error: %d", error);
         return error;
     }
-    int32_t result = reply.ReadInt32();
 
+    int32_t result = reply.ReadInt32();
     return result;
 }
 
@@ -82,8 +83,8 @@ bool AudioManagerProxy::IsMicrophoneMute()
         MEDIA_ERR_LOG("IsMicrophoneMute failed, error: %d", error);
         return false;
     }
+
     bool isMute = reply.ReadBool();
-    
     return isMute;
 }
 

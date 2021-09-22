@@ -35,7 +35,7 @@ REGISTER_SYSTEM_ABILITY_BY_ID(AudioServer, AUDIO_DISTRIBUTED_SERVICE_ID, true)
 #ifdef PA
 constexpr int PA_ARG_COUNT = 1;
 
-void* AudioServer::paDaemonThread(void* arg)
+void *AudioServer::paDaemonThread(void *arg)
 {
     /* Load the mandatory pulseaudio modules at start */
     char *argv[] = {
@@ -111,7 +111,7 @@ int32_t AudioServer::GetMinVolume(AudioSystemManager::AudioVolumeType volumeType
 
 int32_t AudioServer::SetMicrophoneMute(bool isMute)
 {
-    AudioCapturerSource* audioCapturerSourceInstance = AudioCapturerSource::GetInstance();
+    AudioCapturerSource *audioCapturerSourceInstance = AudioCapturerSource::GetInstance();
 
     if (audioCapturerSourceInstance->capturerInited_ == false) {
             MEDIA_INFO_LOG("Capturer is not initialized. Set the flag mute state flag");
@@ -124,7 +124,7 @@ int32_t AudioServer::SetMicrophoneMute(bool isMute)
 
 bool AudioServer::IsMicrophoneMute()
 {
-    AudioCapturerSource* audioCapturerSourceInstance = AudioCapturerSource::GetInstance();
+    AudioCapturerSource *audioCapturerSourceInstance = AudioCapturerSource::GetInstance();
     bool isMute = false;
 
     if (audioCapturerSourceInstance->capturerInited_ == false) {
@@ -148,6 +148,7 @@ std::vector<sptr<AudioDeviceDescriptor>> AudioServer::GetDevices(AudioDeviceDesc
         MEDIA_ERR_LOG("new AudioDeviceDescriptor fail");
         return audioDeviceDescriptor_;
     }
+
     if (AudioDeviceDescriptor::DeviceFlag::INPUT_DEVICES_FLAG == deviceFlag) {
         audioDescriptor->deviceType_ = AudioDeviceDescriptor::DeviceType::MIC;
         audioDescriptor->deviceRole_ = AudioDeviceDescriptor::DeviceRole::INPUT_DEVICE;
@@ -165,6 +166,7 @@ std::vector<sptr<AudioDeviceDescriptor>> AudioServer::GetDevices(AudioDeviceDesc
         audioDeviceDescriptor_.push_back(audioDescriptor_outputDevice);
         return audioDeviceDescriptor_;
     }
+
     audioDeviceDescriptor_.push_back(audioDescriptor);
     return audioDeviceDescriptor_;
 }

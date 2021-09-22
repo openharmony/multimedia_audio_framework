@@ -64,9 +64,9 @@ public:
     AudioRingerMode GetRingerMode() const;
 
     // Parser callbacks
-    void OnAudioPortAvailable(std::shared_ptr<AudioPortInfo> portInfo);
+    void OnAudioPortAvailable(std::unique_ptr<AudioPortInfo> portInfo);
 
-    void OnAudioPortPinAvailable(std::shared_ptr<AudioPortPinInfo> portInfo);
+    void OnAudioPortPinAvailable(std::unique_ptr<AudioPortPinInfo> portInfo);
 
     void OnDefaultOutputPortPin(InternalDeviceType device);
 
