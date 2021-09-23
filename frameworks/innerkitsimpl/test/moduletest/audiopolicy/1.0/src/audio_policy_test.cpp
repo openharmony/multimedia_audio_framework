@@ -89,6 +89,14 @@ const PolicyParam ACTIVE_DEVICE_PARAMS[] = {
         .actDeviceType = BLUETOOTH_SCO,
         .active = true
     },
+    {
+        .actDeviceType = SPEAKER,
+        .active = false
+    },
+    {
+        .actDeviceType = SPEAKER,
+        .active = true
+    },
 };
 
 const PolicyParam RINGER_MODE_PARAMS[] = {
