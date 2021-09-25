@@ -59,7 +59,7 @@ config("audio_external_library_config") {
 }
 
 ohos_executable("audio_capturer_test") {
-  install_enable = true
+  install_enable = false
 
   sources = [ "//foundation/multimedia/audio_standard/services/test/audio_capturer_test.cpp" ]
 

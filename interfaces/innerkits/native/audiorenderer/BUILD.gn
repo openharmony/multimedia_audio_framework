@@ -51,7 +51,7 @@ ohos_shared_library("audio_renderer") {
 }
 
 ohos_executable("audio_renderer_test") {
-  install_enable = true
+  install_enable = false
 
   sources = [ "//foundation/multimedia/audio_standard/services/test/audio_renderer_test.cpp" ]
 
