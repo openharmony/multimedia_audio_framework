@@ -97,7 +97,11 @@ You can use APIs provided in this repository to convert audio data into audible 
 9. Call audioRenderer->**Stop()** function to Stop rendering.
 10. After the playback task is complete, call the audioRenderer->**Release**() function on the AudioRenderer instance to release the stream resources.
 
-Provided the basic playback usecase above. Please refer [**audio_renderer.h**](https://gitee.com/openharmony/multimedia_audio_standard/blob/master/interfaces/innerkits/native/audiorenderer/include/audio_renderer.h) and [**audio_info.h**](https://gitee.com/openharmony/multimedia_audio_standard/blob/master/interfaces/innerkits/native/audiocommon/include/audio_info.h) for more APIs.
+Provided the basic playback usecase above.
+
+11. Use audioRenderer->**SetVolume(float)** and audioRenderer->**GetVolume()** to set and get Track Volume. Value ranges from 0.0 to 1.0
+
+Please refer [**audio_renderer.h**](https://gitee.com/openharmony/multimedia_audio_standard/blob/master/interfaces/innerkits/native/audiorenderer/include/audio_renderer.h) and [**audio_info.h**](https://gitee.com/openharmony/multimedia_audio_standard/blob/master/interfaces/innerkits/native/audiocommon/include/audio_info.h) for more such useful APIs.
 
 
 ### Audio Recording<a name="audio-recording"></a>
@@ -118,7 +122,7 @@ You can use the APIs provided in this repository for your application to record 
     capturerParams.encodingType = ENCODING_PCM;
 
     audioCapturer->SetParams(capturerParams);
-    ```h
+    ```
 4. (Optional) use audioCapturer->**GetParams**(capturerParams) to validate SetParams()
 5. Call audioRenderer->**Start**() function on the AudioCapturer instance to start the recording task.
 6. Get the buffer length to be read, using **GetBufferSize** API. 
@@ -145,11 +149,59 @@ You can use the APIs provided in this repository for your application to record 
 Provided the basic recording usecase above. Please refer [**audio_capturer.h**](https://gitee.com/openharmony/multimedia_audio_standard/blob/master/interfaces/innerkits/native/audiocapturer/include/audio_capturer.h) and [**audio_info.h**](https://gitee.com/openharmony/multimedia_audio_standard/blob/master/interfaces/innerkits/native/audiocommon/include/audio_info.h) for more APIs.
 
 ### Audio Management<a name="audio-management"></a>
+You can use the APIs provided in [**audio_system_manager.h**](https://gitee.com/openharmony/multimedia_audio_standard/blob/master/interfaces/innerkits/native/audiomanager/include/audio_system_manager.h) to control voulme and device.
+1. Use **GetInstance** API to get AudioSystemManager instance.
+    ```
+    AudioSystemManager *audioSystemMgr = AudioSystemManager::GetInstance();
+    ```
+#### Volume Control
+2. Use **GetMaxVolume** and  **GetMinVolume** APIs to query the Maximum & Minimum volume level allowed for the stream. Use this volume range to set the volume.
+    ```
+    AudioSystemManager::AudioVolumeType streamType = AudioSystemManager::AudioVolumeType::STREAM_MUSIC;
+    int32_t maxVol = audioSystemMgr->GetMaxVolume(streamType);
+    int32_t minVol = audioSystemMgr->GetMinVolume(streamType);
+    ```
+3. Use **SetVolume** and **GetVolume** APIs to set and get the volume level of the stream.
+    ```
+    int32_t result = audioSystemMgr->SetVolume(streamType, 10);
+    int32_t vol = audioSystemMgr->GetVolume(streamType);
+    ```
+4. Use **SetMute** and **IsStreamMute** APIs to set and get the mute status of the stream.
+    ```
+    int32_t result = audioSystemMgr->SetMute(streamType, true);
+    bool isMute = audioSystemMgr->IsStreamMute(streamType);
+5. Use **SetRingerMode** and **GetRingerMode** APIs to set and get ringer modes. Refer **AudioRingerMode** enum in [**audio_info.h**](https://gitee.com/openharmony/multimedia_audio_standard/blob/master/interfaces/innerkits/native/audiocommon/include/audio_info.h) for supported ringer modes.
+    ```
+    int32_t result = audioSystemMgr->SetRingerMode(RINGER_MODE_SILENT);
+    AudioRingerMode ringMode = audioSystemMgr->GetRingerMode();
+    ```
+6. Use **SetMicrophoneMute** and **IsMicrophoneMute** APIs to mute/unmute the mic and to check if mic muted.
+    ```
+    int32_t result = audioSystemMgr->SetMicrophoneMute(true);
+    bool isMicMute = audioSystemMgr->IsMicrophoneMute();
+    ```
+#### Device control
+7. Use **GetDevices**, **deviceType_** and **deviceRole_** APIs to get audio I/O devices information. For DeviceFlag, DeviceType and DeviceRole enums refer [**audio_info.h**](https://gitee.com/openharmony/multimedia_audio_standard/blob/master/interfaces/innerkits/native/audiocommon/include/audio_info.h).
+    ```
+    DeviceFlag deviceFlag = OUTPUT_DEVICES_FLAG;
+    vector<sptr<AudioDeviceDescriptor>> audioDeviceDescriptors
+        = audioSystemMgr->GetDevices(deviceFlag);
+    sptr<AudioDeviceDescriptor> audioDeviceDescriptor = audioDeviceDescriptors[0];
+    cout << audioDeviceDescriptor->deviceType_;
+    cout << audioDeviceDescriptor->deviceRole_;
+    ```
+8. Use **SetDeviceActive** and **IsDeviceActive** APIs to Actiavte/Deactivate the device and to check if the deivce is active.
+     ```
+    ActiveDeviceType deviceType = SPEAKER;
+    int32_t result = audioSystemMgr->SetDeviceActive(deviceType, true);
+    bool isDevActive = audioSystemMgr->SetDeviceActive(IsDeviceActive);
+    ```
+9. Other useful APIs such as **IsStreamActive**, **SetAudioParameter** and **GetAudioParameter** are also provided. Please refer [**audio_system_manager.h**](https://gitee.com/openharmony/multimedia_audio_standard/blob/master/interfaces/innerkits/native/audiomanager/include/audio_system_manager.h) for more details
 
+#### JS Usage:
 JS apps can use the APIs provided by audio manager to control the volume and the device.\
 Please refer [**audio-management.md**](https://gitee.com/openharmony/docs/blob/master/en/application-dev/js-reference/audio-management.md) for JS usage of audio volume and device management.
 
 ## Repositories Involved<a name="repositories-involved"></a>
 
-[multimedia\_audio\_standard](https://gitee.com/openharmony/multimedia_audio_standard)\
-[multimedia\_media\_standard](https://gitee.com/openharmony/multimedia_media_standard)
+[multimedia\_audio\_standard](https://gitee.com/openharmony/multimedia_audio_standard)
