@@ -1265,6 +1265,11 @@ HWTEST(AudioRendererModuleTest, Audio_Renderer_Write_008, TestSize.Level1)
             sleep(PAUSE_RENDER_TIME_SECONDS);
             isStarted = audioRenderer->Start();
             EXPECT_EQ(true, isStarted);
+
+            ret = audioRenderer->SetVolume(0.5);
+            EXPECT_EQ(SUCCESS, ret);
+            float volume = audioRenderer->GetVolume();
+            EXPECT_EQ(0.5, volume);
         }
 
         while ((static_cast<size_t>(bytesWritten) < bytesToWrite) &&

@@ -1149,9 +1149,7 @@ int32_t AudioServiceClient::SetStreamVolume(float volume)
         return AUDIO_CLIENT_ERR;
     }
 
-    while (pa_operation_get_state(operation) == PA_OPERATION_RUNNING) {
-        pa_threaded_mainloop_wait(mainLoop);
-    }
+    pa_threaded_mainloop_accept(mainLoop);
 
     pa_operation_unref(operation);
     pa_threaded_mainloop_unlock(mainLoop);
@@ -1175,7 +1173,7 @@ void AudioServiceClient::GetSinkInputInfoVolumeCb(pa_context *c, const pa_sink_i
     }
 
     if (eol) {
-        pa_threaded_mainloop_signal(thiz->mainLoop, 0);
+        pa_threaded_mainloop_signal(thiz->mainLoop, 1);
         return;
     }
 
