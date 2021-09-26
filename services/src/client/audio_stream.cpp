@@ -25,6 +25,7 @@ namespace OHOS {
 namespace AudioStandard {
 const unsigned long long TIME_CONVERSION_US_S = 1000000ULL; /* us to s */
 const unsigned long long TIME_CONVERSION_NS_US = 1000ULL; /* ns to us */
+const unsigned long long TIME_CONVERSION_NS_S = 1000000000ULL; /* ns to s */
 
 AudioStream::AudioStream(AudioStreamType eStreamType, AudioMode eMode) : eStreamType_(eStreamType),
                                                                          eMode_(eMode),
@@ -57,6 +58,13 @@ bool AudioStream::GetAudioTime(Timestamp &timestamp, Timestamp::Timestampbase ba
         timestamp.time.tv_nsec
             = static_cast<time_t>(((paTimeStamp - resetTimestamp_) - (timestamp.time.tv_sec * TIME_CONVERSION_US_S))
                                   * TIME_CONVERSION_NS_US);
+        timestamp.time.tv_sec += baseTimestamp_.tv_sec;
+        timestamp.time.tv_nsec += baseTimestamp_.tv_nsec;
+        timestamp.time.tv_sec += (timestamp.time.tv_nsec / TIME_CONVERSION_NS_S);
+        timestamp.time.tv_nsec = (timestamp.time.tv_nsec % TIME_CONVERSION_NS_S);
+
+        MEDIA_DEBUG_LOG("AudioStream: GetAudioTime timestamp sec:nsec %{public}ld:%{public}ld",
+                        timestamp.time.tv_sec, timestamp.time.tv_nsec);
         return true;
     }
     return false;
@@ -215,6 +223,11 @@ bool AudioStream::StartAudioStream()
 
     if (state_ == STOPPED && GetCurrentTimeStamp(resetTimestamp_)) {
         MEDIA_ERR_LOG("Failed to get timestamp after stop needed for resetting");
+    }
+
+    int32_t retCode = clock_gettime(CLOCK_BOOTTIME, &baseTimestamp_);
+    if (retCode != 0) {
+        MEDIA_ERR_LOG("AudioStream::StartAudioStream get system elapsed time failed: %d", retCode);
     }
 
     int32_t ret = StartStream();

@@ -1043,7 +1043,9 @@ int32_t AudioServiceClient::GetCurrentTimeStamp(uint64_t &timeStamp)
         if (eAudioClientType == AUDIO_SERVICE_CLIENT_PLAYBACK) {
             timeStamp = pa_bytes_to_usec(info->write_index, &sampleSpec);
         } else if (eAudioClientType == AUDIO_SERVICE_CLIENT_RECORD) {
-            timeStamp = pa_bytes_to_usec(info->read_index, &sampleSpec);
+            if (pa_stream_get_time(paStream, &timeStamp)) {
+                MEDIA_ERR_LOG("AudioServiceClient::GetCurrentTimeStamp failed for AUDIO_SERVICE_CLIENT_RECORD");
+            }
         }
     }
     pa_threaded_mainloop_unlock(mainLoop);
