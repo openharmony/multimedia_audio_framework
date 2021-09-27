@@ -105,7 +105,7 @@ Please refer [**audio_renderer.h**](https://gitee.com/openharmony/multimedia_aud
 
 
 ### Audio Recording<a name="audio-recording"></a>
-You can use the APIs provided in this repository for your application to record voices using input devices, convert the voices into audio data, and manage recording tasks. The following steps describe how to use AudioCapturer to develop the audio recording function:
+You can use the APIs provided in this repository for your application to record voices using input devices, convert the voices into audio data, and manage recording tasks. The following steps describe how to use **AudioCapturer** to develop the audio recording function:
 
 1. Use **Create** API with required stream type to get **AudioCapturer** instance.
     ```
@@ -124,14 +124,15 @@ You can use the APIs provided in this repository for your application to record 
     audioCapturer->SetParams(capturerParams);
     ```
 4. (Optional) use audioCapturer->**GetParams**(capturerParams) to validate SetParams()
-5. Call audioRenderer->**Start**() function on the AudioCapturer instance to start the recording task.
+5. Call audioCapturer->**Start**() function on the AudioCapturer instance to start the recording task.
 6. Get the buffer length to be read, using **GetBufferSize** API. 
     ```
     audioCapturer->GetBufferSize(bufferLen);
     ```
 7. Read the captured audio data and convert it to a byte stream. Call the read function repeatedly to read data untill you want to stop recording
     ```
-    bytesRead = audioCapturer->Read(*buffer, bufferLen, isBlocking); // set isBlocking = true/false for blocking/non-blocking read
+    // set isBlocking = true/false for blocking/non-blocking read
+    bytesRead = audioCapturer->Read(*buffer, bufferLen, isBlocking);
     while (numBuffersToCapture) {
         bytesRead = audioCapturer->Read(*buffer, bufferLen, isBlockingRead);
         if (bytesRead < 0) {
@@ -149,8 +150,8 @@ You can use the APIs provided in this repository for your application to record 
 Provided the basic recording usecase above. Please refer [**audio_capturer.h**](https://gitee.com/openharmony/multimedia_audio_standard/blob/master/interfaces/innerkits/native/audiocapturer/include/audio_capturer.h) and [**audio_info.h**](https://gitee.com/openharmony/multimedia_audio_standard/blob/master/interfaces/innerkits/native/audiocommon/include/audio_info.h) for more APIs.
 
 ### Audio Management<a name="audio-management"></a>
-You can use the APIs provided in [**audio_system_manager.h**](https://gitee.com/openharmony/multimedia_audio_standard/blob/master/interfaces/innerkits/native/audiomanager/include/audio_system_manager.h) to control voulme and device.
-1. Use **GetInstance** API to get AudioSystemManager instance.
+You can use the APIs provided in [**audio_system_manager.h**](https://gitee.com/openharmony/multimedia_audio_standard/blob/master/interfaces/innerkits/native/audiomanager/include/audio_system_manager.h) to control volume and device.
+1. Use **GetInstance** API to get **AudioSystemManager** instance.
     ```
     AudioSystemManager *audioSystemMgr = AudioSystemManager::GetInstance();
     ```
@@ -190,17 +191,17 @@ You can use the APIs provided in [**audio_system_manager.h**](https://gitee.com/
     cout << audioDeviceDescriptor->deviceType_;
     cout << audioDeviceDescriptor->deviceRole_;
     ```
-8. Use **SetDeviceActive** and **IsDeviceActive** APIs to Actiavte/Deactivate the device and to check if the deivce is active.
+8. Use **SetDeviceActive** and **IsDeviceActive** APIs to Actiavte/Deactivate the device and to check if the device is active.
      ```
     ActiveDeviceType deviceType = SPEAKER;
     int32_t result = audioSystemMgr->SetDeviceActive(deviceType, true);
-    bool isDevActive = audioSystemMgr->SetDeviceActive(IsDeviceActive);
+    bool isDevActive = audioSystemMgr->IsDeviceActive(deviceType);
     ```
 9. Other useful APIs such as **IsStreamActive**, **SetAudioParameter** and **GetAudioParameter** are also provided. Please refer [**audio_system_manager.h**](https://gitee.com/openharmony/multimedia_audio_standard/blob/master/interfaces/innerkits/native/audiomanager/include/audio_system_manager.h) for more details
 
-#### JS Usage:
-JS apps can use the APIs provided by audio manager to control the volume and the device.\
-Please refer [**audio-management.md**](https://gitee.com/openharmony/docs/blob/master/en/application-dev/js-reference/audio-management.md) for JS usage of audio volume and device management.
+#### JavaScript Usage:
+JavaScript apps can use the APIs provided by audio manager to control the volume and the device.\
+Please refer [**audio-management.md**](https://gitee.com/openharmony/docs/blob/master/en/application-dev/js-reference/audio-management.md) for JavaScript usage of audio volume and device management.
 
 ## Repositories Involved<a name="repositories-involved"></a>
 
