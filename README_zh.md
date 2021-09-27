@@ -64,30 +64,31 @@ PCM（Pulse Code Modulation），即脉冲编码调制，是一种将模拟信�
 
 ### 音频播放<a name="section1147510562812"></a>
 
-可以使用此仓库内提供的接口将音频数据转换为音频模拟信号，使用输出设备播放音频信号，以及管理音频播放任务。以下步骤描述了如何使用AudioRenderer开发音频播放功能：
+可以使用此仓库内提供的接口将音频数据转换为音频模拟信号，使用输出设备播放音频信号，以及管理音频播放任务。以下步骤描述了如何使用 **AudioRenderer** 开发音频播放功能：
 
-1.  使用Create接口和所需流类型来获取AudioRenderer实例。
+1.  使用 **Create** 接口和所需流类型来获取 **AudioRenderer** 实例。
 
     ```
     AudioStreamType streamType = STREAM_MUSIC; // 流类型示例
     std::unique_ptr<AudioRenderer> audioRenderer = AudioRenderer::Create(streamType);
     ```
 
-2.  （可选）静态API GetSupportedFormats\(\), GetSupportedChannels\(\), GetSupportedEncodingTypes\(\), GetSupportedSamplingRates\(\) 可用于获取支持的参数。
-3.  准备设备，调用实例的SetParams。
+2.  （可选）静态接口 **GetSupportedFormats**(), **GetSupportedChannels**(), **GetSupportedEncodingTypes**(), **GetSupportedSamplingRates**() 可用于获取支持的参数。
+3.  准备设备，调用实例的 **SetParams** 。
 
     ```
-    AudioRendererParams rendererParams; 
-    rendererParams.sampleFormat = SAMPLE_S16LE; 
-    rendererParams.sampleRate = SAMPLE_RATE_44100; rendererParams.channelCount = STEREO；
+    AudioRendererParams rendererParams;
+    rendererParams.sampleFormat = SAMPLE_S16LE;
+    rendererParams.sampleRate = SAMPLE_RATE_44100;
+    rendererParams.channelCount = STEREO;
     rendererParams.encodingType = ENCODING_PCM;
      
     audioRenderer->SetParams(rendererParams);
     ```
 
-4.  （可选）使用audioRenderer-\>GetParams（rendererParams）来验证SetParams。
-5.  AudioRenderer 实例调用audioRenderer-\>Start\(\) 函数来启动播放任务。
-6.  使用GetBufferSize接口获取要写入的缓冲区长度。
+4.  （可选）使用 audioRenderer->**GetParams**(rendererParams) 来验证 SetParams。
+5.  AudioRenderer 实例调用 audioRenderer->**Start**() 函数来启动播放任务。
+6.  使用 **GetBufferSize** 接口获取要写入的缓冲区长度。
 
     ```
     audioRenderer->GetBufferSize(bufferLen);
@@ -104,68 +105,124 @@ PCM（Pulse Code Modulation），即脉冲编码调制，是一种将模拟信�
     }
     ```
 
-8.  调用audioRenderer-\>Drain\(\)来清空播放流。
-9.  调用audioRenderer-\>Stop\(\)来停止输出。
-10. 播放任务完成后，调用AudioRenderer实例的audioRenderer-\>Release\(\)函数来释放资源。
+8.  调用audioRenderer->**Drain**()来清空播放流。
+9.  调用audioRenderer->**Stop**()来停止输出。
+10. 播放任务完成后，调用AudioRenderer实例的audioRenderer->**Release**()函数来释放资源。
 
-提供上述基本音频播放使用范例。更多接口说明请参考audio\_renderer.h 和audio\_info.h。
+以上提供了基本音频播放使用场景。
+
+
+11. 使用 audioRenderer->**SetVolume(float)** 和 audioRenderer->**GetVolume()** 来设置和获取当前音频流音量, 可选范围为 0.0 到 1.0。
+
+提供上述基本音频播放使用范例。更多接口说明请参考[**audio_renderer.h**](https://gitee.com/openharmony/multimedia_audio_standard/blob/master/interfaces/innerkits/native/audiorenderer/include/audio_renderer.h) 和 [**audio_info.h**](https://gitee.com/openharmony/multimedia_audio_standard/blob/master/interfaces/innerkits/native/audiocommon/include/audio_info.h)。
 
 ### 音频录制<a name="section295162052813"></a>
 
-可以使用此仓库内提供的接口，让应用程序可以完成使用输入设备进行声音录制，将语音转换为音频数据，并管理录制的任务。以下步骤描述了如何使用AudioReorder开发音频录制功能：
+可以使用此仓库内提供的接口，让应用程序可以完成使用输入设备进行声音录制，将语音转换为音频数据，并管理录制的任务。以下步骤描述了如何使用 **AudioCapturer** 开发音频录制功能：
 
-1.  使用Create接口和所需流类型来获取AudioRecorder实例。
-
-    ```
-    AudioStreamType streamType = STREAM_MUSIC; 
-    std::unique_ptr<AudioRecorder> audioRecorder = AudioRecorder::Create(streamType);
-    ```
-
-2.  （可选）静态API GetSupportedFormats\(\), GetSupportedChannels\(\), GetSupportedEncodingTypes\(\), GetSupportedSamplingRates\(\) 可用于获取支持的参数。
-3.  准备设备，调用实例的SetParams。
+1.  使用Create接口和所需流类型来获取 **AudioCapturer** 实例。
 
     ```
-    AudioRecorderParams recorderParams; 
-    recorderParams.sampleFormat = SAMPLE_S16LE; 
-    recorderParams.sampleRate = SAMPLE_RATE_44100; recorderParams.channelCount = STEREO；
-    recorderParams.encodingType = ENCODING_PCM;
-     
-    audioRecorder->SetParams(recorderParams);
+    AudioStreamType streamType = STREAM_MUSIC;
+    std::unique_ptr<AudioCapturer> audioCapturer = AudioCapturer::Create(streamType);
     ```
 
-4.  （可选）使用 audioRecorder-\>GetParams\(recorderParams\) 来验证 SetParams\(\)。
-5.  AudioRecorder 实例调用 audioRenderer-\>Start\(\) 函数来启动录音任务。
-6.  使用GetBufferSize接口获取要写入的缓冲区长度。
+2.  （可选）静态接口 **GetSupportedFormats**(), **GetSupportedChannels**(), **GetSupportedEncodingTypes**(), **GetSupportedSamplingRates**() 可用于获取支持的参数。
+3.  准备设备，调用实例的 **SetParams** 。
 
     ```
-    audioRecorder->GetBufferSize(bufferLen);
+    AudioCapturerParams capturerParams;
+    capturerParams.sampleFormat = SAMPLE_S16LE;
+    capturerParams.sampleRate = SAMPLE_RATE_44100;
+    capturerParams.channelCount = STEREO;
+    capturerParams.encodingType = ENCODING_PCM;
+
+    audioCapturer->SetParams(capturerParams);
+    ```
+
+4.  （可选）使用 audioCapturer->**GetParams**(capturerParams) 来验证 SetParams()。
+5.  AudioCapturer 实例调用 AudioCapturer->**Start**() 函数来启动录音任务。
+6.  使用 **GetBufferSize** 接口获取要写入的缓冲区长度。
+
+    ```
+    audioCapturer->GetBufferSize(bufferLen);
     ```
 
 7.  读取录制的音频数据并将其转换为字节流。重复调用read函数读取数据直到主动停止。
 
     ```
     // set isBlocking = true/false for blocking/non-blocking read
-    bytesRead = audioRecorder->Read(*buffer, bufferLen, isBlocking);
-    while (numBuffersToRecord) {
-        bytesRead = audioRecorder->Read(*buffer, bufferLen, isBlockingRead);
+    bytesRead = audioCapturer->Read(*buffer, bufferLen, isBlocking);
+    while (numBuffersToCapture) {
+        bytesRead = audioCapturer->Read(*buffer, bufferLen, isBlockingRead);
         if (bytesRead < 0) {
             break;
         } else if (bytesRead > 0) {
             fwrite(buffer, size, bytesRead, recFile); // example shows writes the recored data into a file
-            numBuffersToRecord--;
+            numBuffersToCapture--;
         }
     }
     ```
 
-8.  （可选）调用audioRecorder-\>Flush\(\) 来清空录音流缓冲区。
-9.  AudioRecorder 实例调用 audioRecorder-\>Stop\(\) 函数停止录音。
-10. 录音任务完成后，调用AudioRecorder 实例的audioRecorder-\>Release\(\) 函数释放资源。
+8.  （可选）audioCapturer->**Flush**() 来清空录音流缓冲区。
+9.  AudioCapturer 实例调用 audioCapturer->**Stop**() 函数停止录音。
+10. 录音任务完成后，调用 AudioCapturer 实例的 audioCapturer->**Release**() 函数释放资源。
 
-提供上述基本音频录制使用范例。更多API请参考audio\_recorder.h和audio\_info.h。
+提供上述基本音频录制使用范例。更多API请参考[**audio_capturer.h**](https://gitee.com/openharmony/multimedia_audio_standard/blob/master/interfaces/innerkits/native/audiocapturer/include/audio_capturer.h)和[**audio_info.h**](https://gitee.com/openharmony/multimedia_audio_standard/blob/master/interfaces/innerkits/native/audiocommon/include/audio_info.h)。
 
 ### 音频管理<a name="section645572311287"></a>
+可以使用 [**audio_system_manager.h**](https://gitee.com/openharmony/multimedia_audio_standard/blob/master/interfaces/innerkits/native/audiomanager/include/audio_system_manager.h) 内的接口来控制音量和设备。
+1. 使用 **GetInstance** 接口获取 **AudioSystemManager** 实例.
+    ```
+    AudioSystemManager *audioSystemMgr = AudioSystemManager::GetInstance();
+    ```
+#### 音量控制
+2. 使用 **GetMaxVolume** 和  **GetMinVolume** 接口去查询音频流支持的最大和最小音量等级，在此范围内设置音量。
+    ```
+    AudioSystemManager::AudioVolumeType streamType = AudioSystemManager::AudioVolumeType::STREAM_MUSIC;
+    int32_t maxVol = audioSystemMgr->GetMaxVolume(streamType);
+    int32_t minVol = audioSystemMgr->GetMinVolume(streamType);
+    ```
+3. 使用 **SetVolume** 和 **GetVolume** 接口来设置和获取指定音频流的音量等级。
+    ```
+    int32_t result = audioSystemMgr->SetVolume(streamType, 10);
+    int32_t vol = audioSystemMgr->GetVolume(streamType);
+    ```
+4. 使用 **SetMute** 和 **IsStreamMute** 接口来设置和获取指定音频流的静音状态。
+    ```
+    int32_t result = audioSystemMgr->SetMute(streamType, true);
+    bool isMute = audioSystemMgr->IsStreamMute(streamType);
+5. 使用 **SetRingerMode** 和 **GetRingerMode** 接口来设置和获取铃声模式。参考在 [**audio_info.h**](https://gitee.com/openharmony/multimedia_audio_standard/blob/master/interfaces/innerkits/native/audiocommon/include/audio_info.h)  定义的 **AudioRingerMode** 枚举来获取支持的铃声模式。
+    ```
+    int32_t result = audioSystemMgr->SetRingerMode(RINGER_MODE_SILENT);
+    AudioRingerMode ringMode = audioSystemMgr->GetRingerMode();
+    ```
+6. 使用 **SetMicrophoneMute** 和 **IsMicrophoneMute** 接口来设置和获取麦克风的静音状态。
+    ```
+    int32_t result = audioSystemMgr->SetMicrophoneMute(true);
+    bool isMicMute = audioSystemMgr->IsMicrophoneMute();
+    ```
+#### 设备控制
+7. 使用 **GetDevices**, **deviceType_** 和 **deviceRole_** 接口来获取音频输入输出设备信息。 参考 [**audio_info.h**](https://gitee.com/openharmony/multimedia_audio_standard/blob/master/interfaces/innerkits/native/audiocommon/include/audio_info.h) 内定义的DeviceFlag, DeviceType 和 DeviceRole 枚举。
+    ```
+    DeviceFlag deviceFlag = OUTPUT_DEVICES_FLAG;
+    vector<sptr<AudioDeviceDescriptor>> audioDeviceDescriptors
+        = audioSystemMgr->GetDevices(deviceFlag);
+    sptr<AudioDeviceDescriptor> audioDeviceDescriptor = audioDeviceDescriptors[0];
+    cout << audioDeviceDescriptor->deviceType_;
+    cout << audioDeviceDescriptor->deviceRole_;
+    ```
+8. 使用 **SetDeviceActive** 和 **IsDeviceActive** 接口去激活/去激活音频设备和获取音频设备激活状态。
+     ```
+    ActiveDeviceType deviceType = SPEAKER;
+    int32_t result = audioSystemMgr->SetDeviceActive(deviceType, true);
+    bool isDevActive = audioSystemMgr->IsDeviceActive(deviceType);
+    ```
+9. 提供其他用途的接口如 **IsStreamActive**, **SetAudioParameter** and **GetAudioParameter**, 详细请参考 [**audio_system_manager.h**](https://gitee.com/openharmony/multimedia_audio_standard/blob/master/interfaces/innerkits/native/audiomanager/include/audio_system_manager.h) 
 
-JS应用可以使用音频管理器提供的API来控制音量和设备。有关音频音量和设备管理的JS用法，请参考音频管理JS接口说明。
+#### JavaScript 用法:
+JavaScript应用可以使用系统提供的音频管理接口，来控制音量和设备。\
+请参考 [**音频管理.md**](https://gitee.com/openharmony/docs/blob/master/zh-cn/application-dev/js-reference/音频管理.md) 来获取音量和设备管理相关JavaScript接口的用法。
 
 ## 相关仓<a name="section340mcpsimp"></a>
 
