@@ -68,7 +68,7 @@ Note:If the text contains special characters, please escape them according to th
             <filefilter name="copyrightPolicyFilter" desc="Filters for copyright header policies">
                 <filteritem type="filename" name="*.conf" desc="Pulseaudio configuration files"/>
                 <filteritem type="filename" name="*.pa" desc="Pulseaudio startup script files"/>
-                <filteritem type="filepath" name="services/src/audio_policy/server/etc/audio_policy_config.xml" desc="Pulseaudio policy configuration file"/>
+                <filteritem type="filepath" name="services/src/audio_policy/server/etc/.*" desc="Pulseaudio policy configuration file"/>
                 <filteritem type="filepath" name="pulseaudio/src/pulse/ohos_pa_volume.c" desc="Pulseaudio volume interface file"/>
                 <filteritem type="filepath" name="pulseaudio/src/daemon/ohos_pa_main.c" desc="Pulseaudio daemon file with no systemd"/>
             </filefilter>
