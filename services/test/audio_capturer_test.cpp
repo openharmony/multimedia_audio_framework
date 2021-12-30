@@ -14,7 +14,7 @@
  */
 
 #include <vector>
-
+#include <cinttypes>
 #include "audio_capturer.h"
 #include "media_log.h"
 
@@ -176,7 +176,7 @@ public:
 
         Timestamp timestamp;
         if (audioCapturer->GetAudioTime(timestamp, Timestamp::Timestampbase::MONOTONIC)) {
-            MEDIA_INFO_LOG("Timestamp seconds: %{public}ld", timestamp.time.tv_sec);
+            MEDIA_INFO_LOG("Timestamp seconds: %{public}" PRId64, timestamp.time.tv_sec);
             MEDIA_INFO_LOG("Timestamp nanoseconds: %{public}ld", timestamp.time.tv_nsec);
         }
 
