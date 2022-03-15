@@ -45,11 +45,8 @@ int BluetoothA2dpAudioSrcObserverStub::OnRemoteRequest(
 {
     HILOGD("BluetoothA2dpAudioSrcObserverStub::OnRemoteRequest, cmd = %{public}d, flags = %{public}d",
         code, option.GetFlags());
-    std::u16string descriptor = BluetoothA2dpAudioSrcObserverStub::GetDescriptor();
-    std::u16string remoteDescriptor = data.ReadInterfaceToken();
-    if (descriptor != remoteDescriptor) {
-        HILOGI("local descriptor is not equal to remote, descriptor: %{public}s, remoteDescriptor:%{public}s",
-            descriptor.c_str(), remoteDescriptor.c_str());
+    if (data.ReadInterfaceToken() != BluetoothA2dpAudioSrcObserverStub::GetDescriptor()) {
+        HILOGE("BluetoothA2dpAudioSrcObserverStub: ReadInterfaceToken failed");
         return ERR_INVALID_STATE;
     }
     auto itFunc = memberFuncMap_.find(code);
