@@ -53,6 +53,7 @@ private:
         uint32_t userSize;
         uint8_t *buffer = nullptr;
         size_t bytesRead;
+        size_t bufferSize;
         bool isBlocking;
         bool isTrue;
         AudioSampleFormat audioSampleFormat;
@@ -64,7 +65,7 @@ private:
         DeviceRole deviceRole;
         DeviceType deviceType;
         SourceType sourceType;
-        uint32_t capturerFlags;
+        int32_t capturerFlags;
         AudioCapturerNapi *objectInfo;
         AudioCapturerOptions capturerOptions;
     };
@@ -93,6 +94,7 @@ private:
     static void AudioStreamInfoAsyncCallbackComplete(napi_env env, napi_status status, void *data);
     static void ReadAsyncCallbackComplete(napi_env env, napi_status status, void *data);
     static void IsTrueAsyncCallbackComplete(napi_env env, napi_status status, void *data);
+    static void GetBufferSizeAsyncCallbackComplete(napi_env env, napi_status status, void *data);
     static void GetIntValueAsyncCallbackComplete(napi_env env, napi_status status, void *data);
     static void GetInt64ValueAsyncCallbackComplete(napi_env env, napi_status status, void *data);
     static void VoidAsyncCallbackComplete(napi_env env, napi_status status, void *data);

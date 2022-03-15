@@ -90,14 +90,8 @@ private:
     bool isReadyToWrite_;
     void WriteBuffers();
 
-    static constexpr AudioStreamType streamTypeMap_[CONTENT_TYPE_RINGTONE + 1][STREAM_USAGE_VOICE_ASSISTANT + 1] = {
-        {STREAM_MUSIC, STREAM_MUSIC, STREAM_MUSIC, STREAM_MUSIC, STREAM_MUSIC},
-        {STREAM_MUSIC, STREAM_VOICE_ASSISTANT, STREAM_VOICE_CALL, STREAM_MUSIC, STREAM_VOICE_ASSISTANT},
-        {STREAM_MUSIC, STREAM_MUSIC, STREAM_MUSIC, STREAM_RING, STREAM_VOICE_ASSISTANT},
-        {STREAM_MEDIA, STREAM_MEDIA, STREAM_MUSIC, STREAM_MUSIC, STREAM_MUSIC},
-        {STREAM_NOTIFICATION, STREAM_NOTIFICATION, STREAM_MUSIC, STREAM_MUSIC, STREAM_MUSIC},
-        {STREAM_RING, STREAM_RING, STREAM_MUSIC, STREAM_RING, STREAM_MUSIC}
-    };
+    static const std::map<std::pair<ContentType, StreamUsage>, AudioStreamType> streamTypeMap_;
+    static std::map<std::pair<ContentType, StreamUsage>, AudioStreamType> CreateStreamMap();
 };
 } // namespace AudioStandard
 } // namespace OHOS

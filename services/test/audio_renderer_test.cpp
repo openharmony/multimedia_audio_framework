@@ -286,6 +286,7 @@ public:
 
         if (audioRenderer == nullptr) {
             MEDIA_ERR_LOG("AudioRendererTest: Create failed");
+            fclose(wavFile);
             return false;
         }
 
@@ -294,6 +295,7 @@ public:
         ret = audioRenderer->SetRendererCallback(cb1);
         if (ret) {
             MEDIA_ERR_LOG("AudioRendererTest: SetRendererCallback failed %{public}d", ret);
+            fclose(wavFile);
             return false;
         }
 
