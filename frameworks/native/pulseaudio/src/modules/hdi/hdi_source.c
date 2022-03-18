@@ -395,10 +395,12 @@ pa_source *pa_hdi_source_new(pa_module *m, pa_modargs *ma, const char *driver)
     /* Override with modargs if provided */
     if (pa_modargs_get_sample_spec_and_channel_map(ma, &ss, &map, PA_CHANNEL_MAP_DEFAULT) < 0) {
         MEDIA_INFO_LOG("Failed to parse sample specification and channel map");
-        goto fail;
+        return NULL;
     }
 
     u = pa_xnew0(struct Userdata, 1);
+    pa_assert(u);
+
     u->core = m->core;
     u->module = m;
     u->rtpoll = pa_rtpoll_new();
@@ -451,12 +453,10 @@ pa_source *pa_hdi_source_new(pa_module *m, pa_modargs *ma, const char *driver)
 fail:
     pa_xfree(thread_name);
 
-    if (u) {
-        if (u->IsCapturerStarted) {
-            pa_capturer_exit();
-        }
-        userdata_free(u);
+    if (u->IsCapturerStarted) {
+        pa_capturer_exit();
     }
+    userdata_free(u);
 
     return NULL;
 }

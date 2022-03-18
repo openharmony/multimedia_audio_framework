@@ -44,7 +44,7 @@ std::unique_ptr<AudioRenderer> AudioRenderer::Create(const AudioRendererOptions 
                              "Invalid content type");
 
     StreamUsage streamUsage = rendererOptions.rendererInfo.streamUsage;
-    CHECK_AND_RETURN_RET_LOG(streamUsage >= STREAM_USAGE_UNKNOWN && streamUsage <= STREAM_USAGE_VOICE_ASSISTANT,
+    CHECK_AND_RETURN_RET_LOG(streamUsage >= STREAM_USAGE_UNKNOWN && streamUsage <= STREAM_USAGE_NOTIFICATION_RINGTONE,
                              nullptr, "Invalid stream usage");
 
     AudioStreamType audioStreamType = AudioStream::GetStreamType(contentType, streamUsage);

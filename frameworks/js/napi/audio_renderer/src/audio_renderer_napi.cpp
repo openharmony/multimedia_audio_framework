@@ -559,7 +559,7 @@ void AudioRendererNapi::WriteAsyncCallbackComplete(napi_env env, napi_status sta
 
     if (asyncContext != nullptr) {
         if (!asyncContext->status) {
-            napi_create_int32(env, asyncContext->intValue, &valueParam);
+            napi_create_uint32(env, asyncContext->totalBytesWritten, &valueParam);
         }
         if (!asyncContext->status) {
         napi_get_undefined(env, &result[PARAM0]);
@@ -792,6 +792,21 @@ void AudioRendererNapi::VoidAsyncCallbackComplete(napi_env env, napi_status stat
     if (asyncContext != nullptr) {
         if (!asyncContext->status) {
             napi_get_undefined(env, &valueParam);
+        }
+        CommonCallbackRoutine(env, asyncContext, valueParam);
+    } else {
+        HiLog::Error(LABEL, "ERROR: AudioRendererAsyncContext* is Null!");
+    }
+}
+
+void AudioRendererNapi::GetBufferSizeAsyncCallbackComplete(napi_env env, napi_status status, void *data)
+{
+    auto asyncContext = static_cast<AudioRendererAsyncContext *>(data);
+    napi_value valueParam = nullptr;
+
+    if (asyncContext != nullptr) {
+        if (!asyncContext->status) {
+            napi_create_uint32(env, asyncContext->bufferSize, &valueParam);
         }
         CommonCallbackRoutine(env, asyncContext, valueParam);
     } else {
@@ -1114,17 +1129,20 @@ napi_value AudioRendererNapi::Write(napi_env env, napi_callback_info info)
                 }
 
                 int32_t bytesWritten = 0;
+                size_t totalBytesWritten = 0;
                 size_t minBytes = 4;
-                while ((bytesWritten < bufferLen) && ((bufferLen - bytesWritten) > minBytes)) {
-                    bytesWritten += context->objectInfo->audioRenderer_->Write(buffer.get() + bytesWritten,
-                                                                               bufferLen - bytesWritten);
+                while ((totalBytesWritten < bufferLen) && ((bufferLen - totalBytesWritten) > minBytes)) {
+                    bytesWritten = context->objectInfo->audioRenderer_->Write(buffer.get() + totalBytesWritten,
+                                                                              bufferLen - totalBytesWritten);
                     if (bytesWritten < 0) {
                         break;
                     }
+
+                    totalBytesWritten += bytesWritten;
                 }
 
                 context->status = SUCCESS;
-                context->intValue = bytesWritten;
+                context->totalBytesWritten = totalBytesWritten;
             },
             WriteAsyncCallbackComplete, static_cast<void *>(asyncContext.get()), &asyncContext->work);
         if (status != napi_ok) {
@@ -1480,10 +1498,10 @@ napi_value AudioRendererNapi::GetBufferSize(napi_env env, napi_callback_info inf
                 size_t bufferSize;
                 context->status = context->objectInfo->audioRenderer_->GetBufferSize(bufferSize);
                 if (context->status == SUCCESS) {
-                    context->intValue = bufferSize;
+                    context->bufferSize = bufferSize;
                 }
             },
-            GetIntValueAsyncCallbackComplete, static_cast<void *>(asyncContext.get()), &asyncContext->work);
+            GetBufferSizeAsyncCallbackComplete, static_cast<void *>(asyncContext.get()), &asyncContext->work);
         if (status != napi_ok) {
             result = nullptr;
         } else {

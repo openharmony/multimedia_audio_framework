@@ -371,7 +371,7 @@ declare namespace audio {
      * Notification or ringtone usage.
      * @since 7
      */
-    STREAM_USAGE_NOTIFICATION_RINGTONE = 3
+    STREAM_USAGE_NOTIFICATION_RINGTONE = 6
   }
 
   /**

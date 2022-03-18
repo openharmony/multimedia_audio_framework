@@ -61,6 +61,8 @@ private:
         bool isTrue;
         uint64_t time;
         size_t bufferLen;
+        size_t bufferSize;
+        size_t totalBytesWritten;
         void *data;
         AudioSampleFormat sampleFormat;
         AudioSamplingRate samplingRate;
@@ -103,6 +105,7 @@ private:
     static void SetFunctionAsyncCallbackComplete(napi_env env, napi_status status, void *data);
     static void AudioParamsAsyncCallbackComplete(napi_env env, napi_status status, void *data);
     static void IsTrueAsyncCallbackComplete(napi_env env, napi_status status, void *data);
+    static void GetBufferSizeAsyncCallbackComplete(napi_env env, napi_status status, void *data);
     static void GetIntValueAsyncCallbackComplete(napi_env env, napi_status status, void *data);
     static void GetInt64ValueAsyncCallbackComplete(napi_env env, napi_status status, void *data);
     static void WriteAsyncCallbackComplete(napi_env env, napi_status status, void *data);

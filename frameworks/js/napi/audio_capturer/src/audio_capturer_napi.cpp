@@ -456,6 +456,21 @@ void AudioCapturerNapi::IsTrueAsyncCallbackComplete(napi_env env, napi_status st
     }
 }
 
+void AudioCapturerNapi::GetBufferSizeAsyncCallbackComplete(napi_env env, napi_status status, void *data)
+{
+    auto asyncContext = static_cast<AudioCapturerAsyncContext*>(data);
+    napi_value valueParam = nullptr;
+
+    if (asyncContext != nullptr) {
+        if (!asyncContext->status) {
+            napi_create_uint32(env, asyncContext->bufferSize, &valueParam);
+        }
+        CommonCallbackRoutine(env, asyncContext, valueParam);
+    } else {
+        HiLog::Error(LABEL, "ERROR: AudioCapturerAsyncContext* is Null!");
+    }
+}
+
 void AudioCapturerNapi::GetIntValueAsyncCallbackComplete(napi_env env, napi_status status, void *data)
 {
     auto asyncContext = static_cast<AudioCapturerAsyncContext*>(data);
@@ -1138,10 +1153,10 @@ napi_value AudioCapturerNapi::GetBufferSize(napi_env env, napi_callback_info inf
                 size_t bufferSize;
                 context->status = context->objectInfo->audioCapturer_->GetBufferSize(bufferSize);
                 if (context->status == SUCCESS) {
-                    context->intValue = bufferSize;
+                    context->bufferSize = bufferSize;
                 }
             },
-            GetIntValueAsyncCallbackComplete, static_cast<void*>(asyncContext.get()), &asyncContext->work);
+            GetBufferSizeAsyncCallbackComplete, static_cast<void*>(asyncContext.get()), &asyncContext->work);
         if (status != napi_ok) {
             result = nullptr;
         } else {
