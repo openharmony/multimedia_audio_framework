@@ -80,6 +80,7 @@ private:
     State state_;
     std::atomic<bool> isReadInProgress_;
     std::atomic<bool> isWriteInProgress_;
+    bool resetTime_;
     uint64_t resetTimestamp_;
     struct timespec baseTimestamp_;
     AudioRenderMode renderMode_;
