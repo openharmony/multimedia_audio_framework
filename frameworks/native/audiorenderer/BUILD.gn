@@ -111,7 +111,7 @@ ohos_shared_library("audio_bluetooth_client") {
     "//foundation/communication/bluetooth/interfaces/innerkits/native_cpp/include",
     "//foundation/communication/bluetooth/interfaces/innerkits/native_cpp/framework/common",
     "//foundation/communication/bluetooth/interfaces/innerkits/native_c/include",
-    "//foundation/multimedia/audio_standard/services/src/audio_policy/server/service/include/interface",
+    "//foundation/multimedia/audio_standard/services/include/audio_policy/server/service/interface",
     "//foundation/multimedia/audio_standard/services/include/audio_bluetooth/client",
     "//foundation/multimedia/audio_standard/frameworks/native/audiorenderer/include",
     "//foundation/multimedia/audio_standard/interfaces/inner_api/native/audiocommon/include",

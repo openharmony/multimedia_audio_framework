@@ -16,6 +16,7 @@
 #include "audio_errors.h"
 #include "audio_focus_parser.h"
 #include "audio_manager_base.h"
+#include "audio_manager_proxy.h"
 #include "iservice_registry.h"
 #include "media_log.h"
 #include "system_ability_definition.h"
