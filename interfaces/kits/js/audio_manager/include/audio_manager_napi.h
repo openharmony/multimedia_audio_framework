@@ -37,7 +37,7 @@ public:
         VOICE_CALL = 0,
         RINGTONE = 2,
         MEDIA = 3,
-        VOICE_ASSISTANT = 4,
+        VOICE_ASSISTANT = 9,
         VOLUMETYPE_MAX
     };
 

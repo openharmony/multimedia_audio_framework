@@ -26,7 +26,7 @@
 namespace OHOS {
 namespace AudioStandard {
 namespace {
-#ifdef DEVICE_BALTIMORE
+#ifdef PRODUCT_M40
     const std::string AUDIO_HDI_SERVICE_NAME = "audio_adapter_service";
 #else
     const std::string AUDIO_HDI_SERVICE_NAME = "audio_hdi_service";
@@ -56,6 +56,7 @@ static DeviceType GetInternalDeviceType(AudioDeviceType hdiDeviceType)
 
 static void OnServiceStatusReceived(struct ServiceStatusListener *listener, struct ServiceStatus *serviceStatus)
 {
+    CHECK_AND_RETURN_LOG(serviceStatus != nullptr, "Invalid ServiceStatus");
     std::string info = serviceStatus->info;
     MEDIA_DEBUG_LOG("OnServiceStatusReceived: [service name:%{public}s] [status:%{public}d] [info:%{public}s]",
                     serviceStatus->serviceName, serviceStatus->status, info.c_str());

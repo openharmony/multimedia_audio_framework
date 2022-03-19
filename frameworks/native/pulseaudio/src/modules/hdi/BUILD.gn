@@ -51,12 +51,12 @@ ohos_shared_library("module-hdi-sink") {
   configs = [ ":hdi_config" ]
 
   cflags = [ "-DPA_MODULE_NAME=libmodule_hdi_sink_z_so" ]
-  if (device_name == "baltimore") {
-    cflags += [ "-DDEVICE_BALTIMORE" ]
+  if ("${product_name}" == "m40") {
+    cflags += [ "-DPRODUCT_M40" ]
   }
 
-  if (device_name == "rk3568") {
-    cflags += [ "-DDEVICE_RK3568" ]
+  if ("${product_name}" == "rk3568") {
+    cflags += [ "-DPRODUCT_RK3568" ]
   }
 
   ldflags = [
@@ -86,12 +86,10 @@ ohos_shared_library("module-hdi-source") {
   configs = [ ":hdi_config" ]
 
   cflags = [ "-DPA_MODULE_NAME=libmodule_hdi_source_z_so" ]
-  if (device_name == "baltimore") {
-    cflags += [ "-DDEVICE_BALTIMORE" ]
-  }
-
-  if (device_name == "rk3568") {
-    cflags += [ "-DDEVICE_RK3568" ]
+  if ("${product_name}" == "m40") {
+    cflags += [ "-DPRODUCT_M40" ]
+  } else if ("${product_name}" == "rk3568") {
+    cflags += [ "-DPRODUCT_RK3568" ]
   }
 
   deps = [

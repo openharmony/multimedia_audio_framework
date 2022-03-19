@@ -108,6 +108,7 @@ void AudioManagerNapi::Destructor(napi_env env, void *nativeObject, void *finali
     if (nativeObject != nullptr) {
         auto obj = static_cast<AudioManagerNapi*>(nativeObject);
         delete obj;
+        obj = nullptr;
         MEDIA_DEBUG_LOG("AudioManagerNapi::Destructor delete AudioManagerNapi obj done");
     }
 }

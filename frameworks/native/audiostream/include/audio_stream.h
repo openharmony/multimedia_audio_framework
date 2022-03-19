@@ -36,12 +36,12 @@ public:
     int32_t SetAudioStreamInfo(const AudioStreamParams info);
     int32_t GetAudioStreamInfo(AudioStreamParams &info);
 
-    int32_t GetAudioSessionID(uint32_t &sessionID);
+    int32_t GetAudioSessionID(uint32_t &sessionID) const;
     State GetState();
     bool GetAudioTime(Timestamp &timestamp, Timestamp::Timestampbase base);
-    int32_t GetBufferSize(size_t &bufferSize);
-    int32_t GetFrameCount(uint32_t &frameCount);
-    int32_t GetLatency(uint64_t &latency);
+    int32_t GetBufferSize(size_t &bufferSize) const;
+    int32_t GetFrameCount(uint32_t &frameCount) const;
+    int32_t GetLatency(uint64_t &latency) const;
     static AudioStreamType GetStreamType(ContentType contentType, StreamUsage streamUsage);
     int32_t SetAudioStreamType(AudioStreamType audioStreamType);
     int32_t SetVolume(float volume);
@@ -56,10 +56,10 @@ public:
     int32_t Enqueue(const BufferDesc &bufDesc);
     int32_t Clear();
 
-    std::vector<AudioSampleFormat> GetSupportedFormats();
-    std::vector<AudioChannel> GetSupportedChannels();
-    std::vector<AudioEncodingType> GetSupportedEncodingTypes();
-    std::vector<AudioSamplingRate> GetSupportedSamplingRates();
+    std::vector<AudioSampleFormat> GetSupportedFormats() const;
+    std::vector<AudioChannel> GetSupportedChannels() const;
+    std::vector<AudioEncodingType> GetSupportedEncodingTypes() const;
+    std::vector<AudioSamplingRate> GetSupportedSamplingRates() const;
 
     // Common APIs
     bool StartAudioStream();
@@ -80,6 +80,7 @@ private:
     State state_;
     std::atomic<bool> isReadInProgress_;
     std::atomic<bool> isWriteInProgress_;
+    bool resetTime_;
     uint64_t resetTimestamp_;
     struct timespec baseTimestamp_;
     AudioRenderMode renderMode_;

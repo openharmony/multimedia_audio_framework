@@ -381,11 +381,11 @@ void AudioInterruptCallbackImpl::NotifyEvent(const InterruptEvent &interruptEven
     MEDIA_DEBUG_LOG("AudioRendererPrivate: NotifyEvent: Hint: %{public}d", interruptEvent.hintType);
     MEDIA_DEBUG_LOG("AudioRendererPrivate: NotifyEvent: eventType: %{public}d", interruptEvent.eventType);
 
-    if (cb != nullptr) {
-        cb->OnInterrupt(interruptEvent);
+    if (cb_ != nullptr) {
+        cb_->OnInterrupt(interruptEvent);
         MEDIA_DEBUG_LOG("AudioRendererPrivate: OnInterrupt : NotifyEvent to app complete");
     } else {
-        MEDIA_DEBUG_LOG("AudioRendererPrivate: cb == nullptr cannont NotifyEvent to app");
+        MEDIA_DEBUG_LOG("AudioRendererPrivate: cb_ == nullptr cannont NotifyEvent to app");
     }
 }
 
@@ -481,7 +481,7 @@ void AudioInterruptCallbackImpl::HandleAndNotifyForcedEvent(const InterruptEvent
 
 void AudioInterruptCallbackImpl::OnInterrupt(const InterruptEventInternal &interruptEvent)
 {
-    cb = callback_.lock();
+    cb_ = callback_.lock();
     InterruptForceType forceType = interruptEvent.forceType;
     MEDIA_DEBUG_LOG("AudioRendererPrivate: OnInterrupt InterruptForceType: %{public}d", forceType);
 

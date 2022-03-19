@@ -240,7 +240,7 @@ int32_t RingtonePlayer::Start()
         return ERROR;
     }
 
-    // Player doesnt support play in stopped state. Hence reiniialise player for making start<-->stop to work
+    // Player doesn't support play in stopped state. Hence reinitialise player for making start<-->stop to work
     if (ringtoneState_ == STATE_STOPPED) {
         (void)PrepareRingtonePlayer(true);
     } else {

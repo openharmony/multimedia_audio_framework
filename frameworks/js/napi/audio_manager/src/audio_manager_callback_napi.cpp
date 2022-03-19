@@ -13,12 +13,13 @@
  * limitations under the License.
  */
 
+#include "audio_manager_callback_napi.h"
+
 #include <uv.h>
 
+#include "audio_device_descriptor_napi.h"
 #include "audio_errors.h"
 #include "media_log.h"
-#include "audio_device_descriptor_napi.h"
-#include "audio_manager_callback_napi.h"
 
 namespace OHOS {
 namespace AudioStandard {
@@ -107,6 +108,13 @@ void AudioManagerCallbackNapi::OnJsCallbackDeviceChange(std::unique_ptr<AudioMan
         MEDIA_ERR_LOG("AudioManagerCallbackNapi: OnJsCallbackDeviceChange: No memory");
         return;
     }
+
+    if (jsCb.get() == nullptr) {
+        MEDIA_ERR_LOG("AudioManagerCallbackNapi: OnJsCallbackDeviceChange: jsCb.get() is null");
+        delete work;
+        return;
+    }
+
     work->data = reinterpret_cast<void *>(jsCb.get());
 
     int ret = uv_queue_work(loop, work, [] (uv_work_t *work) {}, [] (uv_work_t *work, int status) {

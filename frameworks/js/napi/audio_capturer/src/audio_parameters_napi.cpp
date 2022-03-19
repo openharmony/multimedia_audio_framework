@@ -156,7 +156,7 @@ napi_value AudioParametersNapi::CreateEncodingTypeObject(napi_env env)
             }
         }
     }
-    HiLog::Error(LABEL, "CreateEncodingTypeObject is Failed!");
+    HiLog::Error(LABEL, "CreateEncodingTypeObject is failed!");
     napi_get_undefined(env, &result);
 
     return result;
@@ -410,6 +410,10 @@ napi_value AudioParametersNapi::GetAudioSampleFormat(napi_env env, napi_callback
 
     status = napi_unwrap(env, jsThis, (void **)&audioParametersNapi);
     if (status == napi_ok) {
+        if (!((audioParametersNapi != nullptr) && (audioParametersNapi->audioParameters_ != nullptr))) {
+            HiLog::Error(LABEL, "Get audio sample format fail to napi_unwrap");
+            return jsResult;
+        }
         audioSampleFormat = audioParametersNapi->audioParameters_->format;
         status = napi_create_int32(env, audioSampleFormat, &jsResult);
         if (status == napi_ok) {
@@ -867,7 +871,7 @@ napi_value AudioParametersNapi::SetDeviceType(napi_env env, napi_callback_info i
     napi_get_undefined(env, &jsResult);
 
     status = napi_get_cb_info(env, info, &argc, args, &jsThis, nullptr);
-    if (status != napi_ok || jsThis == nullptr || args[0] == nullptr) {
+    if ((status != napi_ok) || (jsThis == nullptr) || (args[0] == nullptr)) {
         HiLog::Error(LABEL, "set device type fail to napi_get_cb_info");
         return jsResult;
     }
@@ -889,5 +893,5 @@ napi_value AudioParametersNapi::SetDeviceType(napi_env env, napi_callback_info i
 
     return jsResult;
 }
-}
-}
+}  // namespace AudioStandard
+}  // namespace OHOS

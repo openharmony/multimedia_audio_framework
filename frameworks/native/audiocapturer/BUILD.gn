@@ -19,8 +19,8 @@ ohos_shared_library("audio_capturer_source") {
   sources = [ "//foundation/multimedia/audio_standard/frameworks/native/audiocapturer/src/audio_capturer_source.cpp" ]
   cflags = [ "-fPIC" ]
   cflags += [ "-Wall" ]
-  if (device_name == "baltimore") {
-    cflags += [ "-DDEVICE_BALTIMORE" ]
+  if ("${product_name}" == "m40") {
+    cflags += [ "-DPRODUCT_M40" ]
   }
   cflags_cc = cflags
 
@@ -45,7 +45,7 @@ ohos_shared_library("audio_capturer_source") {
     "//third_party/bounds_checking_function:libsec_static",
   ]
 
-  if (device_name == "baltimore") {
+  if ("${product_name}" == "m40") {
     deps += [ "//drivers/peripheral/adapter/audio/interfaces:hdi_audio_client" ]
   } else {
     deps +=

@@ -55,7 +55,7 @@ AudioRingerModeListenerCallback::AudioRingerModeListenerCallback(
 
 AudioRingerModeListenerCallback::~AudioRingerModeListenerCallback()
 {
-    MEDIA_DEBUG_LOG("AudioRingerModeListenerCallback: Instance destory");
+    MEDIA_DEBUG_LOG("AudioRingerModeListenerCallback: Instance destroy");
 }
 
 void AudioRingerModeListenerCallback::OnRingerModeUpdated(const AudioRingerMode &ringerMode)

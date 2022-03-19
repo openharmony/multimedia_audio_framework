@@ -96,6 +96,11 @@ void AudioRendererCallbackNapi::OnJsCallbackInterrupt(std::unique_ptr<AudioRende
         MEDIA_ERR_LOG("AudioRendererCallbackNapi: OnJsCallBackInterrupt: No memory");
         return;
     }
+    if (jsCb.get() == nullptr) {
+        MEDIA_ERR_LOG("AudioRendererCallbackNapi: OnJsCallBackInterrupt: jsCb.get() is null");
+        delete work;
+        return;
+    }
     work->data = reinterpret_cast<void *>(jsCb.get());
 
     int ret = uv_queue_work(loop, work, [] (uv_work_t *work) {}, [] (uv_work_t *work, int status) {
@@ -161,6 +166,11 @@ void AudioRendererCallbackNapi::OnJsCallbackStateChange(std::unique_ptr<AudioRen
     uv_work_t *work = new(std::nothrow) uv_work_t;
     if (work == nullptr) {
         MEDIA_ERR_LOG("AudioRendererCallbackNapi: OnJsCallbackStateChange: No memory");
+        return;
+    }
+    if (jsCb.get() == nullptr) {
+        MEDIA_ERR_LOG("AudioRendererCallbackNapi: OnJsCallbackStateChange: jsCb.get() is null");
+        delete work;
         return;
     }
     work->data = reinterpret_cast<void *>(jsCb.get());

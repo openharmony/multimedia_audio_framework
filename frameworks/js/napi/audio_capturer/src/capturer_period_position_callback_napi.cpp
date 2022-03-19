@@ -47,6 +47,7 @@ void CapturerPeriodPositionCallbackNapi::SaveCallbackReference(const std::string
                          "CapturerPeriodPositionCallbackNapi: creating reference for callback fail");
 
     std::shared_ptr<AutoRef> cb = std::make_shared<AutoRef>(env_, callback);
+    CHECK_AND_RETURN_LOG(cb != nullptr, "No memory");
     if (callbackName == CAPTURER_PERIOD_POSITION_CALLBACK_NAME) {
         capturerPeriodPositionCallback_ = cb;
     } else {
@@ -82,6 +83,13 @@ void CapturerPeriodPositionCallbackNapi::OnJsCapturerPeriodPositionCallback(
         MEDIA_ERR_LOG("CapturerPeriodPositionCallbackNapi: OnJsCapturerPeriodPositionCallback: No memory");
         return;
     }
+
+    if (jsCb.get() == nullptr) {
+        MEDIA_ERR_LOG("CapturerPeriodPositionCallbackNapi: OnJsCapturerPeriodPositionCallback: jsCb.get() is null");
+        delete work;
+        return;
+    }
+
     work->data = reinterpret_cast<void *>(jsCb.get());
 
     int ret = uv_queue_work(loop, work, [] (uv_work_t *work) {}, [] (uv_work_t *work, int status) {

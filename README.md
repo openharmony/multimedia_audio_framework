@@ -280,7 +280,7 @@ You can use the APIs provided in this repository for your application to record 
     ```
     audioCapturer->GetBufferSize(bufferLen);
     ```
-9. Read the captured audio data and convert it to a byte stream. Call the read function repeatedly to read data untill you want to stop recording
+9. Read the captured audio data and convert it to a byte stream. Call the read function repeatedly to read data until you want to stop recording
     ```
     // set isBlocking = true/false for blocking/non-blocking read
     bytesRead = audioCapturer->Read(*buffer, bufferLen, isBlocking);
@@ -289,7 +289,7 @@ You can use the APIs provided in this repository for your application to record 
         if (bytesRead < 0) {
             break;
         } else if (bytesRead > 0) {
-            fwrite(buffer, size, bytesRead, recFile); // example shows writes the recored data into a file
+            fwrite(buffer, size, bytesRead, recFile); // example shows writes the recorded data into a file
             numBuffersToCapture--;
         }
     }

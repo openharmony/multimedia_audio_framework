@@ -95,7 +95,7 @@ void AudioRendererSink::DeInit()
 int32_t InitAttrs(struct AudioSampleAttributes &attrs)
 {
     /* Initialization of audio parameters for playback */
-#ifdef DEVICE_BALTIMORE
+#ifdef PRODUCT_M40
     attrs.format = AUDIO_FORMAT_PCM_32_BIT;
     attrs.frameSize = PCM_32_BIT * attrs.channelCount / PCM_8_BIT;
 #else
@@ -117,7 +117,7 @@ int32_t InitAttrs(struct AudioSampleAttributes &attrs)
     return SUCCESS;
 }
 
-static int32_t SwitchAdapter(struct AudioAdapterDescriptor *descs, string adapterNameCase,
+static int32_t SwitchAdapterRender(struct AudioAdapterDescriptor *descs, string adapterNameCase,
     enum AudioPortDirection portFlag, struct AudioPort &renderPort, int32_t size)
 {
     if (descs == nullptr) {
@@ -139,7 +139,7 @@ static int32_t SwitchAdapter(struct AudioAdapterDescriptor *descs, string adapte
             }
         }
     }
-    MEDIA_ERR_LOG("SwitchAdapter Fail");
+    MEDIA_ERR_LOG("SwitchAdapterRender Fail");
 
     return ERR_INVALID_INDEX;
 }
@@ -200,7 +200,7 @@ int32_t AudioRendererSink::CreateRender(struct AudioPort &renderPort)
 int32_t AudioRendererSink::Init(AudioSinkAttr &attr)
 {
     attr_ = attr;
-#ifdef DEVICE_BALTIMORE
+#ifdef PRODUCT_M40
     string adapterNameCase = "internal";  // Set sound card information
 #else
     string adapterNameCase = "usb";  // Set sound card information
@@ -222,7 +222,7 @@ int32_t AudioRendererSink::Init(AudioSinkAttr &attr)
     }
 
     // Get qualified sound card and port
-    int32_t index = SwitchAdapter(descs, adapterNameCase, port, audioPort, size);
+    int32_t index = SwitchAdapterRender(descs, adapterNameCase, port, audioPort_, size);
     if (index < 0) {
         MEDIA_ERR_LOG("Switch Adapter Fail");
         return ERR_NOT_STARTED;
@@ -245,12 +245,12 @@ int32_t AudioRendererSink::Init(AudioSinkAttr &attr)
         return ERR_NOT_STARTED;
     }
 
-    if (CreateRender(audioPort) != 0) {
-        MEDIA_ERR_LOG("Create render faied");
+    if (CreateRender(audioPort_) != 0) {
+        MEDIA_ERR_LOG("Create render failed, Audio Port: %{public}d", audioPort_.portId);
         return ERR_NOT_STARTED;
     }
 
-#ifdef DEVICE_BALTIMORE
+#ifdef PRODUCT_M40
     ret = OpenOutput(DEVICE_TYPE_SPEAKER);
     if (ret < 0) {
         MEDIA_ERR_LOG("AudioRendererSink: Update route FAILED: %{public}d", ret);
@@ -367,7 +367,7 @@ int32_t AudioRendererSink::GetLatency(uint32_t *latency)
     }
 }
 
-#ifdef DEVICE_BALTIMORE
+#ifdef PRODUCT_M40
 static AudioCategory GetAudioCategory(AudioScene audioScene)
 {
     AudioCategory audioCategory;
@@ -436,7 +436,7 @@ int32_t AudioRendererSink::OpenOutput(DeviceType outputDevice)
     source.ext.mix.moduleId = 0;
     source.ext.mix.streamId = INTERNAL_OUTPUT_STREAM_ID;
 
-    sink.portId = audioPort.portId;
+    sink.portId = audioPort_.portId;
     sink.role = AUDIO_PORT_SINK_ROLE;
     sink.type = AUDIO_PORT_DEVICE_TYPE;
     sink.ext.device.moduleId = 0;
@@ -461,12 +461,14 @@ int32_t AudioRendererSink::OpenOutput(DeviceType outputDevice)
 int32_t AudioRendererSink::SetAudioScene(AudioScene audioScene)
 {
     MEDIA_INFO_LOG("AudioRendererSink::SetAudioScene in");
+    CHECK_AND_RETURN_RET_LOG(audioScene >= AUDIO_SCENE_DEFAULT && audioScene <= AUDIO_SCENE_PHONE_CHAT,
+                             ERR_INVALID_PARAM, "invalid audioScene");
     if (audioRender_ == nullptr) {
         MEDIA_ERR_LOG("AudioRendererSink::SetAudioScene failed audio render handle is null!");
         return ERR_INVALID_HANDLE;
     }
 
-#ifdef DEVICE_BALTIMORE
+#ifdef PRODUCT_M40
     int32_t ret = OpenOutput(DEVICE_TYPE_SPEAKER);
     if (ret < 0) {
         MEDIA_ERR_LOG("AudioRendererSink: Update route FAILED: %{public}d", ret);
@@ -475,8 +477,8 @@ int32_t AudioRendererSink::SetAudioScene(AudioScene audioScene)
     struct AudioSceneDescriptor scene;
     scene.scene.id = GetAudioCategory(audioScene);
     scene.desc.pins = PIN_OUT_SPEAKER;
-    if (audioRender_->scene.SelectScene == NULL) {
-        MEDIA_ERR_LOG("AudioRendererSink: Select scene NULL");
+    if (audioRender_->scene.SelectScene == nullptr) {
+        MEDIA_ERR_LOG("AudioRendererSink: Select scene nullptr");
         return ERR_OPERATION_FAILED;
     }
 

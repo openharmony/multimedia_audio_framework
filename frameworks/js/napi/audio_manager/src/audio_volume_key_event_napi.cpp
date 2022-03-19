@@ -13,11 +13,11 @@
  * limitations under the License.
  */
 
+#include "audio_volume_key_event_napi.h"
+
 #include <uv.h>
 
 #include "media_log.h"
-
-#include "audio_volume_key_event_napi.h"
 
 using namespace std;
 namespace {
@@ -25,11 +25,6 @@ namespace {
 }
 namespace OHOS {
 namespace AudioStandard {
-constexpr int32_t JS_MEDIA = 3;
-constexpr int32_t JS_VOICE_CALL = 0;
-constexpr int32_t JS_RINGTONE = 2;
-constexpr int32_t JS_STREAM_ERROR = -1;
-
 AudioVolumeKeyEventNapi::AudioVolumeKeyEventNapi(napi_env env)
     :env_(env)
 {
@@ -94,19 +89,22 @@ static void SetValueBoolean(const napi_env& env, const std::string& fieldStr, co
 static int32_t GetJsAudioVolumeType(AudioStreamType streamType)
 {
     int32_t nativeStreamType = static_cast<int32_t>(streamType);
-    int32_t result = JS_STREAM_ERROR;
+    int32_t result = AudioManagerNapi::VOLUMETYPE_DEFAULT;
     switch (nativeStreamType) {
         case AudioStreamType::STREAM_MUSIC:
-            result = JS_MEDIA;
+            result = AudioManagerNapi::MEDIA;
             break;
         case AudioStreamType::STREAM_VOICE_CALL:
-            result = JS_VOICE_CALL;
+            result = AudioManagerNapi::VOICE_CALL;
             break;
         case AudioStreamType::STREAM_RING:
-            result = JS_RINGTONE;
+            result = AudioManagerNapi::RINGTONE;
+            break;
+        case AudioStreamType::STREAM_VOICE_ASSISTANT:
+            result = AudioManagerNapi::VOICE_ASSISTANT;
             break;
         default:
-            result = JS_STREAM_ERROR;
+            result = AudioManagerNapi::VOLUMETYPE_DEFAULT;
             break;
     }
     return result;
@@ -133,6 +131,11 @@ void AudioVolumeKeyEventNapi::OnJsCallbackVolumeEvent(std::unique_ptr<AudioVolum
     uv_work_t *work = new(std::nothrow) uv_work_t;
     if (work == nullptr) {
         MEDIA_ERR_LOG("AudioVolumeKeyEventNapi: OnJsCallBackInterrupt: No memory");
+        return;
+    }
+    if (jsCb.get() == nullptr) {
+        MEDIA_ERR_LOG("AudioVolumeKeyEventNapi: OnJsCallBackInterrupt: jsCb.get() is null");
+        delete work;
         return;
     }
     work->data = reinterpret_cast<void *>(jsCb.get());

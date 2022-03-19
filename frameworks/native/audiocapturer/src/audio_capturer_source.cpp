@@ -78,7 +78,7 @@ void AudioCapturerSource::DeInit()
 #endif // CAPTURE_DUMP
 }
 
-int32_t InitAttrsCapture(struct AudioSampleAttributes &attrs)
+void InitAttrsCapture(struct AudioSampleAttributes &attrs)
 {
     /* Initialization of audio parameters for playback */
     attrs.format = AUDIO_FORMAT_PCM_16_BIT;
@@ -95,12 +95,10 @@ int32_t InitAttrsCapture(struct AudioSampleAttributes &attrs)
     attrs.stopThreshold = INT_32_MAX;
     /* 16 * 1024 */
     attrs.silenceThreshold = AUDIO_BUFF_SIZE;
-
-    return SUCCESS;
 }
 
-int32_t SwitchAdapterCapture(struct AudioAdapterDescriptor *descs, string adapterNameCase,
-    enum AudioPortDirection portFlag, struct AudioPort &capturePort, const int32_t size)
+int32_t SwitchAdapterCapture(struct AudioAdapterDescriptor *descs, int32_t size, const std::string &adapterNameCase,
+    enum AudioPortDirection portFlag, struct AudioPort &capturePort)
 {
     if (descs == nullptr) {
         return ERROR;
@@ -111,7 +109,7 @@ int32_t SwitchAdapterCapture(struct AudioAdapterDescriptor *descs, string adapte
         if (desc == nullptr) {
             continue;
         }
-        if (!strcmp(desc->adapterName, adapterNameCase.c_str())) {
+        if (!adapterNameCase.compare(desc->adapterName)) {
             for (uint32_t port = 0; port < desc->portNum; port++) {
                 // Only find out the port of out in the sound card
                 if (desc->ports[port].dir == portFlag) {
@@ -121,7 +119,7 @@ int32_t SwitchAdapterCapture(struct AudioAdapterDescriptor *descs, string adapte
             }
         }
     }
-    MEDIA_ERR_LOG("SwitchAdapter Fail");
+    MEDIA_ERR_LOG("SwitchAdapterCapture Fail");
 
     return ERR_INVALID_INDEX;
 }
@@ -188,9 +186,9 @@ int32_t AudioCapturerSource::Init(AudioSourceAttr &attr)
 
     // Get qualified sound card and port
     string adapterNameCase = "internal";
-    index = SwitchAdapterCapture(descs, adapterNameCase, PORT_IN, audioPort, size);
+    index = SwitchAdapterCapture(descs, size, adapterNameCase, PORT_IN, audioPort);
     if (index < 0) {
-        MEDIA_ERR_LOG("Switch Adapter Fail");
+        MEDIA_ERR_LOG("Switch Adapter Capture Fail");
         return ERR_NOT_STARTED;
     }
 
@@ -204,7 +202,7 @@ int32_t AudioCapturerSource::Init(AudioSourceAttr &attr)
         return ERR_NOT_STARTED;
     }
 
-    // Inittialization port information, can fill through mode and other paramters
+    // Inittialization port information, can fill through mode and other parameters
     ret = audioAdapter_->InitAllPorts(audioAdapter_);
     if (ret != 0) {
         MEDIA_ERR_LOG("InitAllPorts failed");
@@ -216,7 +214,7 @@ int32_t AudioCapturerSource::Init(AudioSourceAttr &attr)
         return ERR_NOT_STARTED;
     }
 
-#ifdef DEVICE_BALTIMORE
+#ifdef PRODUCT_M40
     ret = OpenInput(DEVICE_TYPE_MIC);
     if (ret < 0) {
         MEDIA_ERR_LOG("AudioRendererSink: update route FAILED: %{public}d", ret);
@@ -341,7 +339,7 @@ int32_t AudioCapturerSource::GetMute(bool &isMute)
     return SUCCESS;
 }
 
-#ifdef DEVICE_BALTIMORE
+#ifdef PRODUCT_M40
 static AudioCategory GetAudioCategory(AudioScene audioScene)
 {
     AudioCategory audioCategory;
@@ -435,12 +433,14 @@ int32_t AudioCapturerSource::OpenInput(DeviceType inputDevice)
 int32_t AudioCapturerSource::SetAudioScene(AudioScene audioScene)
 {
     MEDIA_INFO_LOG("AudioCapturerSource::SetAudioScene in");
+    CHECK_AND_RETURN_RET_LOG(audioScene >= AUDIO_SCENE_DEFAULT && audioScene <= AUDIO_SCENE_PHONE_CHAT,
+                             ERR_INVALID_PARAM, "invalid audioScene");
     if (audioCapture_ == nullptr) {
         MEDIA_ERR_LOG("AudioCapturerSource::SetAudioScene failed audioCapture_ handle is null!");
         return ERR_INVALID_HANDLE;
     }
 
-#ifdef DEVICE_BALTIMORE
+#ifdef PRODUCT_M40
     int32_t ret = OpenInput(DEVICE_TYPE_MIC);
     if (ret < 0) {
         MEDIA_ERR_LOG("AudioCapturerSource: Update route FAILED: %{public}d", ret);
@@ -449,8 +449,8 @@ int32_t AudioCapturerSource::SetAudioScene(AudioScene audioScene)
     struct AudioSceneDescriptor scene;
     scene.scene.id = GetAudioCategory(audioScene);
     scene.desc.pins = PIN_IN_MIC;
-    if (audioCapture_->scene.SelectScene == NULL) {
-        MEDIA_ERR_LOG("AudioCapturerSource: Select scene NULL");
+    if (audioCapture_->scene.SelectScene == nullptr) {
+        MEDIA_ERR_LOG("AudioCapturerSource: Select scene nullptr");
         return ERR_OPERATION_FAILED;
     }
 

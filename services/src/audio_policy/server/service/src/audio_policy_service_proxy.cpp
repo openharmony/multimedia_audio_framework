@@ -127,12 +127,12 @@ std::vector<sptr<AudioDeviceDescriptor>> AudioPolicyServiceProxy::GetDevices(Dev
     return deviceInfo;
 }
 
-const std::string AudioPolicyServiceProxy::GetAudioParameter(const std::string key)
+const std::string AudioPolicyServiceProxy::GetAudioParameter(const std::string &key)
 {
     return "";
 }
 
-void AudioPolicyServiceProxy::SetAudioParameter(const std::string key, const std::string value)
+void AudioPolicyServiceProxy::SetAudioParameter(const std::string &key, const std::string &value)
 {
     return;
 }

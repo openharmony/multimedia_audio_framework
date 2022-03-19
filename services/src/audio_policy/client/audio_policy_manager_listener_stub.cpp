@@ -76,7 +76,7 @@ int AudioPolicyManagerListenerStub::OnRemoteRequest(
             return MEDIA_OK;
         }
         case ON_DEVICE_CHANGED: {
-            MEDIA_INFO_LOG("Device chnage callback received");
+            MEDIA_INFO_LOG("Device change callback received");
             DeviceChangeAction deviceChangeAction = {};
 
             ReadAudioDeviceChangeData(data, deviceChangeAction);

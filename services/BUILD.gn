@@ -159,8 +159,8 @@ config("audio_policy_public_config") {
     cflags += [ "-DBINDER_IPC_32BIT" ]
   }
 
-  if (device_name == "baltimore") {
-    cflags += [ "-DDEVICE_BALTIMORE" ]
+  if ("${product_name}" == "m40") {
+    cflags += [ "-DPRODUCT_M40" ]
   }
 
   ldflags = [ "-Wl" ]
@@ -236,10 +236,10 @@ ohos_shared_library("audio_policy_service") {
 }
 
 ohos_prebuilt_etc("audio_policy_config") {
-  if (device_name == "rk3566" || device_name == "rk3568") {
+  if ("${product_name}" == "rk3566" || "${product_name}" == "rk3568") {
     source = "$AUDIO_POLICY_SERVER_DIR/etc/rk3568/audio_policy_config.xml"
-  } else if (device_name == "baltimore") {
-    source = "$AUDIO_POLICY_SERVER_DIR/etc/baltimore/audio_policy_config.xml"
+  } else if ("${product_name}" == "m40") {
+    source = "$AUDIO_POLICY_SERVER_DIR/etc/m40/audio_policy_config.xml"
   } else {
     source = "$AUDIO_POLICY_SERVER_DIR/etc/audio_policy_config.xml"
   }

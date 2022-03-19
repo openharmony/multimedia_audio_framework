@@ -25,6 +25,7 @@
 #include <map>
 #include "securec.h"
 #include "media_log.h"
+#include "nocopyable.h"
 
 namespace OHOS {
 namespace AudioStandard {
@@ -88,6 +89,8 @@ typedef struct {
 
 class AudioServiceDump : public AudioTimer {
 public:
+    DISALLOW_COPY_AND_MOVE(AudioServiceDump);
+
     AudioServiceDump();
     ~AudioServiceDump();
     int32_t Initialize();

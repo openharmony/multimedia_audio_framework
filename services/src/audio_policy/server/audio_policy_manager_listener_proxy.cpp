@@ -92,7 +92,7 @@ AudioPolicyManagerListenerCallback::AudioPolicyManagerListenerCallback(
 
 AudioPolicyManagerListenerCallback::~AudioPolicyManagerListenerCallback()
 {
-    MEDIA_DEBUG_LOG("AudioPolicyManagerListenerCallback: Instance destory");
+    MEDIA_DEBUG_LOG("AudioPolicyManagerListenerCallback: Instance destroy");
 }
 
 void AudioPolicyManagerListenerCallback::OnInterrupt(const InterruptEventInternal &interruptEvent)
