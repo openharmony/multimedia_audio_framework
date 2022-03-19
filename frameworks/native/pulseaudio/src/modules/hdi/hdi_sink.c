@@ -165,15 +165,22 @@ static void ThreadFuncUseTiming(void *userdata)
     while (true) {
         pa_usec_t now = 0;
         int ret;
-
+#ifdef DEVICE_RK3568
+        if (PA_SINK_IS_OPENED(u->sink->thread_info.state))
+#else
         if (PA_SINK_IS_RUNNING(u->sink->thread_info.state))
+#endif
             now = pa_rtclock_now();
 
         if (PA_UNLIKELY(u->sink->thread_info.rewind_requested))
             pa_sink_process_rewind(u->sink, 0);
 
-        // Render some data and drop it immediately
+	// Render some data and drop it immediately
+#ifdef DEVICE_RK3568
+        if (PA_SINK_IS_OPENED(u->sink->thread_info.state)) {
+#else
         if (PA_SINK_IS_RUNNING(u->sink->thread_info.state)) {
+#endif
             if (u->timestamp <= now)
                 ProcessRenderUseTiming(u, now);
 

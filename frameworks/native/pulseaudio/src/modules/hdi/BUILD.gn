@@ -55,6 +55,10 @@ ohos_shared_library("module-hdi-sink") {
     cflags += [ "-DDEVICE_BALTIMORE" ]
   }
 
+  if (device_name == "rk3568") {
+    cflags += [ "-DDEVICE_RK3568" ]
+  }
+
   ldflags = [
     "-Wl",
     "--no-undefined",
