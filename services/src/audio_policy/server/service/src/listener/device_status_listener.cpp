@@ -65,7 +65,7 @@ static void OnServiceStatusReceived(struct ServiceStatusListener *listener, stru
         CHECK_AND_RETURN_LOG(devListener != nullptr, "Invalid deviceStatusListener");
 
         if (serviceStatus->status == SERVIE_STATUS_START) {
-            devListener->deviceObserver_.OnServiceConnected();
+            devListener->deviceObserver_.OnServiceConnected(AudioServiceIndex::HDI_SERVICE_INDEX);
         } else if (serviceStatus->status == SERVIE_STATUS_CHANGE && !info.empty()) {
             AudioDeviceType hdiDeviceType = HDF_AUDIO_DEVICE_UNKOWN;
             AudioEventType hdiEventType = HDF_AUDIO_EVENT_UNKOWN;

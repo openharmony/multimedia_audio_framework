@@ -23,6 +23,7 @@
 #include "iport_observer.h"
 #include "parser_factory.h"
 
+#include <bitset>
 #include <list>
 #include <string>
 #include <unordered_map>
@@ -80,7 +81,7 @@ public:
 
     void OnDeviceStatusUpdated(DeviceType deviceType, bool connected, void *privData);
 
-    void OnServiceConnected();
+    void OnServiceConnected(AudioServiceIndex serviceIndex);
 
     int32_t SetAudioSessionCallback(AudioSessionCallback *callback);
 
@@ -94,7 +95,7 @@ private:
         mDeviceStatusListener = std::make_unique<DeviceStatusListener>(*this);
     }
 
-    virtual ~AudioPolicyService() {}
+    ~AudioPolicyService();
 
     std::string GetPortName(InternalDeviceType deviceType);
 
@@ -117,6 +118,7 @@ private:
     void TriggerDeviceChangedCallback(const std::vector<sptr<AudioDeviceDescriptor>> &devChangeDesc, bool connection);
 
     bool interruptEnabled_ = true;
+    std::bitset<MIN_SERVICE_COUNT> serviceFlag_;
     DeviceType mCurrentActiveDevice = DEVICE_TYPE_NONE;
     IAudioPolicyInterface& mAudioPolicyManager;
     Parser& mConfigParser;

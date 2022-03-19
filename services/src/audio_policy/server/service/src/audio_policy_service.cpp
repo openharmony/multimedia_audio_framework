@@ -27,8 +27,15 @@ namespace AudioStandard {
 using namespace std;
 static sptr<IStandardAudioService> g_sProxy = nullptr;
 
+AudioPolicyService::~AudioPolicyService()
+{
+    MEDIA_ERR_LOG("~AudioPolicyService()");
+    Deinit();
+}
+
 bool AudioPolicyService::Init(void)
 {
+    serviceFlag_.reset();
     mAudioPolicyManager.Init();
     if (!mConfigParser.LoadConfiguration()) {
         MEDIA_ERR_LOG("Audio Config Load Configuration failed");
@@ -86,14 +93,21 @@ bool AudioPolicyService::ConnectServiceAdapter()
         return false;
     }
 
+    if (serviceFlag_.count() != MIN_SERVICE_COUNT) {
+        OnServiceConnected(AudioServiceIndex::AUDIO_SERVICE_INDEX);
+    }
+
     return true;
 }
 
 void AudioPolicyService::Deinit(void)
 {
-    mAudioPolicyManager.CloseAudioPort(mIOHandles[PRIMARY_SPEAKER]);
-    mAudioPolicyManager.CloseAudioPort(mIOHandles[PRIMARY_MIC]);
+    MEDIA_ERR_LOG("Policy service died. closing active ports");
+    std::for_each(mIOHandles.begin(), mIOHandles.end(), [&](std::pair<std::string, AudioIOHandle> handle) {
+        mAudioPolicyManager.CloseAudioPort(handle.second);
+    });
 
+    mIOHandles.clear();
     mDeviceStatusListener->UnRegisterDeviceStatusListener();
     return;
 }
@@ -446,23 +460,36 @@ void AudioPolicyService::OnDeviceStatusUpdated(DeviceType devType, bool isConnec
     MEDIA_INFO_LOG("output device list = [%{public}zu]", mConnectedDevices.size());
 }
 
-void AudioPolicyService::OnServiceConnected()
+void AudioPolicyService::OnServiceConnected(AudioServiceIndex serviceIndex)
 {
-    MEDIA_INFO_LOG("HDI service started: load modules");
-    int32_t result = ERROR;
+    MEDIA_INFO_LOG("[module_load]::OnServiceConnected for [%{public}d]", serviceIndex);
+    CHECK_AND_RETURN_LOG(serviceIndex >= HDI_SERVICE_INDEX && serviceIndex <= AUDIO_SERVICE_INDEX, "invalid index");
 
+    // If audio service or hdi service is not ready, donot load default modules
+    serviceFlag_.set(serviceIndex, true);
+    if (serviceFlag_.count() != MIN_SERVICE_COUNT) {
+        MEDIA_INFO_LOG("[module_load]::hdi service or audio service not up. Cannot load default module now");
+        return;
+    }
+
+    int32_t result = ERROR;
+    MEDIA_INFO_LOG("[module_load]::HDI and AUDIO SERVICE is READY. Loading default modules");
     auto primaryModulesPos = deviceClassInfo_.find(ClassType::TYPE_PRIMARY);
     if (primaryModulesPos != deviceClassInfo_.end()) {
         auto moduleInfoList = primaryModulesPos->second;
         for (auto &moduleInfo : moduleInfoList) {
-            MEDIA_INFO_LOG("Load modules: %{public}s", moduleInfo.name.c_str());
+            MEDIA_INFO_LOG("[module_load]::Load module[%{public}s]", moduleInfo.name.c_str());
             AudioIOHandle ioHandle = mAudioPolicyManager.OpenAudioPort(moduleInfo);
+            if (ioHandle == ERR_OPERATION_FAILED || ioHandle == ERR_INVALID_HANDLE) {
+                MEDIA_INFO_LOG("[module_load]::Open port failed");
+                continue;
+            }
 
             auto devType = GetDeviceType(moduleInfo.name);
             if (devType == DeviceType::DEVICE_TYPE_SPEAKER || devType == DeviceType::DEVICE_TYPE_MIC) {
                 result = mAudioPolicyManager.SetDeviceActive(ioHandle, devType, moduleInfo.name, true);
                 if (result != SUCCESS) {
-                    MEDIA_ERR_LOG("Activating device failed %{public}d", devType);
+                    MEDIA_ERR_LOG("[module_load]::Device failed %{public}d", devType);
                     break;
                 }
                 // add new device into active device list
@@ -476,7 +503,7 @@ void AudioPolicyService::OnServiceConnected()
     }
 
     if (result == SUCCESS) {
-        MEDIA_INFO_LOG("Setting speaker as active device on bootup");
+        MEDIA_INFO_LOG("[module_load]::Setting speaker as active device on bootup");
         mCurrentActiveDevice = DEVICE_TYPE_SPEAKER;
     }
 }
