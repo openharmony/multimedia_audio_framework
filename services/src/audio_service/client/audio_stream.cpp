@@ -84,6 +84,7 @@ AudioStream::AudioStream(AudioStreamType eStreamType, AudioMode eMode) : eStream
                                                                          state_(NEW),
                                                                          isReadInProgress_(false),
                                                                          isWriteInProgress_(false),
+                                                                         resetTime_(false),
                                                                          resetTimestamp_(0),
                                                                          renderMode_(RENDER_MODE_NORMAL),
                                                                          isReadyToWrite_(false)
@@ -125,6 +126,12 @@ bool AudioStream::GetAudioTime(Timestamp &timestamp, Timestamp::Timestampbase ba
 {
     uint64_t paTimeStamp = 0;
     if (GetCurrentTimeStamp(paTimeStamp) == SUCCESS) {
+        if (resetTime_) {
+            MEDIA_INFO_LOG("AudioStream::GetAudioTime resetTime_ %{public}d", resetTime_);
+            resetTime_ = false;
+            resetTimestamp_ = paTimeStamp;
+        }
+
         timestamp.time.tv_sec = static_cast<time_t>((paTimeStamp - resetTimestamp_) / TIME_CONVERSION_US_S);
         timestamp.time.tv_nsec
             = static_cast<time_t>(((paTimeStamp - resetTimestamp_) - (timestamp.time.tv_sec * TIME_CONVERSION_US_S))
@@ -290,19 +297,16 @@ bool AudioStream::StartAudioStream()
         return false;
     }
 
-    if (state_ == STOPPED && GetCurrentTimeStamp(resetTimestamp_)) {
-        MEDIA_ERR_LOG("Failed to get timestamp after stop needed for resetting");
-    }
-
-    int32_t retCode = clock_gettime(CLOCK_BOOTTIME, &baseTimestamp_);
-    if (retCode != 0) {
-        MEDIA_ERR_LOG("AudioStream::StartAudioStream get system elapsed time failed: %d", retCode);
-    }
-
     int32_t ret = StartStream();
     if (ret != SUCCESS) {
         MEDIA_ERR_LOG("StartStream Start failed:%{public}d", ret);
         return false;
+    }
+
+    resetTime_ = true;
+    int32_t retCode = clock_gettime(CLOCK_BOOTTIME, &baseTimestamp_);
+    if (retCode != 0) {
+        MEDIA_ERR_LOG("AudioStream::StartAudioStream get system elapsed time failed: %d", retCode);
     }
 
     if (renderMode_ == RENDER_MODE_CALLBACK) {
