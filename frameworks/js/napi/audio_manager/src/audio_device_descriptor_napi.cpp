@@ -48,6 +48,7 @@ void AudioDeviceDescriptorNapi::Destructor(napi_env env, void *nativeObject, voi
     if (nativeObject != nullptr) {
         auto obj = static_cast<AudioDeviceDescriptorNapi*>(nativeObject);
         delete obj;
+        obj = nullptr;
     }
 }
 

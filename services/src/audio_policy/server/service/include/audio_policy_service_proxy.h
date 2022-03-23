@@ -32,8 +32,8 @@ public:
     bool IsMicrophoneMute() override;
     int32_t SetAudioScene(AudioScene audioScene) override;
     std::vector<sptr<AudioDeviceDescriptor>> GetDevices(DeviceFlag deviceFlag) override;
-    const std::string GetAudioParameter(const std::string key) override;
-    void SetAudioParameter(const std::string key, const std::string value) override;
+    const std::string GetAudioParameter(const std::string &key) override;
+    void SetAudioParameter(const std::string &key, const std::string &value) override;
     int32_t UpdateActiveDeviceRoute(DeviceType type, DeviceFlag flag) override;
     const char *RetrieveCookie(int32_t &size) override;
 private:

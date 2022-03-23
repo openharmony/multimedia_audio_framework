@@ -109,7 +109,7 @@ State AudioStream::GetState()
     return state_;
 }
 
-int32_t AudioStream::GetAudioSessionID(uint32_t &sessionID)
+int32_t AudioStream::GetAudioSessionID(uint32_t &sessionID) const
 {
     if ((state_ == RELEASED) || (state_ == NEW)) {
         return ERR_ILLEGAL_STATE;
@@ -146,7 +146,7 @@ bool AudioStream::GetAudioTime(Timestamp &timestamp, Timestamp::Timestampbase ba
     return false;
 }
 
-int32_t AudioStream::GetBufferSize(size_t &bufferSize)
+int32_t AudioStream::GetBufferSize(size_t &bufferSize) const
 {
     MEDIA_INFO_LOG("AudioStream: Get Buffer size");
     if (GetMinimumBufferSize(bufferSize) != 0) {
@@ -156,7 +156,7 @@ int32_t AudioStream::GetBufferSize(size_t &bufferSize)
     return SUCCESS;
 }
 
-int32_t AudioStream::GetFrameCount(uint32_t &frameCount)
+int32_t AudioStream::GetFrameCount(uint32_t &frameCount) const
 {
     MEDIA_INFO_LOG("AudioStream: Get frame count");
     if (GetMinimumFrameCount(frameCount) != 0) {
@@ -166,7 +166,7 @@ int32_t AudioStream::GetFrameCount(uint32_t &frameCount)
     return SUCCESS;
 }
 
-int32_t AudioStream::GetLatency(uint64_t &latency)
+int32_t AudioStream::GetLatency(uint64_t &latency) const
 {
     if (GetAudioLatency(latency) != SUCCESS) {
         return ERR_OPERATION_FAILED;
@@ -175,22 +175,22 @@ int32_t AudioStream::GetLatency(uint64_t &latency)
     }
 }
 
-vector<AudioSampleFormat> AudioStream::GetSupportedFormats()
+vector<AudioSampleFormat> AudioStream::GetSupportedFormats() const
 {
     return AUDIO_SUPPORTED_FORMATS;
 }
 
-vector<AudioChannel> AudioStream::GetSupportedChannels()
+vector<AudioChannel> AudioStream::GetSupportedChannels() const
 {
     return AUDIO_SUPPORTED_CHANNELS;
 }
 
-vector<AudioEncodingType> AudioStream::GetSupportedEncodingTypes()
+vector<AudioEncodingType> AudioStream::GetSupportedEncodingTypes() const
 {
     return AUDIO_SUPPORTED_ENCODING_TYPES;
 }
 
-vector<AudioSamplingRate> AudioStream::GetSupportedSamplingRates()
+vector<AudioSamplingRate> AudioStream::GetSupportedSamplingRates() const
 {
     return AUDIO_SUPPORTED_SAMPLING_RATES;
 }

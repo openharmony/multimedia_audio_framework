@@ -81,6 +81,11 @@ void RendererPositionCallbackNapi::OnJsRendererPositionCallback(std::unique_ptr<
         MEDIA_ERR_LOG("RendererPositionCallbackNapi: OnJsRendererPositionCallback: No memory");
         return;
     }
+    if (jsCb.get() == nullptr) {
+        MEDIA_ERR_LOG("RendererPositionCallbackNapi: OnJsRendererPositionCallback: jsCb.get() is null");
+        delete work;
+        return;
+    }
     work->data = reinterpret_cast<void *>(jsCb.get());
 
     int ret = uv_queue_work(loop, work, [] (uv_work_t *work) {}, [] (uv_work_t *work, int status) {

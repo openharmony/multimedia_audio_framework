@@ -17,9 +17,7 @@ group("audio_unit_test") {
   deps = [
     "unittest/capturer_test:audio_capturer_unit_test",
     "unittest/manager_test:audio_manager_unit_test",
-    "unittest/opensles_test:audio_opensles_unit_test",
     "unittest/renderer_test:audio_renderer_unit_test",
-    "unittest/volume_change_test:audio_volume_change_unit_test",
   ]
 }
 

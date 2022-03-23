@@ -47,6 +47,7 @@ void RingtoneOptionsNapi::Destructor(napi_env env, void *nativeObject, void *fin
     if (nativeObject != nullptr) {
         auto obj = static_cast<RingtoneOptionsNapi *>(nativeObject);
         delete obj;
+        obj = nullptr;
     }
 }
 

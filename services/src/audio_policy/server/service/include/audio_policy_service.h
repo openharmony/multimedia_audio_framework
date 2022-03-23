@@ -118,6 +118,7 @@ private:
     void TriggerDeviceChangedCallback(const std::vector<sptr<AudioDeviceDescriptor>> &devChangeDesc, bool connection);
 
     bool interruptEnabled_ = true;
+    int32_t mDefaultDeviceCount = 0;
     std::bitset<MIN_SERVICE_COUNT> serviceFlag_;
     DeviceType mCurrentActiveDevice = DEVICE_TYPE_NONE;
     IAudioPolicyInterface& mAudioPolicyManager;

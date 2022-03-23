@@ -43,7 +43,7 @@ public:
 
     virtual int32_t SetStreamMute(AudioStreamType streamType, bool mute) = 0;
 
-    virtual bool GetStreamMute(AudioStreamType streamType) = 0;
+    virtual bool GetStreamMute(AudioStreamType streamType) const = 0;
 
     virtual bool IsStreamActive(AudioStreamType streamType) = 0;
 
@@ -56,7 +56,7 @@ public:
 
     virtual int32_t SetRingerMode(AudioRingerMode ringerMode) = 0;
 
-    virtual AudioRingerMode GetRingerMode() = 0;
+    virtual AudioRingerMode GetRingerMode() const = 0;
 
     virtual int32_t SetAudioSessionCallback(AudioSessionCallback *callback) = 0;
 

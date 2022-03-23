@@ -13,7 +13,6 @@
  * limitations under the License.
  */
 
-#include <cstdlib>
 #include "media_log.h"
 
 #include "xml_parser.h"
@@ -22,8 +21,8 @@ namespace OHOS {
 namespace AudioStandard {
 bool XMLParser::LoadConfiguration()
 {
-    mDoc = xmlReadFile(CONFIG_FILE, NULL, 0);
-    if (mDoc == NULL) {
+    mDoc = xmlReadFile(CONFIG_FILE, nullptr, 0);
+    if (mDoc == nullptr) {
         MEDIA_ERR_LOG("xmlReadFile Failed");
         return false;
     }
@@ -34,7 +33,7 @@ bool XMLParser::LoadConfiguration()
 bool XMLParser::Parse()
 {
     xmlNode *root = xmlDocGetRootElement(mDoc);
-    if (root == NULL) {
+    if (root == nullptr) {
         MEDIA_ERR_LOG("xmlDocGetRootElement Failed");
         return false;
     }
@@ -48,11 +47,9 @@ bool XMLParser::Parse()
 
 void XMLParser::Destroy()
 {
-    if (mDoc != NULL) {
+    if (mDoc != nullptr) {
         xmlFreeDoc(mDoc);
     }
-
-    return;
 }
 
 bool XMLParser::ParseInternal(xmlNode &node)
@@ -80,7 +77,7 @@ bool XMLParser::ParseInternal(xmlNode &node)
 
 void XMLParser::ParseDeviceClass(xmlNode &node)
 {
-    xmlNode *modulesNode = NULL;
+    xmlNode *modulesNode = nullptr;
     modulesNode = node.xmlChildrenNode;
 
     std::string className = ExtractPropertyValue("name", node);
@@ -92,7 +89,7 @@ void XMLParser::ParseDeviceClass(xmlNode &node)
     deviceClassType_ = GetDeviceClassType(className);
     xmlParsedDataMap_[deviceClassType_] = {};
 
-    while (modulesNode != NULL) {
+    while (modulesNode != nullptr) {
         if (modulesNode->type == XML_ELEMENT_NODE) {
             ParseModules(*modulesNode, className);
         }
@@ -102,11 +99,11 @@ void XMLParser::ParseDeviceClass(xmlNode &node)
 
 void XMLParser::ParseModules(xmlNode &node, std::string &className)
 {
-    xmlNode *moduleNode = NULL;
+    xmlNode *moduleNode = nullptr;
     std::list<AudioModuleInfo> moduleList = {};
     moduleNode = node.xmlChildrenNode;
 
-    while (moduleNode != NULL) {
+    while (moduleNode != nullptr) {
         if (moduleNode->type == XML_ELEMENT_NODE) {
             AudioModuleInfo moduleInfo = {};
             moduleInfo.className = className;
@@ -131,10 +128,10 @@ void XMLParser::ParseModules(xmlNode &node, std::string &className)
 
 void XMLParser::ParsePorts(xmlNode &node, AudioModuleInfo &moduleInfo)
 {
-    xmlNode *portsNode = NULL;
+    xmlNode *portsNode = nullptr;
     portsNode = node.xmlChildrenNode;
 
-    while (portsNode != NULL) {
+    while (portsNode != nullptr) {
         if (portsNode->type == XML_ELEMENT_NODE) {
             ParsePort(*portsNode, moduleInfo);
         }
@@ -144,11 +141,11 @@ void XMLParser::ParsePorts(xmlNode &node, AudioModuleInfo &moduleInfo)
 
 void XMLParser::ParsePort(xmlNode &node, AudioModuleInfo &moduleInfo)
 {
-    xmlNode *portNode = NULL;
+    xmlNode *portNode = nullptr;
     std::list<AudioModuleInfo> portInfoList = {};
     portNode = node.xmlChildrenNode;
 
-    while (portNode != NULL) {
+    while (portNode != nullptr) {
         if (portNode->type == XML_ELEMENT_NODE) {
             moduleInfo.adapterName = ExtractPropertyValue("adapter_name", *portNode);
             moduleInfo.id = ExtractPropertyValue("id", *portNode);

@@ -22,8 +22,8 @@ ohos_shared_library("audio_renderer_sink") {
 
   cflags = [ "-fPIC" ]
   cflags += [ "-Wall" ]
-  if (device_name == "baltimore") {
-    cflags += [ "-DDEVICE_BALTIMORE" ]
+  if ("${product_name}" == "m40") {
+    cflags += [ "-DPRODUCT_M40" ]
   }
   cflags_cc = cflags
 
@@ -50,7 +50,7 @@ ohos_shared_library("audio_renderer_sink") {
     "//utils/native/base:utils",
   ]
 
-  if (device_name == "baltimore") {
+  if ("${product_name}" == "m40") {
     deps += [ "//drivers/peripheral/adapter/audio/interfaces:hdi_audio_client" ]
   } else {
     deps +=
@@ -68,11 +68,7 @@ ohos_shared_library("bluetooth_renderer_sink") {
 
   cflags = [ "-fPIC" ]
   cflags += [ "-Wall" ]
-  if (device_name == "baltimore") {
-    cflags += [ "-DDEVICE_BALTIMORE" ]
-  } else if (device_name == "rk3566" || device_name == "rk3568") {
-    cflags += [ "-DDEVICE_RK" ]
-  }
+
   cflags_cc = cflags
 
   include_dirs = [

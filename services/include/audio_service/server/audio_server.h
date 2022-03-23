@@ -42,8 +42,8 @@ public:
     int32_t SetAudioScene(AudioScene audioScene) override;
     std::vector<sptr<AudioDeviceDescriptor>> GetDevices(DeviceFlag deviceFlag) override;
     static void *paDaemonThread(void *arg);
-    void SetAudioParameter(const std::string key, const std::string value) override;
-    const std::string GetAudioParameter(const std::string key) override;
+    void SetAudioParameter(const std::string &key, const std::string &value) override;
+    const std::string GetAudioParameter(const std::string &key) override;
     const char *RetrieveCookie(int32_t &size) override;
     int32_t UpdateActiveDeviceRoute(DeviceType type, DeviceFlag flag) override;
 private:

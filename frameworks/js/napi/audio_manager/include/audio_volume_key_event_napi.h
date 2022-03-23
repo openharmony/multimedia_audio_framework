@@ -44,7 +44,7 @@ public:
     virtual ~AudioVolumeKeyEventNapi();
 
     /**
-     * @brief OnAudioVolumeKeyEvent will be executed when hard volume key is pressed up/down
+     * @brief OnVolumeKeyEvent will be executed when hard volume key is pressed up/down
      *
      * @param streamType the stream type for which volume must be updated.
      * @param volumeLevel the volume level to be updated.

@@ -55,6 +55,10 @@ config("audio_client_public_config") {
     "-Werror",
   ]
 
+  if ("${product_name}" == "m40") {
+    cflags += [ "-DPRODUCT_M40" ]
+  }
+
   if (target_cpu == "arm") {
     cflags += [ "-DBINDER_IPC_32BIT" ]
   }

@@ -80,6 +80,7 @@ void AudioRendererNapi::Destructor(napi_env env, void *nativeObject, void *final
     if (nativeObject != nullptr) {
         auto obj = static_cast<AudioRendererNapi *>(nativeObject);
         delete obj;
+        obj = nullptr;
     }
 }
 
@@ -1674,21 +1675,24 @@ napi_value AudioRendererNapi::RegisterPeriodPositionCallback(napi_env env, napi_
 {
     int64_t frameCount = 0;
     napi_get_value_int64(env, argv[PARAM1], &frameCount);
-    NAPI_ASSERT(env, frameCount > 0, "AudioRendererNapi: On Invalid frameCount value: <= 0.");
 
-    if (rendererNapi->periodPositionCBNapi_ == nullptr) {
-        rendererNapi->periodPositionCBNapi_ = std::make_shared<RendererPeriodPositionCallbackNapi>(env);
-        NAPI_ASSERT(env, rendererNapi->periodPositionCBNapi_ != nullptr, "AudioRendererNapi: No memory.");
+    if (frameCount > 0) {
+        if (rendererNapi->periodPositionCBNapi_ == nullptr) {
+            rendererNapi->periodPositionCBNapi_ = std::make_shared<RendererPeriodPositionCallbackNapi>(env);
+            NAPI_ASSERT(env, rendererNapi->periodPositionCBNapi_ != nullptr, "AudioRendererNapi: No memory.");
 
-        int32_t ret = rendererNapi->audioRenderer_->SetRendererPeriodPositionCallback(frameCount,
-            rendererNapi->periodPositionCBNapi_);
-        NAPI_ASSERT(env, ret == SUCCESS, "AudioRendererNapi: SetRendererPositionCallback failed.");
+            int32_t ret = rendererNapi->audioRenderer_->SetRendererPeriodPositionCallback(frameCount,
+                rendererNapi->periodPositionCBNapi_);
+            NAPI_ASSERT(env, ret == SUCCESS, "AudioRendererNapi: SetRendererPositionCallback failed.");
 
-        std::shared_ptr<RendererPeriodPositionCallbackNapi> cb =
-            std::static_pointer_cast<RendererPeriodPositionCallbackNapi>(rendererNapi->periodPositionCBNapi_);
-        cb->SaveCallbackReference(cbName, argv[PARAM2]);
+            std::shared_ptr<RendererPeriodPositionCallbackNapi> cb =
+                std::static_pointer_cast<RendererPeriodPositionCallbackNapi>(rendererNapi->periodPositionCBNapi_);
+            cb->SaveCallbackReference(cbName, argv[PARAM2]);
+        } else {
+            MEDIA_DEBUG_LOG("AudioRendererNapi: periodReach already subscribed.");
+        }
     } else {
-        MEDIA_DEBUG_LOG("AudioRendererNapi: periodReach already subscribed.");
+        MEDIA_ERR_LOG("AudioRendererNapi: frameCount value not supported!!");
     }
 
     napi_value result = nullptr;
@@ -1701,20 +1705,23 @@ napi_value AudioRendererNapi::RegisterPositionCallback(napi_env env, napi_value*
 {
     int64_t markPosition = 0;
     napi_get_value_int64(env, argv[PARAM1], &markPosition);
-    NAPI_ASSERT(env, markPosition > 0, "AudioRendererNapi: On Invalid markPosition value: <= 0.");
 
-    if (rendererNapi->positionCBNapi_ == nullptr) {
-        rendererNapi->positionCBNapi_ = std::make_shared<RendererPositionCallbackNapi>(env);
-        NAPI_ASSERT(env, rendererNapi->positionCBNapi_ != nullptr, "AudioRendererNapi: No memory.");
-        int32_t ret = rendererNapi->audioRenderer_->SetRendererPositionCallback(markPosition,
-            rendererNapi->positionCBNapi_);
-        NAPI_ASSERT(env, ret == SUCCESS, "AudioRendererNapi: SetRendererPositionCallback failed.");
+    if (markPosition > 0) {
+        if (rendererNapi->positionCBNapi_ == nullptr) {
+            rendererNapi->positionCBNapi_ = std::make_shared<RendererPositionCallbackNapi>(env);
+            NAPI_ASSERT(env, rendererNapi->positionCBNapi_ != nullptr, "AudioRendererNapi: No memory.");
+            int32_t ret = rendererNapi->audioRenderer_->SetRendererPositionCallback(markPosition,
+                rendererNapi->positionCBNapi_);
+            NAPI_ASSERT(env, ret == SUCCESS, "AudioRendererNapi: SetRendererPositionCallback failed.");
 
-        std::shared_ptr<RendererPositionCallbackNapi> cb =
-            std::static_pointer_cast<RendererPositionCallbackNapi>(rendererNapi->positionCBNapi_);
-        cb->SaveCallbackReference(cbName, argv[PARAM2]);
+            std::shared_ptr<RendererPositionCallbackNapi> cb =
+                std::static_pointer_cast<RendererPositionCallbackNapi>(rendererNapi->positionCBNapi_);
+            cb->SaveCallbackReference(cbName, argv[PARAM2]);
+        } else {
+            MEDIA_DEBUG_LOG("AudioRendererNapi: markReach already subscribed.");
+        }
     } else {
-        MEDIA_DEBUG_LOG("AudioRendererNapi: markReach already subscribed.");
+        MEDIA_ERR_LOG("AudioRendererNapi: Mark Position value not supported!!");
     }
 
     napi_value result = nullptr;
@@ -1793,7 +1800,12 @@ napi_value AudioRendererNapi::On(napi_env env, napi_callback_info info)
         napi_valuetype paramArg1 = napi_undefined;
         napi_typeof(env, argv[1], &paramArg1);
         napi_valuetype expectedValType = napi_number;  // Default. Reset it with 'callbackName' if check, if required.
-        NAPI_ASSERT(env, paramArg1 == expectedValType, "type mismatch for parameter 2");
+        if (paramArg1 != expectedValType) {
+            MEDIA_ERR_LOG("Type mismatch for param 2!!");
+            napi_value result = nullptr;
+            napi_get_undefined(env, &result);
+            return result;
+        }
 
         const int32_t arg2 = 2;
         napi_typeof(env, argv[arg2], &handler);

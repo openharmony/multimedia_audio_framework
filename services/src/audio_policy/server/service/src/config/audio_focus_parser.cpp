@@ -62,12 +62,12 @@ void AudioFocusParser::LoadDefaultConfig(AudioFocusEntry &focusTable)
 
 int32_t AudioFocusParser::LoadConfig(AudioFocusEntry &focusTable)
 {
-    xmlDoc *doc = NULL;
-    xmlNode *rootElement = NULL;
+    xmlDoc *doc = nullptr;
+    xmlNode *rootElement = nullptr;
 
     pIntrAction = &focusTable;
 
-    if ((doc = xmlReadFile(AUDIO_FOCUS_CONFIG_FILE, NULL, 0)) == NULL) {
+    if ((doc = xmlReadFile(AUDIO_FOCUS_CONFIG_FILE, nullptr, 0)) == nullptr) {
         MEDIA_ERR_LOG("error: could not parse file %s", AUDIO_FOCUS_CONFIG_FILE);
         LoadDefaultConfig(focusTable);
         return ERROR;
@@ -75,6 +75,7 @@ int32_t AudioFocusParser::LoadConfig(AudioFocusEntry &focusTable)
 
     rootElement = xmlDocGetRootElement(doc);
     xmlNode *currNode = rootElement;
+    CHECK_AND_RETURN_RET_LOG(currNode != nullptr, ERROR, "root element is null");
     if (!xmlStrcmp(currNode->name, reinterpret_cast<const xmlChar*>("audio_focus_policy"))) {
         if ((currNode->children) && (currNode->children->next)) {
             currNode = currNode->children->next;
@@ -96,7 +97,7 @@ int32_t AudioFocusParser::LoadConfig(AudioFocusEntry &focusTable)
 void AudioFocusParser::ParseFocusTable(xmlNode *node, char *curStream)
 {
     xmlNode *currNode = node;
-    while (currNode) {
+    while (currNode != nullptr) {
         if (currNode->type == XML_ELEMENT_NODE) {
             if (!xmlStrcmp(currNode->name, reinterpret_cast<const xmlChar*>("focus_table"))) {
                 MEDIA_INFO_LOG("node type: Element, name: %s", currNode->name);
@@ -149,14 +150,16 @@ void AudioFocusParser::ParseRejectedStreams(xmlNode *node, char *curStream)
                 if (it1 != streamMap.end()) {
                     AudioFocusEntry *pAction = pIntrAction + (streamMap[curStream] * MAX_NUM_STREAMS) +
                         streamMap[newStream];
-                    pAction->actionOn = INCOMING;
-                    pAction->hintType = INTERRUPT_HINT_NONE;
-                    pAction->forceType = INTERRUPT_FORCE;
-                    pAction->isReject = true;
+                    if (pAction != nullptr) {
+                        pAction->actionOn = INCOMING;
+                        pAction->hintType = INTERRUPT_HINT_NONE;
+                        pAction->forceType = INTERRUPT_FORCE;
+                        pAction->isReject = true;
 
-                    MEDIA_INFO_LOG("current stream: %s, incoming stream: %s", curStream, newStream);
-                    MEDIA_INFO_LOG("actionOn: %d, hintType: %d, forceType: %d isReject: %d", pAction->actionOn,
-                                   pAction->hintType, pAction->forceType, pAction->isReject);
+                        MEDIA_INFO_LOG("current stream: %s, incoming stream: %s", curStream, newStream);
+                        MEDIA_INFO_LOG("actionOn: %d, hintType: %d, forceType: %d isReject: %d", pAction->actionOn,
+                            pAction->hintType, pAction->forceType, pAction->isReject);
+                    }
                 }
                 xmlFree(newStream);
             }

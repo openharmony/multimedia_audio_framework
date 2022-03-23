@@ -128,6 +128,10 @@ private:
     static constexpr int32_t MIN_VOLUME_LEVEL = 0;
     static constexpr int32_t CONST_FACTOR = 100;
     static constexpr int32_t VOLUME_CHANGE_FACTOR = 1;
+    static constexpr int32_t FIRST_PRIORITY = 1;
+    static constexpr int32_t SECOND_PRIORITY = 2;
+    static constexpr int32_t THIRD_PRIORITY = 3;
+    static constexpr int32_t VOLUME_KEY_DURATION = 0;
 };
 } // namespace AudioStandard
 } // namespace OHOS

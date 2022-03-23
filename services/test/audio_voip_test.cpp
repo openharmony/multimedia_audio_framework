@@ -278,11 +278,23 @@ int main(int argc, char *argv[])
     MEDIA_INFO_LOG("AudioVoIPTest: capturer test path = %{public}s",
         argv[AudioTestConstants::ARGS_INDEX_CAPTURER_TEST_PATH]);
 
-    AudioVoIPTest *renderTestObj = new AudioVoIPTest();
+    AudioVoIPTest *renderTestObj = new(std::nothrow) AudioVoIPTest();
+    if (!renderTestObj) {
+        MEDIA_ERR_LOG("AudioVoIPTest: create renderer object failed");
+        return 0;
+    }
+
+    AudioVoIPTest *captureTestObj = new(std::nothrow) AudioVoIPTest();
+    if (!captureTestObj) {
+        MEDIA_ERR_LOG("AudioVoIPTest: create capturer object failed");
+        delete renderTestObj;
+        renderTestObj = nullptr;
+        return 0;
+    }
+
     std::thread renderThread(&AudioVoIPTest::TestPlayback, renderTestObj,
                              argv[AudioTestConstants::ARGS_INDEX_RENDERER_TEST_PATH]);
 
-    AudioVoIPTest *captureTestObj = new AudioVoIPTest();
     std::thread captureThread(&AudioVoIPTest::TestRecording, captureTestObj,
                               argv[AudioTestConstants::ARGS_INDEX_CAPTURER_TEST_PATH]);
 
@@ -290,7 +302,9 @@ int main(int argc, char *argv[])
     captureThread.join();
 
     delete renderTestObj;
+    renderTestObj = nullptr;
     delete captureTestObj;
+    captureTestObj = nullptr;
 
     return 0;
 }
