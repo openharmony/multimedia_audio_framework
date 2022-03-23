@@ -20,5 +20,11 @@
             <option name="push" value="test_audiofile/test_44100_2.wav -> /data" src="res"/>
         </preparer>
     </target>
+    <target name="audio_opensles_unit_test">
+        <depend resource="test_audiofile/test_44100_2.wav" pushpath="/data" findpath="res" presetcmd=""/>
+        <preparer>
+            <option name="push" value="test_audiofile/test_44100_2.wav -> /data" src="res"/>
+        </preparer>
+    </target>
 </configuration>
 
