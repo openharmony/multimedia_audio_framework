@@ -232,6 +232,8 @@ int32_t PulseAudioServiceAdapterImpl::SetDefaultSource(string name)
 
 int32_t PulseAudioServiceAdapterImpl::SetVolume(AudioStreamType streamType, float volume)
 {
+    lock_guard<mutex> lock(mMutex);
+
     unique_ptr<UserData> userData = make_unique<UserData>();
     if (userData == nullptr) {
         MEDIA_ERR_LOG("[PulseAudioServiceAdapterImpl] SetVolume UserData memory alloc failed");
@@ -266,6 +268,8 @@ int32_t PulseAudioServiceAdapterImpl::SetVolume(AudioStreamType streamType, floa
 
 int32_t PulseAudioServiceAdapterImpl::SetMute(AudioStreamType streamType, bool mute)
 {
+    lock_guard<mutex> lock(mMutex);
+
     unique_ptr<UserData> userData = make_unique<UserData>();
     userData->thiz = this;
     userData->mute = mute;
@@ -297,6 +301,8 @@ int32_t PulseAudioServiceAdapterImpl::SetMute(AudioStreamType streamType, bool m
 
 bool PulseAudioServiceAdapterImpl::IsMute(AudioStreamType streamType)
 {
+    lock_guard<mutex> lock(mMutex);
+
     unique_ptr<UserData> userData = make_unique<UserData>();
     userData->thiz = this;
     userData->streamType = streamType;
@@ -329,6 +335,8 @@ bool PulseAudioServiceAdapterImpl::IsMute(AudioStreamType streamType)
 
 bool PulseAudioServiceAdapterImpl::IsStreamActive(AudioStreamType streamType)
 {
+    lock_guard<mutex> lock(mMutex);
+
     unique_ptr<UserData> userData = make_unique<UserData>();
     userData->thiz = this;
     userData->streamType = streamType;
