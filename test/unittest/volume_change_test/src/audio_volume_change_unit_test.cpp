@@ -89,7 +89,7 @@ void AudioVolumeChangeUnitTest::TearDown(void) {}
  * EnvConditions: NA
  * CaseDescription:
  */
-HWTEST(AudioVolumeChangeUnitTest,  volumeChange_test_001, TestSize.Level1)
+HWTEST_F(AudioVolumeChangeUnitTest,  volumeChange_test_001, TestSize.Level1)
 {
     int result;
     int callBackSetResult;
@@ -114,6 +114,7 @@ HWTEST(AudioVolumeChangeUnitTest,  volumeChange_test_001, TestSize.Level1)
         EXPECT_EQ(isUpdateUi, g_isUpdateUi);
         EXPECT_STREQ(g_callbackName.c_str(), testCaseName.c_str());
     }
+    g_audioManagerInstance->UnregisterVolumeKeyEventCallback(getpid());
 }
 
 /*
@@ -124,7 +125,7 @@ HWTEST(AudioVolumeChangeUnitTest,  volumeChange_test_001, TestSize.Level1)
  * EnvConditions: NA
  * CaseDescription:
  */
-HWTEST(AudioVolumeChangeUnitTest,  volumeChange_test_002, TestSize.Level1)
+HWTEST_F(AudioVolumeChangeUnitTest,  volumeChange_test_002, TestSize.Level1)
 {
     int result;
     int callBackSetResult;
@@ -149,6 +150,7 @@ HWTEST(AudioVolumeChangeUnitTest,  volumeChange_test_002, TestSize.Level1)
         EXPECT_EQ(isUpdateUi, g_isUpdateUi);
         EXPECT_STREQ(g_callbackName.c_str(), testCaseName.c_str());
     }
+    g_audioManagerInstance->UnregisterVolumeKeyEventCallback(getpid());
 }
 
 /*
@@ -159,7 +161,7 @@ HWTEST(AudioVolumeChangeUnitTest,  volumeChange_test_002, TestSize.Level1)
  * EnvConditions: NA
  * CaseDescription:
  */
-HWTEST(AudioVolumeChangeUnitTest,  volumeChange_test_003, TestSize.Level1)
+HWTEST_F(AudioVolumeChangeUnitTest,  volumeChange_test_003, TestSize.Level1)
 {
     int result;
     int callBackSetResult;
@@ -184,6 +186,7 @@ HWTEST(AudioVolumeChangeUnitTest,  volumeChange_test_003, TestSize.Level1)
         EXPECT_EQ(isUpdateUi, g_isUpdateUi);
         EXPECT_STREQ(g_callbackName.c_str(), testCaseName.c_str());
     }
+    g_audioManagerInstance->UnregisterVolumeKeyEventCallback(getpid());
 }
 } // namespace AudioStandard
 } // namespace OHOS
