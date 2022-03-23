@@ -563,6 +563,6 @@ INSTANTIATE_TEST_CASE_P(
     GetAudioScene,
     AudioPolicyGetAudioSceneTest,
     ValuesIn(AUDIO_SCENE_PARAMS));
-} // V1_0
-} // AudioStandard
-} // OHOS
+} // namespace V1_0
+} // namespace AudioStandard
+} // namespace OHOS

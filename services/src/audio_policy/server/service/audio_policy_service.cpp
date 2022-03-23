@@ -633,5 +633,5 @@ DeviceRole AudioPolicyService::GetDeviceRole(const std::string &role)
         return DeviceRole::DEVICE_ROLE_NONE;
     }
 }
-}
-}
+} // namespace AudioStandard
+} // namespace OHOS

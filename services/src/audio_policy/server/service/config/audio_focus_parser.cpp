@@ -218,5 +218,5 @@ void AudioFocusParser::ParseAllowedStreams(xmlNode *node, char *curStream,
         currNode = currNode->next;
     }
 }
-}
-}
+} // namespace AudioStandard
+} // namespace OHOS

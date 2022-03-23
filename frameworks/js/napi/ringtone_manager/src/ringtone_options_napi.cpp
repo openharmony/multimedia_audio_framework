@@ -252,5 +252,5 @@ napi_value RingtoneOptionsNapi::SetLoop(napi_env env, napi_callback_info info)
 
     return jsResult;
 }
-}
-}
+}  // namespace AudioStandard
+}  // namespace OHOS

@@ -132,6 +132,6 @@ private:
     std::shared_ptr<CapturerPeriodPositionCallback> periodPositionCBNapi_ = nullptr;
     std::shared_ptr<AudioCapturerCallback> callbackNapi_ = nullptr;
 };
-}
-}
+} // namespace AudioStandard
+} // namespace OHOS
 #endif /* AUDIO_CAPTURER_NAPI_H_ */

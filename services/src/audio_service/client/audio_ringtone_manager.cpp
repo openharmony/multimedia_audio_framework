@@ -187,6 +187,7 @@ void RingtonePlayer::InitialisePlayer()
 int32_t RingtonePlayer::PrepareRingtonePlayer(bool isReInitNeeded)
 {
     MEDIA_INFO_LOG("RingtonePlayer::%{public}s", __func__);
+    CHECK_AND_RETURN_RET_LOG(player_ != nullptr, ERR_INVALID_PARAM, "Ringtone player instance is null");
 
     // fetch uri from kvstore
     auto kvstoreUri = audioRingtoneMgr_.GetSystemRingtoneUri(context_, type_);
@@ -299,6 +300,8 @@ RingtoneState RingtonePlayer::GetRingtoneState()
 
 void RingtonePlayer::SetPlayerState(RingtoneState ringtoneState)
 {
+    CHECK_AND_RETURN_LOG(player_ != nullptr, "Ringtone player instance is null");
+
     if (ringtoneState_ != RingtoneState::STATE_RELEASED) {
         ringtoneState_ = ringtoneState;
     }
@@ -380,37 +383,37 @@ void RingtonePlayerCallback::OnError(PlayerErrorType errorType, int32_t errorCod
 
 void RingtonePlayerCallback::OnInfo(PlayerOnInfoType type, int32_t extra, const Format &infoBody)
 {
-    if (type == INFO_TYPE_STATE_CHANGE) {
-        state_ = static_cast<PlayerStates>(extra);
-
-        switch (state_) {
-            case PLAYER_STATE_ERROR:
-                ringtoneState_ = STATE_INVALID;
-                break;
-            case PLAYER_IDLE:
-            case PLAYER_INITIALIZED:
-            case PLAYER_PREPARING:
-                ringtoneState_ = STATE_NEW;
-                break;
-            case PLAYER_PREPARED:
-                ringtoneState_ = STATE_PREPARED;
-                break;
-            case PLAYER_STARTED:
-                ringtoneState_ = STATE_RUNNING;
-                break;
-            case PLAYER_PAUSED:
-                ringtoneState_ = STATE_PAUSED;
-                break;
-            case PLAYER_STOPPED:
-            case PLAYER_PLAYBACK_COMPLETE:
-                ringtoneState_ = STATE_STOPPED;
-                break;
-            default:
-                break;
-        }
-
-        ringtonePlayer_.SetPlayerState(ringtoneState_);
+    if (type != INFO_TYPE_STATE_CHANGE) {
+        return;
     }
+    state_ = static_cast<PlayerStates>(extra);
+
+    switch (state_) {
+        case PLAYER_STATE_ERROR:
+            ringtoneState_ = STATE_INVALID;
+            break;
+        case PLAYER_IDLE:
+        case PLAYER_INITIALIZED:
+        case PLAYER_PREPARING:
+            ringtoneState_ = STATE_NEW;
+            break;
+        case PLAYER_PREPARED:
+            ringtoneState_ = STATE_PREPARED;
+            break;
+        case PLAYER_STARTED:
+            ringtoneState_ = STATE_RUNNING;
+            break;
+        case PLAYER_PAUSED:
+            ringtoneState_ = STATE_PAUSED;
+            break;
+        case PLAYER_STOPPED:
+        case PLAYER_PLAYBACK_COMPLETE:
+            ringtoneState_ = STATE_STOPPED;
+            break;
+        default:
+            break;
+    }
+    ringtonePlayer_.SetPlayerState(ringtoneState_);
 }
-} // AudioStandard
-} // OHOS
+} // namesapce AudioStandard
+} // namespace OHOS

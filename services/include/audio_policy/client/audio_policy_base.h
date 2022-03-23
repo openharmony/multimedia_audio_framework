@@ -88,6 +88,6 @@ public:
 public:
     DECLARE_INTERFACE_DESCRIPTOR(u"IAudioPolicy");
 };
-} // AudioStandard
+} // namespace AudioStandard
 } // namespace OHOS
 #endif // I_AUDIO_POLICY_BASE_H

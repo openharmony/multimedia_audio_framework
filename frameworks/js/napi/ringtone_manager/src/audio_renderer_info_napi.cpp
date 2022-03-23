@@ -320,5 +320,5 @@ napi_value AudioRendererInfoNapi::SetRendererFlags(napi_env env, napi_callback_i
 
     return jsResult;
 }
-}
-}
+}  // namespace AudioStandard
+}  // namespace OHOS

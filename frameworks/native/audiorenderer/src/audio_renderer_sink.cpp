@@ -92,7 +92,7 @@ void AudioRendererSink::DeInit()
 #endif // DUMPFILE
 }
 
-int32_t InitAttrs(struct AudioSampleAttributes &attrs)
+void InitAttrs(struct AudioSampleAttributes &attrs)
 {
     /* Initialization of audio parameters for playback */
 #ifdef PRODUCT_M40
@@ -113,8 +113,6 @@ int32_t InitAttrs(struct AudioSampleAttributes &attrs)
     attrs.startThreshold = DEEP_BUFFER_RENDER_PERIOD_SIZE / (attrs.frameSize);
     attrs.stopThreshold = INT_32_MAX;
     attrs.silenceThreshold = 0;
-
-    return SUCCESS;
 }
 
 static int32_t SwitchAdapterRender(struct AudioAdapterDescriptor *descs, string adapterNameCase,
@@ -169,7 +167,7 @@ uint32_t PcmFormatToBits(enum AudioFormat format)
             return PCM_32_BIT;
         default:
             return PCM_24_BIT;
-    };
+    }
 }
 
 int32_t AudioRendererSink::CreateRender(struct AudioPort &renderPort)
@@ -182,7 +180,7 @@ int32_t AudioRendererSink::CreateRender(struct AudioPort &renderPort)
     param.format = attr_.format;
     param.frameSize = PcmFormatToBits(param.format) * param.channelCount / PCM_8_BIT;
     param.startThreshold = DEEP_BUFFER_RENDER_PERIOD_SIZE / (param.frameSize);
-    MEDIA_ERR_LOG("AudioRendererSink Create render format: %{public}d", param.format);
+    MEDIA_INFO_LOG("AudioRendererSink Create render format: %{public}d", param.format);
     struct AudioDeviceDescriptor deviceDesc;
     deviceDesc.portId = renderPort.portId;
     deviceDesc.pins = PIN_OUT_SPEAKER;
