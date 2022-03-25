@@ -304,7 +304,7 @@ bool AudioStream::StartAudioStream()
     }
 
     resetTime_ = true;
-    int32_t retCode = clock_gettime(CLOCK_BOOTTIME, &baseTimestamp_);
+    int32_t retCode = clock_gettime(CLOCK_MONOTONIC, &baseTimestamp_);
     if (retCode != 0) {
         MEDIA_ERR_LOG("AudioStream::StartAudioStream get system elapsed time failed: %d", retCode);
     }
