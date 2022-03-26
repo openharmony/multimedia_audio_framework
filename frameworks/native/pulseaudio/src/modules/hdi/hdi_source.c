@@ -210,7 +210,7 @@ static void thread_func(void *userdata)
     while (true) {
         int ret = 0;
 
-        if (PA_SOURCE_IS_RUNNING(u->source->thread_info.state) && u->IsCapturerStarted) {
+        if (PA_SOURCE_IS_OPENED(u->source->thread_info.state) && u->IsCapturerStarted) {
             pa_memchunk chunk;
             pa_usec_t now;
 
