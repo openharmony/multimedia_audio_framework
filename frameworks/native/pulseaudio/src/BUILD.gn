@@ -31,6 +31,7 @@ config("pulsecommon_config") {
     "$pulseaudio_build_path/include",
     "$libsndfile_dir/include",
     "$pulseaudio_dir/src/pulse",
+    "//base/startup/init_lite/interfaces/innerkits/include",
   ]
 
   cflags = [
@@ -105,7 +106,7 @@ ohos_source_set("pulsecommon_sources") {
     "$pulseaudio_dir/src/pulsecore/shm.c",
     "$pulseaudio_dir/src/pulsecore/sndfile-util.c",
     "$pulseaudio_dir/src/pulsecore/socket-client.c",
-    "$pulseaudio_dir/src/pulsecore/socket-server.c",
+    "$pulseaudio_dir/src/pulsecore/ohos_socket-server.c",
     "$pulseaudio_dir/src/pulsecore/socket-util.c",
     "$pulseaudio_dir/src/pulsecore/srbchannel.c",
     "$pulseaudio_dir/src/pulsecore/strbuf.c",
@@ -128,6 +129,8 @@ ohos_shared_library("pulsecommon") {
     ":pulsecommon_sources",
     "$libsndfile_build_path:sndfile",
   ]
+
+  external_deps = [ "init:libbegetutil" ]
 
   subsystem_name = "multimedia"
   part_name = "multimedia_audio_standard"

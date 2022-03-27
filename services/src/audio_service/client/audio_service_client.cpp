@@ -499,6 +499,29 @@ AudioServiceClient::~AudioServiceClient()
     ResetPAAudioClient();
 }
 
+void AudioServiceClient::SetEnv()
+{
+    MEDIA_INFO_LOG("SetEnv called");
+    int ret = 0;
+    const char *env_home_pa = getenv("HOME");
+    if (!env_home_pa) {
+        ret = setenv("HOME", PA_HOME_DIR, 1);
+        MEDIA_INFO_LOG("set env HOME: %{public}d", ret);
+    }
+
+    const char *env_runtime_pa = getenv("PULSE_RUNTIME_PATH");
+    if (!env_runtime_pa) {
+        ret = setenv("PULSE_RUNTIME_PATH", PA_RUNTIME_DIR, 1);
+        MEDIA_INFO_LOG("set env PULSE_RUNTIME_DIR: %{public}d", ret);
+    }
+
+    const char *env_state_pa = getenv("PULSE_STATE_PATH");
+    if (!env_state_pa) {
+        ret = setenv("PULSE_STATE_PATH", PA_STATE_DIR, 1);
+        MEDIA_INFO_LOG("set env PULSE_STATE_PATH: %{public}d", ret);
+    }
+}
+
 static std::string GetClientBundle(int uid)
 {
     std::string bundleName = "";
@@ -541,6 +564,7 @@ int32_t AudioServiceClient::Initialize(ASClientType eClientType)
     mTotalBytesRead = 0;
     mFramePeriodRead = 0;
 
+    SetEnv();
     mAudioSystemMgr = AudioSystemManager::GetInstance();
 
     mainLoop = pa_threaded_mainloop_new();
@@ -577,6 +601,7 @@ int32_t AudioServiceClient::Initialize(ASClientType eClientType)
 
         ofstream cookieCache(appCookiePath.c_str(), std::ofstream::binary);
         cookieCache.write(cookieData, size);
+        cookieCache.flush();
         cookieCache.close();
 
         pa_context_load_cookie_from_file(context, appCookiePath.c_str());

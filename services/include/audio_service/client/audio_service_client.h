@@ -594,6 +594,7 @@ private:
     // Resets PA audio client and free up resources if any with this API
     void ResetPAAudioClient();
     // For setting some environment variables required while running from hap
+    void SetEnv();
     int32_t CorkStream();
 
     // Callbacks to be implemented

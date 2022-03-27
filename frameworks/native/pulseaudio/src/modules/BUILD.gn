@@ -75,7 +75,7 @@ ohos_shared_library("module-native-protocol-fd") {
 }
 
 ohos_shared_library("module-native-protocol-tcp") {
-  sources = [ "$pulseaudio_dir/src/modules/module-protocol-stub.c" ]
+  sources = [ "$pulseaudio_dir/src/modules/ohos_module-protocol-stub.c" ]
   cflags = [
     "-DPA_MODULE_NAME=libmodule_native_protocol_tcp_z_so",
     "-DUSE_PROTOCOL_NATIVE",
@@ -96,7 +96,7 @@ ohos_shared_library("module-native-protocol-tcp") {
 }
 
 ohos_shared_library("module-native-protocol-unix") {
-  sources = [ "$pulseaudio_dir/src/modules/module-protocol-stub.c" ]
+  sources = [ "$pulseaudio_dir/src/modules/ohos_module-protocol-stub.c" ]
   cflags = [
     "-DPA_MODULE_NAME=libmodule_native_protocol_unix_z_so",
     "-DUSE_PROTOCOL_NATIVE",
@@ -117,7 +117,7 @@ ohos_shared_library("module-native-protocol-unix") {
 }
 
 ohos_shared_library("module-cli-protocol-unix") {
-  sources = [ "$pulseaudio_dir/src/modules/module-protocol-stub.c" ]
+  sources = [ "$pulseaudio_dir/src/modules/ohos_module-protocol-stub.c" ]
   cflags = [
     "-DPA_MODULE_NAME=libmodule_cli_protocol_unix_z_so",
     "-DUSE_PROTOCOL_CLI",
