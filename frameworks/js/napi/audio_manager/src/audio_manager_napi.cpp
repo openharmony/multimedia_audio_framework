@@ -51,6 +51,7 @@ napi_ref AudioManagerNapi::deviceTypeRef_ = nullptr;
 napi_ref AudioManagerNapi::activeDeviceTypeRef_ = nullptr;
 napi_ref AudioManagerNapi::audioRingModeRef_ = nullptr;
 napi_ref AudioManagerNapi::deviceChangeType_ = nullptr;
+napi_ref AudioManagerNapi::interruptActionType_ = nullptr;
 napi_ref AudioManagerNapi::audioScene_ = nullptr;
 
 #define GET_PARAMS(env, info, num) \
@@ -224,6 +225,37 @@ napi_value AudioManagerNapi::CreateDeviceChangeTypeObject(napi_env env)
         }
     }
     HiLog::Error(LABEL, "CreateDeviceChangeTypeObject is Failed!");
+    napi_get_undefined(env, &result);
+
+    return result;
+}
+
+napi_value AudioManagerNapi::CreateInterruptActionTypeObject(napi_env env)
+{
+    napi_value result = nullptr;
+    napi_status status;
+    std::string propName;
+    int32_t refCount = 1;
+
+    status = napi_create_object(env, &result);
+    if (status == napi_ok) {
+        for (auto &iter: interruptActionTypeMap) {
+            propName = iter.first;
+            status = AddNamedProperty(env, result, propName, iter.second);
+            if (status != napi_ok) {
+                HiLog::Error(LABEL, "Failed to add named prop in CreateInterruptActionTypeObject!");
+                break;
+            }
+            propName.clear();
+        }
+        if (status == napi_ok) {
+            status = napi_create_reference(env, result, refCount, &interruptActionType_);
+            if (status == napi_ok) {
+                return result;
+            }
+        }
+    }
+    HiLog::Error(LABEL, "CreateInterruptActionTypeObject is Failed!");
     napi_get_undefined(env, &result);
 
     return result;
@@ -560,6 +592,7 @@ napi_value AudioManagerNapi::Init(napi_env env, napi_value exports)
         DECLARE_NAPI_FUNCTION("setAudioScene", SetAudioScene),
         DECLARE_NAPI_FUNCTION("getAudioScene", GetAudioScene),
         DECLARE_NAPI_FUNCTION("on", On),
+        DECLARE_NAPI_FUNCTION("off", Off),
     };
 
     napi_property_descriptor static_prop[] = {
@@ -571,7 +604,8 @@ napi_value AudioManagerNapi::Init(napi_env env, napi_value exports)
         DECLARE_NAPI_PROPERTY("ActiveDeviceType", CreateActiveDeviceTypeObject(env)),
         DECLARE_NAPI_PROPERTY("AudioRingMode", CreateAudioRingModeObject(env)),
         DECLARE_NAPI_PROPERTY("AudioScene", CreateAudioSceneObject(env)),
-        DECLARE_NAPI_PROPERTY("DeviceChangeType", CreateDeviceChangeTypeObject(env))
+        DECLARE_NAPI_PROPERTY("DeviceChangeType", CreateDeviceChangeTypeObject(env)),
+        DECLARE_NAPI_PROPERTY("InterruptActionType", CreateInterruptActionTypeObject(env))
     };
 
     status = napi_define_class(env, AUDIO_MNGR_NAPI_CLASS_NAME.c_str(), NAPI_AUTO_LENGTH, Construct, nullptr,
@@ -1898,13 +1932,42 @@ napi_value AudioManagerNapi::On(napi_env env, napi_callback_info info)
     napi_get_undefined(env, &undefinedResult);
 
     const size_t minArgCount = 2;
-    size_t argCount = minArgCount;
-    napi_value args[minArgCount] = {nullptr, nullptr};
+    size_t argCount = 3;
+    napi_value args[minArgCount + 1] = {nullptr, nullptr, nullptr};
     napi_value jsThis = nullptr;
     napi_status status = napi_get_cb_info(env, info, &argCount, args, &jsThis, nullptr);
-    if (status != napi_ok || jsThis == nullptr || args[PARAM0] == nullptr || args[PARAM1] == nullptr) {
-        HiLog::Error(LABEL, "On fail to napi_get_cb_info");
+    if (status != napi_ok || argCount < minArgCount) {
+        MEDIA_ERR_LOG("On fail to napi_get_cb_info/Requires min 2 parameters");
         return undefinedResult;
+    }
+
+    napi_valuetype eventType = napi_undefined;
+    if (napi_typeof(env, args[PARAM0], &eventType) != napi_ok || eventType != napi_string) {
+        return undefinedResult;
+    }
+    std::string callbackName = AudioCommonNapi::GetStringArgument(env, args[0]);
+    MEDIA_DEBUG_LOG("AudioManagerNapi::On callbackName: %{public}s", callbackName.c_str());
+
+    napi_valuetype handler = napi_undefined;
+    if (argCount == minArgCount) {
+        napi_valuetype handler = napi_undefined;
+        if (napi_typeof(env, args[PARAM1], &handler) != napi_ok || handler != napi_function) {
+            MEDIA_ERR_LOG("AudioManagerNapi::On type mismatch for parameter 2");
+            return undefinedResult;
+        }
+    } else {
+        napi_valuetype paramArg1 = napi_undefined;
+        napi_typeof(env, args[PARAM1], &paramArg1);
+        if (!callbackName.compare(INTERRUPT_CALLBACK_NAME)) {
+            if (paramArg1 != napi_object) {
+                MEDIA_ERR_LOG("AudioManagerNapi::On Type mismatch for param 2!!");
+                return undefinedResult;
+            }
+            if (napi_typeof(env, args[PARAM2], &handler) != napi_ok || handler != napi_function) {
+                MEDIA_ERR_LOG("AudioManagerNapi::On type mismatch for parameter 2");
+                return undefinedResult;
+            }
+        }
     }
 
     AudioManagerNapi *managerNapi = nullptr;
@@ -1912,15 +1975,6 @@ napi_value AudioManagerNapi::On(napi_env env, napi_callback_info info)
     NAPI_ASSERT(env, status == napi_ok && managerNapi != nullptr, "Failed to retrieve audio manager napi instance.");
     NAPI_ASSERT(env, managerNapi->audioMngr_ != nullptr, "audio system manager instance is null.");
 
-    napi_valuetype valueType0 = napi_undefined;
-    napi_valuetype valueType1 = napi_undefined;
-    if (napi_typeof(env, args[PARAM0], &valueType0) != napi_ok || valueType0 != napi_string ||
-        napi_typeof(env, args[PARAM1], &valueType1) != napi_ok || valueType1 != napi_function) {
-        return undefinedResult;
-    }
-
-    std::string callbackName = AudioCommonNapi::GetStringArgument(env, args[0]);
-    MEDIA_DEBUG_LOG("AudioManagerNapi: callbackName: %{public}s", callbackName.c_str());
     if (!callbackName.compare(RINGERMODE_CALLBACK_NAME)) {
         if (managerNapi->ringerModecallbackNapi_ == nullptr) {
             managerNapi->ringerModecallbackNapi_ = std::make_shared<AudioRingerModeCallbackNapi>(env);
@@ -1945,6 +1999,52 @@ napi_value AudioManagerNapi::On(napi_env env, napi_callback_info info)
         std::shared_ptr<AudioManagerCallbackNapi> cb =
         std::static_pointer_cast<AudioManagerCallbackNapi>(managerNapi->deviceChangeCallbackNapi_);
         cb->SaveCallbackReference(callbackName, args[PARAM1]);
+    }
+
+    return undefinedResult;
+}
+
+napi_value AudioManagerNapi::Off(napi_env env, napi_callback_info info)
+{
+    MEDIA_INFO_LOG("AudioManagerNapi:%{public}s", __func__);
+    napi_value undefinedResult = nullptr;
+    napi_get_undefined(env, &undefinedResult);
+
+    const size_t minArgCount = 1;
+    size_t argCount = 3;
+    napi_value args[minArgCount + 2] = {nullptr, nullptr, nullptr};
+    napi_value jsThis = nullptr;
+    napi_status status = napi_get_cb_info(env, info, &argCount, args, &jsThis, nullptr);
+    if (status != napi_ok || argCount < minArgCount) {
+        MEDIA_ERR_LOG("Off fail to napi_get_cb_info/Requires min 1 parameters");
+        return undefinedResult;
+    }
+
+    napi_valuetype eventType = napi_undefined;
+    if (napi_typeof(env, args[PARAM0], &eventType) != napi_ok || eventType != napi_string) {
+        return undefinedResult;
+    }
+    std::string callbackName = AudioCommonNapi::GetStringArgument(env, args[0]);
+    MEDIA_DEBUG_LOG("AudioManagerNapi::Off callbackName: %{public}s", callbackName.c_str());
+
+    napi_valuetype handler = napi_undefined;
+    if (!callbackName.compare(INTERRUPT_CALLBACK_NAME) && argCount > ARGS_ONE) {
+        napi_valuetype paramArg1 = napi_undefined;
+        if (napi_typeof(env, args[PARAM1], &paramArg1) != napi_ok || paramArg1 != napi_object) {
+            MEDIA_ERR_LOG("AudioManagerNapi::On type mismatch for parameter 2");
+            return undefinedResult;
+        }
+        if (argCount == ARGS_THREE) {
+            if (napi_typeof(env, args[PARAM2], &handler) != napi_ok || handler != napi_function) {
+                MEDIA_ERR_LOG("AudioManagerNapi::On type mismatch for parameter 3");
+                return undefinedResult;
+            }
+        }
+    } else if (argCount == ARGS_TWO) {
+        if (napi_typeof(env, args[PARAM1], &handler) != napi_ok || handler != napi_function) {
+            MEDIA_ERR_LOG("AudioManagerNapi::On type mismatch for parameter 2");
+            return undefinedResult;
+        }
     }
 
     return undefinedResult;
