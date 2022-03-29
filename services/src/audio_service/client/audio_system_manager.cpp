@@ -132,6 +132,7 @@ void AudioSystemManager::init()
     sptr<IRemoteObject> object = samgr->GetSystemAbility(AUDIO_DISTRIBUTED_SERVICE_ID);
     if (object == nullptr) {
         MEDIA_DEBUG_LOG("AudioSystemManager::object is NULL.");
+        return;
     }
     g_sProxy = iface_cast<IStandardAudioService>(object);
     if (g_sProxy == nullptr) {
