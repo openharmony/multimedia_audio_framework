@@ -188,7 +188,8 @@ std::vector<sptr<AudioDeviceDescriptor>> AudioPolicyService::GetDevices(DeviceFl
     MEDIA_INFO_LOG("GetDevices mConnectedDevices size = [%{public}zu]", mConnectedDevices.size());
     for (const auto &device : mConnectedDevices) {
         if (device != nullptr && device->deviceRole_ == role) {
-            auto devDesc = new(std::nothrow) AudioDeviceDescriptor(device->deviceType_, device->deviceRole_);
+            sptr<AudioDeviceDescriptor> devDesc = new(std::nothrow) AudioDeviceDescriptor(device->deviceType_,
+                device->deviceRole_);
             deviceList.push_back(devDesc);
         }
     }
@@ -531,7 +532,7 @@ int32_t AudioPolicyService::SetDeviceChangeCallback(const sptr<IRemoteObject> &o
 {
     MEDIA_INFO_LOG("Entered AudioPolicyService::%{public}s", __func__);
 
-    auto callback = iface_cast<IStandardAudioPolicyManagerListener>(object);
+    sptr<IStandardAudioPolicyManagerListener> callback = iface_cast<IStandardAudioPolicyManagerListener>(object);
     if (callback != nullptr) {
         deviceChangeCallbackList_.push_back(callback);
     }

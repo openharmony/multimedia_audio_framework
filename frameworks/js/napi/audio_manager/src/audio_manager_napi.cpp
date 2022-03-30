@@ -17,7 +17,6 @@
 
 #include "audio_capturer_napi.h"
 #include "audio_common_napi.h"
-#include "audio_device_descriptor_napi.h"
 #include "audio_errors.h"
 #include "audio_parameters_napi.h"
 #include "audio_renderer_info_napi.h"
@@ -1825,22 +1824,31 @@ napi_value AudioManagerNapi::GetMinVolume(napi_env env, napi_callback_info info)
     return result;
 }
 
+static void SetValueInt32(const napi_env& env, const std::string& fieldStr, const int intValue, napi_value &result)
+{
+    napi_value value = nullptr;
+    napi_create_int32(env, intValue, &value);
+    napi_set_named_property(env, result, fieldStr.c_str(), value);
+}
+
 static void GetDevicesAsyncCallbackComplete(napi_env env, napi_status status, void *data)
 {
     auto asyncContext = static_cast<AudioManagerAsyncContext*>(data);
     napi_value result[ARGS_TWO] = {0};
-    napi_value ddWrapper = nullptr;
+    napi_value valueParam = nullptr;
     napi_value retVal;
     size_t size = asyncContext->deviceDescriptors.size();
-    HiLog::Info(LABEL, "number of devices = %{public}d", size);
+    HiLog::Info(LABEL, "number of devices = %{public}zu", size);
 
     napi_create_array_with_length(env, size, &result[PARAM1]);
-
     for (size_t i = 0; i < size; i ++) {
-        ddWrapper = AudioDeviceDescriptorNapi::CreateAudioDeviceDescriptorWrapper(env,
-            asyncContext->deviceDescriptors[i]);
-        if (ddWrapper != nullptr) {
-            napi_set_element(env, result[PARAM1], i, ddWrapper);
+        if (asyncContext->deviceDescriptors[i] != nullptr) {
+            (void)napi_create_object(env, &valueParam);
+            SetValueInt32(env, "deviceRole", static_cast<int32_t>(
+                asyncContext->deviceDescriptors[i]->deviceRole_), valueParam);
+            SetValueInt32(env, "deviceType", static_cast<int32_t>(
+                asyncContext->deviceDescriptors[i]->deviceType_), valueParam);
+            napi_set_element(env, result[PARAM1], i, valueParam);
         }
     }
 
@@ -2053,7 +2061,6 @@ napi_value AudioManagerNapi::Off(napi_env env, napi_callback_info info)
 static napi_value Init(napi_env env, napi_value exports)
 {
     AudioManagerNapi::Init(env, exports);
-    AudioDeviceDescriptorNapi::Init(env, exports);
     AudioCapturerNapi::Init(env, exports);
     AudioRendererNapi::Init(env, exports);
     AudioParametersNapi::Init(env, exports);

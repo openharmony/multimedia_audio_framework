@@ -17,7 +17,6 @@
 
 #include <uv.h>
 
-#include "audio_device_descriptor_napi.h"
 #include "audio_errors.h"
 #include "media_log.h"
 
@@ -58,27 +57,28 @@ static void SetValueInt32(const napi_env& env, const std::string& fieldStr, cons
     napi_set_named_property(env, result, fieldStr.c_str(), value);
 }
 
-static void NativeDeviceChangeActionToJsObj(const napi_env& env, napi_value& jsObj,
-    const DeviceChangeAction &deviceChangeAction)
+static void NativeDeviceChangeActionToJsObj(const napi_env& env, napi_value& jsObj, const DeviceChangeAction &action)
 {
     napi_create_object(env, &jsObj);
+    SetValueInt32(env, "type", static_cast<int32_t>(action.type), jsObj);
 
-    SetValueInt32(env, "type", static_cast<int32_t>(deviceChangeAction.type), jsObj);
-
-    napi_value ddWrapper = nullptr;
+    napi_value value = nullptr;
     napi_value jsArray;
-    size_t size = deviceChangeAction.deviceDescriptors.size();
+    size_t size = action.deviceDescriptors.size();
     napi_create_array_with_length(env, size, &jsArray);
 
     for (size_t i = 0; i < size; i++) {
-        ddWrapper = AudioDeviceDescriptorNapi::CreateAudioDeviceDescriptorWrapper(env,
-            deviceChangeAction.deviceDescriptors[i]);
-        if (ddWrapper != nullptr) {
-            napi_set_element(env, jsArray, i, ddWrapper);
+        if (action.deviceDescriptors[i] != nullptr) {
+            (void)napi_create_object(env, &value);
+            SetValueInt32(env, "deviceRole", static_cast<int32_t>(action.deviceDescriptors[i]->deviceRole_), value);
+            SetValueInt32(env, "deviceType", static_cast<int32_t>(action.deviceDescriptors[i]->deviceType_), value);
+            napi_set_element(env, jsArray, i, value);
         }
     }
+
     napi_set_named_property(env, jsObj, "deviceDescriptors", jsArray);
 }
+
 
 void AudioManagerCallbackNapi::OnDeviceChange(const DeviceChangeAction &deviceChangeAction)
 {

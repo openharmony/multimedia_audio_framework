@@ -106,7 +106,6 @@
               "header": {
                 "header_files": [
                   "audio_manager_napi.h",
-                  "audio_device_descriptor_napi.h",
                   "audio_capturer_napi.h",
                   "audio_renderer_napi.h",
                   "audio_parameters_napi.h"
