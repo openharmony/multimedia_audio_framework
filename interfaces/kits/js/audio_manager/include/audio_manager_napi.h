@@ -79,6 +79,8 @@ private:
     static napi_value CreateDeviceTypeObject(napi_env env);
     static napi_value CreateActiveDeviceTypeObject(napi_env env);
     static napi_value CreateInterruptActionTypeObject(napi_env env);
+    static napi_value CreateInterruptHintObject(napi_env env);
+    static napi_value CreateInterruptTypeObject(napi_env env);
     static napi_value CreateAudioRingModeObject(napi_env env);
     static napi_value On(napi_env env, napi_callback_info info);
     static napi_value Off(napi_env env, napi_callback_info info);
@@ -93,6 +95,8 @@ private:
     static napi_ref audioRingModeRef_;
     static napi_ref deviceChangeType_;
     static napi_ref interruptActionType_;
+    static napi_ref interruptHint_;
+    static napi_ref interruptType_;
     static napi_ref audioScene_;
 
     AudioSystemManager *audioMngr_;
@@ -117,6 +121,19 @@ static const std::map<std::string, AudioScene> audioSceneMap = {
     {"AUDIO_SCENE_VOICE_CHAT", AUDIO_SCENE_PHONE_CHAT}
 };
 
+static const std::map<std::string, InterruptType> interruptTypeMap = {
+    {"INTERRUPT_TYPE_BEGIN", INTERRUPT_TYPE_BEGIN},
+    {"INTERRUPT_TYPE_END", INTERRUPT_TYPE_END}
+};
+
+static const std::map<std::string, InterruptHint> interruptHintMap = {
+    {"INTERRUPT_HINT_NONE", INTERRUPT_HINT_NONE},
+    {"INTERRUPT_HINT_PAUSE", INTERRUPT_HINT_PAUSE},
+    {"INTERRUPT_HINT_RESUME", INTERRUPT_HINT_RESUME},
+    {"INTERRUPT_HINT_STOP", INTERRUPT_HINT_STOP},
+    {"INTERRUPT_HINT_DUCK", INTERRUPT_HINT_DUCK},
+    {"INTERRUPT_HINT_UNDUCK", INTERRUPT_HINT_UNDUCK}
+};
 static const std::map<std::string, InterruptActionType> interruptActionTypeMap = {
     {"TYPE_ACTIVATED", TYPE_ACTIVATED},
     {"TYPE_INTERRUPT", TYPE_INTERRUPT}

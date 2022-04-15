@@ -85,7 +85,9 @@ public:
 
     int32_t SetAudioSessionCallback(AudioSessionCallback *callback);
 
-    int32_t SetDeviceChangeCallback(const sptr<IRemoteObject> &object);
+    int32_t SetDeviceChangeCallback(const int32_t clientId, const sptr<IRemoteObject> &object);
+
+    int32_t UnsetDeviceChangeCallback(const int32_t clientId);
 
 private:
     AudioPolicyService()
@@ -125,7 +127,7 @@ private:
     Parser& mConfigParser;
     std::unique_ptr<DeviceStatusListener> mDeviceStatusListener;
     std::vector<sptr<AudioDeviceDescriptor>> mConnectedDevices;
-    std::list<sptr<IStandardAudioPolicyManagerListener>> deviceChangeCallbackList_;
+    std::unordered_map<int32_t, sptr<IStandardAudioPolicyManagerListener>> deviceChangeCallbackMap_;
     AudioScene mAudioScene = AUDIO_SCENE_DEFAULT;
     AudioFocusEntry focusTable_[MAX_NUM_STREAMS][MAX_NUM_STREAMS];
     std::unordered_map<ClassType, std::list<AudioModuleInfo>> deviceClassInfo_ = {};

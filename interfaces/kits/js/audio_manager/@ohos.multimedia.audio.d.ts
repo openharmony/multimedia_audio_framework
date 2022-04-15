@@ -584,6 +584,28 @@ declare namespace audio {
   }
 
   /**
+   * Enumerates interrupt action types.
+   * @since 7
+   * @syscap SystemCapability.Multimedia.Audio.Renderer
+   */
+  enum InterruptActionType {
+
+    /**
+     * Focus gain event.
+     * @since 7
+     * @syscap SystemCapability.Multimedia.Audio.Renderer
+     */
+    TYPE_ACTIVATED = 0,
+
+    /**
+     * Audio interruption event.
+     * @since 7
+     * @syscap SystemCapability.Multimedia.Audio.Renderer
+     */
+    TYPE_INTERRUPT = 1
+  }
+
+  /**
    * Enumerates device change types.
    * @since 7
    * @syscap SystemCapability.Multimedia.Audio
@@ -876,6 +898,33 @@ declare namespace audio {
     * @syscap SystemCapability.Multimedia.Audio
     */
     on(type: 'deviceChange', callback: Callback<DeviceChangeAction>): void;
+
+    /**
+     * UnSubscribes to device change events.
+     * @since 7
+     * @syscap SystemCapability.Multimedia.Audio.Device
+     */
+    off(type: 'deviceChange'): void;
+
+    /**
+     * Listens for audio interruption events. When the audio of an application is interrupted by another application,
+     * the callback is invoked to notify the former application.
+     * @param type Type of the event to listen for. Only the interrupt event is supported.
+     * @param interrupt Parameters of the audio interruption event type.
+     * @param callback Callback invoked for the audio interruption event.
+     * @since 7
+     * @syscap SystemCapability.Multimedia.Audio.Renderer
+     */
+    on(type: 'interrupt', interrupt: AudioInterrupt, callback: Callback<InterruptAction>): void;
+
+     /**
+      * Cancels the listening of audio interruption events.
+      * @param type Type of the event to listen for. Only the interrupt event is supported.
+      * @param interrupt Input parameters of the audio interruption event.
+      * @since 7
+      * @syscap SystemCapability.Multimedia.Audio.Renderer
+      */
+    off(type: 'interrupt', interrupt: AudioInterrupt): void;
   }
 
   /**
@@ -930,6 +979,75 @@ declare namespace audio {
      * @syscap SystemCapability.Multimedia.Audio
      */
     updateUi: boolean;
+  }
+
+  /**
+   * Describes the callback invoked for audio interruption or focus gain events.When the audio of an application
+   * is interrupted by another application, the callback is invoked to notify the former application.
+   * @since 7
+   * @syscap SystemCapability.Multimedia.Audio.Renderer
+   */
+  interface InterruptAction {
+
+    /**
+     * Event type.
+     * The value TYPE_ACTIVATED means the focus gain event, and TYPE_INTERRUPT means the audio interruption event.
+     * @since 7
+     * @syscap SystemCapability.Multimedia.Audio.Renderer
+     */
+    actionType: InterruptActionType;
+
+    /**
+     * Type of the audio interruption event.
+     * @since 7
+     * @syscap SystemCapability.Multimedia.Audio.Renderer
+     */
+    type?: InterruptType;
+
+    /**
+     * Hint for the audio interruption event.
+     * @since 7
+     * @syscap SystemCapability.Multimedia.Audio.Renderer
+     */
+    hint?: InterruptHint;
+
+    /**
+     * Whether the focus is gained or released. The value true means that the focus is gained or released,
+     * and false means that the focus fails to be gained or released.
+     * @since 7
+     * @syscap SystemCapability.Multimedia.Audio.Renderer
+     */
+    activated?: boolean;
+  }
+
+  /**
+   * Describes input parameters of audio listening events.
+   * @since 7
+   * @syscap SystemCapability.Multimedia.Audio.Renderer
+   */
+  interface AudioInterrupt {
+
+    /**
+     * Audio stream usage type.
+     * @since 7
+     * @syscap SystemCapability.Multimedia.Audio.Renderer
+     */
+    streamUsage: StreamUsage;
+
+    /**
+     * Type of the media interrupted.
+     * @since 7
+     * @syscap SystemCapability.Multimedia.Audio.Renderer
+     */
+    contentType: ContentType;
+
+    /**
+     * Whether audio playback can be paused when it is interrupted.
+     * The value true means that audio playback can be paused when it is interrupted, and false means the opposite.
+     * @since 7
+     * @syscap SystemCapability.Multimedia.Audio.Renderer
+     */
+    pauseWhenDucked: boolean;
   }
 
   /**

@@ -44,14 +44,20 @@ private:
     void UnsetInterruptCallbackInternal(MessageParcel &data, MessageParcel &reply);
     void ActivateInterruptInternal(MessageParcel &data, MessageParcel &reply);
     void DeactivateInterruptInternal(MessageParcel &data, MessageParcel &reply);
+    void SetAudioManagerInterruptCbInternal(MessageParcel &data, MessageParcel &reply);
+    void UnsetAudioManagerInterruptCbInternal(MessageParcel &data, MessageParcel &reply);
+    void RequestAudioFocusInternal(MessageParcel &data, MessageParcel &reply);
+    void AbandonAudioFocusInternal(MessageParcel &data, MessageParcel &reply);
     void GetStreamInFocusInternal(MessageParcel &reply);
     void GetSessionInfoInFocusInternal(MessageParcel &reply);
     void ReadAudioInterruptParams(MessageParcel &data, AudioInterrupt &audioInterrupt);
+    void ReadAudioManagerInterruptParams(MessageParcel &data, AudioInterrupt &audioInterrupt);
     void WriteAudioInteruptParams(MessageParcel &reply, const AudioInterrupt &audioInterrupt);
     void SetVolumeKeyEventCallbackInternal(MessageParcel &data, MessageParcel &reply);
     void UnsetVolumeKeyEventCallbackInternal(MessageParcel &data, MessageParcel &reply);
     void GetDevicesInternal(MessageParcel &data, MessageParcel &reply);
     void SetDeviceChangeCallbackInternal(MessageParcel &data, MessageParcel &reply);
+    void UnsetDeviceChangeCallbackInternal(MessageParcel &data, MessageParcel &reply);
 };
 } // AudioStandard
 } // namespace OHOS

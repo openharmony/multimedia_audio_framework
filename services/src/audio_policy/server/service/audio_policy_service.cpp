@@ -528,13 +528,27 @@ void AudioPolicyService::OnXmlParsingCompleted(const std::unordered_map<ClassTyp
     deviceClassInfo_ = xmlData;
 }
 
-int32_t AudioPolicyService::SetDeviceChangeCallback(const sptr<IRemoteObject> &object)
+int32_t AudioPolicyService::SetDeviceChangeCallback(const int32_t clientId, const sptr<IRemoteObject> &object)
 {
     MEDIA_INFO_LOG("Entered AudioPolicyService::%{public}s", __func__);
 
     sptr<IStandardAudioPolicyManagerListener> callback = iface_cast<IStandardAudioPolicyManagerListener>(object);
     if (callback != nullptr) {
-        deviceChangeCallbackList_.push_back(callback);
+        deviceChangeCallbackMap_[clientId] = callback;
+    }
+
+    return SUCCESS;
+}
+
+int32_t AudioPolicyService::UnsetDeviceChangeCallback(const int32_t clientId)
+{
+    AUDIO_INFO_LOG("Entered AudioPolicyService::%{public}s", __func__);
+
+    if (deviceChangeCallbackMap_.erase(clientId)) {
+        AUDIO_DEBUG_LOG("AudioPolicyServer:UnsetDeviceChangeCallback for clientID %{public}d done", clientId);
+    } else {
+        AUDIO_DEBUG_LOG("AudioPolicyServer:UnsetDeviceChangeCallback clientID %{public}d not present/unset already",
+                        clientId);
     }
 
     return SUCCESS;
@@ -586,9 +600,9 @@ void AudioPolicyService::TriggerDeviceChangedCallback(const vector<sptr<AudioDev
     deviceChangeAction.deviceDescriptors = desc;
     deviceChangeAction.type = isConnected ? DeviceChangeType::CONNECT : DeviceChangeType::DISCONNECT;
 
-    for (auto const &deviceChangedCallback : deviceChangeCallbackList_) {
-        if (deviceChangedCallback) {
-            deviceChangedCallback->OnDeviceChange(deviceChangeAction);
+    for (auto it = deviceChangeCallbackMap_.begin(); it != deviceChangeCallbackMap_.end(); ++it) {
+        if (it->second) {
+            it->second->OnDeviceChange(deviceChangeAction);
         }
     }
 }

@@ -65,7 +65,10 @@ public:
 
     AudioScene GetAudioScene();
 
-    int32_t SetDeviceChangeCallback(const std::shared_ptr<AudioManagerDeviceChangeCallback> &callback);
+    int32_t SetDeviceChangeCallback(const int32_t clientId,
+        const std::shared_ptr<AudioManagerDeviceChangeCallback> &callback);
+
+    int32_t UnsetDeviceChangeCallback(const int32_t clientId);
 
     int32_t SetRingerModeCallback(const int32_t clientId,
                                   const std::shared_ptr<AudioRingerModeCallback> &callback);
@@ -80,6 +83,15 @@ public:
     int32_t ActivateAudioInterrupt(const AudioInterrupt &audioInterrupt);
 
     int32_t DeactivateAudioInterrupt(const AudioInterrupt &audioInterrupt);
+
+    int32_t SetAudioManagerInterruptCallback(const uint32_t clientID,
+        const std::shared_ptr<AudioInterruptCallback> &callback);
+
+    int32_t UnsetAudioManagerInterruptCallback(const uint32_t clientID);
+
+    int32_t RequestAudioFocus(const uint32_t clientID, const AudioInterrupt &audioInterrupt);
+
+    int32_t AbandonAudioFocus(const uint32_t clientID, const AudioInterrupt &audioInterrupt);
 
     AudioStreamType GetStreamInFocus();
 

@@ -48,7 +48,10 @@ config("audio_opensles_config") {
 
 ohos_unittest("audio_opensles_unit_test") {
   module_out_path = module_output_path
-  include_dirs = [ "./include" ]
+  include_dirs = [
+    "//foundation/multimedia/audio_standard/frameworks/native/audiopolicy/include",
+    "./include",
+  ]
 
   configs = [
     ":audio_opensles_config",
