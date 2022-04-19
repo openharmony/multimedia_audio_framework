@@ -63,6 +63,7 @@ public:
     int32_t Enqueue(const BufferDesc &bufDesc) const override;
     int32_t Clear() const override;
     int32_t GetBufQueueState(BufferQueueState &bufState) const override;
+    void SetAbilityContext(const std::shared_ptr<AbilityRuntime::Context> context) override;
 
     AudioRendererInfo rendererInfo_ = {};
 

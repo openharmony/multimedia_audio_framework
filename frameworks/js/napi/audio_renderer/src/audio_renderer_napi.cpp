@@ -419,6 +419,24 @@ napi_value AudioRendererNapi::Init(napi_env env, napi_value exports)
     return result;
 }
 
+shared_ptr<AbilityRuntime::Context> AudioRendererNapi::GetAbilityContext(napi_env env)
+{
+    HiLog::Info(LABEL, "Getting context with FA model");
+    auto ability = OHOS::AbilityRuntime::GetCurrentAbility(env);
+    if (ability == nullptr) {
+        HiLog::Error(LABEL, "Failed to obtain ability in FA mode");
+        return nullptr;
+    }
+
+    auto faContext = ability->GetAbilityContext();
+    if (faContext == nullptr) {
+        HiLog::Error(LABEL, "GetAbilityContext returned null in FA model");
+        return nullptr;
+    }
+
+    return faContext;
+}
+
 napi_value AudioRendererNapi::Construct(napi_env env, napi_callback_info info)
 {
     napi_status status;
@@ -434,8 +452,9 @@ napi_value AudioRendererNapi::Construct(napi_env env, napi_callback_info info)
     rendererNapi->contentType_ = sAudioRendererOptions_->rendererInfo.contentType;
     rendererNapi->streamUsage_ = sAudioRendererOptions_->rendererInfo.streamUsage;
     rendererNapi->rendererFlags_ = sAudioRendererOptions_->rendererInfo.rendererFlags;
+    rendererNapi->abilityContext_ = GetAbilityContext(env);
 
-    rendererNapi->audioRenderer_ = AudioRenderer::Create(*sAudioRendererOptions_);
+    rendererNapi->audioRenderer_ = AudioRenderer::Create(rendererNapi->abilityContext_, *sAudioRendererOptions_);
     CHECK_AND_RETURN_RET_LOG(rendererNapi->audioRenderer_ != nullptr, result, "Renderer Create failed");
 
     if (rendererNapi->callbackNapi_ == nullptr) {

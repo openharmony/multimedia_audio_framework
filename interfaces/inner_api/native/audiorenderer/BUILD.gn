@@ -17,6 +17,9 @@ pulseaudio_dir = "//third_party/pulseaudio"
 
 config("audio_renderer_config") {
   include_dirs = [
+    "//base/global/resmgr_standard/interfaces/innerkits/include",
+    "//foundation/aafwk/standard/frameworks/kits/appkit/native/ability_runtime/context",
+    "//foundation/appexecfwk/standard/interfaces/innerkits/appexecfwk_base/include",
     "//foundation/multimedia/audio_standard/interfaces/inner_api/native/audiorenderer/include",
     "//foundation/multimedia/audio_standard/frameworks/native/audiorenderer/include",
     "//foundation/multimedia/audio_standard/frameworks/native/audiosession/include",

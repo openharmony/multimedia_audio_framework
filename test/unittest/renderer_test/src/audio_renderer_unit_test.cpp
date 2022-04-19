@@ -286,7 +286,7 @@ HWTEST(AudioRendererUnitTest, Audio_Renderer_Create_008, TestSize.Level0)
 *             rendererOptions.rendererInfo.streamUsage = STREAM_USAGE_MEDIA;
 *             rendererOptions.rendererInfo.rendererFlags = RENDERER_FLAG;
 */
-HWTEST(AudioRendererUnitTest, Audio_Renderer_Create_009, TestSize.Level0)
+HWTEST(AudioRendererUnitTest, Audio_Renderer_Create_009, TestSize.Level1)
 {
     AudioRendererOptions rendererOptions;
     rendererOptions.streamInfo.samplingRate = AudioSamplingRate::SAMPLE_RATE_8000;
@@ -315,7 +315,7 @@ HWTEST(AudioRendererUnitTest, Audio_Renderer_Create_009, TestSize.Level0)
 *             rendererOptions.rendererInfo.streamUsage = STREAM_USAGE_NOTIFICATION_RINGTONE;
 *             rendererOptions.rendererInfo.rendererFlags = RENDERER_FLAG;
 */
-HWTEST(AudioRendererUnitTest, Audio_Renderer_Create_010, TestSize.Level0)
+HWTEST(AudioRendererUnitTest, Audio_Renderer_Create_010, TestSize.Level1)
 {
     AudioRendererOptions rendererOptions;
     rendererOptions.streamInfo.samplingRate = AudioSamplingRate::SAMPLE_RATE_64000;
@@ -344,7 +344,7 @@ HWTEST(AudioRendererUnitTest, Audio_Renderer_Create_010, TestSize.Level0)
 *             rendererOptions.rendererInfo.streamUsage = STREAM_USAGE_MEDIA;
 *             rendererOptions.rendererInfo.rendererFlags = RENDERER_FLAG;
 */
-HWTEST(AudioRendererUnitTest, Audio_Renderer_Create_011, TestSize.Level0)
+HWTEST(AudioRendererUnitTest, Audio_Renderer_Create_011, TestSize.Level1)
 {
     AudioRendererOptions rendererOptions;
     rendererOptions.streamInfo.samplingRate = AudioSamplingRate::SAMPLE_RATE_48000;
@@ -373,7 +373,7 @@ HWTEST(AudioRendererUnitTest, Audio_Renderer_Create_011, TestSize.Level0)
 *             rendererOptions.rendererInfo.streamUsage = STREAM_USAGE_VOICE_ASSISTANT;
 *             rendererOptions.rendererInfo.rendererFlags = RENDERER_FLAG;
 */
-HWTEST(AudioRendererUnitTest, Audio_Renderer_Create_012, TestSize.Level0)
+HWTEST(AudioRendererUnitTest, Audio_Renderer_Create_012, TestSize.Level1)
 {
     AudioRendererOptions rendererOptions;
     rendererOptions.streamInfo.samplingRate = AudioSamplingRate::SAMPLE_RATE_44100;
@@ -402,7 +402,7 @@ HWTEST(AudioRendererUnitTest, Audio_Renderer_Create_012, TestSize.Level0)
 *             rendererOptions.rendererInfo.streamUsage = STREAM_USAGE_VOICE_COMMUNICATION;
 *             rendererOptions.rendererInfo.rendererFlags = RENDERER_FLAG;
 */
-HWTEST(AudioRendererUnitTest, Audio_Renderer_Create_013, TestSize.Level0)
+HWTEST(AudioRendererUnitTest, Audio_Renderer_Create_013, TestSize.Level1)
 {
     AudioRendererOptions rendererOptions;
     rendererOptions.streamInfo.samplingRate = AudioSamplingRate::SAMPLE_RATE_22050;
@@ -431,7 +431,7 @@ HWTEST(AudioRendererUnitTest, Audio_Renderer_Create_013, TestSize.Level0)
 *             rendererOptions.rendererInfo.streamUsage = STREAM_USAGE_VOICE_ASSISTANT;
 *             rendererOptions.rendererInfo.rendererFlags = RENDERER_FLAG;
 */
-HWTEST(AudioRendererUnitTest, Audio_Renderer_Create_014, TestSize.Level0)
+HWTEST(AudioRendererUnitTest, Audio_Renderer_Create_014, TestSize.Level1)
 {
     AudioRendererOptions rendererOptions;
     rendererOptions.streamInfo.samplingRate = AudioSamplingRate::SAMPLE_RATE_12000;

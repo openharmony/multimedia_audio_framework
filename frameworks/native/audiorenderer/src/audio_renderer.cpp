@@ -39,6 +39,12 @@ std::unique_ptr<AudioRenderer> AudioRenderer::Create(AudioStreamType audioStream
 
 std::unique_ptr<AudioRenderer> AudioRenderer::Create(const AudioRendererOptions &rendererOptions)
 {
+    return Create(nullptr, rendererOptions);
+}
+
+std::unique_ptr<AudioRenderer> AudioRenderer::Create(const std::shared_ptr<AbilityRuntime::Context> context,
+    const AudioRendererOptions &rendererOptions)
+{
     ContentType contentType = rendererOptions.rendererInfo.contentType;
     CHECK_AND_RETURN_RET_LOG(contentType >= CONTENT_TYPE_UNKNOWN && contentType <= CONTENT_TYPE_RINGTONE, nullptr,
                              "Invalid content type");
@@ -50,6 +56,10 @@ std::unique_ptr<AudioRenderer> AudioRenderer::Create(const AudioRendererOptions 
     AudioStreamType audioStreamType = AudioStream::GetStreamType(contentType, streamUsage);
     auto audioRenderer = std::make_unique<AudioRendererPrivate>(audioStreamType);
     CHECK_AND_RETURN_RET_LOG(audioRenderer != nullptr, nullptr, "Failed to create renderer object");
+    if (context != nullptr) {
+        AUDIO_DEBUG_LOG("Set ability context");
+        audioRenderer->SetAbilityContext(context);
+    }
 
     audioRenderer->rendererInfo_.contentType = contentType;
     audioRenderer->rendererInfo_.streamUsage = streamUsage;
@@ -565,6 +575,11 @@ int32_t AudioRendererPrivate::Clear() const
 int32_t AudioRendererPrivate::GetBufQueueState(BufferQueueState &bufState) const
 {
     return SUCCESS;
+}
+
+void AudioRendererPrivate::SetAbilityContext(const std::shared_ptr<AbilityRuntime::Context> context)
+{
+    audioStream_->SetAbilityContext(context);
 }
 
 int32_t AudioRendererPrivate::SetRendererWriteCallback(const std::shared_ptr<AudioRendererWriteCallback> &callback)

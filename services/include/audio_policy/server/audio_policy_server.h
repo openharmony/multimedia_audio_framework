@@ -114,7 +114,6 @@ private:
     void UnduckCurActiveList(const AudioInterrupt &exitingInterrupt);
     void ResumeUnduckPendingList(const AudioInterrupt &exitingInterrupt);
     void NotifyFocusGranted(const uint32_t clientID, const AudioInterrupt &audioInterrupt);
-    void NotifyFocusRejected(const uint32_t clientID, const AudioInterrupt &audioInterrupt);
     int32_t NotifyFocusAbandoned(const uint32_t clientID, const AudioInterrupt &audioInterrupt);
     int32_t SetStreamVolume(AudioStreamType streamType, float volume, bool isUpdateUi);
     void RegisterAudioServerDeathRecipient();
