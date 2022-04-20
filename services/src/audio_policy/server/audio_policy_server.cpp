@@ -394,7 +394,7 @@ int32_t AudioPolicyServer::SetAudioManagerInterruptCallback(const uint32_t clien
     CHECK_AND_RETURN_RET_LOG(callback != nullptr, ERR_INVALID_PARAM, "AudioPolicyServer: failed to  create cb obj");
 
     audioManagerListenerCbsMap_[clientID] = callback;
-    AUDIO_INFO_LOG("AudioPolicyServer: SetAudioManagerInterruptCallback for client id %{public}d done", clientID);
+    MEDIA_INFO_LOG("AudioPolicyServer: SetAudioManagerInterruptCallback for client id %{public}d done", clientID);
 
     return SUCCESS;
 }
@@ -402,9 +402,9 @@ int32_t AudioPolicyServer::SetAudioManagerInterruptCallback(const uint32_t clien
 int32_t AudioPolicyServer::UnsetAudioManagerInterruptCallback(const uint32_t clientID)
 {
     if (audioManagerListenerCbsMap_.erase(clientID)) {
-        AUDIO_INFO_LOG("AudioPolicyServer:UnsetAudioManagerInterruptCallback for client %{public}d done", clientID);
+        MEDIA_INFO_LOG("AudioPolicyServer:UnsetAudioManagerInterruptCallback for client %{public}d done", clientID);
     } else {
-        AUDIO_DEBUG_LOG("AudioPolicyServer:UnsetAudioManagerInterruptCallback client %{public}d not present",
+        MEDIA_DEBUG_LOG("AudioPolicyServer:UnsetAudioManagerInterruptCallback client %{public}d not present",
                         clientID);
     }
 
@@ -413,20 +413,20 @@ int32_t AudioPolicyServer::UnsetAudioManagerInterruptCallback(const uint32_t cli
 
 int32_t AudioPolicyServer::RequestAudioFocus(const uint32_t clientID, const AudioInterrupt &audioInterrupt)
 {
-    AUDIO_DEBUG_LOG("AudioPolicyServer: RequestAudioFocus in");
+    MEDIA_DEBUG_LOG("AudioPolicyServer: RequestAudioFocus in");
     if (clientOnFocus_ == clientID) {
-        AUDIO_DEBUG_LOG("AudioPolicyServer: client already has focus..");
+        MEDIA_DEBUG_LOG("AudioPolicyServer: client already has focus..");
         NotifyFocusGranted(clientID, audioInterrupt);
         return SUCCESS;
     }
 
     if (focussedAudioInterruptInfo_ != nullptr) {
-        AUDIO_DEBUG_LOG("AudioPolicyServer: Existing stream: %{public}d, incoming stream: %{public}d",
+        MEDIA_DEBUG_LOG("AudioPolicyServer: Existing stream: %{public}d, incoming stream: %{public}d",
                         focussedAudioInterruptInfo_->streamType, audioInterrupt.streamType);
         AbandonAudioFocus(clientOnFocus_, *focussedAudioInterruptInfo_);
     }
 
-    AUDIO_DEBUG_LOG("AudioPolicyServer: Grant audio focus");
+    MEDIA_DEBUG_LOG("AudioPolicyServer: Grant audio focus");
     NotifyFocusGranted(clientID, audioInterrupt);
 
     return SUCCESS;
@@ -434,11 +434,11 @@ int32_t AudioPolicyServer::RequestAudioFocus(const uint32_t clientID, const Audi
 
 int32_t AudioPolicyServer::AbandonAudioFocus(const uint32_t clientID, const AudioInterrupt &audioInterrupt)
 {
-    AUDIO_INFO_LOG("AudioPolicyServer: AbandonAudioFocus in");
+    MEDIA_INFO_LOG("AudioPolicyServer: AbandonAudioFocus in");
 
     int32_t ret = NotifyFocusAbandoned(clientID, audioInterrupt);
     if ((ret == SUCCESS) && (clientID == clientOnFocus_)) {
-        AUDIO_DEBUG_LOG("AudioPolicyServer: remove app focus");
+        MEDIA_DEBUG_LOG("AudioPolicyServer: remove app focus");
         focussedAudioInterruptInfo_.reset();
         focussedAudioInterruptInfo_ = nullptr;
         clientOnFocus_ = 0;
@@ -449,7 +449,7 @@ int32_t AudioPolicyServer::AbandonAudioFocus(const uint32_t clientID, const Audi
 
 void AudioPolicyServer::NotifyFocusGranted(const uint32_t clientID, const AudioInterrupt &audioInterrupt)
 {
-    AUDIO_INFO_LOG("AudioPolicyServer: Notify focus granted in: %{public}d", clientID);
+    MEDIA_INFO_LOG("AudioPolicyServer: Notify focus granted in: %{public}d", clientID);
     std::shared_ptr<AudioInterruptCallback> interruptCb = nullptr;
     interruptCb = audioManagerListenerCbsMap_[clientID];
     if (interruptCb) {
@@ -459,7 +459,7 @@ void AudioPolicyServer::NotifyFocusGranted(const uint32_t clientID, const AudioI
         interruptEvent.hintType = INTERRUPT_HINT_NONE;
         interruptEvent.duckVolume = 0;
 
-        AUDIO_DEBUG_LOG("AudioPolicyServer: callback focus granted");
+        MEDIA_DEBUG_LOG("AudioPolicyServer: callback focus granted");
         interruptCb->OnInterrupt(interruptEvent);
 
         unique_ptr<AudioInterrupt> tempAudioInterruptInfo = make_unique<AudioInterrupt>();
@@ -474,11 +474,11 @@ void AudioPolicyServer::NotifyFocusGranted(const uint32_t clientID, const AudioI
 
 int32_t AudioPolicyServer::NotifyFocusAbandoned(const uint32_t clientID, const AudioInterrupt &audioInterrupt)
 {
-    AUDIO_INFO_LOG("AudioPolicyServer: Notify focus abandoned in: %{public}d", clientID);
+    MEDIA_INFO_LOG("AudioPolicyServer: Notify focus abandoned in: %{public}d", clientID);
     std::shared_ptr<AudioInterruptCallback> interruptCb = nullptr;
     interruptCb = audioManagerListenerCbsMap_[clientID];
     if (!interruptCb) {
-        AUDIO_INFO_LOG("AudioPolicyServer: Notify failed, callback not present");
+        MEDIA_INFO_LOG("AudioPolicyServer: Notify failed, callback not present");
         return ERR_INVALID_PARAM;
     }
 
@@ -487,7 +487,7 @@ int32_t AudioPolicyServer::NotifyFocusAbandoned(const uint32_t clientID, const A
     interruptEvent.forceType = INTERRUPT_SHARE;
     interruptEvent.hintType = INTERRUPT_HINT_STOP;
     interruptEvent.duckVolume = 0;
-    AUDIO_DEBUG_LOG("AudioPolicyServer: callback focus abandoned");
+    MEDIA_DEBUG_LOG("AudioPolicyServer: callback focus abandoned");
     interruptCb->OnInterrupt(interruptEvent);
 
     return SUCCESS;

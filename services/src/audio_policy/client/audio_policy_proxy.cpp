@@ -362,13 +362,13 @@ int32_t AudioPolicyProxy::UnsetDeviceChangeCallback(const int32_t clientId)
     MessageOption option;
 
     if (!data.WriteInterfaceToken(GetDescriptor())) {
-        AUDIO_ERR_LOG("AudioPolicyProxy: WriteInterfaceToken failed");
+        MEDIA_ERR_LOG("AudioPolicyProxy: WriteInterfaceToken failed");
         return -1;
     }
     data.WriteInt32(clientId);
     int error = Remote()->SendRequest(UNSET_DEVICE_CHANGE_CALLBACK, data, reply, option);
     if (error != ERR_NONE) {
-        AUDIO_ERR_LOG("AudioPolicyProxy: unset device change callback failed, error: %{public}d", error);
+        MEDIA_ERR_LOG("AudioPolicyProxy: unset device change callback failed, error: %{public}d", error);
         return error;
     }
 
@@ -467,18 +467,18 @@ int32_t AudioPolicyProxy::SetAudioManagerInterruptCallback(const uint32_t client
     MessageOption option;
 
     if (object == nullptr) {
-        AUDIO_ERR_LOG("AudioPolicyProxy: SetAudioManagerInterruptCallback object is null");
+        MEDIA_ERR_LOG("AudioPolicyProxy: SetAudioManagerInterruptCallback object is null");
         return ERR_NULL_OBJECT;
     }
     if (!data.WriteInterfaceToken(GetDescriptor())) {
-        AUDIO_ERR_LOG("AudioPolicyProxy: WriteInterfaceToken failed");
+        MEDIA_ERR_LOG("AudioPolicyProxy: WriteInterfaceToken failed");
         return -1;
     }
     data.WriteUint32(clientID);
     (void)data.WriteRemoteObject(object);
     int error = Remote()->SendRequest(SET_INTERRUPT_CALLBACK, data, reply, option);
     if (error != ERR_NONE) {
-        AUDIO_ERR_LOG("AudioPolicyProxy: set callback failed, error: %{public}d", error);
+        MEDIA_ERR_LOG("AudioPolicyProxy: set callback failed, error: %{public}d", error);
         return error;
     }
 
@@ -492,7 +492,7 @@ int32_t AudioPolicyProxy::UnsetAudioManagerInterruptCallback(const uint32_t clie
     MessageOption option;
 
     if (!data.WriteInterfaceToken(GetDescriptor())) {
-        AUDIO_ERR_LOG("AudioPolicyProxy: WriteInterfaceToken failed");
+        MEDIA_ERR_LOG("AudioPolicyProxy: WriteInterfaceToken failed");
         return -1;
     }
 
@@ -500,7 +500,7 @@ int32_t AudioPolicyProxy::UnsetAudioManagerInterruptCallback(const uint32_t clie
 
     int error = Remote()->SendRequest(UNSET_INTERRUPT_CALLBACK, data, reply, option);
     if (error != ERR_NONE) {
-        AUDIO_ERR_LOG("AudioPolicyProxy: unset callback failed, error: %{public}d", error);
+        MEDIA_ERR_LOG("AudioPolicyProxy: unset callback failed, error: %{public}d", error);
         return error;
     }
 
@@ -514,7 +514,7 @@ int32_t AudioPolicyProxy::RequestAudioFocus(const uint32_t clientID, const Audio
     MessageOption option;
 
     if (!data.WriteInterfaceToken(GetDescriptor())) {
-        AUDIO_ERR_LOG("AudioPolicyProxy: WriteInterfaceToken failed");
+        MEDIA_ERR_LOG("AudioPolicyProxy: WriteInterfaceToken failed");
         return -1;
     }
 
@@ -523,7 +523,7 @@ int32_t AudioPolicyProxy::RequestAudioFocus(const uint32_t clientID, const Audio
 
     int error = Remote()->SendRequest(REQUEST_AUDIO_FOCUS, data, reply, option);
     if (error != ERR_NONE) {
-        AUDIO_ERR_LOG("AudioPolicyProxy: activate interrupt failed, error: %{public}d", error);
+        MEDIA_ERR_LOG("AudioPolicyProxy: activate interrupt failed, error: %{public}d", error);
         return error;
     }
 
@@ -537,7 +537,7 @@ int32_t AudioPolicyProxy::AbandonAudioFocus(const uint32_t clientID, const Audio
     MessageOption option;
 
     if (!data.WriteInterfaceToken(GetDescriptor())) {
-        AUDIO_ERR_LOG("AudioPolicyProxy: WriteInterfaceToken failed");
+        MEDIA_ERR_LOG("AudioPolicyProxy: WriteInterfaceToken failed");
         return -1;
     }
     data.WriteUint32(clientID);
@@ -545,7 +545,7 @@ int32_t AudioPolicyProxy::AbandonAudioFocus(const uint32_t clientID, const Audio
 
     int error = Remote()->SendRequest(ABANDON_AUDIO_FOCUS, data, reply, option);
     if (error != ERR_NONE) {
-        AUDIO_ERR_LOG("AudioPolicyProxy: deactivate interrupt failed, error: %{public}d", error);
+        MEDIA_ERR_LOG("AudioPolicyProxy: deactivate interrupt failed, error: %{public}d", error);
         return error;
     }
 

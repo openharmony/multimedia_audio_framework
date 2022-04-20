@@ -15,7 +15,7 @@
 #include <uv.h>
 
 #include "audio_errors.h"
-#include "audio_log.h"
+#include "media_log.h"
 #include "audio_manager_interrupt_callback_napi.h"
 
 namespace OHOS {
@@ -23,12 +23,12 @@ namespace AudioStandard {
 AudioManagerInterruptCallbackNapi::AudioManagerInterruptCallbackNapi(napi_env env)
     : env_(env)
 {
-    AUDIO_INFO_LOG("AudioManagerInterruptCallbackNapi: instance create");
+    MEDIA_INFO_LOG("AudioManagerInterruptCallbackNapi: instance create");
 }
 
 AudioManagerInterruptCallbackNapi::~AudioManagerInterruptCallbackNapi()
 {
-    AUDIO_INFO_LOG("AudioManagerInterruptCallbackNapi: instance destroy");
+    MEDIA_INFO_LOG("AudioManagerInterruptCallbackNapi: instance destroy");
 }
 
 void AudioManagerInterruptCallbackNapi::SaveCallbackReference(const std::string &callbackName, napi_value args)
@@ -43,7 +43,7 @@ void AudioManagerInterruptCallbackNapi::SaveCallbackReference(const std::string 
     if (callbackName == INTERRUPT_CALLBACK_NAME) {
         audioManagerInterruptCallback_ = cb;
     } else {
-        AUDIO_ERR_LOG("SaveCallbackReference: Unknown callback type: %{public}s", callbackName.c_str());
+        MEDIA_ERR_LOG("SaveCallbackReference: Unknown callback type: %{public}s", callbackName.c_str());
     }
 }
 
@@ -74,7 +74,7 @@ static void NativeInterruptActionToJsObj(const napi_env &env, napi_value &jsObj,
 void AudioManagerInterruptCallbackNapi::OnInterrupt(const InterruptAction &interruptAction)
 {
     std::lock_guard<std::mutex> lock(mutex_);
-    AUDIO_INFO_LOG("OnInterrupt action: %{public}d IntType: %{public}d, IntHint: %{public}d, activated: %{public}d",
+    MEDIA_INFO_LOG("OnInterrupt action: %{public}d IntType: %{public}d, IntHint: %{public}d, activated: %{public}d",
         interruptAction.actionType, interruptAction.interruptType, interruptAction.interruptHint,
         interruptAction.activated);
     CHECK_AND_RETURN_LOG(audioManagerInterruptCallback_ != nullptr, "Cannot find the reference of interrupt callback");
@@ -97,11 +97,11 @@ void AudioManagerInterruptCallbackNapi::OnJsCallbackAudioManagerInterrupt (
 
     uv_work_t *work = new(std::nothrow) uv_work_t;
     if (work == nullptr) {
-        AUDIO_ERR_LOG("OnJsCallbackAudioManagerInterrupt: No memory");
+        MEDIA_ERR_LOG("OnJsCallbackAudioManagerInterrupt: No memory");
         return;
     }
     if (jsCb.get() == nullptr) {
-        AUDIO_ERR_LOG("OnJsCallbackAudioManagerInterrupt: jsCb.get() is null");
+        MEDIA_ERR_LOG("OnJsCallbackAudioManagerInterrupt: jsCb.get() is null");
         delete work;
         return;
     }
@@ -113,7 +113,7 @@ void AudioManagerInterruptCallbackNapi::OnJsCallbackAudioManagerInterrupt (
         std::string request = event->callbackName;
         napi_env env = event->callback->env_;
         napi_ref callback = event->callback->cb_;
-        AUDIO_INFO_LOG("OnJsCallbackAudioManagerInterrupt: JsCallBack %{public}s, uv_queue_work start",
+        MEDIA_INFO_LOG("OnJsCallbackAudioManagerInterrupt: JsCallBack %{public}s, uv_queue_work start",
             request.c_str());
         do {
             CHECK_AND_BREAK_LOG(status != UV_ECANCELED, "%{public}s canceled", request.c_str());
@@ -138,7 +138,7 @@ void AudioManagerInterruptCallbackNapi::OnJsCallbackAudioManagerInterrupt (
         delete work;
     });
     if (ret != 0) {
-        AUDIO_ERR_LOG("OnJsCallbackAudioManagerInterrupt: Failed to execute libuv work queue");
+        MEDIA_ERR_LOG("OnJsCallbackAudioManagerInterrupt: Failed to execute libuv work queue");
         delete work;
     } else {
         jsCb.release();

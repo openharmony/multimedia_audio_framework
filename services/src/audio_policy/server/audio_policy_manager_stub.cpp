@@ -224,7 +224,7 @@ void AudioPolicyManagerStub::SetAudioManagerInterruptCbInternal(MessageParcel &d
     uint32_t clientID = data.ReadUint32();
     sptr<IRemoteObject> object = data.ReadRemoteObject();
     if (object == nullptr) {
-        AUDIO_ERR_LOG("AudioPolicyManagerStub: AudioInterruptCallback obj is null");
+        MEDIA_ERR_LOG("AudioPolicyManagerStub: AudioInterruptCallback obj is null");
         return;
     }
     int32_t result = SetAudioManagerInterruptCallback(clientID, object);

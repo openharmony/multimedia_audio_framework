@@ -521,7 +521,7 @@ void AudioServiceClient::SetEnv()
 
 void AudioServiceClient::SetApplicationCachePath(const std::string cachePath)
 {
-    AUDIO_DEBUG_LOG("SetApplicationCachePath in");
+    MEDIA_DEBUG_LOG("SetApplicationCachePath in");
     cachePath_ = cachePath;
 }
 
@@ -558,7 +558,7 @@ int32_t AudioServiceClient::Initialize(ASClientType eClientType)
     pa_context_set_state_callback(context, PAContextStateCb, mainLoop);
 
     if (!cachePath_.empty()) {
-        AUDIO_DEBUG_LOG("abilityContext not null");
+        MEDIA_DEBUG_LOG("abilityContext not null");
         int32_t size = 0;
         const char *cookieData = mAudioSystemMgr->RetrieveCookie(size);
         if (size <= 0) {
@@ -906,6 +906,12 @@ int32_t AudioServiceClient::StopStream()
         return AUDIO_CLIENT_ERR;
     } else {
         MEDIA_INFO_LOG("Stream Stopped Successfully");
+        if (internalRdBufLen) {
+            (void)pa_stream_drop(paStream);
+            internalReadBuffer = nullptr;
+            internalRdBufLen = 0;
+            internalRdBufIndex = 0;
+        }
         return AUDIO_CLIENT_SUCCESS;
     }
 }
@@ -1357,7 +1363,7 @@ int32_t AudioServiceClient::ReadStream(StreamBuffer &stream, bool isBlocking)
                 }
             } else {
                 internalRdBufIndex = 0;
-                MEDIA_INFO_LOG("buffer size from PA: %zu", internalRdBufLen);
+                MEDIA_INFO_LOG("buffer size from PA: %{public}zu", internalRdBufLen);
             }
         }
 

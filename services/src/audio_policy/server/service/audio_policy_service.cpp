@@ -542,12 +542,12 @@ int32_t AudioPolicyService::SetDeviceChangeCallback(const int32_t clientId, cons
 
 int32_t AudioPolicyService::UnsetDeviceChangeCallback(const int32_t clientId)
 {
-    AUDIO_INFO_LOG("Entered AudioPolicyService::%{public}s", __func__);
+    MEDIA_INFO_LOG("Entered AudioPolicyService::%{public}s", __func__);
 
     if (deviceChangeCallbackMap_.erase(clientId)) {
-        AUDIO_DEBUG_LOG("AudioPolicyServer:UnsetDeviceChangeCallback for clientID %{public}d done", clientId);
+        MEDIA_DEBUG_LOG("AudioPolicyServer:UnsetDeviceChangeCallback for clientID %{public}d done", clientId);
     } else {
-        AUDIO_DEBUG_LOG("AudioPolicyServer:UnsetDeviceChangeCallback clientID %{public}d not present/unset already",
+        MEDIA_DEBUG_LOG("AudioPolicyServer:UnsetDeviceChangeCallback clientID %{public}d not present/unset already",
                         clientId);
     }
 

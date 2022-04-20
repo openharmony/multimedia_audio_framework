@@ -116,6 +116,8 @@ static int source_process_msg(pa_msgobject *o, int code, void *data, int64_t off
 static int source_set_state_in_io_thread_cb(pa_source *s, pa_source_state_t newState,
     pa_suspend_cause_t newSuspendCause)
 {
+    MEDIA_INFO_LOG("source_set_state_in_io_thread_cb: s->thread_info.state: %{public}d newState: %{public}d",
+        s->thread_info.state, newState);
     struct Userdata *u = NULL;
     pa_assert(s);
     pa_assert_se(u = s->userdata);

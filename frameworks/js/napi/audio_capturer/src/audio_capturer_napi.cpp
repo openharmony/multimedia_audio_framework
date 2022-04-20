@@ -17,7 +17,6 @@
 #include "ability.h"
 #include "audio_capturer_callback_napi.h"
 #include "audio_errors.h"
-#include "audio_log.h"
 #include "audio_manager_napi.h"
 #include "audio_parameters_napi.h"
 #include "capturer_period_position_callback_napi.h"

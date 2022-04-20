@@ -188,7 +188,7 @@ int32_t AudioPolicyManager::SetDeviceChangeCallback(const int32_t clientId,
 
 int32_t AudioPolicyManager::UnsetDeviceChangeCallback(const int32_t clientId)
 {
-    AUDIO_INFO_LOG("Entered %{public}s", __func__);
+    MEDIA_INFO_LOG("Entered %{public}s", __func__);
 
     return g_sProxy->UnsetDeviceChangeCallback(clientId);
 }
@@ -240,21 +240,21 @@ int32_t AudioPolicyManager::SetAudioManagerInterruptCallback(const uint32_t clie
     const std::shared_ptr<AudioInterruptCallback> &callback)
 {
     if (callback == nullptr) {
-        AUDIO_ERR_LOG("AudioPolicyManager: callback is nullptr");
+        MEDIA_ERR_LOG("AudioPolicyManager: callback is nullptr");
         return ERR_INVALID_PARAM;
     }
 
     std::unique_lock<std::mutex> lock(listenerStubMutex_);
     sptr<AudioPolicyManagerListenerStub> interruptListenerStub = new(std::nothrow) AudioPolicyManagerListenerStub();
     if (interruptListenerStub == nullptr || g_sProxy == nullptr) {
-        AUDIO_ERR_LOG("AudioPolicyManager: object null");
+        MEDIA_ERR_LOG("AudioPolicyManager: object null");
         return ERROR;
     }
     interruptListenerStub->SetInterruptCallback(callback);
 
     sptr<IRemoteObject> object = interruptListenerStub->AsObject();
     if (object == nullptr) {
-        AUDIO_ERR_LOG("AudioPolicyManager: onInterruptListenerStub->AsObject is nullptr..");
+        MEDIA_ERR_LOG("AudioPolicyManager: onInterruptListenerStub->AsObject is nullptr..");
         return ERROR;
     }
     lock.unlock();

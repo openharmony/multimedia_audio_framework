@@ -1996,12 +1996,12 @@ napi_status JsObjectToInt(const napi_env &env, const napi_value &object, std::st
     napi_value tempValue = nullptr;
     napi_status status = napi_get_named_property(env, object, fieldStr.c_str(), &tempValue);
     if (status != napi_ok) {
-        AUDIO_ERR_LOG("JsObjectToInt: Failed to retrieve property %{public}s", fieldStr.c_str());
+        MEDIA_ERR_LOG("JsObjectToInt: Failed to retrieve property %{public}s", fieldStr.c_str());
         return status;
     }
     status = napi_get_value_int32(env, tempValue, &fieldRef);
     if (status != napi_ok) {
-        AUDIO_ERR_LOG("JsObjectToInt: Failed to retrieve value for property %{public}s", fieldStr.c_str());
+        MEDIA_ERR_LOG("JsObjectToInt: Failed to retrieve value for property %{public}s", fieldStr.c_str());
     }
     return status;
 }
@@ -2011,12 +2011,12 @@ napi_status JsObjectToBool(const napi_env &env, const napi_value &object, std::s
     napi_value tempValue = nullptr;
     napi_status status = napi_get_named_property(env, object, fieldStr.c_str(), &tempValue);
     if (status != napi_ok) {
-        AUDIO_ERR_LOG("JsObjectToBool: Failed to retrieve property %{public}s", fieldStr.c_str());
+        MEDIA_ERR_LOG("JsObjectToBool: Failed to retrieve property %{public}s", fieldStr.c_str());
         return status;
     }
     status = napi_get_value_bool(env, tempValue, &fieldRef);
     if (status != napi_ok) {
-        AUDIO_ERR_LOG("JsObjectToBool: Failed to retrieve value for property %{public}s", fieldStr.c_str());
+        MEDIA_ERR_LOG("JsObjectToBool: Failed to retrieve value for property %{public}s", fieldStr.c_str());
     }
     return status;
 }
@@ -2026,27 +2026,27 @@ napi_status JsObjToAudioInterrupt(const napi_env& env, const napi_value& object,
     int32_t propValue = -1;
     napi_status status = JsObjectToInt(env, object, "contentType", propValue);
     if (status != napi_ok) {
-        AUDIO_ERR_LOG("JsObjToAudioInterrupt: Failed to retrieve contentType");
+        MEDIA_ERR_LOG("JsObjToAudioInterrupt: Failed to retrieve contentType");
         return status;
     }
     audioInterrupt.contentType = static_cast<ContentType>(propValue);
 
     status = JsObjectToInt(env, object, "streamUsage", propValue);
     if (status != napi_ok) {
-        AUDIO_ERR_LOG("JsObjToAudioInterrupt: Failed to retrieve streamUsage");
+        MEDIA_ERR_LOG("JsObjToAudioInterrupt: Failed to retrieve streamUsage");
         return status;
     }
     audioInterrupt.streamUsage = static_cast<StreamUsage>(propValue);
 
     status = JsObjectToBool(env, object, "pauseWhenDucked", audioInterrupt.pauseWhenDucked);
     if (status != napi_ok) {
-        AUDIO_ERR_LOG("JsObjToAudioInterrupt: Failed to retrieve pauseWhenDucked");
+        MEDIA_ERR_LOG("JsObjToAudioInterrupt: Failed to retrieve pauseWhenDucked");
         return status;
     }
     // Update Stream type based on Content type and Stream Usage type
     audioInterrupt.streamType = AudioSystemManager::GetStreamType(audioInterrupt.contentType,
         audioInterrupt.streamUsage);
-    AUDIO_INFO_LOG("JsObjToAudioInterrupt: ContentType %{public}d, streamUsage %{public}d, streamType %{public}d ",
+    MEDIA_INFO_LOG("JsObjToAudioInterrupt: ContentType %{public}d, streamUsage %{public}d, streamType %{public}d ",
         audioInterrupt.contentType, audioInterrupt.streamUsage, audioInterrupt.streamType);
     return status;
 }
@@ -2071,7 +2071,7 @@ napi_value AudioManagerNapi::On(napi_env env, napi_callback_info info)
         return undefinedResult;
     }
     std::string callbackName = AudioCommonNapi::GetStringArgument(env, args[0]);
-    AUDIO_INFO_LOG("AudioManagerNapi::On callbackName: %{public}s", callbackName.c_str());
+    MEDIA_INFO_LOG("AudioManagerNapi::On callbackName: %{public}s", callbackName.c_str());
 
     AudioManagerNapi *managerNapi = nullptr;
     status = napi_unwrap(env, jsThis, reinterpret_cast<void **>(&managerNapi));
@@ -2089,11 +2089,11 @@ napi_value AudioManagerNapi::On(napi_env env, napi_callback_info info)
         napi_typeof(env, args[PARAM1], &paramArg1);
         if (!callbackName.compare(INTERRUPT_CALLBACK_NAME)) {
             if (paramArg1 != napi_object) {
-                AUDIO_ERR_LOG("AudioManagerNapi::On Type mismatch for parameter 2");
+                MEDIA_ERR_LOG("AudioManagerNapi::On Type mismatch for parameter 2");
                 return undefinedResult;
             }
             if (napi_typeof(env, args[PARAM2], &handler) != napi_ok || handler != napi_function) {
-                AUDIO_ERR_LOG("AudioManagerNapi::On type mismatch for parameter 3");
+                MEDIA_ERR_LOG("AudioManagerNapi::On type mismatch for parameter 3");
                 return undefinedResult;
             }
         }
@@ -2103,7 +2103,7 @@ napi_value AudioManagerNapi::On(napi_env env, napi_callback_info info)
             int32_t ret = managerNapi->audioMngr_->
                 SetAudioManagerInterruptCallback(managerNapi->interruptCallbackNapi_);
             if (ret) {
-                AUDIO_ERR_LOG("AudioManagerNapi: SetAudioManagerInterruptCallback Failed");
+                MEDIA_ERR_LOG("AudioManagerNapi: SetAudioManagerInterruptCallback Failed");
                 return undefinedResult;
             }
         }
@@ -2115,10 +2115,10 @@ napi_value AudioManagerNapi::On(napi_env env, napi_callback_info info)
         NAPI_ASSERT(env, status == napi_ok, "Failed to retrieve audioInterrupt value");
         int32_t ret = managerNapi->audioMngr_->RequestAudioFocus(audioInterrupt);
         if (ret) {
-            AUDIO_ERR_LOG("AudioManagerNapi: RequestAudioFocus Failed");
+            MEDIA_ERR_LOG("AudioManagerNapi: RequestAudioFocus Failed");
             return undefinedResult;
         }
-        AUDIO_INFO_LOG("AudioManagerNapi::On SetAudioManagerInterruptCallback and RequestAudioFocus is successful");
+        MEDIA_INFO_LOG("AudioManagerNapi::On SetAudioManagerInterruptCallback and RequestAudioFocus is successful");
     }
 
     if (!callbackName.compare(RINGERMODE_CALLBACK_NAME)) {
@@ -2147,13 +2147,13 @@ napi_value AudioManagerNapi::On(napi_env env, napi_callback_info info)
         }
         int32_t ret = managerNapi->audioMngr_->SetDeviceChangeCallback(managerNapi->deviceChangeCallbackNapi_);
         if (ret) {
-            AUDIO_ERR_LOG("AudioManagerNapi: SetDeviceChangeCallback Failed");
+            MEDIA_ERR_LOG("AudioManagerNapi: SetDeviceChangeCallback Failed");
             return undefinedResult;
         }
         std::shared_ptr<AudioManagerCallbackNapi> cb =
         std::static_pointer_cast<AudioManagerCallbackNapi>(managerNapi->deviceChangeCallbackNapi_);
         cb->SaveCallbackReference(callbackName, args[PARAM1]);
-        AUDIO_INFO_LOG("AudioManagerNapi::On SetDeviceChangeCallback is successful");
+        MEDIA_INFO_LOG("AudioManagerNapi::On SetDeviceChangeCallback is successful");
     }
     return undefinedResult;
 }
@@ -2178,7 +2178,7 @@ napi_value AudioManagerNapi::Off(napi_env env, napi_callback_info info)
         return undefinedResult;
     }
     std::string callbackName = AudioCommonNapi::GetStringArgument(env, args[0]);
-    AUDIO_INFO_LOG("AudioManagerNapi::Off callbackName: %{public}s", callbackName.c_str());
+    MEDIA_INFO_LOG("AudioManagerNapi::Off callbackName: %{public}s", callbackName.c_str());
 
     AudioManagerNapi *managerNapi = nullptr;
     status = napi_unwrap(env, jsThis, reinterpret_cast<void **>(&managerNapi));
@@ -2189,12 +2189,12 @@ napi_value AudioManagerNapi::Off(napi_env env, napi_callback_info info)
     if (!callbackName.compare(INTERRUPT_CALLBACK_NAME) && argCount > ARGS_ONE) {
         napi_valuetype paramArg1 = napi_undefined;
         if (napi_typeof(env, args[PARAM1], &paramArg1) != napi_ok || paramArg1 != napi_object) {
-            AUDIO_ERR_LOG("AudioManagerNapi::Off type mismatch for parameter 2");
+            MEDIA_ERR_LOG("AudioManagerNapi::Off type mismatch for parameter 2");
             return undefinedResult;
         }
         if (argCount == ARGS_THREE) {
             if (napi_typeof(env, args[PARAM2], &handler) != napi_ok || handler != napi_function) {
-                AUDIO_ERR_LOG("AudioManagerNapi::Off type mismatch for parameter 3");
+                MEDIA_ERR_LOG("AudioManagerNapi::Off type mismatch for parameter 3");
                 return undefinedResult;
             }
         }
@@ -2203,29 +2203,29 @@ napi_value AudioManagerNapi::Off(napi_env env, napi_callback_info info)
         NAPI_ASSERT(env, status == napi_ok, "AudioManagerNapi::Off Failed to retrieve audioInterrupt value");
         int32_t ret = managerNapi->audioMngr_->AbandonAudioFocus(audioInterrupt);
         if (ret) {
-            AUDIO_ERR_LOG("AudioManagerNapi::Off AbandonAudioFocus Failed");
+            MEDIA_ERR_LOG("AudioManagerNapi::Off AbandonAudioFocus Failed");
         }
         ret = managerNapi->audioMngr_->UnsetAudioManagerInterruptCallback();
         if (ret) {
-            AUDIO_ERR_LOG("AudioManagerNapi::Off UnsetAudioManagerInterruptCallback Failed");
+            MEDIA_ERR_LOG("AudioManagerNapi::Off UnsetAudioManagerInterruptCallback Failed");
             return undefinedResult;
         }
         if (managerNapi->interruptCallbackNapi_ != nullptr) {
             managerNapi->interruptCallbackNapi_.reset();
             managerNapi->interruptCallbackNapi_ = nullptr;
         }
-        AUDIO_INFO_LOG("AudioManagerNapi::Off Abandon Focus and UnSetAudioInterruptCallback success");
+        MEDIA_INFO_LOG("AudioManagerNapi::Off Abandon Focus and UnSetAudioInterruptCallback success");
     } else if (!callbackName.compare(DEVICE_CHANGE_CALLBACK_NAME)) {
         int32_t ret = managerNapi->audioMngr_->UnsetDeviceChangeCallback();
         if (ret) {
-            AUDIO_ERR_LOG("AudioManagerNapi::Off UnsetDeviceChangeCallback Failed");
+            MEDIA_ERR_LOG("AudioManagerNapi::Off UnsetDeviceChangeCallback Failed");
             return undefinedResult;
         }
         if (managerNapi->deviceChangeCallbackNapi_ != nullptr) {
             managerNapi->deviceChangeCallbackNapi_.reset();
             managerNapi->deviceChangeCallbackNapi_ = nullptr;
         }
-        AUDIO_INFO_LOG("AudioManagerNapi::Off UnsetDeviceChangeCallback Success");
+        MEDIA_INFO_LOG("AudioManagerNapi::Off UnsetDeviceChangeCallback Success");
     }
     return undefinedResult;
 }

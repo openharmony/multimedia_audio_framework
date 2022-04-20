@@ -60,7 +60,7 @@ std::unique_ptr<AudioCapturer> AudioCapturer::Create(const std::string cachePath
     }
 
     if (!cachePath.empty()) {
-        AUDIO_DEBUG_LOG("Set application cache path");
+        MEDIA_DEBUG_LOG("Set application cache path");
         capturer->SetApplicationCachePath(cachePath);
     }
 

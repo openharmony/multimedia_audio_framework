@@ -357,7 +357,7 @@ int32_t AudioSystemManager::SetDeviceChangeCallback(const std::shared_ptr<AudioM
 
 int32_t AudioSystemManager::UnsetDeviceChangeCallback()
 {
-    AUDIO_INFO_LOG("Entered AudioSystemManager::%{public}s", __func__);
+    MEDIA_INFO_LOG("Entered AudioSystemManager::%{public}s", __func__);
     int32_t clientId = GetCallingPid();
     return AudioPolicyManager::GetInstance().UnsetDeviceChangeCallback(clientId);
 }
@@ -453,14 +453,14 @@ int32_t AudioSystemManager::DeactivateAudioInterrupt(const AudioInterrupt &audio
 int32_t AudioSystemManager::SetAudioManagerInterruptCallback(const std::shared_ptr<AudioManagerCallback> &callback)
 {
     uint32_t clientID = GetCallingPid();
-    AUDIO_INFO_LOG("AudioSystemManager:: SetAudioManagerInterruptCallback client id: %{public}d", clientID);
+    MEDIA_INFO_LOG("AudioSystemManager:: SetAudioManagerInterruptCallback client id: %{public}d", clientID);
     if (callback == nullptr) {
-        AUDIO_ERR_LOG("AudioSystemManager::callback is null");
+        MEDIA_ERR_LOG("AudioSystemManager::callback is null");
         return ERR_INVALID_PARAM;
     }
 
     if (audioInterruptCallback_ != nullptr) {
-        AUDIO_DEBUG_LOG("AudioSystemManager reset existing callback object");
+        MEDIA_DEBUG_LOG("AudioSystemManager reset existing callback object");
         AudioPolicyManager::GetInstance().UnsetAudioManagerInterruptCallback(clientID);
         audioInterruptCallback_.reset();
         audioInterruptCallback_ = nullptr;
@@ -468,13 +468,13 @@ int32_t AudioSystemManager::SetAudioManagerInterruptCallback(const std::shared_p
 
     audioInterruptCallback_ = std::make_shared<AudioManagerInterruptCallbackImpl>();
     if (audioInterruptCallback_ == nullptr) {
-        AUDIO_ERR_LOG("AudioSystemManager::Failed to allocate memory for audioInterruptCallback");
+        MEDIA_ERR_LOG("AudioSystemManager::Failed to allocate memory for audioInterruptCallback");
         return ERROR;
     }
 
     int32_t ret = AudioPolicyManager::GetInstance().SetAudioManagerInterruptCallback(clientID, audioInterruptCallback_);
     if (ret != SUCCESS) {
-        AUDIO_ERR_LOG("AudioSystemManager::Failed set callback");
+        MEDIA_ERR_LOG("AudioSystemManager::Failed set callback");
         return ERROR;
     }
 
@@ -488,7 +488,7 @@ int32_t AudioSystemManager::SetAudioManagerInterruptCallback(const std::shared_p
 int32_t AudioSystemManager::UnsetAudioManagerInterruptCallback()
 {
     uint32_t clientID = GetCallingPid();
-    AUDIO_INFO_LOG("AudioSystemManager:: UnsetAudioManagerInterruptCallback client id: %{public}d", clientID);
+    MEDIA_INFO_LOG("AudioSystemManager:: UnsetAudioManagerInterruptCallback client id: %{public}d", clientID);
 
     int32_t ret = AudioPolicyManager::GetInstance().UnsetAudioManagerInterruptCallback(clientID);
     if (audioInterruptCallback_ != nullptr) {
@@ -502,7 +502,7 @@ int32_t AudioSystemManager::UnsetAudioManagerInterruptCallback()
 int32_t AudioSystemManager::RequestAudioFocus(const AudioInterrupt &audioInterrupt)
 {
     uint32_t clientID = GetCallingPid();
-    AUDIO_INFO_LOG("AudioSystemManager:: RequestAudioFocus client id: %{public}d", clientID);
+    MEDIA_INFO_LOG("AudioSystemManager:: RequestAudioFocus client id: %{public}d", clientID);
     CHECK_AND_RETURN_RET_LOG(audioInterrupt.contentType >= CONTENT_TYPE_UNKNOWN
                              && audioInterrupt.contentType <= CONTENT_TYPE_RINGTONE, ERR_INVALID_PARAM,
                              "Invalid content type");
@@ -518,7 +518,7 @@ int32_t AudioSystemManager::RequestAudioFocus(const AudioInterrupt &audioInterru
 int32_t AudioSystemManager::AbandonAudioFocus(const AudioInterrupt &audioInterrupt)
 {
     uint32_t clientID = GetCallingPid();
-    AUDIO_INFO_LOG("AudioSystemManager:: AbandonAudioFocus client id: %{public}d", clientID);
+    MEDIA_INFO_LOG("AudioSystemManager:: AbandonAudioFocus client id: %{public}d", clientID);
     CHECK_AND_RETURN_RET_LOG(audioInterrupt.contentType >= CONTENT_TYPE_UNKNOWN
                              && audioInterrupt.contentType <= CONTENT_TYPE_RINGTONE, ERR_INVALID_PARAM,
                              "Invalid content type");
@@ -533,12 +533,12 @@ int32_t AudioSystemManager::AbandonAudioFocus(const AudioInterrupt &audioInterru
 
 AudioManagerInterruptCallbackImpl::AudioManagerInterruptCallbackImpl()
 {
-    AUDIO_INFO_LOG("AudioManagerInterruptCallbackImpl constructor");
+    MEDIA_INFO_LOG("AudioManagerInterruptCallbackImpl constructor");
 }
 
 AudioManagerInterruptCallbackImpl::~AudioManagerInterruptCallbackImpl()
 {
-    AUDIO_DEBUG_LOG("AudioManagerInterruptCallbackImpl: instance destroy");
+    MEDIA_DEBUG_LOG("AudioManagerInterruptCallbackImpl: instance destroy");
 }
 
 void AudioManagerInterruptCallbackImpl::SaveCallback(const std::weak_ptr<AudioManagerCallback> &callback)
@@ -557,9 +557,9 @@ void AudioManagerInterruptCallbackImpl::OnInterrupt(const InterruptEventInternal
         interruptAction.interruptHint = interruptEvent.hintType;
         interruptAction.activated = (interruptEvent.eventType == INTERRUPT_TYPE_BEGIN) ? false : true;
         cb_->OnInterrupt(interruptAction);
-        AUDIO_DEBUG_LOG("AudioManagerInterruptCallbackImpl: OnInterrupt : Notify event to app complete");
+        MEDIA_DEBUG_LOG("AudioManagerInterruptCallbackImpl: OnInterrupt : Notify event to app complete");
     } else {
-        AUDIO_ERR_LOG("AudioManagerInterruptCallbackImpl: callback is null");
+        MEDIA_ERR_LOG("AudioManagerInterruptCallbackImpl: callback is null");
     }
 
     return;

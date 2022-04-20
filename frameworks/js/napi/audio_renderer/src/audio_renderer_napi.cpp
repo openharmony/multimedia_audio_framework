@@ -21,7 +21,6 @@
 
 #include "audio_common_napi.h"
 #include "audio_errors.h"
-#include "audio_log.h"
 #include "audio_manager_napi.h"
 #include "audio_parameters_napi.h"
 #include "hilog/log.h"
