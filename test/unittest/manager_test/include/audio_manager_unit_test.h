@@ -17,6 +17,7 @@
 #define AUDIO_MANAGER_UNIT_TEST_H
 
 #include "gtest/gtest.h"
+#include "audio_system_manager.h"
 
 namespace OHOS {
 namespace AudioStandard {
@@ -30,6 +31,13 @@ public:
     void SetUp(void);
     // TearDown: Called after each test cases
     void TearDown(void);
+};
+
+class AudioManagerCallbackImpl : public AudioManagerCallback {
+public:
+    AudioManagerCallbackImpl() {}
+    ~AudioManagerCallbackImpl() {}
+    void OnInterrupt(const InterruptAction &interruptAction) override {}
 };
 } // namespace AudioStandard
 } // namespace OHOS
