@@ -213,16 +213,19 @@ bool AudioSystemManager::IsStreamActive(AudioSystemManager::AudioVolumeType volu
 
 const std::string AudioSystemManager::GetAudioParameter(const std::string key) const
 {
+    CHECK_AND_RETURN_RET_LOG(g_sProxy != nullptr, "", "GetAudioParameter::Audio service unavailable");
     return g_sProxy->GetAudioParameter(key);
 }
 
 void AudioSystemManager::SetAudioParameter(const std::string &key, const std::string &value) const
 {
+    CHECK_AND_RETURN_LOG(g_sProxy != nullptr, "SetAudioParameter::Audio service unavailable");
     g_sProxy->SetAudioParameter(key, value);
 }
 
 const char *AudioSystemManager::RetrieveCookie(int32_t &size) const
 {
+    CHECK_AND_RETURN_RET_LOG(g_sProxy != nullptr, nullptr, "RetrieveCookie::Audio service unavailable");
     return g_sProxy->RetrieveCookie(size);
 }
 
@@ -289,11 +292,13 @@ int32_t AudioSystemManager::MapVolumeFromHDI(float volume)
 
 int32_t AudioSystemManager::GetMaxVolume(AudioSystemManager::AudioVolumeType volumeType) const
 {
+    CHECK_AND_RETURN_RET_LOG(g_sProxy != nullptr, ERR_OPERATION_FAILED, "GetMaxVolume::Audio service unavailable");
     return g_sProxy->GetMaxVolume(volumeType);
 }
 
 int32_t AudioSystemManager::GetMinVolume(AudioSystemManager::AudioVolumeType volumeType) const
 {
+    CHECK_AND_RETURN_RET_LOG(g_sProxy != nullptr, ERR_OPERATION_FAILED, "GetMinVolume::Audio service unavailable");
     return g_sProxy->GetMinVolume(volumeType);
 }
 
@@ -376,11 +381,13 @@ int32_t AudioSystemManager::UnsetRingerModeCallback(const int32_t clientId) cons
 
 int32_t AudioSystemManager::SetMicrophoneMute(bool isMute) const
 {
+    CHECK_AND_RETURN_RET_LOG(g_sProxy != nullptr, ERR_OPERATION_FAILED, "SetMicrophoneMute::Audio service unavailable");
     return g_sProxy->SetMicrophoneMute(isMute);
 }
 
 bool AudioSystemManager::IsMicrophoneMute() const
 {
+    CHECK_AND_RETURN_RET_LOG(g_sProxy != nullptr, ERR_OPERATION_FAILED, "IsMicrophoneMute::Audio service unavailable");
     return g_sProxy->IsMicrophoneMute();
 }
 
