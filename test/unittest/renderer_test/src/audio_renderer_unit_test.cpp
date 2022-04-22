@@ -257,7 +257,7 @@ HWTEST(AudioRendererUnitTest, Audio_Renderer_Create_007, TestSize.Level0)
 *             rendererOptions.rendererInfo.streamUsage = STREAM_USAGE_MEDIA;
 *             rendererOptions.rendererInfo.rendererFlags = RENDERER_FLAG;
 */
-HWTEST(AudioRendererUnitTest, Audio_Renderer_Create_008, TestSize.Level0)
+HWTEST(AudioRendererUnitTest, Audio_Renderer_Create_008, TestSize.Level1)
 {
     AudioRendererOptions rendererOptions;
     rendererOptions.streamInfo.samplingRate = AudioSamplingRate::SAMPLE_RATE_96000;

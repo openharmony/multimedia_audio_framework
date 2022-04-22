@@ -28,9 +28,6 @@ group("audio_client_test_packages") {
 
 config("audio_client_public_config") {
   include_dirs = [
-    "//base/global/resmgr_standard/interfaces/innerkits/include",
-    "//foundation/aafwk/standard/frameworks/kits/appkit/native/ability_runtime/context",
-    "//foundation/appexecfwk/standard/interfaces/innerkits/appexecfwk_base/include",
     "//foundation/multimedia/audio_standard/frameworks/native/audiopolicy/include",
     "//foundation/multimedia/audio_standard/frameworks/native/audiosession/include",
     "//foundation/multimedia/audio_standard/frameworks/native/audiostream/include",
@@ -86,7 +83,6 @@ ohos_shared_library("audio_client") {
   ]
 
   external_deps = [
-    "ability_runtime:abilitykit_native",
     "hiviewdfx_hilog_native:libhilog",
     "ipc:ipc_core",
     "samgr_standard:samgr_proxy",

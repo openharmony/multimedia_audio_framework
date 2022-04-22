@@ -23,8 +23,6 @@
 #include "audio_renderer.h"
 #include "napi/native_api.h"
 #include "napi/native_node_api.h"
-#include "napi_base_context.h"
-#include "ability.h"
 
 namespace OHOS {
 namespace AudioStandard {
@@ -137,8 +135,6 @@ private:
     static napi_value CreateAudioStateObject(napi_env env);
     static napi_value CreateAudioSampleFormatObject(napi_env env);
 
-    static std::shared_ptr<AbilityRuntime::Context> GetAbilityContext(napi_env env);
-
     static napi_ref audioRendererRate_;
     static napi_ref interruptEventType_;
     static napi_ref interruptForceType_;
@@ -155,7 +151,6 @@ private:
     DeviceRole deviceRole_;
     DeviceType deviceType_;
     int32_t rendererFlags_;
-    std::shared_ptr<AbilityRuntime::Context> abilityContext_;
     napi_env env_;
     napi_ref wrapper_;
     std::queue<napi_async_work> writeRequestQ_;

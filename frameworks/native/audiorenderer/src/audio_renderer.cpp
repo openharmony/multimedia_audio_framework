@@ -42,7 +42,7 @@ std::unique_ptr<AudioRenderer> AudioRenderer::Create(const AudioRendererOptions 
     return Create(nullptr, rendererOptions);
 }
 
-std::unique_ptr<AudioRenderer> AudioRenderer::Create(const std::shared_ptr<AbilityRuntime::Context> context,
+std::unique_ptr<AudioRenderer> AudioRenderer::Create(const std::string cachePath,
     const AudioRendererOptions &rendererOptions)
 {
     ContentType contentType = rendererOptions.rendererInfo.contentType;
@@ -56,9 +56,9 @@ std::unique_ptr<AudioRenderer> AudioRenderer::Create(const std::shared_ptr<Abili
     AudioStreamType audioStreamType = AudioStream::GetStreamType(contentType, streamUsage);
     auto audioRenderer = std::make_unique<AudioRendererPrivate>(audioStreamType);
     CHECK_AND_RETURN_RET_LOG(audioRenderer != nullptr, nullptr, "Failed to create renderer object");
-    if (context != nullptr) {
-        AUDIO_DEBUG_LOG("Set ability context");
-        audioRenderer->SetAbilityContext(context);
+    if (!cachePath.empty()) {
+        AUDIO_DEBUG_LOG("Set application cache path");
+        audioRenderer->SetApplicationCachePath(cachePath);
     }
 
     audioRenderer->rendererInfo_.contentType = contentType;
@@ -577,9 +577,9 @@ int32_t AudioRendererPrivate::GetBufQueueState(BufferQueueState &bufState) const
     return SUCCESS;
 }
 
-void AudioRendererPrivate::SetAbilityContext(const std::shared_ptr<AbilityRuntime::Context> context)
+void AudioRendererPrivate::SetApplicationCachePath(const std::string cachePath)
 {
-    audioStream_->SetAbilityContext(context);
+    audioStream_->SetApplicationCachePath(cachePath);
 }
 
 int32_t AudioRendererPrivate::SetRendererWriteCallback(const std::shared_ptr<AudioRendererWriteCallback> &callback)

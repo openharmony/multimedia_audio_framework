@@ -30,10 +30,7 @@ ohos_unittest("audio_renderer_unit_test") {
 
   sources = [ "src/audio_renderer_unit_test.cpp" ]
 
-  deps = [
-    "//foundation/aafwk/standard/frameworks/kits/ability/native:abilitykit_native",
-    "//foundation/multimedia/audio_standard/interfaces/inner_api/native/audiorenderer:audio_renderer",
-  ]
+  deps = [ "//foundation/multimedia/audio_standard/interfaces/inner_api/native/audiorenderer:audio_renderer" ]
 
   resource_config_file = "//foundation/multimedia/audio_standard/test/resource/audio_renderer/ohos_test.xml"
 }

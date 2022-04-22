@@ -14,16 +14,19 @@
  */
 
 #include "audio_renderer_napi.h"
+#include "ability.h"
 #include "audio_renderer_callback_napi.h"
 #include "renderer_period_position_callback_napi.h"
 #include "renderer_position_callback_napi.h"
 
 #include "audio_common_napi.h"
 #include "audio_errors.h"
+#include "audio_log.h"
 #include "audio_manager_napi.h"
 #include "audio_parameters_napi.h"
 #include "hilog/log.h"
 #include "media_log.h"
+#include "napi_base_context.h"
 #include "securec.h"
 
 using namespace std;
@@ -419,7 +422,7 @@ napi_value AudioRendererNapi::Init(napi_env env, napi_value exports)
     return result;
 }
 
-shared_ptr<AbilityRuntime::Context> AudioRendererNapi::GetAbilityContext(napi_env env)
+static shared_ptr<AbilityRuntime::Context> GetAbilityContext(napi_env env)
 {
     HiLog::Info(LABEL, "Getting context with FA model");
     auto ability = OHOS::AbilityRuntime::GetCurrentAbility(env);
@@ -452,9 +455,13 @@ napi_value AudioRendererNapi::Construct(napi_env env, napi_callback_info info)
     rendererNapi->contentType_ = sAudioRendererOptions_->rendererInfo.contentType;
     rendererNapi->streamUsage_ = sAudioRendererOptions_->rendererInfo.streamUsage;
     rendererNapi->rendererFlags_ = sAudioRendererOptions_->rendererInfo.rendererFlags;
-    rendererNapi->abilityContext_ = GetAbilityContext(env);
+    std::shared_ptr<AbilityRuntime::Context> abilityContext = GetAbilityContext(env);
+    if (abilityContext != nullptr) {
+        rendererNapi->audioRenderer_ = AudioRenderer::Create(abilityContext->GetCacheDir(), *sAudioRendererOptions_);
+    } else {
+        rendererNapi->audioRenderer_ = AudioRenderer::Create(*sAudioRendererOptions_);
+    }
 
-    rendererNapi->audioRenderer_ = AudioRenderer::Create(rendererNapi->abilityContext_, *sAudioRendererOptions_);
     CHECK_AND_RETURN_RET_LOG(rendererNapi->audioRenderer_ != nullptr, result, "Renderer Create failed");
 
     if (rendererNapi->callbackNapi_ == nullptr) {
