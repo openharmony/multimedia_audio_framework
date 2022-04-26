@@ -39,7 +39,7 @@ std::unique_ptr<AudioRenderer> AudioRenderer::Create(AudioStreamType audioStream
 
 std::unique_ptr<AudioRenderer> AudioRenderer::Create(const AudioRendererOptions &rendererOptions)
 {
-    return Create(nullptr, rendererOptions);
+    return Create("", rendererOptions);
 }
 
 std::unique_ptr<AudioRenderer> AudioRenderer::Create(const std::string cachePath,

@@ -2232,9 +2232,9 @@ HWTEST(AudioRendererUnitTest, Audio_Renderer_Flush_004, TestSize.Level1)
 }
 
 /**
-* @tc.name  : Test Flush API via illegal state, RENDERER_STOPPED: call Stop before Flush.
+* @tc.name  : Test Flush API: call Stop before Flush.
 * @tc.number: Audio_Renderer_Flush_005
-* @tc.desc  : Test Flush interface. Returns false, if the renderer state is not RENDERER_RUNNING or RENDERER_PAUSED.
+* @tc.desc  : Test Flush interface. Returns true, if the renderer state is RENDERER_STOPPED.
 */
 HWTEST(AudioRendererUnitTest, Audio_Renderer_Flush_005, TestSize.Level1)
 {
@@ -2251,7 +2251,7 @@ HWTEST(AudioRendererUnitTest, Audio_Renderer_Flush_005, TestSize.Level1)
     EXPECT_EQ(true, isStopped);
 
     bool isFlushed = audioRenderer->Flush();
-    EXPECT_EQ(false, isFlushed);
+    EXPECT_EQ(true, isFlushed);
 
     audioRenderer->Release();
 }
