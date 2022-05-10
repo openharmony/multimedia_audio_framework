@@ -1550,9 +1550,9 @@ HWTEST(AudioCapturerUnitTest, Audio_Capturer_Flush_003, TestSize.Level1)
 }
 
 /**
-* @tc.name  : Test Flush API via illegal state, CAPTURER_STOPPED: call Stop before Flush.
+* @tc.name  : Test Flush API: call Stop before Flush.
 * @tc.number: Audio_Capturer_Flush_004
-* @tc.desc  : Test Flush interface. Returns false, if the capturer state is not CAPTURER_RUNNING.
+* @tc.desc  : Test Flush interface. Returns true, if the capturer state is CAPTURER_STOPPED.
 */
 HWTEST(AudioCapturerUnitTest, Audio_Capturer_Flush_004, TestSize.Level1)
 {
@@ -1569,7 +1569,7 @@ HWTEST(AudioCapturerUnitTest, Audio_Capturer_Flush_004, TestSize.Level1)
     EXPECT_EQ(true, isStopped);
 
     bool isFlushed = audioCapturer->Flush();
-    EXPECT_EQ(false, isFlushed);
+    EXPECT_EQ(true, isFlushed);
 
     audioCapturer->Release();
 }

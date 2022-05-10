@@ -68,6 +68,7 @@ static void AudioOnConnectionChanged(const RawAddress &device, int state)
 
 static BtA2dpAudioCallback g_hdiCallacks = {
     .OnPlayingStatusChanged = AudioOnPlayingStatusChanged,
+    .OnConfigurationChanged = AudioOnConfigurationChanged,
     .OnConnectionStateChanged = AudioOnConnectionChanged,
 };
 

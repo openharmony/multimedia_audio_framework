@@ -82,6 +82,8 @@ int AudioManagerStub::OnRemoteRequest(
             if (size > 0) {
                 MEDIA_DEBUG_LOG("cookie received from server");
                 reply.WriteRawData(static_cast<const void *>(cookieInfo), size);
+                free((void *)cookieInfo);
+                cookieInfo = nullptr;
             }
 
             return MEDIA_OK;

@@ -257,7 +257,7 @@ HWTEST(AudioRendererUnitTest, Audio_Renderer_Create_007, TestSize.Level0)
 *             rendererOptions.rendererInfo.streamUsage = STREAM_USAGE_MEDIA;
 *             rendererOptions.rendererInfo.rendererFlags = RENDERER_FLAG;
 */
-HWTEST(AudioRendererUnitTest, Audio_Renderer_Create_008, TestSize.Level0)
+HWTEST(AudioRendererUnitTest, Audio_Renderer_Create_008, TestSize.Level1)
 {
     AudioRendererOptions rendererOptions;
     rendererOptions.streamInfo.samplingRate = AudioSamplingRate::SAMPLE_RATE_96000;
@@ -286,7 +286,7 @@ HWTEST(AudioRendererUnitTest, Audio_Renderer_Create_008, TestSize.Level0)
 *             rendererOptions.rendererInfo.streamUsage = STREAM_USAGE_MEDIA;
 *             rendererOptions.rendererInfo.rendererFlags = RENDERER_FLAG;
 */
-HWTEST(AudioRendererUnitTest, Audio_Renderer_Create_009, TestSize.Level0)
+HWTEST(AudioRendererUnitTest, Audio_Renderer_Create_009, TestSize.Level1)
 {
     AudioRendererOptions rendererOptions;
     rendererOptions.streamInfo.samplingRate = AudioSamplingRate::SAMPLE_RATE_8000;
@@ -315,7 +315,7 @@ HWTEST(AudioRendererUnitTest, Audio_Renderer_Create_009, TestSize.Level0)
 *             rendererOptions.rendererInfo.streamUsage = STREAM_USAGE_NOTIFICATION_RINGTONE;
 *             rendererOptions.rendererInfo.rendererFlags = RENDERER_FLAG;
 */
-HWTEST(AudioRendererUnitTest, Audio_Renderer_Create_010, TestSize.Level0)
+HWTEST(AudioRendererUnitTest, Audio_Renderer_Create_010, TestSize.Level1)
 {
     AudioRendererOptions rendererOptions;
     rendererOptions.streamInfo.samplingRate = AudioSamplingRate::SAMPLE_RATE_64000;
@@ -344,7 +344,7 @@ HWTEST(AudioRendererUnitTest, Audio_Renderer_Create_010, TestSize.Level0)
 *             rendererOptions.rendererInfo.streamUsage = STREAM_USAGE_MEDIA;
 *             rendererOptions.rendererInfo.rendererFlags = RENDERER_FLAG;
 */
-HWTEST(AudioRendererUnitTest, Audio_Renderer_Create_011, TestSize.Level0)
+HWTEST(AudioRendererUnitTest, Audio_Renderer_Create_011, TestSize.Level1)
 {
     AudioRendererOptions rendererOptions;
     rendererOptions.streamInfo.samplingRate = AudioSamplingRate::SAMPLE_RATE_48000;
@@ -373,7 +373,7 @@ HWTEST(AudioRendererUnitTest, Audio_Renderer_Create_011, TestSize.Level0)
 *             rendererOptions.rendererInfo.streamUsage = STREAM_USAGE_VOICE_ASSISTANT;
 *             rendererOptions.rendererInfo.rendererFlags = RENDERER_FLAG;
 */
-HWTEST(AudioRendererUnitTest, Audio_Renderer_Create_012, TestSize.Level0)
+HWTEST(AudioRendererUnitTest, Audio_Renderer_Create_012, TestSize.Level1)
 {
     AudioRendererOptions rendererOptions;
     rendererOptions.streamInfo.samplingRate = AudioSamplingRate::SAMPLE_RATE_44100;
@@ -402,7 +402,7 @@ HWTEST(AudioRendererUnitTest, Audio_Renderer_Create_012, TestSize.Level0)
 *             rendererOptions.rendererInfo.streamUsage = STREAM_USAGE_VOICE_COMMUNICATION;
 *             rendererOptions.rendererInfo.rendererFlags = RENDERER_FLAG;
 */
-HWTEST(AudioRendererUnitTest, Audio_Renderer_Create_013, TestSize.Level0)
+HWTEST(AudioRendererUnitTest, Audio_Renderer_Create_013, TestSize.Level1)
 {
     AudioRendererOptions rendererOptions;
     rendererOptions.streamInfo.samplingRate = AudioSamplingRate::SAMPLE_RATE_22050;
@@ -431,7 +431,7 @@ HWTEST(AudioRendererUnitTest, Audio_Renderer_Create_013, TestSize.Level0)
 *             rendererOptions.rendererInfo.streamUsage = STREAM_USAGE_VOICE_ASSISTANT;
 *             rendererOptions.rendererInfo.rendererFlags = RENDERER_FLAG;
 */
-HWTEST(AudioRendererUnitTest, Audio_Renderer_Create_014, TestSize.Level0)
+HWTEST(AudioRendererUnitTest, Audio_Renderer_Create_014, TestSize.Level1)
 {
     AudioRendererOptions rendererOptions;
     rendererOptions.streamInfo.samplingRate = AudioSamplingRate::SAMPLE_RATE_12000;
@@ -2232,9 +2232,9 @@ HWTEST(AudioRendererUnitTest, Audio_Renderer_Flush_004, TestSize.Level1)
 }
 
 /**
-* @tc.name  : Test Flush API via illegal state, RENDERER_STOPPED: call Stop before Flush.
+* @tc.name  : Test Flush API: call Stop before Flush.
 * @tc.number: Audio_Renderer_Flush_005
-* @tc.desc  : Test Flush interface. Returns false, if the renderer state is not RENDERER_RUNNING or RENDERER_PAUSED.
+* @tc.desc  : Test Flush interface. Returns true, if the renderer state is RENDERER_STOPPED.
 */
 HWTEST(AudioRendererUnitTest, Audio_Renderer_Flush_005, TestSize.Level1)
 {
@@ -2251,7 +2251,7 @@ HWTEST(AudioRendererUnitTest, Audio_Renderer_Flush_005, TestSize.Level1)
     EXPECT_EQ(true, isStopped);
 
     bool isFlushed = audioRenderer->Flush();
-    EXPECT_EQ(false, isFlushed);
+    EXPECT_EQ(true, isFlushed);
 
     audioRenderer->Release();
 }

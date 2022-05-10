@@ -479,6 +479,13 @@ public:
      */
     int32_t SaveWriteCallback(const std::weak_ptr<AudioRendererWriteCallback> &callback);
 
+    /**
+     * @brief Set the applicationcache path to access the application resources
+     *
+     * @return none
+     */
+    void SetApplicationCachePath(const std::string cachePath);
+
     // Audio timer callback
     virtual void OnTimeOut();
 
@@ -505,6 +512,7 @@ private:
     bool isStreamConnected;
 
     std::string appCookiePath = "";
+    std::string cachePath_ = "";
 
     float mVolumeFactor;
     AudioStreamType mStreamType;

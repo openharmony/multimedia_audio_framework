@@ -373,6 +373,7 @@ struct AudioInterrupt {
     ContentType contentType;
     AudioStreamType streamType;
     uint32_t sessionID;
+    bool pauseWhenDucked;
 };
 
 struct VolumeEvent {
@@ -508,15 +509,15 @@ static inline bool FLOAT_COMPARE_EQ(const float& x, const float& y)
 // Below APIs are added to handle compilation error in call manager
 // Once call manager adapt to new interrupt APIs, this will be removed
 enum InterruptActionType {
-    TYPE_ACTIVATED = 1,
-    TYPE_INTERRUPTED = 2,
-    TYPE_DEACTIVATED = 3
+    TYPE_ACTIVATED = 0,
+    TYPE_INTERRUPT = 1
 };
 
 struct InterruptAction {
     InterruptActionType actionType;
     InterruptType interruptType;
     InterruptHint interruptHint;
+    bool activated;
 };
 
 enum AudioServiceIndex {

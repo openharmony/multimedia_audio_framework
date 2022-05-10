@@ -14,6 +14,7 @@
  */
 
 #include "audio_renderer_napi.h"
+#include "ability.h"
 #include "audio_renderer_callback_napi.h"
 #include "renderer_period_position_callback_napi.h"
 #include "renderer_position_callback_napi.h"
@@ -24,6 +25,7 @@
 #include "audio_parameters_napi.h"
 #include "hilog/log.h"
 #include "media_log.h"
+#include "napi_base_context.h"
 #include "securec.h"
 
 using namespace std;
@@ -419,6 +421,24 @@ napi_value AudioRendererNapi::Init(napi_env env, napi_value exports)
     return result;
 }
 
+static shared_ptr<AbilityRuntime::Context> GetAbilityContext(napi_env env)
+{
+    HiLog::Info(LABEL, "Getting context with FA model");
+    auto ability = OHOS::AbilityRuntime::GetCurrentAbility(env);
+    if (ability == nullptr) {
+        HiLog::Error(LABEL, "Failed to obtain ability in FA mode");
+        return nullptr;
+    }
+
+    auto faContext = ability->GetAbilityContext();
+    if (faContext == nullptr) {
+        HiLog::Error(LABEL, "GetAbilityContext returned null in FA model");
+        return nullptr;
+    }
+
+    return faContext;
+}
+
 napi_value AudioRendererNapi::Construct(napi_env env, napi_callback_info info)
 {
     napi_status status;
@@ -434,8 +454,13 @@ napi_value AudioRendererNapi::Construct(napi_env env, napi_callback_info info)
     rendererNapi->contentType_ = sAudioRendererOptions_->rendererInfo.contentType;
     rendererNapi->streamUsage_ = sAudioRendererOptions_->rendererInfo.streamUsage;
     rendererNapi->rendererFlags_ = sAudioRendererOptions_->rendererInfo.rendererFlags;
+    std::shared_ptr<AbilityRuntime::Context> abilityContext = GetAbilityContext(env);
+    if (abilityContext != nullptr) {
+        rendererNapi->audioRenderer_ = AudioRenderer::Create(abilityContext->GetCacheDir(), *sAudioRendererOptions_);
+    } else {
+        rendererNapi->audioRenderer_ = AudioRenderer::Create(*sAudioRendererOptions_);
+    }
 
-    rendererNapi->audioRenderer_ = AudioRenderer::Create(*sAudioRendererOptions_);
     CHECK_AND_RETURN_RET_LOG(rendererNapi->audioRenderer_ != nullptr, result, "Renderer Create failed");
 
     if (rendererNapi->callbackNapi_ == nullptr) {

@@ -58,7 +58,9 @@ public:
 
     virtual int32_t UnsetRingerModeCallback(const int32_t clientId) = 0;
 
-    virtual int32_t SetDeviceChangeCallback(const sptr<IRemoteObject> &object) = 0;
+    virtual int32_t SetDeviceChangeCallback(const int32_t clientId, const sptr<IRemoteObject> &object) = 0;
+
+    virtual int32_t UnsetDeviceChangeCallback(const int32_t clientId) = 0;
 
     virtual int32_t SetAudioInterruptCallback(const uint32_t sessionID, const sptr<IRemoteObject> &object) = 0;
 
@@ -67,6 +69,14 @@ public:
     virtual int32_t ActivateAudioInterrupt(const AudioInterrupt &audioInterrupt) = 0;
 
     virtual int32_t DeactivateAudioInterrupt(const AudioInterrupt &audioInterrupt) = 0;
+
+    virtual int32_t SetAudioManagerInterruptCallback(const uint32_t clientID, const sptr<IRemoteObject> &object) = 0;
+
+    virtual int32_t UnsetAudioManagerInterruptCallback(const uint32_t clientID) = 0;
+
+    virtual int32_t RequestAudioFocus(const uint32_t clientID, const AudioInterrupt &audioInterrupt) = 0;
+
+    virtual int32_t AbandonAudioFocus(const uint32_t clientID, const AudioInterrupt &audioInterrupt) = 0;
 
     virtual AudioStreamType GetStreamInFocus() = 0;
 

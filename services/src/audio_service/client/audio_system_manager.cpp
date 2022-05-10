@@ -29,6 +29,8 @@ namespace OHOS {
 namespace AudioStandard {
 using namespace std;
 static sptr<IStandardAudioService> g_sProxy = nullptr;
+const map<pair<ContentType, StreamUsage>, AudioStreamType> AudioSystemManager::streamTypeMap_
+    = AudioSystemManager::CreateStreamMap();
 
 AudioSystemManager::AudioSystemManager()
 {
@@ -55,6 +57,70 @@ AudioSystemManager *AudioSystemManager::GetInstance()
     return &audioManager;
 }
 
+uint32_t AudioSystemManager::GetCallingPid()
+{
+    return getpid();
+}
+
+map<pair<ContentType, StreamUsage>, AudioStreamType> AudioSystemManager::CreateStreamMap()
+{
+    map<pair<ContentType, StreamUsage>, AudioStreamType> streamMap;
+
+    streamMap[make_pair(CONTENT_TYPE_UNKNOWN, STREAM_USAGE_UNKNOWN)] = AudioStreamType::STREAM_MUSIC;
+    streamMap[make_pair(CONTENT_TYPE_UNKNOWN, STREAM_USAGE_MEDIA)] = AudioStreamType::STREAM_MUSIC;
+    streamMap[make_pair(CONTENT_TYPE_UNKNOWN, STREAM_USAGE_VOICE_COMMUNICATION)] = AudioStreamType::STREAM_MUSIC;
+    streamMap[make_pair(CONTENT_TYPE_UNKNOWN, STREAM_USAGE_VOICE_ASSISTANT)] = AudioStreamType::STREAM_MUSIC;
+    streamMap[make_pair(CONTENT_TYPE_UNKNOWN, STREAM_USAGE_NOTIFICATION_RINGTONE)] = AudioStreamType::STREAM_MUSIC;
+
+    streamMap[make_pair(CONTENT_TYPE_SPEECH, STREAM_USAGE_UNKNOWN)] = AudioStreamType::STREAM_MUSIC;
+    streamMap[make_pair(CONTENT_TYPE_SPEECH, STREAM_USAGE_MEDIA)] = AudioStreamType::STREAM_VOICE_ASSISTANT;
+    streamMap[make_pair(CONTENT_TYPE_SPEECH, STREAM_USAGE_VOICE_COMMUNICATION)] = AudioStreamType::STREAM_VOICE_CALL;
+    streamMap[make_pair(CONTENT_TYPE_SPEECH, STREAM_USAGE_VOICE_ASSISTANT)] = AudioStreamType::STREAM_VOICE_ASSISTANT;
+    streamMap[make_pair(CONTENT_TYPE_SPEECH, STREAM_USAGE_NOTIFICATION_RINGTONE)] = AudioStreamType::STREAM_MUSIC;
+
+    streamMap[make_pair(CONTENT_TYPE_MUSIC, STREAM_USAGE_UNKNOWN)] = AudioStreamType::STREAM_MUSIC;
+    streamMap[make_pair(CONTENT_TYPE_MUSIC, STREAM_USAGE_MEDIA)] = AudioStreamType::STREAM_MUSIC;
+    streamMap[make_pair(CONTENT_TYPE_MUSIC, STREAM_USAGE_VOICE_COMMUNICATION)] = AudioStreamType::STREAM_MUSIC;
+    streamMap[make_pair(CONTENT_TYPE_MUSIC, STREAM_USAGE_VOICE_ASSISTANT)] = AudioStreamType::STREAM_VOICE_ASSISTANT;
+    streamMap[make_pair(CONTENT_TYPE_MUSIC, STREAM_USAGE_NOTIFICATION_RINGTONE)] = AudioStreamType::STREAM_RING;
+
+    streamMap[make_pair(CONTENT_TYPE_MOVIE, STREAM_USAGE_UNKNOWN)] = AudioStreamType::STREAM_MEDIA;
+    streamMap[make_pair(CONTENT_TYPE_MOVIE, STREAM_USAGE_MEDIA)] = AudioStreamType::STREAM_MEDIA;
+    streamMap[make_pair(CONTENT_TYPE_MOVIE, STREAM_USAGE_VOICE_COMMUNICATION)] = AudioStreamType::STREAM_MUSIC;
+    streamMap[make_pair(CONTENT_TYPE_MOVIE, STREAM_USAGE_VOICE_ASSISTANT)] = AudioStreamType::STREAM_MUSIC;
+    streamMap[make_pair(CONTENT_TYPE_MOVIE, STREAM_USAGE_NOTIFICATION_RINGTONE)] = AudioStreamType::STREAM_MUSIC;
+
+    streamMap[make_pair(CONTENT_TYPE_SONIFICATION, STREAM_USAGE_UNKNOWN)] = AudioStreamType::STREAM_NOTIFICATION;
+    streamMap[make_pair(CONTENT_TYPE_SONIFICATION, STREAM_USAGE_MEDIA)] = AudioStreamType::STREAM_NOTIFICATION;
+    streamMap[make_pair(CONTENT_TYPE_SONIFICATION, STREAM_USAGE_VOICE_COMMUNICATION)] = AudioStreamType::STREAM_MUSIC;
+    streamMap[make_pair(CONTENT_TYPE_SONIFICATION, STREAM_USAGE_VOICE_ASSISTANT)] = AudioStreamType::STREAM_MUSIC;
+    streamMap[make_pair(CONTENT_TYPE_SONIFICATION, STREAM_USAGE_NOTIFICATION_RINGTONE)] = AudioStreamType::STREAM_MUSIC;
+
+    streamMap[make_pair(CONTENT_TYPE_RINGTONE, STREAM_USAGE_UNKNOWN)] = AudioStreamType::STREAM_RING;
+    streamMap[make_pair(CONTENT_TYPE_RINGTONE, STREAM_USAGE_MEDIA)] = AudioStreamType::STREAM_RING;
+    streamMap[make_pair(CONTENT_TYPE_RINGTONE, STREAM_USAGE_VOICE_COMMUNICATION)] = AudioStreamType::STREAM_MUSIC;
+    streamMap[make_pair(CONTENT_TYPE_RINGTONE, STREAM_USAGE_VOICE_ASSISTANT)] = AudioStreamType::STREAM_MUSIC;
+    streamMap[make_pair(CONTENT_TYPE_RINGTONE, STREAM_USAGE_NOTIFICATION_RINGTONE)] = AudioStreamType::STREAM_RING;
+
+    return streamMap;
+}
+
+AudioStreamType AudioSystemManager::GetStreamType(ContentType contentType, StreamUsage streamUsage)
+{
+    AudioStreamType streamType = AudioStreamType::STREAM_MUSIC;
+    auto pos = streamTypeMap_.find(make_pair(contentType, streamUsage));
+    if (pos != streamTypeMap_.end()) {
+        streamType = pos->second;
+    }
+
+    if (streamType == AudioStreamType::STREAM_MEDIA) {
+        streamType = AudioStreamType::STREAM_MUSIC;
+    }
+
+    return streamType;
+}
+
+
 void AudioSystemManager::init()
 {
     auto samgr = SystemAbilityManagerClient::GetInstance().GetSystemAbilityManager();
@@ -66,6 +132,7 @@ void AudioSystemManager::init()
     sptr<IRemoteObject> object = samgr->GetSystemAbility(AUDIO_DISTRIBUTED_SERVICE_ID);
     if (object == nullptr) {
         MEDIA_DEBUG_LOG("AudioSystemManager::object is NULL.");
+        return;
     }
     g_sProxy = iface_cast<IStandardAudioService>(object);
     if (g_sProxy == nullptr) {
@@ -147,16 +214,19 @@ bool AudioSystemManager::IsStreamActive(AudioSystemManager::AudioVolumeType volu
 
 const std::string AudioSystemManager::GetAudioParameter(const std::string key) const
 {
+    CHECK_AND_RETURN_RET_LOG(g_sProxy != nullptr, "", "GetAudioParameter::Audio service unavailable");
     return g_sProxy->GetAudioParameter(key);
 }
 
 void AudioSystemManager::SetAudioParameter(const std::string &key, const std::string &value) const
 {
+    CHECK_AND_RETURN_LOG(g_sProxy != nullptr, "SetAudioParameter::Audio service unavailable");
     g_sProxy->SetAudioParameter(key, value);
 }
 
 const char *AudioSystemManager::RetrieveCookie(int32_t &size) const
 {
+    CHECK_AND_RETURN_RET_LOG(g_sProxy != nullptr, nullptr, "RetrieveCookie::Audio service unavailable");
     return g_sProxy->RetrieveCookie(size);
 }
 
@@ -223,11 +293,13 @@ int32_t AudioSystemManager::MapVolumeFromHDI(float volume)
 
 int32_t AudioSystemManager::GetMaxVolume(AudioSystemManager::AudioVolumeType volumeType) const
 {
+    CHECK_AND_RETURN_RET_LOG(g_sProxy != nullptr, ERR_OPERATION_FAILED, "GetMaxVolume::Audio service unavailable");
     return g_sProxy->GetMaxVolume(volumeType);
 }
 
 int32_t AudioSystemManager::GetMinVolume(AudioSystemManager::AudioVolumeType volumeType) const
 {
+    CHECK_AND_RETURN_RET_LOG(g_sProxy != nullptr, ERR_OPERATION_FAILED, "GetMinVolume::Audio service unavailable");
     return g_sProxy->GetMinVolume(volumeType);
 }
 
@@ -279,7 +351,15 @@ int32_t AudioSystemManager::SetDeviceChangeCallback(const std::shared_ptr<AudioM
         return ERR_INVALID_PARAM;
     }
 
-    return AudioPolicyManager::GetInstance().SetDeviceChangeCallback(callback);
+    int32_t clientId = GetCallingPid();
+    return AudioPolicyManager::GetInstance().SetDeviceChangeCallback(clientId, callback);
+}
+
+int32_t AudioSystemManager::UnsetDeviceChangeCallback()
+{
+    MEDIA_INFO_LOG("Entered AudioSystemManager::%{public}s", __func__);
+    int32_t clientId = GetCallingPid();
+    return AudioPolicyManager::GetInstance().UnsetDeviceChangeCallback(clientId);
 }
 
 int32_t AudioSystemManager::SetRingerModeCallback(const int32_t clientId,
@@ -302,11 +382,13 @@ int32_t AudioSystemManager::UnsetRingerModeCallback(const int32_t clientId) cons
 
 int32_t AudioSystemManager::SetMicrophoneMute(bool isMute) const
 {
+    CHECK_AND_RETURN_RET_LOG(g_sProxy != nullptr, ERR_OPERATION_FAILED, "SetMicrophoneMute::Audio service unavailable");
     return g_sProxy->SetMicrophoneMute(isMute);
 }
 
 bool AudioSystemManager::IsMicrophoneMute() const
 {
+    CHECK_AND_RETURN_RET_LOG(g_sProxy != nullptr, ERR_OPERATION_FAILED, "IsMicrophoneMute::Audio service unavailable");
     return g_sProxy->IsMicrophoneMute();
 }
 
@@ -366,6 +448,121 @@ int32_t AudioSystemManager::DeactivateAudioInterrupt(const AudioInterrupt &audio
 {
     MEDIA_DEBUG_LOG("AudioSystemManager DeactivateAudioInterrupt stub implementation");
     return SUCCESS;
+}
+
+int32_t AudioSystemManager::SetAudioManagerInterruptCallback(const std::shared_ptr<AudioManagerCallback> &callback)
+{
+    uint32_t clientID = GetCallingPid();
+    MEDIA_INFO_LOG("AudioSystemManager:: SetAudioManagerInterruptCallback client id: %{public}d", clientID);
+    if (callback == nullptr) {
+        MEDIA_ERR_LOG("AudioSystemManager::callback is null");
+        return ERR_INVALID_PARAM;
+    }
+
+    if (audioInterruptCallback_ != nullptr) {
+        MEDIA_DEBUG_LOG("AudioSystemManager reset existing callback object");
+        AudioPolicyManager::GetInstance().UnsetAudioManagerInterruptCallback(clientID);
+        audioInterruptCallback_.reset();
+        audioInterruptCallback_ = nullptr;
+    }
+
+    audioInterruptCallback_ = std::make_shared<AudioManagerInterruptCallbackImpl>();
+    if (audioInterruptCallback_ == nullptr) {
+        MEDIA_ERR_LOG("AudioSystemManager::Failed to allocate memory for audioInterruptCallback");
+        return ERROR;
+    }
+
+    int32_t ret = AudioPolicyManager::GetInstance().SetAudioManagerInterruptCallback(clientID, audioInterruptCallback_);
+    if (ret != SUCCESS) {
+        MEDIA_ERR_LOG("AudioSystemManager::Failed set callback");
+        return ERROR;
+    }
+
+    std::shared_ptr<AudioManagerInterruptCallbackImpl> cbInterrupt =
+        std::static_pointer_cast<AudioManagerInterruptCallbackImpl>(audioInterruptCallback_);
+    cbInterrupt->SaveCallback(callback);
+
+    return SUCCESS;
+}
+
+int32_t AudioSystemManager::UnsetAudioManagerInterruptCallback()
+{
+    uint32_t clientID = GetCallingPid();
+    MEDIA_INFO_LOG("AudioSystemManager:: UnsetAudioManagerInterruptCallback client id: %{public}d", clientID);
+
+    int32_t ret = AudioPolicyManager::GetInstance().UnsetAudioManagerInterruptCallback(clientID);
+    if (audioInterruptCallback_ != nullptr) {
+        audioInterruptCallback_.reset();
+        audioInterruptCallback_ = nullptr;
+    }
+
+    return ret;
+}
+
+int32_t AudioSystemManager::RequestAudioFocus(const AudioInterrupt &audioInterrupt)
+{
+    uint32_t clientID = GetCallingPid();
+    MEDIA_INFO_LOG("AudioSystemManager:: RequestAudioFocus client id: %{public}d", clientID);
+    CHECK_AND_RETURN_RET_LOG(audioInterrupt.contentType >= CONTENT_TYPE_UNKNOWN
+                             && audioInterrupt.contentType <= CONTENT_TYPE_RINGTONE, ERR_INVALID_PARAM,
+                             "Invalid content type");
+    CHECK_AND_RETURN_RET_LOG(audioInterrupt.streamUsage >= STREAM_USAGE_UNKNOWN
+                             && audioInterrupt.streamUsage <= STREAM_USAGE_NOTIFICATION_RINGTONE,
+                             ERR_INVALID_PARAM, "Invalid stream usage");
+    CHECK_AND_RETURN_RET_LOG(audioInterrupt.streamType >= AudioStreamType::STREAM_VOICE_CALL
+                             && audioInterrupt.streamType <= AudioStreamType::STREAM_ACCESSIBILITY,
+                             ERR_INVALID_PARAM, "Invalid stream type");
+    return AudioPolicyManager::GetInstance().RequestAudioFocus(clientID, audioInterrupt);
+}
+
+int32_t AudioSystemManager::AbandonAudioFocus(const AudioInterrupt &audioInterrupt)
+{
+    uint32_t clientID = GetCallingPid();
+    MEDIA_INFO_LOG("AudioSystemManager:: AbandonAudioFocus client id: %{public}d", clientID);
+    CHECK_AND_RETURN_RET_LOG(audioInterrupt.contentType >= CONTENT_TYPE_UNKNOWN
+                             && audioInterrupt.contentType <= CONTENT_TYPE_RINGTONE, ERR_INVALID_PARAM,
+                             "Invalid content type");
+    CHECK_AND_RETURN_RET_LOG(audioInterrupt.streamUsage >= STREAM_USAGE_UNKNOWN
+                             && audioInterrupt.streamUsage <= STREAM_USAGE_NOTIFICATION_RINGTONE,
+                             ERR_INVALID_PARAM, "Invalid stream usage");
+    CHECK_AND_RETURN_RET_LOG(audioInterrupt.streamType >= AudioStreamType::STREAM_VOICE_CALL
+                             && audioInterrupt.streamType <= AudioStreamType::STREAM_ACCESSIBILITY,
+                             ERR_INVALID_PARAM, "Invalid stream type");
+    return AudioPolicyManager::GetInstance().AbandonAudioFocus(clientID, audioInterrupt);
+}
+
+AudioManagerInterruptCallbackImpl::AudioManagerInterruptCallbackImpl()
+{
+    MEDIA_INFO_LOG("AudioManagerInterruptCallbackImpl constructor");
+}
+
+AudioManagerInterruptCallbackImpl::~AudioManagerInterruptCallbackImpl()
+{
+    MEDIA_DEBUG_LOG("AudioManagerInterruptCallbackImpl: instance destroy");
+}
+
+void AudioManagerInterruptCallbackImpl::SaveCallback(const std::weak_ptr<AudioManagerCallback> &callback)
+{
+    callback_ = callback;
+}
+
+void AudioManagerInterruptCallbackImpl::OnInterrupt(const InterruptEventInternal &interruptEvent)
+{
+    cb_ = callback_.lock();
+    if (cb_ != nullptr) {
+        InterruptAction interruptAction = {};
+        interruptAction.actionType = (interruptEvent.eventType == INTERRUPT_TYPE_BEGIN)
+            ? TYPE_INTERRUPT : TYPE_ACTIVATED;
+        interruptAction.interruptType = interruptEvent.eventType;
+        interruptAction.interruptHint = interruptEvent.hintType;
+        interruptAction.activated = (interruptEvent.eventType == INTERRUPT_TYPE_BEGIN) ? false : true;
+        cb_->OnInterrupt(interruptAction);
+        MEDIA_DEBUG_LOG("AudioManagerInterruptCallbackImpl: OnInterrupt : Notify event to app complete");
+    } else {
+        MEDIA_ERR_LOG("AudioManagerInterruptCallbackImpl: callback is null");
+    }
+
+    return;
 }
 } // namespace AudioStandard
 } // namespace OHOS

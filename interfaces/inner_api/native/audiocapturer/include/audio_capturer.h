@@ -111,6 +111,17 @@ public:
     static std::unique_ptr<AudioCapturer> Create(const AudioCapturerOptions &capturerOptions);
 
     /**
+     * @brief create capturer instance.
+     *
+     * @param cachePath Application cache path
+     * @param capturerOptions The audio capturer configuration to be used while creating capturer instance.
+     * refer AudioCapturerOptions in audio_info.h.
+     * @return Returns unique pointer to the AudioCapturer object
+    */
+    static std::unique_ptr<AudioCapturer> Create(const std::string cachePath,
+        const AudioCapturerOptions &capturerOptions);
+
+    /**
      * @brief Sets audio capture parameters.
      *
      * @param params Indicates information about audio capture parameters to set. For details, see
@@ -286,6 +297,14 @@ public:
      * defined in {@link audio_errors.h} otherwise.
      */
     virtual int32_t SetBufferDuration(uint64_t bufferDuration) const = 0;
+
+    /**
+     * @brief Set the application cache path to access the application resources
+     *
+     * @param cachePath Indicates application cache path.
+     * @return none
+     */
+    virtual void SetApplicationCachePath(const std::string cachePath) = 0;
 
     /**
      * @brief Obtains the capturer supported formats.

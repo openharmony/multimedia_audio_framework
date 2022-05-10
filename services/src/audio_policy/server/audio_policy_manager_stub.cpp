@@ -29,6 +29,14 @@ void AudioPolicyManagerStub::ReadAudioInterruptParams(MessageParcel &data, Audio
     audioInterrupt.sessionID = data.ReadUint32();
 }
 
+void AudioPolicyManagerStub::ReadAudioManagerInterruptParams(MessageParcel &data, AudioInterrupt &audioInterrupt)
+{
+    audioInterrupt.streamUsage = static_cast<StreamUsage>(data.ReadInt32());
+    audioInterrupt.contentType = static_cast<ContentType>(data.ReadInt32());
+    audioInterrupt.streamType = static_cast<AudioStreamType>(data.ReadInt32());
+    audioInterrupt.pauseWhenDucked = data.ReadBool();
+}
+
 void AudioPolicyManagerStub::WriteAudioInteruptParams(MessageParcel &reply, const AudioInterrupt &audioInterrupt)
 {
     reply.WriteInt32(static_cast<int32_t>(audioInterrupt.streamUsage));
@@ -159,12 +167,20 @@ void AudioPolicyManagerStub::UnsetRingerModeCallbackInternal(MessageParcel &data
 
 void AudioPolicyManagerStub::SetDeviceChangeCallbackInternal(MessageParcel &data, MessageParcel &reply)
 {
+    int32_t clientId = data.ReadInt32();
     sptr<IRemoteObject> object = data.ReadRemoteObject();
     if (object == nullptr) {
         MEDIA_ERR_LOG("AudioPolicyManagerStub: AudioInterruptCallback obj is null");
         return;
     }
-    int32_t result = SetDeviceChangeCallback(object);
+    int32_t result = SetDeviceChangeCallback(clientId, object);
+    reply.WriteInt32(result);
+}
+
+void AudioPolicyManagerStub::UnsetDeviceChangeCallbackInternal(MessageParcel &data, MessageParcel &reply)
+{
+    int32_t clientId = data.ReadInt32();
+    int32_t result = UnsetDeviceChangeCallback(clientId);
     reply.WriteInt32(result);
 }
 
@@ -200,6 +216,43 @@ void AudioPolicyManagerStub::DeactivateInterruptInternal(MessageParcel &data, Me
     AudioInterrupt audioInterrupt = {};
     ReadAudioInterruptParams(data, audioInterrupt);
     int32_t result = DeactivateAudioInterrupt(audioInterrupt);
+    reply.WriteInt32(result);
+}
+
+void AudioPolicyManagerStub::SetAudioManagerInterruptCbInternal(MessageParcel &data, MessageParcel &reply)
+{
+    uint32_t clientID = data.ReadUint32();
+    sptr<IRemoteObject> object = data.ReadRemoteObject();
+    if (object == nullptr) {
+        MEDIA_ERR_LOG("AudioPolicyManagerStub: AudioInterruptCallback obj is null");
+        return;
+    }
+    int32_t result = SetAudioManagerInterruptCallback(clientID, object);
+    reply.WriteInt32(result);
+}
+
+void AudioPolicyManagerStub::UnsetAudioManagerInterruptCbInternal(MessageParcel &data, MessageParcel &reply)
+{
+    uint32_t clientID = data.ReadUint32();
+    int32_t result = UnsetAudioManagerInterruptCallback(clientID);
+    reply.WriteInt32(result);
+}
+
+void AudioPolicyManagerStub::RequestAudioFocusInternal(MessageParcel &data, MessageParcel &reply)
+{
+    AudioInterrupt audioInterrupt = {};
+    uint32_t clientID = data.ReadUint32();
+    ReadAudioManagerInterruptParams(data, audioInterrupt);
+    int32_t result = RequestAudioFocus(clientID, audioInterrupt);
+    reply.WriteInt32(result);
+}
+
+void AudioPolicyManagerStub::AbandonAudioFocusInternal(MessageParcel &data, MessageParcel &reply)
+{
+    AudioInterrupt audioInterrupt = {};
+    uint32_t clientID = data.ReadUint32();
+    ReadAudioManagerInterruptParams(data, audioInterrupt);
+    int32_t result = AbandonAudioFocus(clientID, audioInterrupt);
     reply.WriteInt32(result);
 }
 
@@ -301,6 +354,10 @@ int AudioPolicyManagerStub::OnRemoteRequest(
             SetDeviceChangeCallbackInternal(data, reply);
             break;
 
+        case UNSET_DEVICE_CHANGE_CALLBACK:
+            UnsetDeviceChangeCallbackInternal(data, reply);
+            break;
+
         case SET_CALLBACK:
             SetInterruptCallbackInternal(data, reply);
             break;
@@ -315,6 +372,22 @@ int AudioPolicyManagerStub::OnRemoteRequest(
 
         case DEACTIVATE_INTERRUPT:
             DeactivateInterruptInternal(data, reply);
+            break;
+
+        case SET_INTERRUPT_CALLBACK:
+            SetAudioManagerInterruptCbInternal(data, reply);
+            break;
+
+        case UNSET_INTERRUPT_CALLBACK:
+            UnsetAudioManagerInterruptCbInternal(data, reply);
+            break;
+
+        case REQUEST_AUDIO_FOCUS:
+            RequestAudioFocusInternal(data, reply);
+            break;
+
+        case ABANDON_AUDIO_FOCUS:
+            AbandonAudioFocusInternal(data, reply);
             break;
 
         case SET_VOLUME_KEY_EVENT_CALLBACK:

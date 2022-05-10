@@ -139,6 +139,17 @@ public:
     static std::unique_ptr<AudioRenderer> Create(const AudioRendererOptions &rendererOptions);
 
     /**
+     * @brief create renderer instance.
+     *
+     * @param cachePath Application cache path
+     * @param rendererOptions The audio renderer configuration to be used while creating renderer instance.
+     * refer AudioRendererOptions in audio_info.h.
+     * @return Returns unique pointer to the AudioRenderer object
+    */
+    static std::unique_ptr<AudioRenderer> Create(const std::string cachePath,
+        const AudioRendererOptions &rendererOptions);
+
+    /**
      * @brief Sets audio renderer parameters.
      *
      * @param params Indicates information about audio renderer parameters to set. For details, see
@@ -483,6 +494,14 @@ public:
      * defined in {@link audio_errors.h} otherwise.
      */
     virtual int32_t GetBufQueueState(BufferQueueState &bufState) const = 0;
+
+    /**
+     * @brief Set the application cache path to access the application resources
+     *
+     * @param cachePath Indicates application cache path.
+     * @return none
+     */
+    virtual void SetApplicationCachePath(const std::string cachePath) = 0;
 
     virtual ~AudioRenderer();
 };

@@ -32,6 +32,12 @@ std::unique_ptr<AudioCapturer> AudioCapturer::Create(AudioStreamType audioStream
 
 std::unique_ptr<AudioCapturer> AudioCapturer::Create(const AudioCapturerOptions &capturerOptions)
 {
+    return Create("", capturerOptions);
+}
+
+std::unique_ptr<AudioCapturer> AudioCapturer::Create(const std::string cachePath,
+    const AudioCapturerOptions &capturerOptions)
+{
     auto sourceType = capturerOptions.capturerInfo.sourceType;
     if (sourceType < SOURCE_TYPE_MIC || sourceType > SOURCE_TYPE_VOICE_CALL) {
         return nullptr;
@@ -51,6 +57,11 @@ std::unique_ptr<AudioCapturer> AudioCapturer::Create(const AudioCapturerOptions 
     auto capturer = std::make_unique<AudioCapturerPrivate>(audioStreamType);
     if (capturer == nullptr) {
         return capturer;
+    }
+
+    if (!cachePath.empty()) {
+        MEDIA_DEBUG_LOG("Set application cache path");
+        capturer->SetApplicationCachePath(cachePath);
     }
 
     if (capturer->SetParams(params) != SUCCESS) {
@@ -233,6 +244,11 @@ int32_t AudioCapturerPrivate::SetBufferDuration(uint64_t bufferDuration) const
         return ERR_INVALID_PARAM;
     }
     return audioStream_->SetBufferSizeInMsec(bufferDuration);
+}
+
+void AudioCapturerPrivate::SetApplicationCachePath(const std::string cachePath)
+{
+    audioStream_->SetApplicationCachePath(cachePath);
 }
 
 void AudioStreamCallbackCapturer::SaveCallback(const std::weak_ptr<AudioCapturerCallback> &callback)

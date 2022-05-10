@@ -21,8 +21,8 @@
 
 class BluetoothA2dpSrcObserver : public OHOS::Bluetooth::BluetoothA2dpAudioSrcObserverStub {
 public:
-    BluetoothA2dpSrcObserver(OHOS::Bluetooth::BtA2dpAudioCallback *callbacks) : callbacks_(callbacks){};
-    ~BluetoothA2dpSrcObserver(){};
+    BluetoothA2dpSrcObserver(OHOS::Bluetooth::BtA2dpAudioCallback *callbacks) : callbacks_(callbacks) { };
+    ~BluetoothA2dpSrcObserver() { };
 
     void OnConnectionStateChanged(const bluetooth::RawAddress &device, int state);
     void OnPlayingStatusChanged(const bluetooth::RawAddress &device, int playingState, int error);

@@ -17,9 +17,11 @@
 #define ST_AUDIO_SYSTEM_MANAGER_H
 
 #include <cstdlib>
+#include <map>
 
 #include "parcel.h"
 #include "audio_info.h"
+#include "audio_interrupt_callback.h"
 
 namespace OHOS {
 namespace AudioStandard {
@@ -55,6 +57,18 @@ public:
      * For details, refer InterruptAction struct in audio_info.h
      */
     virtual void OnInterrupt(const InterruptAction &interruptAction) = 0;
+};
+
+class AudioManagerInterruptCallbackImpl : public AudioInterruptCallback {
+public:
+    explicit AudioManagerInterruptCallbackImpl();
+    virtual ~AudioManagerInterruptCallbackImpl();
+
+    void OnInterrupt(const InterruptEventInternal &interruptEvent) override;
+    void SaveCallback(const std::weak_ptr<AudioManagerCallback> &callback);
+private:
+    std::weak_ptr<AudioManagerCallback> callback_;
+    std::shared_ptr<AudioManagerCallback> cb_;
 };
 
 class AudioManagerDeviceChangeCallback {
@@ -163,6 +177,7 @@ public:
     static AudioSystemManager *GetInstance();
     static float MapVolumeToHDI(int32_t volume);
     static int32_t MapVolumeFromHDI(float volume);
+    static AudioStreamType GetStreamType(ContentType contentType, StreamUsage streamUsage);
     int32_t SetVolume(AudioSystemManager::AudioVolumeType volumeType, int32_t volume) const;
     int32_t GetVolume(AudioSystemManager::AudioVolumeType volumeType) const;
     int32_t GetMaxVolume(AudioSystemManager::AudioVolumeType volumeType) const;
@@ -183,6 +198,7 @@ public:
     int32_t SetAudioScene(const AudioScene &scene);
     AudioScene GetAudioScene() const;
     int32_t SetDeviceChangeCallback(const std::shared_ptr<AudioManagerDeviceChangeCallback> &callback);
+    int32_t UnsetDeviceChangeCallback();
     int32_t SetRingerModeCallback(const int32_t clientId,
                                   const std::shared_ptr<AudioRingerModeCallback> &callback);
     int32_t UnsetRingerModeCallback(const int32_t clientId) const;
@@ -197,6 +213,10 @@ public:
     int32_t UnsetAudioManagerCallback(const AudioSystemManager::AudioVolumeType streamType) const;
     int32_t ActivateAudioInterrupt(const AudioInterrupt &audioInterrupt);
     int32_t DeactivateAudioInterrupt(const AudioInterrupt &audioInterrupt) const;
+    int32_t SetAudioManagerInterruptCallback(const std::shared_ptr<AudioManagerCallback> &callback);
+    int32_t UnsetAudioManagerInterruptCallback();
+    int32_t RequestAudioFocus(const AudioInterrupt &audioInterrupt);
+    int32_t AbandonAudioFocus(const AudioInterrupt &audioInterrupt);
 private:
     AudioSystemManager();
     virtual ~AudioSystemManager();
@@ -204,9 +224,15 @@ private:
     static constexpr int32_t MAX_VOLUME_LEVEL = 15;
     static constexpr int32_t MIN_VOLUME_LEVEL = 0;
     static constexpr int32_t CONST_FACTOR = 100;
+    static const std::map<std::pair<ContentType, StreamUsage>, AudioStreamType> streamTypeMap_;
+    static std::map<std::pair<ContentType, StreamUsage>, AudioStreamType> CreateStreamMap();
+
     int32_t cbClientId_ = -1;
     int32_t volumeChangeClientPid_ = -1;
     std::shared_ptr<AudioManagerDeviceChangeCallback> deviceChangeCallback_ = nullptr;
+    std::shared_ptr<AudioInterruptCallback> audioInterruptCallback_ = nullptr;
+
+    uint32_t GetCallingPid();
 };
 } // namespace AudioStandard
 } // namespace OHOS

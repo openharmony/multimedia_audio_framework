@@ -354,7 +354,7 @@ std::string RingtonePlayer::GetTitle()
 
     shared_ptr<AbsSharedResultSet> resultSet = nullptr;
     resultSet = helper->Query(mediaLibUri, columns, predicates);
-    CHECK_AND_RETURN_RET_LOG(resultSet != nullptr, "", "Unable to fetch details for path %{public}s", uri.c_str());
+    CHECK_AND_RETURN_RET_LOG(resultSet != nullptr, "", "Unable to fetch details from path %s", uri.c_str());
 
     int ret = resultSet->GoToFirstRow();
     CHECK_AND_RETURN_RET_LOG(ret == SUCCESS, "", "Failed to obtain the record");

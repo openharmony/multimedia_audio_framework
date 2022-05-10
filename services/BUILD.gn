@@ -14,8 +14,6 @@
 import("//build/ohos.gni")
 import("//drivers/adapter/uhdf2/uhdf.gni")
 
-samgr_dir = "//foundation/distributedschedule/samgr"
-
 AUDIO_POLICY_SERVER_DIR =
     "//foundation/multimedia/audio_standard/services/src/audio_policy/server"
 
@@ -101,15 +99,16 @@ config("audio_policy_public_config") {
     "//foundation/multimedia/audio_standard/frameworks/native/audiopolicy/include",
     "//foundation/multimedia/audio_standard/interfaces/inner_api/native/audiocommon/include",
     "//foundation/multimedia/audio_standard/interfaces/inner_api/native/audiomanager/include",
-    "//foundation/multimedia/audio_standard/services/src/audio_policy/server/service/include/common",
-    "//foundation/multimedia/audio_standard/services/src/audio_policy/server/service/include/config",
-    "//foundation/multimedia/audio_standard/services/src/audio_policy/server/service/include/interface",
-    "//foundation/multimedia/audio_standard/services/src/audio_policy/server/service/include/listener",
-    "//foundation/multimedia/audio_standard/services/src/audio_policy/server/service/include/manager",
-    "//foundation/multimedia/audio_standard/services/src/audio_policy/server/service/include",
+    "//foundation/multimedia/audio_standard/services/include/audio_policy/server/service/common",
+    "//foundation/multimedia/audio_standard/services/include/audio_policy/server/service/config",
+    "//foundation/multimedia/audio_standard/services/include/audio_policy/server/service/interface",
+    "//foundation/multimedia/audio_standard/services/include/audio_policy/server/service/listener",
+    "//foundation/multimedia/audio_standard/services/include/audio_policy/server/service/manager",
+    "//foundation/multimedia/audio_standard/services/include/audio_policy/server/service",
     "//foundation/multimedia/audio_standard/services/include/audio_policy/common",
     "//foundation/multimedia/audio_standard/services/include/audio_policy/server",
     "//foundation/multimedia/audio_standard/services/include/audio_policy/client",
+    "//foundation/multimedia/audio_standard/services/include/audio_bluetooth/client",
     "//foundation/communication/ipc/interfaces/innerkits/ipc_core/include",
     "//foundation/distributedschedule/samgr/interfaces/innerkits/samgr_proxy/include",
     "//foundation/distributeddatamgr/distributeddatamgr/interfaces/innerkits/distributeddata/include",
@@ -133,26 +132,8 @@ config("audio_policy_public_config") {
   ]
 
   cflags = [
-    "-fPIC",
     "-Wall",
-    "-Wextra",
     "-Werror",
-    "-DGST_DISABLE_DEPRECATED",
-    "-DHAVE_CONFIG_H",
-    "-fno-strict-aliasing",
-    "-Wno-sign-compare",
-    "-Wno-builtin-requires-header",
-    "-Wno-implicit-function-declaration",
-    "-Wno-format",
-    "-Wno-int-conversion",
-    "-Wno-unused-function",
-    "-Wno-unused-parameter",
-    "-Wno-thread-safety-attributes",
-    "-Wno-inconsistent-missing-override",
-    "-fno-rtti",
-    "-fno-exceptions",
-    "-ffunction-sections",
-    "-fdata-sections",
   ]
 
   if (target_cpu == "arm") {
@@ -187,21 +168,18 @@ ohos_shared_library("audio_dump") {
 ohos_shared_library("audio_policy_service") {
   install_enable = true
   sources = [
-    "//foundation/multimedia/audio_standard/frameworks/native/audiorenderer/src/audio_bluetooth_manager.cpp",
-    "//foundation/multimedia/audio_standard/frameworks/native/audiorenderer/src/bluetooth_a2dp_audio_src_observer_stub.cpp",
-    "//foundation/multimedia/audio_standard/frameworks/native/audiorenderer/src/bluetooth_a2dp_src_observer.cpp",
     "//foundation/multimedia/audio_standard/services/src/audio_policy/client/audio_device_descriptor.cpp",
     "//foundation/multimedia/audio_standard/services/src/audio_policy/server/audio_policy_manager_listener_proxy.cpp",
     "//foundation/multimedia/audio_standard/services/src/audio_policy/server/audio_policy_manager_stub.cpp",
     "//foundation/multimedia/audio_standard/services/src/audio_policy/server/audio_policy_server.cpp",
     "//foundation/multimedia/audio_standard/services/src/audio_policy/server/audio_ringermode_update_listener_proxy.cpp",
     "//foundation/multimedia/audio_standard/services/src/audio_policy/server/audio_volume_key_event_callback_proxy.cpp",
-    "//foundation/multimedia/audio_standard/services/src/audio_policy/server/service/src/audio_policy_service.cpp",
-    "//foundation/multimedia/audio_standard/services/src/audio_policy/server/service/src/audio_policy_service_proxy.cpp",
-    "//foundation/multimedia/audio_standard/services/src/audio_policy/server/service/src/config/audio_focus_parser.cpp",
-    "//foundation/multimedia/audio_standard/services/src/audio_policy/server/service/src/config/xml_parser.cpp",
-    "//foundation/multimedia/audio_standard/services/src/audio_policy/server/service/src/listener/device_status_listener.cpp",
-    "//foundation/multimedia/audio_standard/services/src/audio_policy/server/service/src/manager/audio_adapter_manager.cpp",
+    "//foundation/multimedia/audio_standard/services/src/audio_policy/server/service/audio_policy_service.cpp",
+    "//foundation/multimedia/audio_standard/services/src/audio_policy/server/service/config/audio_focus_parser.cpp",
+    "//foundation/multimedia/audio_standard/services/src/audio_policy/server/service/config/xml_parser.cpp",
+    "//foundation/multimedia/audio_standard/services/src/audio_policy/server/service/listener/device_status_listener.cpp",
+    "//foundation/multimedia/audio_standard/services/src/audio_policy/server/service/manager/audio_adapter_manager.cpp",
+    "//foundation/multimedia/audio_standard/services/src/audio_service/client/audio_manager_proxy.cpp",
   ]
 
   public_configs = [ ":audio_policy_public_config" ]
@@ -211,13 +189,12 @@ ohos_shared_library("audio_policy_service") {
     "$hdf_uhdf_path/host:libhdf_host",
     "$hdf_uhdf_path/ipc:libhdf_ipc_adapter",
     "$hdf_uhdf_path/utils:libhdf_utils",
-    "${samgr_dir}/interfaces/innerkits/common:samgr_common",
-    "${samgr_dir}/interfaces/innerkits/lsamgr:lsamgr",
     "//foundation/communication/bluetooth/services/bluetooth_standard/ipc:btipc_static",
     "//foundation/communication/ipc/interfaces/innerkits/ipc_core:ipc_core",
     "//foundation/distributeddatamgr/distributeddatamgr/interfaces/innerkits/distributeddata:distributeddata_inner",
     "//foundation/distributeddatamgr/distributeddatamgr/services/distributeddataservice/adapter:distributeddata_adapter",
     "//foundation/multimedia/audio_standard/frameworks/native/audioadapter:pulse_audio_service_adapter",
+    "//foundation/multimedia/audio_standard/frameworks/native/audiorenderer:audio_bluetooth_client",
     "//foundation/multimedia/audio_standard/services:audio_dump",
     "//foundation/multimodalinput/input/frameworks/proxy:libmmi-client",
     "//foundation/multimodalinput/input/frameworks/util:libmmi-util",

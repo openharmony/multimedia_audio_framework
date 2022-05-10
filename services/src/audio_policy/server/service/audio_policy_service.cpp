@@ -16,6 +16,7 @@
 #include "audio_errors.h"
 #include "audio_focus_parser.h"
 #include "audio_manager_base.h"
+#include "audio_manager_proxy.h"
 #include "iservice_registry.h"
 #include "media_log.h"
 #include "system_ability_definition.h"
@@ -187,7 +188,8 @@ std::vector<sptr<AudioDeviceDescriptor>> AudioPolicyService::GetDevices(DeviceFl
     MEDIA_INFO_LOG("GetDevices mConnectedDevices size = [%{public}zu]", mConnectedDevices.size());
     for (const auto &device : mConnectedDevices) {
         if (device != nullptr && device->deviceRole_ == role) {
-            auto devDesc = new(std::nothrow) AudioDeviceDescriptor(device->deviceType_, device->deviceRole_);
+            sptr<AudioDeviceDescriptor> devDesc = new(std::nothrow) AudioDeviceDescriptor(device->deviceType_,
+                device->deviceRole_);
             deviceList.push_back(devDesc);
         }
     }
@@ -526,13 +528,27 @@ void AudioPolicyService::OnXmlParsingCompleted(const std::unordered_map<ClassTyp
     deviceClassInfo_ = xmlData;
 }
 
-int32_t AudioPolicyService::SetDeviceChangeCallback(const sptr<IRemoteObject> &object)
+int32_t AudioPolicyService::SetDeviceChangeCallback(const int32_t clientId, const sptr<IRemoteObject> &object)
 {
     MEDIA_INFO_LOG("Entered AudioPolicyService::%{public}s", __func__);
 
-    auto callback = iface_cast<IStandardAudioPolicyManagerListener>(object);
+    sptr<IStandardAudioPolicyManagerListener> callback = iface_cast<IStandardAudioPolicyManagerListener>(object);
     if (callback != nullptr) {
-        deviceChangeCallbackList_.push_back(callback);
+        deviceChangeCallbackMap_[clientId] = callback;
+    }
+
+    return SUCCESS;
+}
+
+int32_t AudioPolicyService::UnsetDeviceChangeCallback(const int32_t clientId)
+{
+    MEDIA_INFO_LOG("Entered AudioPolicyService::%{public}s", __func__);
+
+    if (deviceChangeCallbackMap_.erase(clientId)) {
+        MEDIA_DEBUG_LOG("AudioPolicyServer:UnsetDeviceChangeCallback for clientID %{public}d done", clientId);
+    } else {
+        MEDIA_DEBUG_LOG("AudioPolicyServer:UnsetDeviceChangeCallback clientID %{public}d not present/unset already",
+                        clientId);
     }
 
     return SUCCESS;
@@ -584,9 +600,9 @@ void AudioPolicyService::TriggerDeviceChangedCallback(const vector<sptr<AudioDev
     deviceChangeAction.deviceDescriptors = desc;
     deviceChangeAction.type = isConnected ? DeviceChangeType::CONNECT : DeviceChangeType::DISCONNECT;
 
-    for (auto const &deviceChangedCallback : deviceChangeCallbackList_) {
-        if (deviceChangedCallback) {
-            deviceChangedCallback->OnDeviceChange(deviceChangeAction);
+    for (auto it = deviceChangeCallbackMap_.begin(); it != deviceChangeCallbackMap_.end(); ++it) {
+        if (it->second) {
+            it->second->OnDeviceChange(deviceChangeAction);
         }
     }
 }

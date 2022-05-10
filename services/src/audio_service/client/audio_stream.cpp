@@ -87,7 +87,8 @@ AudioStream::AudioStream(AudioStreamType eStreamType, AudioMode eMode) : eStream
                                                                          resetTime_(false),
                                                                          resetTimestamp_(0),
                                                                          renderMode_(RENDER_MODE_NORMAL),
-                                                                         isReadyToWrite_(false)
+                                                                         isReadyToWrite_(false),
+                                                                         isFirstRead_(false)
 {
     MEDIA_DEBUG_LOG("AudioStream ctor");
 }
@@ -314,6 +315,7 @@ bool AudioStream::StartAudioStream()
         writeThread_ = std::make_unique<std::thread>(&AudioStream::WriteBuffers, this);
     }
 
+    isFirstRead_ = true;
     state_ = RUNNING;
     MEDIA_INFO_LOG("StartAudioStream SUCCESS");
     return true;
@@ -329,6 +331,11 @@ int32_t AudioStream::Read(uint8_t &buffer, size_t userSize, bool isBlockingRead)
     if (state_ != RUNNING) {
         MEDIA_ERR_LOG("Read: State is not RUNNNIG. Illegal  state:%{public}u", state_);
         return ERR_ILLEGAL_STATE;
+    }
+
+    if (isFirstRead_) {
+        FlushAudioStream();
+        isFirstRead_ = false;
     }
 
     StreamBuffer stream;
@@ -450,7 +457,7 @@ bool AudioStream::StopAudioStream()
 
 bool AudioStream::FlushAudioStream()
 {
-    if ((state_ != RUNNING) && (state_ != PAUSED)) {
+    if ((state_ != RUNNING) && (state_ != PAUSED) && (state_ != STOPPED)) {
         MEDIA_ERR_LOG("FlushAudioStream: State is not RUNNING. Illegal state:%{public}u", state_);
         return false;
     }

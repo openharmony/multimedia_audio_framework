@@ -71,7 +71,9 @@ public:
 
     int32_t UnsetRingerModeCallback(const int32_t clientId) override;
 
-    int32_t SetDeviceChangeCallback(const sptr<IRemoteObject> &object) override;
+    int32_t SetDeviceChangeCallback(const int32_t clientId, const sptr<IRemoteObject> &object) override;
+
+    int32_t UnsetDeviceChangeCallback(const int32_t clientId) override;
 
     int32_t SetAudioInterruptCallback(const uint32_t sessionID, const sptr<IRemoteObject> &object) override;
 
@@ -80,6 +82,14 @@ public:
     int32_t ActivateAudioInterrupt(const AudioInterrupt &audioInterrupt) override;
 
     int32_t DeactivateAudioInterrupt(const AudioInterrupt &audioInterrupt) override;
+
+    int32_t SetAudioManagerInterruptCallback(const uint32_t clientID, const sptr<IRemoteObject> &object) override;
+
+    int32_t UnsetAudioManagerInterruptCallback(const uint32_t clientID) override;
+
+    int32_t RequestAudioFocus(const uint32_t clientID, const AudioInterrupt &audioInterrupt) override;
+
+    int32_t AbandonAudioFocus(const uint32_t clientID, const AudioInterrupt &audioInterrupt) override;
 
     AudioStreamType GetStreamInFocus() override;
 
@@ -103,6 +113,8 @@ private:
     void AddToCurActiveList(const AudioInterrupt &audioInterrupt);
     void UnduckCurActiveList(const AudioInterrupt &exitingInterrupt);
     void ResumeUnduckPendingList(const AudioInterrupt &exitingInterrupt);
+    void NotifyFocusGranted(const uint32_t clientID, const AudioInterrupt &audioInterrupt);
+    int32_t NotifyFocusAbandoned(const uint32_t clientID, const AudioInterrupt &audioInterrupt);
     int32_t SetStreamVolume(AudioStreamType streamType, float volume, bool isUpdateUi);
     void RegisterAudioServerDeathRecipient();
     void AudioServerDied(pid_t pid);
@@ -119,7 +131,11 @@ private:
     std::mutex ringerModeMutex_;
     std::mutex interruptMutex_;
     std::mutex volumeKeyEventMutex_;
+    uint32_t clientOnFocus_;
+    std::unique_ptr<AudioInterrupt> focussedAudioInterruptInfo_;
+
     std::unordered_map<uint32_t, std::shared_ptr<AudioInterruptCallback>> policyListenerCbsMap_;
+    std::unordered_map<uint32_t, std::shared_ptr<AudioInterruptCallback>> audioManagerListenerCbsMap_;
     std::list<AudioInterrupt> curActiveOwnersList_;
     std::list<AudioInterrupt> pendingOwnersList_;
     std::unordered_map<AudioStreamType, int32_t> interruptPriorityMap_;
