@@ -115,8 +115,8 @@ private:
     void Init();
     sptr<AudioPolicyManagerListenerStub> listenerStub_ = nullptr;
     std::mutex listenerStubMutex_;
+    std::mutex volumeCallbackMutex_;
 
-    std::shared_ptr<VolumeKeyEventCallback> volumeKeyEventCallback_ = nullptr;
     sptr<AudioVolumeKeyEventCallbackStub> volumeKeyEventListenerStub_ = nullptr;
     sptr<AudioRingerModeUpdateListenerStub> ringerModelistenerStub_ = nullptr;
     static bool serverConnected;

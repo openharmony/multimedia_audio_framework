@@ -295,8 +295,7 @@ int32_t AudioPolicyManager::SetVolumeKeyEventCallback(const int32_t clientPid,
         return ERR_INVALID_PARAM;
     }
 
-    volumeKeyEventCallback_ = callback;
-
+    std::lock_guard<std::mutex> lock(volumeCallbackMutex_);
     volumeKeyEventListenerStub_ = new(std::nothrow) AudioVolumeKeyEventCallbackStub();
     if (volumeKeyEventListenerStub_ == nullptr || g_sProxy == nullptr) {
         AUDIO_ERR_LOG("AudioPolicyManager: object null");
