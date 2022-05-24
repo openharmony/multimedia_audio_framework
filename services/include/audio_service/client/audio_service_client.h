@@ -508,6 +508,10 @@ private:
 
     std::mutex dataMutex;
     std::mutex ctrlMutex;
+    std::mutex capturerMarkReachedMutex_;
+    std::mutex capturerPeriodReachedMutex_;
+    std::mutex rendererMarkReachedMutex_;
+    std::mutex rendererPeriodReachedMutex_;
 
     AudioCache acache;
     const void *internalReadBuffer;

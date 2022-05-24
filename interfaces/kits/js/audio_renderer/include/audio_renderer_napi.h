@@ -142,9 +142,8 @@ private:
     static napi_ref interruptHintType_;
     static napi_ref audioState_;
     static napi_ref sampleFormat_;
-    static AudioRendererOptions sRendererOptions_;
     static std::unique_ptr<AudioParameters> sAudioParameters_;
-    static std::unique_ptr<AudioRendererOptions> sAudioRendererOptions_;
+    static std::unique_ptr<AudioRendererOptions> sRendererOptions_;
 
     std::unique_ptr<AudioRenderer> audioRenderer_;
     ContentType contentType_;
