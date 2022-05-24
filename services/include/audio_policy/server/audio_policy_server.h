@@ -123,7 +123,7 @@ private:
     void InitKVStore();
     void ConnectServiceAdapter();
 
-    static float GetVolumeFactor();
+    static float MapVolumeToHDI(int32_t volume);
     static int32_t ConvertVolumeToInt(float volume);
 
     AudioPolicyService& mPolicyService;
