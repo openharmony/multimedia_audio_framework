@@ -31,6 +31,7 @@ namespace {
 #else
     const std::string AUDIO_HDI_SERVICE_NAME = "audio_hdi_service";
 #endif
+    const std::string AUDIO_BLUETOOTH_HDI_SERVICE_NAME = "audio_bluetooth_hdi_service";
 }
 
 const uint8_t EVENT_PARAMS = 2;
@@ -77,7 +78,19 @@ static void OnServiceStatusReceived(struct ServiceStatusListener *listener, stru
 
             DeviceType internalDevice = GetInternalDeviceType(hdiDeviceType);
             bool isConnected = (hdiEventType == HDF_AUDIO_DEVICE_ADD) ? true : false;
-            devListener->deviceObserver_.OnDeviceStatusUpdated(internalDevice, isConnected, devListener->privData_);
+            AudioStreamInfo streamInfo = {};
+            devListener->deviceObserver_.OnDeviceStatusUpdated(internalDevice, isConnected, devListener->privData_,
+                "", streamInfo);
+        }
+    } else if (serviceStatus->serviceName == AUDIO_BLUETOOTH_HDI_SERVICE_NAME) {
+        DeviceStatusListener *devListener = reinterpret_cast<DeviceStatusListener *>(listener->priv);
+        CHECK_AND_RETURN_LOG(devListener != nullptr, "Invalid deviceStatusListener");
+        if (serviceStatus->status == SERVIE_STATUS_START) {
+            AUDIO_INFO_LOG("Bluetooth hdi service started");
+            OHOS::Bluetooth::RegisterObserver(devListener->deviceObserver_);
+        } else if (serviceStatus->status == SERVIE_STATUS_STOP) {
+            AUDIO_INFO_LOG("Bluetooth hdi service stopped");
+            OHOS::Bluetooth::DeRegisterObserver();
         }
     }
 }
@@ -105,10 +118,6 @@ int32_t DeviceStatusListener::RegisterDeviceStatusListener(void *privData)
         AUDIO_ERR_LOG("[DeviceStatusListener]: Register service status listener failed");
         return ERR_OPERATION_FAILED;
     }
-
-    AUDIO_DEBUG_LOG("call bluetooth interface");
-    OHOS::Bluetooth::GetProxy();
-    OHOS::Bluetooth::RegisterObserver(deviceObserver_);
 
     return SUCCESS;
 }

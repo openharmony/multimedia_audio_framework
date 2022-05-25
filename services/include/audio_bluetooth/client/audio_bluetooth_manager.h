@@ -34,8 +34,9 @@ typedef struct BtA2dpAudioCallback {
 
 int GetPlayingState();
 RawAddress& GetDevice();
-void GetProxy();
-void RegisterObserver(AudioStandard::IDeviceStatusObserver &observer);
+int32_t GetProxy();
+int32_t RegisterObserver(AudioStandard::IDeviceStatusObserver &observer);
+void DeRegisterObserver();
 }
 }
 #endif  // AUDIO_BLUETOOTH_MANAGERI_H

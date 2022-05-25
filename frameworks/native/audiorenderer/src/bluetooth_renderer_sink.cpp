@@ -35,7 +35,7 @@ const float DEFAULT_VOLUME_LEVEL = 1.0f;
 const uint32_t AUDIO_CHANNELCOUNT = 2;
 const uint32_t AUDIO_SAMPLE_RATE_48K = 48000;
 const uint32_t DEEP_BUFFER_RENDER_PERIOD_SIZE = 4096;
-const uint32_t RENDER_FRAME_INTERVAL_IN_MICROSECONDS = 20000;
+const uint32_t RENDER_FRAME_INTERVAL_IN_MICROSECONDS = 10000;
 const uint32_t INT_32_MAX = 0x7fffffff;
 const uint32_t PCM_8_BIT = 8;
 const uint32_t PCM_16_BIT = 16;
@@ -284,7 +284,7 @@ int32_t BluetoothRendererSink::Init(AudioSinkAttr &attr)
 int32_t BluetoothRendererSink::RenderFrame(char &data, uint64_t len, uint64_t &writeLen)
 {
     AUDIO_INFO_LOG("Bluetooth Render: RenderFrame in");
-    int32_t ret;
+    int32_t ret = SUCCESS;
     if (audioRender_ == nullptr) {
         AUDIO_ERR_LOG("Bluetooth Render Handle is nullptr!");
         return ERR_INVALID_HANDLE;
@@ -297,14 +297,25 @@ int32_t BluetoothRendererSink::RenderFrame(char &data, uint64_t len, uint64_t &w
     }
 #endif // BT_DUMPFILE
 
-    ret = audioRender_->RenderFrame(audioRender_, (void*)&data, len, &writeLen);
-    if (ret != 0) {
-        AUDIO_ERR_LOG("A2dp RenderFrame failed ret: %{public}x", ret);
-        return ERR_WRITE_FAILED;
+    while (true) {
+        ret = audioRender_->RenderFrame(audioRender_, (void*)&data, len, &writeLen);
+        AUDIO_DEBUG_LOG("A2dp RenderFrame returns: %{public}x", ret);
+        if (ret == -4) {
+            AUDIO_ERR_LOG("retry render frame...");
+            usleep(RENDER_FRAME_INTERVAL_IN_MICROSECONDS);
+            continue;
+        }
+
+        if (ret != 0) {
+            AUDIO_ERR_LOG("A2dp RenderFrame failed ret: %{public}x", ret);
+            ret = ERR_WRITE_FAILED;
+        }
+
+        break;
     }
     usleep(RENDER_FRAME_INTERVAL_IN_MICROSECONDS);
 
-    return SUCCESS;
+    return ret;
 }
 
 int32_t BluetoothRendererSink::Start(void)

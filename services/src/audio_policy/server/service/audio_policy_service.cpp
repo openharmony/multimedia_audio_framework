@@ -25,6 +25,8 @@
 namespace OHOS {
 namespace AudioStandard {
 using namespace std;
+const uint32_t PCM_8_BIT = 8;
+const uint32_t BT_BUFFER_ADJUSTMENT_FACTOR = 50;
 static sptr<IStandardAudioService> g_sProxy = nullptr;
 
 AudioPolicyService::~AudioPolicyService()
@@ -245,6 +247,22 @@ void UpdateActiveDeviceRoute(InternalDeviceType deviceType)
     }
 }
 
+static string ConvertToHDIAudioFormat(AudioSampleFormat sampleFormat)
+{
+    switch (sampleFormat) {
+        case SAMPLE_U8:
+            return "u8";
+        case SAMPLE_S16LE:
+            return "s16le";
+        case SAMPLE_S24LE:
+            return "s24le";
+        case SAMPLE_S32LE:
+            return "s32le";
+        default:
+            return "";
+    }
+}
+
 int32_t AudioPolicyService::ActivateNewDevice(DeviceType deviceType)
 {
     int32_t result = SUCCESS;
@@ -260,6 +278,18 @@ int32_t AudioPolicyService::ActivateNewDevice(DeviceType deviceType)
             for (auto &moduleInfo : moduleInfoList) {
                 if (mIOHandles.find(moduleInfo.name) == mIOHandles.end()) {
                     AUDIO_INFO_LOG("Load a2dp module [%{public}s]", moduleInfo.name.c_str());
+                    AudioStreamInfo audioStreamInfo = {};
+                    GetActiveDeviceStreamInfo(deviceType, audioStreamInfo);
+                    uint32_t bufferSize
+                        = (audioStreamInfo.samplingRate * audioStreamInfo.format * audioStreamInfo.channels)
+                            / (PCM_8_BIT * BT_BUFFER_ADJUSTMENT_FACTOR);
+                    AUDIO_INFO_LOG("a2dp rate: %{public}d, format: %{public}d, channel: %{public}d",
+                        audioStreamInfo.samplingRate, audioStreamInfo.format, audioStreamInfo.channels);
+                    moduleInfo.channels = to_string(audioStreamInfo.channels);
+                    moduleInfo.rate = to_string(audioStreamInfo.samplingRate);
+                    moduleInfo.format = ConvertToHDIAudioFormat(audioStreamInfo.format);
+                    moduleInfo.bufferSize = to_string(bufferSize);
+
                     AudioIOHandle ioHandle = mAudioPolicyManager.OpenAudioPort(moduleInfo);
                     CHECK_AND_RETURN_RET_LOG(ioHandle != ERR_OPERATION_FAILED && ioHandle != ERR_INVALID_HANDLE,
                                              ERR_OPERATION_FAILED, "OpenAudioPort failed %{public}d", ioHandle);
@@ -392,8 +422,44 @@ void AudioPolicyService::OnUpdateRouteSupport(bool isSupported)
     isUpdateRouteSupported_ = isSupported;
 }
 
+bool AudioPolicyService::GetActiveDeviceStreamInfo(DeviceType deviceType, AudioStreamInfo &streamInfo)
+{
+    if (deviceType == DEVICE_TYPE_BLUETOOTH_A2DP) {
+        auto streamInfoPos = connectedBTDeviceMap_.find(activeBTDevice_);
+        if (streamInfoPos != connectedBTDeviceMap_.end()) {
+            streamInfo.samplingRate = streamInfoPos->second.samplingRate;
+            streamInfo.format = streamInfoPos->second.format;
+            streamInfo.channels = streamInfoPos->second.channels;
+            return true;
+        }
+    }
+
+    return false;
+}
+
+bool AudioPolicyService::IsConfigurationUpdated(DeviceType deviceType, const AudioStreamInfo &streamInfo)
+{
+    if (deviceType == DEVICE_TYPE_BLUETOOTH_A2DP) {
+        AudioStreamInfo audioStreamInfo = {};
+        if (GetActiveDeviceStreamInfo(deviceType, audioStreamInfo)) {
+            AUDIO_DEBUG_LOG("Device configurations current rate: %{public}d, format: %{public}d, channel: %{public}d",
+                audioStreamInfo.samplingRate, audioStreamInfo.format, audioStreamInfo.channels);
+            AUDIO_DEBUG_LOG("Device configurations updated rate: %{public}d, format: %{public}d, channel: %{public}d",
+                streamInfo.samplingRate, streamInfo.format, streamInfo.channels);
+            if ((audioStreamInfo.samplingRate != streamInfo.samplingRate)
+                || (audioStreamInfo.channels != streamInfo.channels)
+                || (audioStreamInfo.format != streamInfo.format)) {
+                return true;
+            }
+        }
+    }
+
+    return false;
+}
+
 void AudioPolicyService::UpdateConnectedDevices(DeviceType devType, vector<sptr<AudioDeviceDescriptor>> &desc,
-                                                bool isConnected)
+                                                bool isConnected, const std::string &macAddress,
+                                                const AudioStreamInfo &streamInfo)
 {
     sptr<AudioDeviceDescriptor> audioDescriptor = nullptr;
 
@@ -420,7 +486,8 @@ void AudioPolicyService::UpdateConnectedDevices(DeviceType devType, vector<sptr<
     }
 }
 
-void AudioPolicyService::OnDeviceStatusUpdated(DeviceType devType, bool isConnected, void *privData)
+void AudioPolicyService::OnDeviceStatusUpdated(DeviceType devType, bool isConnected, void *privData,
+    const std::string &macAddress, const AudioStreamInfo &streamInfo)
 {
     AUDIO_INFO_LOG("=== DEVICE STATUS CHANGED | TYPE[%{public}d] STATUS[%{public}d] ===", devType, isConnected);
     int32_t result = ERROR;
@@ -432,6 +499,16 @@ void AudioPolicyService::OnDeviceStatusUpdated(DeviceType devType, bool isConnec
         return descriptor->deviceType_ == devType;
     };
 
+    if (devType == DEVICE_TYPE_BLUETOOTH_A2DP) {
+        if (isConnected) {
+            connectedBTDeviceMap_.insert(make_pair(macAddress, streamInfo));
+            activeBTDevice_ = macAddress;
+        } else {
+            connectedBTDeviceMap_.erase(macAddress);
+            activeBTDevice_ = "";
+        }
+    }
+
     // If device already in list, remove it else do not modify the list
     mConnectedDevices.erase(std::remove_if(mConnectedDevices.begin(), mConnectedDevices.end(), isPresent),
                             mConnectedDevices.end());
@@ -442,10 +519,10 @@ void AudioPolicyService::OnDeviceStatusUpdated(DeviceType devType, bool isConnec
         result = ActivateNewDevice(devType);
         CHECK_AND_RETURN_LOG(result == SUCCESS, "Failed to activate new device %{public}d", devType);
         mCurrentActiveDevice = devType;
-        UpdateConnectedDevices(devType, deviceChangeDescriptor, isConnected);
+        UpdateConnectedDevices(devType, deviceChangeDescriptor, isConnected, macAddress, streamInfo);
     } else {
         AUDIO_INFO_LOG("=== DEVICE DISCONNECTED === TYPE[%{public}d]", devType);
-        UpdateConnectedDevices(devType, deviceChangeDescriptor, isConnected);
+        UpdateConnectedDevices(devType, deviceChangeDescriptor, isConnected, macAddress, streamInfo);
 
         auto priorityDev = FetchHighPriorityDevice();
         AUDIO_INFO_LOG("Priority device is [%{public}d]", priorityDev);
@@ -474,6 +551,57 @@ void AudioPolicyService::OnDeviceStatusUpdated(DeviceType devType, bool isConnec
 
     TriggerDeviceChangedCallback(deviceChangeDescriptor, isConnected);
     AUDIO_INFO_LOG("output device list = [%{public}zu]", mConnectedDevices.size());
+}
+
+void AudioPolicyService::OnDeviceConfigurationChanged(DeviceType deviceType,
+    const std::string &macAddress, const AudioStreamInfo &streamInfo)
+{
+    AUDIO_INFO_LOG("OnDeviceConfigurationChanged in");
+    if ((deviceType == DEVICE_TYPE_BLUETOOTH_A2DP) && !macAddress.compare(activeBTDevice_)
+        && IsDeviceActive(deviceType)) {
+        if (!IsConfigurationUpdated(deviceType, streamInfo)) {
+            AUDIO_DEBUG_LOG("Audio configuration same");
+            return;
+        }
+
+        uint32_t bufferSize
+            = (streamInfo.samplingRate * streamInfo.format * streamInfo.channels)
+                / (PCM_8_BIT * BT_BUFFER_ADJUSTMENT_FACTOR);
+        AUDIO_DEBUG_LOG("Updated buffer size: %{public}d", bufferSize);
+        connectedBTDeviceMap_[macAddress] = streamInfo;
+
+        auto a2dpModulesPos = deviceClassInfo_.find(ClassType::TYPE_A2DP);
+        if (a2dpModulesPos == deviceClassInfo_.end()) {
+            auto moduleInfoList = a2dpModulesPos->second;
+            for (auto &moduleInfo : moduleInfoList) {
+                if (mIOHandles.find(moduleInfo.name) != mIOHandles.end()) {
+                    moduleInfo.channels = to_string(streamInfo.channels);
+                    moduleInfo.rate = to_string(streamInfo.samplingRate);
+                    moduleInfo.format = ConvertToHDIAudioFormat(streamInfo.format);
+                    moduleInfo.bufferSize = to_string(bufferSize);
+
+                    // First unload the existing bt sink
+                    AUDIO_DEBUG_LOG("UnLoad existing a2dp module");
+                    std::string currentActivePort = GetPortName(mCurrentActiveDevice);
+                    AudioIOHandle activateDeviceIOHandle = mIOHandles[BLUETOOTH_SPEAKER];
+                    mAudioPolicyManager.SuspendAudioDevice(currentActivePort, true);
+                    mAudioPolicyManager.CloseAudioPort(activateDeviceIOHandle);
+
+                    // Load bt sink module again with new configuration
+                    AUDIO_DEBUG_LOG("Reload a2dp module [%{public}s]", moduleInfo.name.c_str());
+                    AudioIOHandle ioHandle = mAudioPolicyManager.OpenAudioPort(moduleInfo);
+                    CHECK_AND_RETURN_LOG(ioHandle != ERR_OPERATION_FAILED && ioHandle != ERR_INVALID_HANDLE,
+                        "OpenAudioPort failed %{public}d", ioHandle);
+                    mIOHandles[moduleInfo.name] = ioHandle;
+                    std::string portName = GetPortName(deviceType);
+                    mAudioPolicyManager.SetDeviceActive(ioHandle, deviceType, portName, true);
+                    mAudioPolicyManager.SuspendAudioDevice(portName, false);
+
+                    break;
+                }
+            }
+        }
+    }
 }
 
 void AudioPolicyService::OnServiceConnected(AudioServiceIndex serviceIndex)

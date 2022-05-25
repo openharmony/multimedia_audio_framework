@@ -22,7 +22,10 @@ namespace OHOS {
 namespace AudioStandard {
 class IDeviceStatusObserver {
 public:
-    virtual void OnDeviceStatusUpdated(DeviceType deviceType, bool connected, void *privData) = 0;
+    virtual void OnDeviceStatusUpdated(DeviceType deviceType, bool connected, void *privData,
+        const std::string &macAddress, const AudioStreamInfo &streamInfo) = 0;
+    virtual void OnDeviceConfigurationChanged(DeviceType deviceType,
+        const std::string &macAddress, const AudioStreamInfo &streamInfo) = 0;
     virtual void OnServiceConnected(AudioServiceIndex serviceIndex) = 0;
 };
 } // namespace AudioStandard
