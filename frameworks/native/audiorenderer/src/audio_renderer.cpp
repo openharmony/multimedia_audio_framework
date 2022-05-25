@@ -57,7 +57,7 @@ std::unique_ptr<AudioRenderer> AudioRenderer::Create(const std::string cachePath
     auto audioRenderer = std::make_unique<AudioRendererPrivate>(audioStreamType);
     CHECK_AND_RETURN_RET_LOG(audioRenderer != nullptr, nullptr, "Failed to create renderer object");
     if (!cachePath.empty()) {
-        MEDIA_DEBUG_LOG("Set application cache path");
+        MEDIA_INFO_LOG("Set application cache path");
         audioRenderer->SetApplicationCachePath(cachePath);
     }
 

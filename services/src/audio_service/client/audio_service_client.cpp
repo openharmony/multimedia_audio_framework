@@ -1091,27 +1091,34 @@ void AudioServiceClient::HandleRenderPositionCallbacks(size_t bytesWritten)
 
     uint64_t writtenFrameNumber = mTotalBytesWritten / mFrameSize;
     MEDIA_DEBUG_LOG("frame size: %{public}d", mFrameSize);
-    if (!mMarkReached && mRenderPositionCb) {
-        MEDIA_DEBUG_LOG("frame mark position: %{public}" PRIu64 ", Total frames written: %{public}" PRIu64,
-            static_cast<uint64_t>(mFrameMarkPosition), static_cast<uint64_t>(writtenFrameNumber));
-        if (writtenFrameNumber >= mFrameMarkPosition) {
-            MEDIA_DEBUG_LOG("audio service client OnMarkReached");
-            mPositionCBThreads.emplace_back(std::make_unique<std::thread>(&RendererPositionCallback::OnMarkReached,
-                                            mRenderPositionCb, mFrameMarkPosition));
-            mMarkReached = true;
+
+    {
+        std::lock_guard<std::mutex> lock(rendererMarkReachedMutex_);
+        if (!mMarkReached && mRenderPositionCb) {
+            MEDIA_DEBUG_LOG("frame mark position: %{public}" PRIu64 ", Total frames written: %{public}" PRIu64,
+                static_cast<uint64_t>(mFrameMarkPosition), static_cast<uint64_t>(writtenFrameNumber));
+            if (writtenFrameNumber >= mFrameMarkPosition) {
+                MEDIA_DEBUG_LOG("audio service client OnMarkReached");
+                mPositionCBThreads.emplace_back(std::make_unique<std::thread>(&RendererPositionCallback::OnMarkReached,
+                                                mRenderPositionCb, mFrameMarkPosition));
+                mMarkReached = true;
+            }
         }
     }
 
-    if (mRenderPeriodPositionCb) {
-        mFramePeriodWritten += (bytesWritten / mFrameSize);
-        MEDIA_DEBUG_LOG("frame period number: %{public}" PRIu64 ", Total frames written: %{public}" PRIu64,
-            static_cast<uint64_t>(mFramePeriodNumber), static_cast<uint64_t>(writtenFrameNumber));
-        if (mFramePeriodWritten >= mFramePeriodNumber) {
-            mFramePeriodWritten %= mFramePeriodNumber;
-            MEDIA_DEBUG_LOG("OnPeriodReached, remaining frames: %{public}" PRIu64,
-                static_cast<uint64_t>(mFramePeriodWritten));
-            mPeriodPositionCBThreads.emplace_back(std::make_unique<std::thread>(
-                &RendererPeriodPositionCallback::OnPeriodReached, mRenderPeriodPositionCb, mFramePeriodNumber));
+    {
+        std::lock_guard<std::mutex> lock(rendererPeriodReachedMutex_);
+        if (mRenderPeriodPositionCb) {
+            mFramePeriodWritten += (bytesWritten / mFrameSize);
+            MEDIA_DEBUG_LOG("frame period number: %{public}" PRIu64 ", Total frames written: %{public}" PRIu64,
+                static_cast<uint64_t>(mFramePeriodNumber), static_cast<uint64_t>(writtenFrameNumber));
+            if (mFramePeriodWritten >= mFramePeriodNumber) {
+                mFramePeriodWritten %= mFramePeriodNumber;
+                MEDIA_DEBUG_LOG("OnPeriodReached, remaining frames: %{public}" PRIu64,
+                    static_cast<uint64_t>(mFramePeriodWritten));
+                mPeriodPositionCBThreads.emplace_back(std::make_unique<std::thread>(
+                    &RendererPeriodPositionCallback::OnPeriodReached, mRenderPeriodPositionCb, mFramePeriodNumber));
+            }
         }
     }
 }
@@ -1295,27 +1302,33 @@ void AudioServiceClient::HandleCapturePositionCallbacks(size_t bytesRead)
 
     uint64_t readFrameNumber = mTotalBytesRead / mFrameSize;
     MEDIA_DEBUG_LOG("frame size: %{public}d", mFrameSize);
-    if (!mMarkReached && mCapturePositionCb) {
-        MEDIA_DEBUG_LOG("frame mark position: %{public}" PRIu64 ", Total frames read: %{public}" PRIu64,
-            static_cast<uint64_t>(mFrameMarkPosition), static_cast<uint64_t>(readFrameNumber));
-        if (readFrameNumber >= mFrameMarkPosition) {
-            MEDIA_DEBUG_LOG("audio service client capturer OnMarkReached");
-            mPositionCBThreads.emplace_back(std::make_unique<std::thread>(&CapturerPositionCallback::OnMarkReached,
-                                            mCapturePositionCb, mFrameMarkPosition));
-            mMarkReached = true;
+    {
+        std::lock_guard<std::mutex> lock(capturerMarkReachedMutex_);
+        if (!mMarkReached && mCapturePositionCb) {
+            MEDIA_DEBUG_LOG("frame mark position: %{public}" PRIu64 ", Total frames read: %{public}" PRIu64,
+                static_cast<uint64_t>(mFrameMarkPosition), static_cast<uint64_t>(readFrameNumber));
+            if (readFrameNumber >= mFrameMarkPosition) {
+                MEDIA_DEBUG_LOG("audio service client capturer OnMarkReached");
+                mPositionCBThreads.emplace_back(std::make_unique<std::thread>(&CapturerPositionCallback::OnMarkReached,
+                                                mCapturePositionCb, mFrameMarkPosition));
+                mMarkReached = true;
+            }
         }
     }
 
-    if (mCapturePeriodPositionCb) {
-        mFramePeriodRead += (bytesRead / mFrameSize);
-        MEDIA_DEBUG_LOG("frame period number: %{public}" PRIu64 ", Total frames read: %{public}" PRIu64,
-            static_cast<uint64_t>(mFramePeriodNumber), static_cast<uint64_t>(readFrameNumber));
-        if (mFramePeriodRead >= mFramePeriodNumber) {
-            mFramePeriodRead %= mFramePeriodNumber;
-            MEDIA_DEBUG_LOG("audio service client OnPeriodReached, remaining frames: %{public}" PRIu64,
-                static_cast<uint64_t>(mFramePeriodRead));
-            mPeriodPositionCBThreads.emplace_back(std::make_unique<std::thread>(
-                &CapturerPeriodPositionCallback::OnPeriodReached, mCapturePeriodPositionCb, mFramePeriodNumber));
+    {
+        std::lock_guard<std::mutex> lock(capturerPeriodReachedMutex_);
+        if (mCapturePeriodPositionCb) {
+            mFramePeriodRead += (bytesRead / mFrameSize);
+            MEDIA_DEBUG_LOG("frame period number: %{public}" PRIu64 ", Total frames read: %{public}" PRIu64,
+                static_cast<uint64_t>(mFramePeriodNumber), static_cast<uint64_t>(readFrameNumber));
+            if (mFramePeriodRead >= mFramePeriodNumber) {
+                mFramePeriodRead %= mFramePeriodNumber;
+                MEDIA_DEBUG_LOG("audio service client OnPeriodReached, remaining frames: %{public}" PRIu64,
+                    static_cast<uint64_t>(mFramePeriodRead));
+                mPeriodPositionCBThreads.emplace_back(std::make_unique<std::thread>(
+                    &CapturerPeriodPositionCallback::OnPeriodReached, mCapturePeriodPositionCb, mFramePeriodNumber));
+            }
         }
     }
 }
@@ -1595,6 +1608,7 @@ void AudioServiceClient::SetRendererPositionCallback(int64_t markPosition,
 void AudioServiceClient::UnsetRendererPositionCallback()
 {
     MEDIA_INFO_LOG("Unregistering render frame position callback");
+    std::lock_guard<std::mutex> lock(rendererMarkReachedMutex_);
     mRenderPositionCb = nullptr;
     mMarkReached = false;
     mFrameMarkPosition = 0;
@@ -1617,6 +1631,7 @@ void AudioServiceClient::SetRendererPeriodPositionCallback(int64_t periodPositio
 void AudioServiceClient::UnsetRendererPeriodPositionCallback()
 {
     MEDIA_INFO_LOG("Unregistering render period position callback");
+    std::lock_guard<std::mutex> lock(rendererPeriodReachedMutex_);
     mRenderPeriodPositionCb = nullptr;
     mFramePeriodWritten = 0;
     mFramePeriodNumber = 0;
@@ -1634,6 +1649,7 @@ void AudioServiceClient::SetCapturerPositionCallback(int64_t markPosition,
 void AudioServiceClient::UnsetCapturerPositionCallback()
 {
     MEDIA_INFO_LOG("Unregistering capture frame position callback");
+    std::lock_guard<std::mutex> lock(capturerMarkReachedMutex_);
     mCapturePositionCb = nullptr;
     mMarkReached = false;
     mFrameMarkPosition = 0;
@@ -1656,6 +1672,7 @@ void AudioServiceClient::SetCapturerPeriodPositionCallback(int64_t periodPositio
 void AudioServiceClient::UnsetCapturerPeriodPositionCallback()
 {
     MEDIA_INFO_LOG("Unregistering period position callback");
+    std::lock_guard<std::mutex> lock(capturerPeriodReachedMutex_);
     mCapturePeriodPositionCb = nullptr;
     mFramePeriodRead = 0;
     mFramePeriodNumber = 0;
