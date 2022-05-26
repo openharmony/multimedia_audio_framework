@@ -81,7 +81,11 @@ public:
 
     void OnUpdateRouteSupport(bool isSupported);
 
-    void OnDeviceStatusUpdated(DeviceType deviceType, bool connected, void *privData);
+    void OnDeviceStatusUpdated(DeviceType deviceType, bool connected, void *privData,
+        const std::string &macAddress, const AudioStreamInfo &streamInfo);
+
+    void OnDeviceConfigurationChanged(DeviceType deviceType,
+        const std::string &macAddress, const AudioStreamInfo &streamInfo);
 
     void OnServiceConnected(AudioServiceIndex serviceIndex);
 
@@ -117,9 +121,14 @@ private:
 
     DeviceType FetchHighPriorityDevice();
 
-    void UpdateConnectedDevices(DeviceType deviceType, std::vector<sptr<AudioDeviceDescriptor>> &desc, bool status);
+    void UpdateConnectedDevices(DeviceType deviceType, std::vector<sptr<AudioDeviceDescriptor>> &desc, bool status,
+        const std::string &macAddress, const AudioStreamInfo &streamInfo);
 
     void TriggerDeviceChangedCallback(const std::vector<sptr<AudioDeviceDescriptor>> &devChangeDesc, bool connection);
+
+    bool GetActiveDeviceStreamInfo(DeviceType deviceType, AudioStreamInfo &streamInfo);
+
+    bool IsConfigurationUpdated(DeviceType deviceType, const AudioStreamInfo &streamInfo);
 
     bool interruptEnabled_ = true;
     bool isUpdateRouteSupported_ = true;
@@ -130,6 +139,8 @@ private:
     Parser& mConfigParser;
     std::unique_ptr<DeviceStatusListener> mDeviceStatusListener;
     std::vector<sptr<AudioDeviceDescriptor>> mConnectedDevices;
+    std::unordered_map<std::string, AudioStreamInfo> connectedBTDeviceMap_;
+    std::string activeBTDevice_;
     std::unordered_map<int32_t, sptr<IStandardAudioPolicyManagerListener>> deviceChangeCallbackMap_;
     AudioScene mAudioScene = AUDIO_SCENE_DEFAULT;
     AudioFocusEntry focusTable_[MAX_NUM_STREAMS][MAX_NUM_STREAMS];
