@@ -36,7 +36,7 @@ namespace OHOS {
 namespace AudioStandard {
 static __thread napi_ref g_rendererConstructor = nullptr;
 std::unique_ptr<AudioParameters> AudioRendererNapi::sAudioParameters_ = nullptr;
-std::unique_ptr<AudioRendererOptions> AudioRendererNapi::sAudioRendererOptions_ = nullptr;
+std::unique_ptr<AudioRendererOptions> AudioRendererNapi::sRendererOptions_ = nullptr;
 napi_ref AudioRendererNapi::audioRendererRate_ = nullptr;
 napi_ref AudioRendererNapi::interruptEventType_ = nullptr;
 napi_ref AudioRendererNapi::interruptHintType_ = nullptr;
@@ -451,14 +451,26 @@ napi_value AudioRendererNapi::Construct(napi_env env, napi_callback_info info)
     CHECK_AND_RETURN_RET_LOG(rendererNapi != nullptr, result, "No memory");
 
     rendererNapi->env_ = env;
-    rendererNapi->contentType_ = sAudioRendererOptions_->rendererInfo.contentType;
-    rendererNapi->streamUsage_ = sAudioRendererOptions_->rendererInfo.streamUsage;
-    rendererNapi->rendererFlags_ = sAudioRendererOptions_->rendererInfo.rendererFlags;
+    rendererNapi->contentType_ = sRendererOptions_->rendererInfo.contentType;
+    rendererNapi->streamUsage_ = sRendererOptions_->rendererInfo.streamUsage;
+    rendererNapi->rendererFlags_ = sRendererOptions_->rendererInfo.rendererFlags;
+
+    AudioRendererOptions rendererOptions = {};
+    rendererOptions.streamInfo.samplingRate = sRendererOptions_->streamInfo.samplingRate;
+    rendererOptions.streamInfo.encoding = sRendererOptions_->streamInfo.encoding;
+    rendererOptions.streamInfo.format = sRendererOptions_->streamInfo.format;
+    rendererOptions.streamInfo.channels = sRendererOptions_->streamInfo.channels;
+
+    rendererOptions.rendererInfo.contentType = sRendererOptions_->rendererInfo.contentType;
+    rendererOptions.rendererInfo.streamUsage = sRendererOptions_->rendererInfo.streamUsage;
+    rendererOptions.rendererInfo.rendererFlags = sRendererOptions_->rendererInfo.rendererFlags;
+
     std::shared_ptr<AbilityRuntime::Context> abilityContext = GetAbilityContext(env);
     if (abilityContext != nullptr) {
-        rendererNapi->audioRenderer_ = AudioRenderer::Create(abilityContext->GetCacheDir(), *sAudioRendererOptions_);
+        std::string cacheDir = abilityContext->GetCacheDir();
+        rendererNapi->audioRenderer_ = AudioRenderer::Create(cacheDir, rendererOptions);
     } else {
-        rendererNapi->audioRenderer_ = AudioRenderer::Create(*sAudioRendererOptions_);
+        rendererNapi->audioRenderer_ = AudioRenderer::Create(rendererOptions);
     }
 
     CHECK_AND_RETURN_RET_LOG(rendererNapi->audioRenderer_ != nullptr, result, "Renderer Create failed");
@@ -1957,9 +1969,9 @@ napi_value AudioRendererNapi::CreateAudioRendererWrapper(napi_env env, unique_pt
     if (renderOptions != nullptr) {
         status = napi_get_reference_value(env, g_rendererConstructor, &constructor);
         if (status == napi_ok) {
-            sAudioRendererOptions_ = move(renderOptions);
+            sRendererOptions_ = move(renderOptions);
             status = napi_new_instance(env, constructor, 0, nullptr, &result);
-            sAudioRendererOptions_.release();
+            sRendererOptions_.release();
             if (status == napi_ok) {
                 return result;
             }

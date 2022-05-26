@@ -35,7 +35,7 @@ namespace OHOS {
 namespace AudioStandard {
 static __thread napi_ref g_capturerConstructor = nullptr;
 std::unique_ptr<AudioParameters> AudioCapturerNapi::sAudioParameters_ = nullptr;
-std::unique_ptr<AudioCapturerOptions> AudioCapturerNapi::sAudioCapturerOptions_ = nullptr;
+std::unique_ptr<AudioCapturerOptions> AudioCapturerNapi::sCapturerOptions_ = nullptr;
 
 namespace {
     constexpr int ARGS_ONE = 1;
@@ -230,13 +230,24 @@ napi_value AudioCapturerNapi::Construct(napi_env env, napi_callback_info info)
     unique_ptr<AudioCapturerNapi> capturerNapi = make_unique<AudioCapturerNapi>();
     CHECK_AND_RETURN_RET_LOG(capturerNapi != nullptr, result, "No memory");
     capturerNapi->env_ = env;
-    capturerNapi->sourceType_ = sAudioCapturerOptions_->capturerInfo.sourceType;
-    capturerNapi->capturerFlags_ = sAudioCapturerOptions_->capturerInfo.capturerFlags;
+    capturerNapi->sourceType_ = sCapturerOptions_->capturerInfo.sourceType;
+    capturerNapi->capturerFlags_ = sCapturerOptions_->capturerInfo.capturerFlags;
+
+    AudioCapturerOptions capturerOptions = {};
+    capturerOptions.streamInfo.samplingRate = sCapturerOptions_->streamInfo.samplingRate;
+    capturerOptions.streamInfo.encoding = sCapturerOptions_->streamInfo.encoding;
+    capturerOptions.streamInfo.format = sCapturerOptions_->streamInfo.format;
+    capturerOptions.streamInfo.channels = sCapturerOptions_->streamInfo.channels;
+
+    capturerOptions.capturerInfo.sourceType = sCapturerOptions_->capturerInfo.sourceType;
+    capturerOptions.capturerInfo.capturerFlags = sCapturerOptions_->capturerInfo.capturerFlags;
+
     std::shared_ptr<AbilityRuntime::Context> abilityContext = GetAbilityContext(env);
     if (abilityContext != nullptr) {
-        capturerNapi->audioCapturer_ = AudioCapturer::Create(*sAudioCapturerOptions_, abilityContext->GetCacheDir());
+        std::string cacheDir = abilityContext->GetCacheDir();
+        capturerNapi->audioCapturer_ = AudioCapturer::Create(capturerOptions, cacheDir);
     } else {
-        capturerNapi->audioCapturer_ = AudioCapturer::Create(*sAudioCapturerOptions_);
+        capturerNapi->audioCapturer_ = AudioCapturer::Create(capturerOptions);
     }
 
     CHECK_AND_RETURN_RET_LOG(capturerNapi->audioCapturer_ != nullptr, result, "Capturer Create failed");
@@ -1317,9 +1328,9 @@ napi_value AudioCapturerNapi::CreateAudioCapturerWrapper(napi_env env, unique_pt
     if (captureOptions != nullptr) {
         status = napi_get_reference_value(env, g_capturerConstructor, &constructor);
         if (status == napi_ok) {
-            sAudioCapturerOptions_ = move(captureOptions);
+            sCapturerOptions_ = move(captureOptions);
             status = napi_new_instance(env, constructor, 0, nullptr, &result);
-            sAudioCapturerOptions_.release();
+            sCapturerOptions_.release();
             if (status == napi_ok) {
                 return result;
             }
