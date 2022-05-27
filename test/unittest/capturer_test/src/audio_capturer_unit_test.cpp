@@ -266,7 +266,7 @@ HWTEST(AudioCapturerUnitTest, Audio_Capturer_Create_008, TestSize.Level0)
 *             capturerOptions.streamInfo.encoding = ENCODING_PCM;
 *             capturerOptions.streamInfo.format = SAMPLE_U8;
 *             capturerOptions.streamInfo.channels = MONO;
-*             capturerOptions.capturerInfo.sourceType = SOURCE_TYPE_VOICE_CALL;
+*             capturerOptions.capturerInfo.sourceType = SOURCE_TYPE_VOICE_COMMUNICATION;
 *             capturerOptions.capturerInfo.capturerFlags = CAPTURER_FLAG;
 */
 HWTEST(AudioCapturerUnitTest, Audio_Capturer_Create_009, TestSize.Level0)
@@ -276,7 +276,7 @@ HWTEST(AudioCapturerUnitTest, Audio_Capturer_Create_009, TestSize.Level0)
     capturerOptions.streamInfo.encoding = AudioEncodingType::ENCODING_PCM;
     capturerOptions.streamInfo.format = AudioSampleFormat::SAMPLE_U8;
     capturerOptions.streamInfo.channels = AudioChannel::MONO;
-    capturerOptions.capturerInfo.sourceType = SourceType::SOURCE_TYPE_VOICE_CALL;
+    capturerOptions.capturerInfo.sourceType = SourceType::SOURCE_TYPE_VOICE_COMMUNICATION;
     capturerOptions.capturerInfo.capturerFlags = CAPTURER_FLAG;
 
     unique_ptr<AudioCapturer> audioCapturer = AudioCapturer::Create(capturerOptions);
@@ -293,7 +293,7 @@ HWTEST(AudioCapturerUnitTest, Audio_Capturer_Create_009, TestSize.Level0)
 *             capturerOptions.streamInfo.encoding = ENCODING_PCM;
 *             capturerOptions.streamInfo.format = SAMPLE_S32LE;
 *             capturerOptions.streamInfo.channels = MONO;
-*             capturerOptions.capturerInfo.sourceType = SOURCE_TYPE_VOICE_CALL;
+*             capturerOptions.capturerInfo.sourceType = SOURCE_TYPE_VOICE_COMMUNICATION;
 *             capturerOptions.capturerInfo.capturerFlags = CAPTURER_FLAG;
 */
 HWTEST(AudioCapturerUnitTest, Audio_Capturer_Create_010, TestSize.Level0)
@@ -303,7 +303,7 @@ HWTEST(AudioCapturerUnitTest, Audio_Capturer_Create_010, TestSize.Level0)
     capturerOptions.streamInfo.encoding = AudioEncodingType::ENCODING_PCM;
     capturerOptions.streamInfo.format = AudioSampleFormat::SAMPLE_S32LE;
     capturerOptions.streamInfo.channels = AudioChannel::MONO;
-    capturerOptions.capturerInfo.sourceType = SourceType::SOURCE_TYPE_VOICE_CALL;
+    capturerOptions.capturerInfo.sourceType = SourceType::SOURCE_TYPE_VOICE_COMMUNICATION;
     capturerOptions.capturerInfo.capturerFlags = CAPTURER_FLAG;
 
     unique_ptr<AudioCapturer> audioCapturer = AudioCapturer::Create(capturerOptions);

@@ -39,12 +39,12 @@ std::unique_ptr<AudioCapturer> AudioCapturer::Create(const std::string cachePath
     const AudioCapturerOptions &capturerOptions)
 {
     auto sourceType = capturerOptions.capturerInfo.sourceType;
-    if (sourceType < SOURCE_TYPE_MIC || sourceType > SOURCE_TYPE_VOICE_CALL) {
+    if (sourceType < SOURCE_TYPE_MIC || sourceType > SOURCE_TYPE_VOICE_COMMUNICATION) {
         return nullptr;
     }
 
     AudioStreamType audioStreamType = STREAM_MUSIC;
-    if (sourceType == SOURCE_TYPE_VOICE_CALL) {
+    if (sourceType == SOURCE_TYPE_VOICE_COMMUNICATION) {
         audioStreamType = STREAM_VOICE_CALL;
     }
 
