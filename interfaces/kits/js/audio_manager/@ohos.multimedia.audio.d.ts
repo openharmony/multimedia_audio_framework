@@ -1290,7 +1290,12 @@ declare namespace audio {
      * Mic source type.
      * @since 8
      */
-    SOURCE_TYPE_MIC
+    SOURCE_TYPE_MIC = 0,
+    /**
+     * Voice communication source type.
+     * @since 8
+     */
+    SOURCE_TYPE_VOICE_COMMUNICATION = 7
   }
 
   /**
