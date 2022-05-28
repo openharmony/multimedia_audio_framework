@@ -53,7 +53,6 @@ ohos_shared_library("opensles") {
 
   sources = [
     "$opensles_dir/api/1.0.1/OpenSLES_IID.c",
-    "$opensles_dir/api/1.0.1/OpenSLES_OpenHarmony_IID.cpp",
     "//foundation/multimedia/audio_standard/frameworks/native/opensles/src/adapter/audiocapturer_adapter.cpp",
     "//foundation/multimedia/audio_standard/frameworks/native/opensles/src/adapter/audioplayer_adapter.cpp",
     "//foundation/multimedia/audio_standard/frameworks/native/opensles/src/adapter/readorwritecallback_adapter.cpp",
@@ -67,6 +66,7 @@ ohos_shared_library("opensles") {
     "//foundation/multimedia/audio_standard/frameworks/native/opensles/src/obj/audioplayer_obj.cpp",
     "//foundation/multimedia/audio_standard/frameworks/native/opensles/src/obj/engine_obj.cpp",
     "//foundation/multimedia/audio_standard/frameworks/native/opensles/src/obj/output_mix_obj.cpp",
+    "//foundation/multimedia/audio_standard/frameworks/native/opensles/src/util/OpenSLES_OpenHarmony_IID.cpp",
     "//foundation/multimedia/audio_standard/frameworks/native/opensles/src/util/builder.cpp",
     "//foundation/multimedia/audio_standard/frameworks/native/opensles/src/util/table_struct.cpp",
   ]
