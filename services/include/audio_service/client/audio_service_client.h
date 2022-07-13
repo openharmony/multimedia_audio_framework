@@ -522,6 +522,7 @@ private:
     size_t internalRdBufIndex;
     size_t setBufferSize;
     int32_t streamCmdStatus;
+    int32_t updatePropStatus;
     int32_t streamDrainStatus;
     int32_t streamFlushStatus;
     bool isMainLoopStarted;
@@ -653,6 +654,7 @@ private:
     static void PAStreamStartSuccessCb(pa_stream *stream, int32_t success, void *userdata);
     static void PAStreamStopSuccessCb(pa_stream *stream, int32_t success, void *userdata);
     static void PAStreamPauseSuccessCb(pa_stream *stream, int32_t success, void *userdata);
+    static void PAStreamUpdatePropSuccessCb(pa_stream *stream, int32_t success, void *userdata);
     static void PAStreamWriteCb(pa_stream *stream, size_t length, void *userdata);
     static void PAStreamDrainSuccessCb(pa_stream *stream, int32_t success, void *userdata);
     static void PAStreamFlushSuccessCb(pa_stream *stream, int32_t success, void *userdata);

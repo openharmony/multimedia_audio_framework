@@ -199,6 +199,20 @@ void AudioServiceClient::PAStreamPauseSuccessCb(pa_stream *stream, int32_t succe
     pa_threaded_mainloop_signal(mainLoop, 0);
 }
 
+void AudioServiceClient::PAStreamUpdatePropSuccessCb(pa_stream *stream, int32_t success, void *userdata)
+{
+    if (!userdata) {
+        AUDIO_ERR_LOG("AudioServiceClient::PAStreamUpdatePropSuccessCb: userdata is null");
+        return;
+    }
+
+    AudioServiceClient *asClient = static_cast<AudioServiceClient *>(userdata);
+    pa_threaded_mainloop *mainLoop = static_cast<pa_threaded_mainloop *>(asClient->mainLoop);
+
+    asClient->updatePropStatus = success;
+    pa_threaded_mainloop_signal(mainLoop, 0);
+}
+
 void AudioServiceClient::PAStreamDrainSuccessCb(pa_stream *stream, int32_t success, void *userdata)
 {
     if (!userdata) {
@@ -491,6 +505,7 @@ AudioServiceClient::AudioServiceClient()
     internalRdBufIndex = 0;
     internalRdBufLen = 0;
     streamCmdStatus = 0;
+    updatePropStatus = 0;
     streamDrainStatus = 0;
     streamFlushStatus = 0;
     underFlowCount = 0;
@@ -2007,11 +2022,28 @@ int32_t AudioServiceClient::SetStreamVolume(float volume)
         return AUDIO_CLIENT_ERR;
     }
 
+    updatePropStatus = 0;
     pa_proplist_sets(propList, "stream.volumeFactor", std::to_string(mVolumeFactor).c_str());
     pa_operation *updatePropOperation = pa_stream_proplist_update(paStream, PA_UPDATE_REPLACE, propList,
-        nullptr, nullptr);
+        PAStreamUpdatePropSuccessCb, (void *)this);
+    if (updatePropOperation == nullptr) {
+        AUDIO_ERR_LOG("pa_stream_proplist_update returned null");
+        pa_proplist_free(propList);
+        pa_threaded_mainloop_unlock(mainLoop);
+        return AUDIO_CLIENT_ERR;
+    }
+
+    while (pa_operation_get_state(updatePropOperation) == PA_OPERATION_RUNNING) {
+        pa_threaded_mainloop_wait(mainLoop);
+    }
     pa_proplist_free(propList);
     pa_operation_unref(updatePropOperation);
+
+    if (!updatePropStatus) {
+        AUDIO_ERR_LOG("Update volume property failed");
+        pa_threaded_mainloop_unlock(mainLoop);
+        return AUDIO_CLIENT_ERR;
+    }
 
     if (mAudioSystemMgr == nullptr) {
         AUDIO_ERR_LOG("System manager instance is null");
