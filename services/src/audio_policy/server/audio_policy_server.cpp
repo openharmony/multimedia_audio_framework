@@ -222,6 +222,9 @@ int32_t AudioPolicyServer::SetStreamVolume(AudioStreamType streamType, float vol
 
 float AudioPolicyServer::GetStreamVolume(AudioStreamType streamType)
 {
+    if (GetStreamMute(streamType)) {
+        return MIN_VOLUME_LEVEL;
+    }
     return mPolicyService.GetStreamVolume(streamType);
 }
 
@@ -234,7 +237,18 @@ int32_t AudioPolicyServer::SetStreamMute(AudioStreamType streamType, bool mute)
         }
     }
 
-    return mPolicyService.SetStreamMute(streamType, mute);
+    int result = mPolicyService.SetStreamMute(streamType, mute);
+    for (auto it = volumeChangeCbsMap_.begin(); it != volumeChangeCbsMap_.end(); ++it) {
+        std::shared_ptr<VolumeKeyEventCallback> volumeChangeCb = it->second;
+        if (volumeChangeCb == nullptr) {
+            AUDIO_ERR_LOG("volumeChangeCb: nullptr for client : %{public}d", it->first);
+            continue;
+        }
+        AUDIO_DEBUG_LOG("AudioPolicyServer::SetStreamMute trigger volumeChangeCb clientPid : %{public}d", it->first);
+        volumeChangeCb->OnVolumeKeyEvent(streamType, ConvertVolumeToInt(GetStreamVolume(streamType)), false);
+    }
+
+    return result;
 }
 
 int32_t AudioPolicyServer::SetStreamVolume(AudioStreamType streamType, float volume, bool isUpdateUi)
