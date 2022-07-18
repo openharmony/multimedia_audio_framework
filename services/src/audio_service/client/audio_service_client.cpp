@@ -970,6 +970,7 @@ int32_t AudioServiceClient::CreateStream(AudioStreamParams audioParams, AudioStr
     pa_threaded_mainloop_unlock(mainLoop);
 
     error = ConnectStreamToPA();
+    streamInfoUpdated = false;
     if (error < 0) {
         AUDIO_ERR_LOG("Create Stream Failed");
         ResetPAAudioClient();
