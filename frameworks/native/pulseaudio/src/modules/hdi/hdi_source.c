@@ -186,14 +186,14 @@ static int get_capturer_frame_from_hdi(pa_memchunk *chunk, const struct Userdata
         AUDIO_ERR_LOG("HDI Source: Error replyBytes > requestBytes. Requested data Length: "
                 "%{public}" PRIu64 ", Read: %{public}" PRIu64 " bytes", requestBytes, replyBytes);
         pa_memblock_unref(chunk->memblock);
-        return -1;
+        return 0;
     }
 
     if (replyBytes == 0) {
         AUDIO_ERR_LOG("HDI Source: Failed to read, Requested data Length: %{public}" PRIu64 " bytes,"
                 " Read: %{public}" PRIu64 " bytes", requestBytes, replyBytes);
         pa_memblock_unref(chunk->memblock);
-        return -1;
+        return 0;
     }
 
     chunk->index = 0;
