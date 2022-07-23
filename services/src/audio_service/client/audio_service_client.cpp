@@ -2011,6 +2011,13 @@ int32_t AudioServiceClient::SetStreamVolume(float volume)
     pa_proplist_sets(propList, "stream.volumeFactor", std::to_string(mVolumeFactor).c_str());
     pa_operation *updatePropOperation = pa_stream_proplist_update(paStream, PA_UPDATE_REPLACE, propList,
         nullptr, nullptr);
+    if (updatePropOperation == nullptr) {
+        AUDIO_ERR_LOG("pa_stream_proplist_update returned null");
+        pa_proplist_free(propList);
+        pa_threaded_mainloop_unlock(mainLoop);
+        return AUDIO_CLIENT_ERR;
+    }
+
     pa_proplist_free(propList);
     pa_operation_unref(updatePropOperation);
 
