@@ -84,7 +84,7 @@ void InitAttrsCapture(struct AudioSampleAttributes &attrs)
     attrs.format = AUDIO_FORMAT_PCM_16_BIT;
     attrs.channelCount = AUDIO_CHANNELCOUNT;
     attrs.sampleRate = AUDIO_SAMPLE_RATE_48K;
-    attrs.interleaved = 0;
+    attrs.interleaved = true;
     attrs.streamId = INTERNAL_INPUT_STREAM_ID;
     attrs.type = AUDIO_IN_MEDIA;
     attrs.period = DEEP_BUFFER_CAPTURE_PERIOD_SIZE;
@@ -164,20 +164,11 @@ int32_t AudioCapturerSource::CreateCapture(struct AudioPort &capturePort)
     return 0;
 }
 
-int32_t AudioCapturerSource::Init(AudioSourceAttr &attr)
+int32_t AudioCapturerSource::GetAndLoadAdapter(void)
 {
-    attr_ = attr;
-    int32_t ret;
-    int32_t index;
     int32_t size = 0;
     struct AudioAdapterDescriptor *descs = nullptr;
-
-    if (InitAudioManager() != 0) {
-        MEDIA_ERR_LOG("Init audio manager Fail");
-        return ERR_INVALID_HANDLE;
-    }
-
-    ret = audioManager_->GetAllAdapters(audioManager_, &descs, &size);
+    int32_t ret = audioManager_->GetAllAdapters(audioManager_, &descs, &size);
     // adapters is 0~3
     if (size > MAX_AUDIO_ADAPTER_NUM || size == 0 || descs == nullptr || ret != 0) {
         MEDIA_ERR_LOG("Get adapters Fail");
@@ -185,8 +176,12 @@ int32_t AudioCapturerSource::Init(AudioSourceAttr &attr)
     }
 
     // Get qualified sound card and port
+#ifdef PRODUCT_Hi37XX
+    string adapterNameCase = "primary";  // Set sound card information
+#else
     string adapterNameCase = "internal";
-    index = SwitchAdapterCapture(descs, size, adapterNameCase, PORT_IN, audioPort);
+#endif
+    int32_t index = SwitchAdapterCapture(descs, size, adapterNameCase, PORT_IN, audioPort);
     if (index < 0) {
         MEDIA_ERR_LOG("Switch Adapter Capture Fail");
         return ERR_NOT_STARTED;
@@ -200,6 +195,21 @@ int32_t AudioCapturerSource::Init(AudioSourceAttr &attr)
     if (audioAdapter_ == nullptr) {
         MEDIA_ERR_LOG("Load audio device failed");
         return ERR_NOT_STARTED;
+    }
+    return SUCCESS;
+}
+
+int32_t AudioCapturerSource::Init(AudioSourceAttr &attr)
+{
+    attr_ = attr;
+    if (InitAudioManager() != 0) {
+        MEDIA_ERR_LOG("Init audio manager Fail");
+        return ERR_INVALID_HANDLE;
+    }
+
+    int32_t ret = GetAndLoadAdapter();
+    if (ret != SUCCESS) {
+        return ret;
     }
 
     // Inittialization port information, can fill through mode and other parameters

@@ -88,6 +88,7 @@ private:
 
     int32_t CreateCapture(struct AudioPort &capturePort);
     int32_t InitAudioManager();
+    int32_t GetAndLoadAdapter(void);
 
 #ifdef CAPTURE_DUMP
     FILE *pfd;
