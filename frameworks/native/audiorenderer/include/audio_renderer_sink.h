@@ -66,6 +66,7 @@ private:
 
     int32_t CreateRender(struct AudioPort &renderPort);
     int32_t InitAudioManager();
+    int32_t GetAndLoadAdapter(void);
 #ifdef DUMPFILE
     FILE *pfd;
 #endif // DUMPFILE

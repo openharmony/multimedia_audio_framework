@@ -104,7 +104,7 @@ int32_t InitAttrs(struct AudioSampleAttributes &attrs)
 #endif
     attrs.channelCount = AUDIO_CHANNELCOUNT;
     attrs.sampleRate = AUDIO_SAMPLE_RATE_48K;
-    attrs.interleaved = 0;
+    attrs.interleaved = true;
     attrs.streamId = INTERNAL_OUTPUT_STREAM_ID;
     attrs.type = AUDIO_IN_MEDIA;
     attrs.period = DEEP_BUFFER_RENDER_PERIOD_SIZE;
@@ -126,7 +126,7 @@ static int32_t SwitchAdapterRender(struct AudioAdapterDescriptor *descs, string 
 
     for (int32_t index = 0; index < size; index++) {
         struct AudioAdapterDescriptor *desc = &descs[index];
-        if (desc == nullptr) {
+        if (desc == nullptr || desc->adapterName == nullptr) {
             continue;
         }
         if (!strcmp(desc->adapterName, adapterNameCase.c_str())) {
@@ -197,25 +197,19 @@ int32_t AudioRendererSink::CreateRender(struct AudioPort &renderPort)
     return 0;
 }
 
-int32_t AudioRendererSink::Init(AudioSinkAttr &attr)
+int32_t AudioRendererSink::GetAndLoadAdapter(void)
 {
-    attr_ = attr;
 #ifdef PRODUCT_M40
     string adapterNameCase = "internal";  // Set sound card information
+#elif (defined (PRODUCT_Hi37XX))
+    string adapterNameCase = "primary";  // Set sound card information
 #else
     string adapterNameCase = "usb";  // Set sound card information
 #endif
     enum AudioPortDirection port = PORT_OUT; // Set port information
-
-    if (InitAudioManager() != 0) {
-        MEDIA_ERR_LOG("Init audio manager Fail");
-        return ERR_NOT_STARTED;
-    }
-
     int32_t size = 0;
-    int32_t ret;
     struct AudioAdapterDescriptor *descs = nullptr;
-    ret = audioManager_->GetAllAdapters(audioManager_, &descs, &size);
+    int32_t ret = audioManager_->GetAllAdapters(audioManager_, &descs, &size);
     if (size > MAX_AUDIO_ADAPTER_NUM || size == 0 || descs == nullptr || ret != 0) {
         MEDIA_ERR_LOG("Get adapters Fail");
         return ERR_NOT_STARTED;
@@ -236,6 +230,22 @@ int32_t AudioRendererSink::Init(AudioSinkAttr &attr)
     if (audioAdapter_ == nullptr) {
         MEDIA_ERR_LOG("Load audio device failed");
         return ERR_NOT_STARTED;
+    }
+    return SUCCESS;
+}
+
+int32_t AudioRendererSink::Init(AudioSinkAttr &attr)
+{
+    attr_ = attr;
+
+    if (InitAudioManager() != 0) {
+        MEDIA_ERR_LOG("Init audio manager Fail");
+        return ERR_NOT_STARTED;
+    }
+
+    int32_t ret = GetAndLoadAdapter();
+    if (ret != SUCCESS) {
+        return ret;
     }
 
     // Initialization port information, can fill through mode and other parameters

@@ -21,6 +21,8 @@ ohos_shared_library("audio_capturer_source") {
   cflags += [ "-Wall" ]
   if ("${product_name}" == "m40") {
     cflags += [ "-DPRODUCT_M40" ]
+  } else if ("${product_name}" == "Hi3751V350") {
+    cflags += [ "-DPRODUCT_Hi37XX" ]
   }
   cflags_cc = cflags
 

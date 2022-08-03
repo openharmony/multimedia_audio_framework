@@ -217,6 +217,8 @@ ohos_prebuilt_etc("audio_policy_config") {
     source = "$AUDIO_POLICY_SERVER_DIR/etc/rk3568/audio_policy_config.xml"
   } else if ("${product_name}" == "m40") {
     source = "$AUDIO_POLICY_SERVER_DIR/etc/m40/audio_policy_config.xml"
+  } else if ("${product_name}" == "Hi3751V350") {
+    source = "$AUDIO_POLICY_SERVER_DIR/etc/hi3751v350/audio_policy_config.xml"
   } else {
     source = "$AUDIO_POLICY_SERVER_DIR/etc/audio_policy_config.xml"
   }
