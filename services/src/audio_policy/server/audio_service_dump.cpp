@@ -264,6 +264,9 @@ const std::string AudioServiceDump::GetDeviceTypeName(DeviceType deviceType)
         case DEVICE_TYPE_WIRED_HEADSET:
             device = "WIRED_HEADSET";
             break;
+        case DEVICE_TYPE_WIRED_HEADPHONES:
+            device = "WIRED_HEADPHONES";
+            break;
         case DEVICE_TYPE_BLUETOOTH_SCO:
              device = "BLUETOOTH_SCO";
             break;

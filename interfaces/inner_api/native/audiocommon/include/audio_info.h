@@ -94,6 +94,10 @@ enum DeviceType {
      */
     DEVICE_TYPE_WIRED_HEADSET = 3,
     /**
+     * Indicates a pair of wired headphones.
+     */
+    DEVICE_TYPE_WIRED_HEADPHONES = 4,
+    /**
      * Indicates a Bluetooth device used for telephony.
      */
     DEVICE_TYPE_BLUETOOTH_SCO = 7,
