@@ -509,6 +509,9 @@ napi_value AudioManagerNapi::CreateDeviceTypeObject(napi_env env)
                 case DEVICE_TYPE_WIRED_HEADSET:
                     propName = "WIRED_HEADSET";
                     break;
+                case DEVICE_TYPE_WIRED_HEADPHONES:
+                    propName = "WIRED_HEADPHONES";
+                    break;
                 case DEVICE_TYPE_BLUETOOTH_SCO:
                     propName = "BLUETOOTH_SCO";
                     break;
