@@ -414,17 +414,9 @@ pa_source *pa_hdi_source_new(pa_module *m, pa_modargs *ma, const char *driver)
 
     u->buffer_size = DEFAULT_BUFFER_SIZE;
     u->attrs.sampleRate = ss.rate;
-// The values for rk are hardcoded due to config mismatch in hdi. To be removed once hdi issue is fixed.
-#ifdef PRODUCT_RK3568
-    int32_t channelCount = 2;
-    u->attrs.channel = channelCount;
-    u->attrs.format = AUDIO_FORMAT_PCM_16_BIT;
-    u->attrs.isBigEndian = false;
-#else
     u->attrs.channel = ss.channels;
     u->attrs.format = ConvertToHDIAudioFormat(ss.format);
     u->attrs.isBigEndian = GetEndianInfo(ss.format);
-#endif
 
     MEDIA_INFO_LOG("AudioDeviceCreateCapture format: %{public}d, isBigEndian: %{public}d channel: %{public}d,"
         "sampleRate: %{public}d", u->attrs.format, u->attrs.isBigEndian, u->attrs.channel, u->attrs.sampleRate);
