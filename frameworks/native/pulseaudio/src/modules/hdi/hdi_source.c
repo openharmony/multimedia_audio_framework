@@ -332,7 +332,6 @@ static int pa_set_source_properties(pa_module *m, pa_modargs *ma, const pa_sampl
     return 0;
 }
 
-#ifndef PRODUCT_RK3568
 static enum AudioFormat ConvertToHDIAudioFormat(pa_sample_format_t format)
 {
     enum AudioFormat hdiAudioFormat;
@@ -378,7 +377,6 @@ static bool GetEndianInfo(pa_sample_format_t format)
 
     return isBigEndian;
 }
-#endif // #ifndef PRODUCT_RK3568
 
 pa_source *pa_hdi_source_new(pa_module *m, pa_modargs *ma, const char *driver)
 {
