@@ -25,7 +25,7 @@ void AudioClientTrackerCallbackProxy::PausedStreamImpl(
 {
     MessageParcel data;
     MessageParcel reply;
-    MessageOption option;
+    MessageOption option(MessageOption::TF_ASYNC);
     if (!data.WriteInterfaceToken(GetDescriptor())) {
         AUDIO_ERR_LOG("AudioClientTrackerCallbackProxy: PausedStreamImpl WriteInterfaceToken failed");
         return;
@@ -44,7 +44,7 @@ void AudioClientTrackerCallbackProxy::ResumeStreamImpl(
 {
     MessageParcel data;
     MessageParcel reply;
-    MessageOption option;
+    MessageOption option(MessageOption::TF_ASYNC);
     if (!data.WriteInterfaceToken(GetDescriptor())) {
         AUDIO_ERR_LOG("AudioClientTrackerCallbackProxy: ResumeStreamImpl WriteInterfaceToken failed");
         return;
