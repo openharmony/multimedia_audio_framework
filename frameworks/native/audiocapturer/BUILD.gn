@@ -47,7 +47,10 @@ ohos_shared_library("audio_capturer") {
 
   public_configs = [ ":audio_external_library_config" ]
 
-  external_deps = [ "hiviewdfx_hilog_native:libhilog" ]
+  external_deps = [
+    "eventhandler:libeventhandler",
+    "hiviewdfx_hilog_native:libhilog",
+  ]
 
   part_name = "multimedia_audio_framework"
   subsystem_name = "multimedia"

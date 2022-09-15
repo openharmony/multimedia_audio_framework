@@ -36,15 +36,19 @@ AudioPlayerAdapter* AudioPlayerAdapter::GetInstance()
 
 AudioRenderer* AudioPlayerAdapter::GetAudioRenderById(SLuint32 id)
 {
-    AUDIO_INFO_LOG("AudioPlayerAdapter::GetAudioRenderById: %{public}lu", id);
     return renderMap_.find(id)->second;
 }
 
 void AudioPlayerAdapter::EraseAudioRenderById(SLuint32 id)
 {
     AUDIO_INFO_LOG("AudioPlayerAdapter::EraseAudioRenderById: %{public}lu", id);
+    AudioRenderer* pRender = GetAudioRenderById(id);
     renderMap_.erase(id);
     callbackMap_.erase(id);
+    if (pRender) {
+        delete pRender;
+        pRender = nullptr;
+    }
     return;
 }
 
@@ -65,6 +69,7 @@ SLresult AudioPlayerAdapter::CreateAudioPlayerAdapter
     rendererOptions.rendererInfo.rendererFlags = RENDERER_NEW;
     string cachePath = "/data/storage/el2/base/haps/entry/files";
     unique_ptr<AudioRenderer> rendererHolder = AudioRenderer::Create(cachePath.c_str(), rendererOptions);
+    // use release to get raw pointer, so need to delete explicitly when destory object
     AudioRenderer *renderer = rendererHolder.release();
     AUDIO_INFO_LOG("AudioPlayerAdapter::CreateAudioPlayer ID: %{public}lu", id);
     renderer->SetRenderMode(RENDER_MODE_CALLBACK);

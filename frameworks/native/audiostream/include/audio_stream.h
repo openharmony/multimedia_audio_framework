@@ -16,6 +16,9 @@
 #define AUDIO_STREAM_H
 
 #include <mutex>
+#include <condition_variable>
+#include "event_handler.h"
+#include "event_runner.h"
 #include "audio_info.h"
 #include "audio_session.h"
 #include "timestamp.h"
@@ -23,9 +26,10 @@
 
 namespace OHOS {
 namespace AudioStandard {
-static constexpr int32_t MAX_NUM_BUFFERS = 3;
+static constexpr int32_t MAX_WRITECB_NUM_BUFFERS = 1;
+static constexpr int32_t MAX_READCB_NUM_BUFFERS = 3;
 
-class AudioStream : public AudioSession {
+class AudioStream : public AppExecFwk::EventHandler, public AudioSession {
 public:
     AudioStream(AudioStreamType eStreamType, AudioMode eMode, int32_t appUid);
     virtual ~AudioStream();
@@ -50,6 +54,8 @@ public:
     int32_t SetRenderRate(AudioRendererRate renderRate);
     AudioRendererRate GetRenderRate();
     int32_t SetStreamCallback(const std::shared_ptr<AudioStreamCallback> &callback);
+
+    // callback mode api
     int32_t SetRenderMode(AudioRenderMode renderMode);
     AudioRenderMode GetRenderMode();
     int32_t SetRendererWriteCallback(const std::shared_ptr<AudioRendererWriteCallback> &callback);
@@ -60,6 +66,10 @@ public:
     int32_t GetBufQueueState(BufferQueueState &bufState);
     int32_t Enqueue(const BufferDesc &bufDesc);
     int32_t Clear();
+    void SubmitAllFreeBuffers();
+    void SendWriteBufferRequestEvent();
+    void HandleWriteRequestEvent();
+
     int32_t SetLowPowerVolume(float volume);
     float GetLowPowerVolume();
     float GetSingleStreamVolume();
@@ -81,7 +91,12 @@ public:
 
     // Recording related APIs
     int32_t Read(uint8_t &buffer, size_t userSize, bool isBlockingRead);
+protected:
+    virtual void ProcessEvent(const AppExecFwk::InnerEvent::Pointer &event) override;
 private:
+    enum {
+        WRITE_BUFFER_REQUEST = 0,
+    };
     AudioStreamType eStreamType_;
     AudioMode eMode_;
     State state_;
@@ -94,13 +109,14 @@ private:
     AudioCaptureMode captureMode_;
     std::queue<BufferDesc> freeBufferQ_;
     std::queue<BufferDesc> filledBufferQ_;
-    std::array<std::unique_ptr<uint8_t[]>, MAX_NUM_BUFFERS> bufferPool_ = {};
+    std::array<std::unique_ptr<uint8_t[]>, MAX_WRITECB_NUM_BUFFERS> writeBufferPool_ = {};
+    std::array<std::unique_ptr<uint8_t[]>, MAX_READCB_NUM_BUFFERS> readBufferPool_ = {};
     std::unique_ptr<std::thread> writeThread_ = nullptr;
     std::unique_ptr<std::thread> readThread_ = nullptr;
     bool isReadyToWrite_;
     bool isReadyToRead_;
-    void WriteBuffers();
-    void ReadBuffers();
+    void WriteCbTheadLoop();
+    void ReadCbThreadLoop();
     std::unique_ptr<AudioStreamTracker> audioStreamTracker_;
     AudioRendererInfo rendererInfo_;
     AudioCapturerInfo capturerInfo_;
@@ -111,7 +127,9 @@ private:
     bool isFirstRead_;
     bool isFirstWrite_;
 
-    std::mutex mBufferQueueLock;
+    std::mutex bufferQueueLock_;
+    std::condition_variable bufferQueueCV_;
+    std::shared_ptr<AudioRendererWriteCallback> writeCallback_;
 };
 } // namespace AudioStandard
 } // namespace OHOS
