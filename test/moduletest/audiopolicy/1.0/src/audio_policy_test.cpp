@@ -158,7 +158,7 @@ HWTEST_P(AudioPolicySetVolumeTest, SetVolume, TestSize.Level1)
     EXPECT_EQ(AUDIO_OK, AudioSystemManager::GetInstance()->SetVolume(volumeType, volume));
 }
 
-INSTANTIATE_TEST_CASE_P(
+INSTANTIATE_TEST_SUITE_P(
     SetVolume,
     AudioPolicySetVolumeTest,
     ValuesIn(VOLUME_PARAMS));
@@ -180,7 +180,7 @@ HWTEST_P(AudioPolicyGetVolumeTest, GetVolume, TestSize.Level1)
     EXPECT_EQ(volume, AudioSystemManager::GetInstance()->GetVolume(volumeType));
 }
 
-INSTANTIATE_TEST_CASE_P(
+INSTANTIATE_TEST_SUITE_P(
     GetVolume,
     AudioPolicyGetVolumeTest,
     ValuesIn(VOLUME_PARAMS));
@@ -201,7 +201,7 @@ HWTEST_P(AudioPolicySetMuteTest, SetMute, TestSize.Level1)
     EXPECT_EQ(AUDIO_OK, AudioSystemManager::GetInstance()->SetMute(volumeType, mute));
 }
 
-INSTANTIATE_TEST_CASE_P(
+INSTANTIATE_TEST_SUITE_P(
     SetMute,
     AudioPolicySetMuteTest,
     ValuesIn(MUTE_PARAMS));
@@ -221,7 +221,7 @@ HWTEST_P(AudioPolicySetRingerModeTest, SetRingerMode, TestSize.Level1)
 }
 
 
-INSTANTIATE_TEST_CASE_P(
+INSTANTIATE_TEST_SUITE_P(
     SetRingerMode,
     AudioPolicySetRingerModeTest,
     ValuesIn(RINGER_MODE_PARAMS));
@@ -241,7 +241,7 @@ HWTEST_P(AudioPolicyGetRingerModeTest, GetRingerMode, TestSize.Level1)
     EXPECT_EQ(ringerMode, AudioSystemManager::GetInstance()->GetRingerMode());
 }
 
-INSTANTIATE_TEST_CASE_P(
+INSTANTIATE_TEST_SUITE_P(
     GetRingerMode,
     AudioPolicyGetRingerModeTest,
     ValuesIn(RINGER_MODE_PARAMS));
@@ -272,7 +272,7 @@ HWTEST_P(AudioPolicySetRingerModeCallbackTest, SetRingerModeCallback, TestSize.L
     EXPECT_EQ(SUCCESS, ret);
 }
 
-INSTANTIATE_TEST_CASE_P(
+INSTANTIATE_TEST_SUITE_P(
     SetRingerModeCallback,
     AudioPolicySetRingerModeCallbackTest,
     ValuesIn(RINGER_MODE_PARAMS));
@@ -291,7 +291,7 @@ HWTEST_P(AudioPolicySetMicrophoneMuteTest, SetMicrophoneMute, TestSize.Level1)
     EXPECT_EQ(AUDIO_OK, AudioSystemManager::GetInstance()->SetMicrophoneMute(mute));
 }
 
-INSTANTIATE_TEST_CASE_P(
+INSTANTIATE_TEST_SUITE_P(
     SetMicrophoneMute,
     AudioPolicySetMicrophoneMuteTest,
     ValuesIn(MIC_MUTE_PARAMS));
@@ -311,7 +311,7 @@ HWTEST_P(AudioPolicyGetMicrophoneMuteTest, IsMicrophoneMute, TestSize.Level1)
     EXPECT_EQ(mute, AudioSystemManager::GetInstance()->IsMicrophoneMute());
 }
 
-INSTANTIATE_TEST_CASE_P(
+INSTANTIATE_TEST_SUITE_P(
     IsMicrophoneMute,
     AudioPolicyGetMicrophoneMuteTest,
     ValuesIn(MIC_MUTE_PARAMS));
@@ -338,12 +338,12 @@ HWTEST_P(AudioPolicyVolumeRangeTest, GetMinVolume, TestSize.Level1)
     EXPECT_EQ(0, AudioSystemManager::GetInstance()->GetMinVolume(volumeType));
 }
 
-INSTANTIATE_TEST_CASE_P(
+INSTANTIATE_TEST_SUITE_P(
     GetMaxVolume,
     AudioPolicyVolumeRangeTest,
     ValuesIn(VOLUME_RANGE_PARAMS));
 
-INSTANTIATE_TEST_CASE_P(
+INSTANTIATE_TEST_SUITE_P(
     GetMinVolume,
     AudioPolicyVolumeRangeTest,
     ValuesIn(VOLUME_RANGE_PARAMS));
@@ -361,7 +361,7 @@ HWTEST_P(AudioPolicyAudioParameterTest, SetAudioParameter, TestSize.Level1)
     EXPECT_EQ(params.value, AudioSystemManager::GetInstance()->GetAudioParameter(params.key));
 }
 
-INSTANTIATE_TEST_CASE_P(
+INSTANTIATE_TEST_SUITE_P(
     SetAudioParameter,
     AudioPolicyAudioParameterTest,
     ValuesIn(AUDIO_PARAMS));
@@ -373,7 +373,7 @@ HWTEST_P(AudioPolicyAudioParameterTest, GetAudioParameter, TestSize.Level1)
     EXPECT_EQ(params.value, AudioSystemManager::GetInstance()->GetAudioParameter(params.key));
 }
 
-INSTANTIATE_TEST_CASE_P(
+INSTANTIATE_TEST_SUITE_P(
     GetAudioParameter,
     AudioPolicyAudioParameterTest,
     ValuesIn(AUDIO_PARAMS));
@@ -394,7 +394,7 @@ HWTEST_P(AudioPolicySetAudioSceneTest, SetAudioScene, TestSize.Level1)
     EXPECT_EQ(SUCCESS, ret);
 }
 
-INSTANTIATE_TEST_CASE_P(
+INSTANTIATE_TEST_SUITE_P(
     SetAudioScene,
     AudioPolicySetAudioSceneTest,
     ValuesIn(AUDIO_SCENE_PARAMS));
@@ -420,7 +420,7 @@ HWTEST_P(AudioPolicyGetAudioSceneTest, GetAudioScene, TestSize.Level1)
     EXPECT_EQ(SUCCESS, ret);
 }
 
-INSTANTIATE_TEST_CASE_P(
+INSTANTIATE_TEST_SUITE_P(
     GetAudioScene,
     AudioPolicyGetAudioSceneTest,
     ValuesIn(AUDIO_SCENE_PARAMS));
