@@ -55,6 +55,7 @@ ohos_shared_library("audio_renderer") {
 
   external_deps = [
     "c_utils:utils",
+    "eventhandler:libeventhandler",
     "hiviewdfx_hilog_native:libhilog",
   ]
 

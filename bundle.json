@@ -35,7 +35,8 @@
               "native_dataability",
               "native_rdb",
               "samgr_proxy",
-              "system_ability_fwk"
+              "system_ability_fwk",
+              "eventhandler"
             ],
             "third_party": [
               "libsnd",
