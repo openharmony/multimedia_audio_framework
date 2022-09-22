@@ -29,13 +29,13 @@ extern "C" {
 const int32_t  SUCCESS = 0;
 const int32_t  ERROR = -1;
 
-const int32_t CLASS_TYPE_PRIMARY = 0;
 const int32_t CLASS_TYPE_A2DP = 1;
+const int32_t CLASS_TYPE_PRIMARY = 0;
 const int32_t CLASS_TYPE_FILE = 2;
 const int32_t CLASS_TYPE_REMOTE = 3;
 
-const char *g_deviceClassPrimary = "primary";
 const char *g_deviceClassA2Dp = "a2dp";
+const char *g_deviceClassPrimary = "primary";
 const char *g_deviceClassFile = "file_io";
 const char *g_deviceClassRemote = "remote";
 

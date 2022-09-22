@@ -282,8 +282,8 @@ int32_t AudioCapturerSource::SetVolume(float left, float right)
         return ERR_INVALID_HANDLE;
     }
 
-    leftVolume_ = left;
     rightVolume_ = right;
+    leftVolume_ = left;
     if ((leftVolume_ == 0) && (rightVolume_ != 0)) {
         volume = rightVolume_;
     } else if ((leftVolume_ != 0) && (rightVolume_ == 0)) {
@@ -355,17 +355,17 @@ static AudioCategory GetAudioCategory(AudioScene audioScene)
 {
     AudioCategory audioCategory;
     switch (audioScene) {
-        case AUDIO_SCENE_DEFAULT:
-            audioCategory = AUDIO_IN_MEDIA;
-            break;
-        case AUDIO_SCENE_RINGING:
-            audioCategory = AUDIO_IN_RINGTONE;
-            break;
         case AUDIO_SCENE_PHONE_CALL:
             audioCategory = AUDIO_IN_CALL;
             break;
         case AUDIO_SCENE_PHONE_CHAT:
             audioCategory = AUDIO_IN_COMMUNICATION;
+            break;
+        case AUDIO_SCENE_RINGING:
+            audioCategory = AUDIO_IN_RINGTONE;
+            break;
+        case AUDIO_SCENE_DEFAULT:
+            audioCategory = AUDIO_IN_MEDIA;
             break;
         default:
             audioCategory = AUDIO_IN_MEDIA;

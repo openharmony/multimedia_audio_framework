@@ -31,6 +31,7 @@ namespace AudioStandard {
 namespace {
 const int32_t HALF_FACTOR = 2;
 const int32_t MAX_AUDIO_ADAPTER_NUM = 5;
+const int32_t RENDER_FRAME_NUM = -4;
 const float DEFAULT_VOLUME_LEVEL = 1.0f;
 const uint32_t AUDIO_CHANNELCOUNT = 2;
 const uint32_t AUDIO_SAMPLE_RATE_48K = 48000;
@@ -299,7 +300,7 @@ int32_t BluetoothRendererSink::RenderFrame(char &data, uint64_t len, uint64_t &w
     while (true) {
         ret = audioRender_->RenderFrame(audioRender_, (void*)&data, len, &writeLen);
         AUDIO_DEBUG_LOG("A2dp RenderFrame returns: %{public}x", ret);
-        if (ret == -4) {
+        if (ret == RENDER_FRAME_NUM) {
             AUDIO_ERR_LOG("retry render frame...");
             usleep(RENDER_FRAME_INTERVAL_IN_MICROSECONDS);
             continue;

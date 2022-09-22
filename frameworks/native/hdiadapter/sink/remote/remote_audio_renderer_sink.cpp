@@ -412,7 +412,7 @@ int32_t RemoteAudioRendererSink::RenderFrame(char &data, uint64_t len, uint64_t 
         return ERR_INVALID_HANDLE;
     }
 
-    ret = audioRender_->RenderFrame(audioRender_, (void*)&data, len, &writeLen);
+    ret = audioRender_->RenderFrame(audioRender_, static_cast<void*>(&data), len, &writeLen);
     if (ret != 0) {
         AUDIO_ERR_LOG("RenderFrame failed ret: %{public}x", ret);
         return ERR_WRITE_FAILED;

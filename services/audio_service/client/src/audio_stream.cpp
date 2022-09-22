@@ -670,7 +670,8 @@ int32_t AudioStream::SetRenderMode(AudioRenderMode renderMode)
 
         writeBufferPool_[i] = std::make_unique<uint8_t[]>(length);
         if (writeBufferPool_[i] == nullptr) {
-            AUDIO_INFO_LOG("AudioServiceClient::GetBufferDescriptor writeBufferPool_[i]==nullptr. Allocate memory failed.");
+            AUDIO_INFO_LOG(
+            "AudioServiceClient::GetBufferDescriptor writeBufferPool_[i]==nullptr. Allocate memory failed.");
             return ERR_OPERATION_FAILED;
         }
 
