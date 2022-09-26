@@ -18,6 +18,8 @@
 #include <string>
 #include <unistd.h>
 
+#include "power_mgr_client.h"
+
 #include "audio_errors.h"
 #include "audio_log.h"
 #include "audio_utils.h"
@@ -97,6 +99,7 @@ std::string AudioRendererSink::GetAudioParameter(const AudioParamKey key, const 
 
 void AudioRendererSink::DeInit()
 {
+    AUDIO_INFO_LOG("DeInit.");
     started_ = false;
     rendererInited_ = false;
     if ((audioRender_ != nullptr) && (audioAdapter_ != nullptr)) {
@@ -312,8 +315,21 @@ int32_t AudioRendererSink::RenderFrame(char &data, uint64_t len, uint64_t &write
 
 int32_t AudioRendererSink::Start(void)
 {
-    int32_t ret;
+    AUDIO_INFO_LOG("Start.");
 
+    if (mKeepRunningLock == nullptr) {
+        mKeepRunningLock = PowerMgr::PowerMgrClient::GetInstance().CreateRunningLock("AudioPrimaryBackgroundPlay",
+            PowerMgr::RunningLockType::RUNNINGLOCK_BACKGROUND);
+    }
+
+    if (mKeepRunningLock != nullptr) {
+        AUDIO_INFO_LOG("AudioRendererSink call KeepRunningLock lock");
+        mKeepRunningLock->Lock(0); // 0 for lasting.
+    } else {
+        AUDIO_ERR_LOG("mKeepRunningLock is null, playback can not work well!");
+    }
+
+    int32_t ret;
     if (!started_) {
         ret = audioRender_->control.Start(reinterpret_cast<AudioHandle>(audioRender_));
         if (!ret) {
@@ -552,6 +568,15 @@ int32_t AudioRendererSink::GetTransactionId(uint64_t *transactionId)
 
 int32_t AudioRendererSink::Stop(void)
 {
+    AUDIO_INFO_LOG("Stop.");
+
+    if (mKeepRunningLock != nullptr) {
+        AUDIO_INFO_LOG("AudioRendererSink call KeepRunningLock UnLock");
+        mKeepRunningLock->UnLock();
+    } else {
+        AUDIO_ERR_LOG("mKeepRunningLock is null, playback can not work well!");
+    }
+
     int32_t ret;
 
     if (audioRender_ == nullptr) {

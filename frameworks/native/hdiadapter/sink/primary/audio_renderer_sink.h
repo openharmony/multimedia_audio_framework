@@ -19,6 +19,7 @@
 #include "audio_info.h"
 #include "audio_manager.h"
 #include "audio_sink_callback.h"
+#include "running_lock.h"
 
 #include <cstdio>
 #include <list>
@@ -75,6 +76,8 @@ private:
     struct AudioAdapter *audioAdapter_;
     struct AudioRender *audioRender_;
     struct AudioPort audioPort_ = {};
+
+    std::shared_ptr<PowerMgr::RunningLock> mKeepRunningLock;
 
     int32_t CreateRender(struct AudioPort &renderPort);
     int32_t InitAudioManager();

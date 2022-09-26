@@ -20,6 +20,8 @@
 #include <string>
 #include <unistd.h>
 
+#include "power_mgr_client.h"
+
 #include "audio_errors.h"
 #include "audio_log.h"
 
@@ -73,6 +75,7 @@ BluetoothRendererSink *BluetoothRendererSink::GetInstance()
 
 void BluetoothRendererSink::DeInit()
 {
+    AUDIO_INFO_LOG("DeInit.");
     started_ = false;
     rendererInited_ = false;
     if ((audioRender_ != nullptr) && (audioAdapter_ != nullptr)) {
@@ -320,6 +323,20 @@ int32_t BluetoothRendererSink::RenderFrame(char &data, uint64_t len, uint64_t &w
 
 int32_t BluetoothRendererSink::Start(void)
 {
+    AUDIO_INFO_LOG("Start.");
+
+    if (mKeepRunningLock == nullptr) {
+        mKeepRunningLock = PowerMgr::PowerMgrClient::GetInstance().CreateRunningLock("AudioBluetoothBackgroundPlay",
+            PowerMgr::RunningLockType::RUNNINGLOCK_BACKGROUND);
+    }
+
+    if (mKeepRunningLock != nullptr) {
+        AUDIO_INFO_LOG("AudioRendBluetoothRendererSinkererSink call KeepRunningLock lock");
+        mKeepRunningLock->Lock(0); // 0 for lasting.
+    } else {
+        AUDIO_ERR_LOG("mKeepRunningLock is null, playback can not work well!");
+    }
+
     int32_t ret;
 
     if (!started_) {
@@ -413,6 +430,12 @@ int32_t BluetoothRendererSink::GetTransactionId(uint64_t *transactionId)
 int32_t BluetoothRendererSink::Stop(void)
 {
     AUDIO_INFO_LOG("BluetoothRendererSink::Stop in");
+    if (mKeepRunningLock != nullptr) {
+        AUDIO_INFO_LOG("BluetoothRendererSink call KeepRunningLock UnLock");
+        mKeepRunningLock->UnLock();
+    } else {
+        AUDIO_ERR_LOG("mKeepRunningLock is null, playback can not work well!");
+    }
     int32_t ret;
 
     if (audioRender_ == nullptr) {

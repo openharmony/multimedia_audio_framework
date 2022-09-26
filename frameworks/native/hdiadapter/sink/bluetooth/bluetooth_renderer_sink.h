@@ -18,6 +18,7 @@
 
 #include "audio_info.h"
 #include "audio_proxy_manager.h"
+#include "running_lock.h"
 
 #include <cstdio>
 #include <list>
@@ -62,6 +63,8 @@ private:
     struct HDI::Audio_Bluetooth::AudioRender *audioRender_;
     struct HDI::Audio_Bluetooth::AudioPort audioPort = {};
     void *handle_;
+
+    std::shared_ptr<PowerMgr::RunningLock> mKeepRunningLock;
 
     int32_t CreateRender(struct HDI::Audio_Bluetooth::AudioPort &renderPort);
     int32_t InitAudioManager();
