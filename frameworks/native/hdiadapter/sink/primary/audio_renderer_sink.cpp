@@ -186,6 +186,7 @@ uint32_t PcmFormatToBits(enum AudioFormat format)
         case AUDIO_FORMAT_PCM_32_BIT:
             return PCM_32_BIT;
         default:
+            AUDIO_INFO_LOG("PcmFormatToBits: Unkown format type,set it to default");
             return PCM_24_BIT;
     }
 }
@@ -203,11 +204,11 @@ int32_t AudioRendererSink::CreateRender(struct AudioPort &renderPort)
     AUDIO_INFO_LOG("AudioRendererSink Create render format: %{public}d", param.format);
     struct AudioDeviceDescriptor deviceDesc;
     deviceDesc.portId = renderPort.portId;
-    deviceDesc.pins = PIN_OUT_SPEAKER;
     deviceDesc.desc = nullptr;
+    deviceDesc.pins = PIN_OUT_SPEAKER;
     ret = audioAdapter_->CreateRender(audioAdapter_, &deviceDesc, &param, &audioRender_);
     if (ret != 0 || audioRender_ == nullptr) {
-        AUDIO_ERR_LOG("AudioDeviceCreateRender failed");
+        AUDIO_ERR_LOG("AudioDeviceCreateRender failed.");
         audioManager_->UnloadAdapter(audioManager_, audioAdapter_);
         return ERR_NOT_STARTED;
     }
@@ -223,7 +224,7 @@ int32_t AudioRendererSink::Init(AudioSinkAttr &attr)
     enum AudioPortDirection port = PORT_OUT; // Set port information
 
     if (InitAudioManager() != 0) {
-        AUDIO_ERR_LOG("Init audio manager Fail");
+        AUDIO_ERR_LOG("Init audio manager Fail.");
         return ERR_NOT_STARTED;
     }
 
@@ -232,24 +233,24 @@ int32_t AudioRendererSink::Init(AudioSinkAttr &attr)
     struct AudioAdapterDescriptor *descs = nullptr;
     ret = audioManager_->GetAllAdapters(audioManager_, &descs, &size);
     if (size > MAX_AUDIO_ADAPTER_NUM || size == 0 || descs == nullptr || ret != 0) {
-        AUDIO_ERR_LOG("Get adapters Fail");
+        AUDIO_ERR_LOG("Get adapters Fail.");
         return ERR_NOT_STARTED;
     }
 
     // Get qualified sound card and port
     int32_t index = SwitchAdapterRender(descs, adapterNameCase_, port, audioPort_, size);
     if (index < 0) {
-        AUDIO_ERR_LOG("Switch Adapter Fail");
+        AUDIO_ERR_LOG("Switch Adapter Fail.");
         return ERR_NOT_STARTED;
     }
 
     struct AudioAdapterDescriptor *desc = &descs[index];
     if (audioManager_->LoadAdapter(audioManager_, desc, &audioAdapter_) != 0) {
-        AUDIO_ERR_LOG("Load Adapter Fail");
+        AUDIO_ERR_LOG("Load Adapter Fail.");
         return ERR_NOT_STARTED;
     }
     if (audioAdapter_ == nullptr) {
-        AUDIO_ERR_LOG("Load audio device failed");
+        AUDIO_ERR_LOG("Load audio device failed.");
         return ERR_NOT_STARTED;
     }
 
@@ -298,7 +299,7 @@ int32_t AudioRendererSink::RenderFrame(char &data, uint64_t len, uint64_t &write
     }
 #endif // DUMPFILE
 
-    ret = audioRender_->RenderFrame(audioRender_, (void*)&data, len, &writeLen);
+    ret = audioRender_->RenderFrame(audioRender_, static_cast<void*>(&data), len, &writeLen);
     if (ret != 0) {
         AUDIO_ERR_LOG("RenderFrame failed ret: %{public}x", ret);
         return ERR_WRITE_FAILED;

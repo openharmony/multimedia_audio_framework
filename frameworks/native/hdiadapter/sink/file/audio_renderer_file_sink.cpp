@@ -71,7 +71,7 @@ int32_t AudioRendererFileSink::RenderFrame(char &data, uint64_t len, uint64_t &w
         return ERROR;
     }
 
-    size_t writeResult = fwrite((void*)&data, 1, len, filePtr_);
+    size_t writeResult = fwrite(static_cast<void*>(&data), 1, len, filePtr_);
     if (writeResult != len) {
         AUDIO_ERR_LOG("Failed to write the file.");
     }

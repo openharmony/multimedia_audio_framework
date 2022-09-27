@@ -56,7 +56,7 @@ private:
     const uint32_t internalInputStreamId = 1;
     const uint32_t deepBufferCapturePeriodSize = 4096;
 
-    RemoteAudioCapturerSource(std::string deviceNetworkId);
+    explicit RemoteAudioCapturerSource(std::string deviceNetworkId);
     ~RemoteAudioCapturerSource();
 
     IAudioSourceAttr attr_;

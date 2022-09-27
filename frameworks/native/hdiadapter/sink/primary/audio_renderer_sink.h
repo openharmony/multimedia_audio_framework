@@ -38,15 +38,15 @@ typedef struct {
 
 class AudioRendererSink {
 public:
-    int32_t Init(AudioSinkAttr &atrr);
+    int32_t Init(AudioSinkAttr &attr);
     void DeInit(void);
+    int32_t Flush(void);
+    int32_t Pause(void);
+    int32_t Reset(void);
+    int32_t Resume(void);
     int32_t Start(void);
     int32_t Stop(void);
-    int32_t Flush(void);
-    int32_t Reset(void);
-    int32_t Pause(void);
-    int32_t Resume(void);
-    int32_t RenderFrame(char &frame, uint64_t len, uint64_t &writeLen);
+    int32_t RenderFrame(char &data, uint64_t len, uint64_t &writeLen);
     int32_t SetVolume(float left, float right);
     int32_t GetVolume(float &left, float &right);
     int32_t SetVoiceVolume(float volume);
