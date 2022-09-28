@@ -36,6 +36,8 @@
 
 #include "audio_service_dump.h"
 #include "audio_policy_server.h"
+#include "permission_state_change_info.h"
+#include "token_setproc.h"
 using namespace std;
 
 namespace OHOS {
@@ -82,6 +84,16 @@ void AudioPolicyServer::OnStart()
 
     mPolicyService.Init();
     RegisterAudioServerDeathRecipient();
+
+    Security::AccessToken::PermStateChangeScope scopeInfo;
+    scopeInfo.permList = {"ohos.permission.MICROPHONE"};
+    auto callbackPtr = std::make_shared<PerStateChangeCbCustomizeCallback>(scopeInfo, this);
+    callbackPtr->ready_ = false;
+    int32_t iRes = Security::AccessToken::AccessTokenKit::RegisterPermStateChangeCallback(callbackPtr);
+    if (iRes < 0) {
+        AUDIO_ERR_LOG("fail to call RegisterPermStateChangeCallback.");
+    }
+
     return;
 }
 
@@ -1534,6 +1546,52 @@ void AudioPolicyServer::RemoteParameterCallback::StateOnChange(const std::string
     if (!strcmp(eventDes, "ERR_EVENT")) {
         server_->mPolicyService.NotifyRemoteRenderState(networkId, condition, value);
     }
+}
+
+void AudioPolicyServer::PerStateChangeCbCustomizeCallback::PermStateChangeCallback(
+    Security::AccessToken::PermStateChangeInfo& result)
+{
+    ready_ = true;
+    Security::AccessToken::HapTokenInfo hapTokenInfo;
+    int32_t res = Security::AccessToken::AccessTokenKit::GetHapTokenInfo(result.tokenID, hapTokenInfo);
+    if (res < 0) {
+        AUDIO_ERR_LOG("Call GetHapTokenInfo fail.");
+    }
+    bool bSetMute;
+    if (result.PermStateChangeType > 0) {
+        bSetMute = false;
+    } else {
+        bSetMute = true;
+    }
+
+    int32_t appUid = getUidByBundleName(hapTokenInfo.bundleName, hapTokenInfo.userID);
+    if (appUid < 0) {
+        AUDIO_ERR_LOG("fail to get uid.");
+    } else {
+        server_->mPolicyService.SetSourceOutputStreamMute(appUid, bSetMute);
+        AUDIO_DEBUG_LOG(" get uid value:%{public}d", appUid);
+    }
+}
+
+int32_t AudioPolicyServer::PerStateChangeCbCustomizeCallback::getUidByBundleName(std::string bundle_name, int user_id)
+{
+    auto systemAbilityManager = SystemAbilityManagerClient::GetInstance().GetSystemAbilityManager();
+    if (systemAbilityManager == nullptr) {
+        return ERR_INVALID_PARAM;
+    }
+
+    sptr<IRemoteObject> remoteObject = systemAbilityManager->GetSystemAbility(BUNDLE_MGR_SERVICE_SYS_ABILITY_ID);
+    if (remoteObject == nullptr) {
+        return ERR_INVALID_PARAM;
+    }
+
+    sptr<AppExecFwk::IBundleMgr> bundleMgrProxy = OHOS::iface_cast<AppExecFwk::IBundleMgr>(remoteObject);
+    if (bundleMgrProxy == nullptr) {
+        return ERR_INVALID_PARAM;
+    }
+    int32_t iUid = bundleMgrProxy->GetUidByBundleName(bundle_name, user_id);
+
+    return iUid;
 }
 
 void AudioPolicyServer::RegisterParamCallback()

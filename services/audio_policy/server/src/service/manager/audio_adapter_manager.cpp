@@ -130,6 +130,15 @@ int32_t AudioAdapterManager::SetStreamMute(AudioStreamType streamType, bool mute
     return mAudioServiceAdapter->SetMute(streamType, mute);
 }
 
+int32_t AudioAdapterManager::SetSourceOutputStreamMute(int32_t uid, bool setMute)
+{
+    if (!mAudioServiceAdapter) {
+        AUDIO_ERR_LOG("[AudioAdapterManager] audio adapter null");
+        return ERR_OPERATION_FAILED;
+    }
+    return mAudioServiceAdapter->SetSourceOutputMute(uid, setMute);
+}
+
 bool AudioAdapterManager::GetStreamMute(AudioStreamType streamType)
 {
     if (!mAudioServiceAdapter) {

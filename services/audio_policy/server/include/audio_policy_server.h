@@ -29,6 +29,13 @@
 #include "system_ability.h"
 #include "audio_service_dump.h"
 #include "audio_info.h"
+#include "accesstoken_kit.h"
+#include "perm_state_change_callback_customize.h"
+#include "bundle_mgr_interface.h"
+#include "system_ability_definition.h"
+#include "iservice_registry.h"
+#include "ipc_skeleton.h"
+#include "bundle_mgr_proxy.h"
 
 namespace OHOS {
 namespace AudioStandard {
@@ -181,6 +188,21 @@ public:
         void StateOnChange(const std::string networkId, const std::string& condition, const std::string& value);
     };
     std::shared_ptr<RemoteParameterCallback> remoteParameterCallback_;
+
+    class PerStateChangeCbCustomizeCallback : public Security::AccessToken::PermStateChangeCallbackCustomize {
+    public:
+        explicit PerStateChangeCbCustomizeCallback(const Security::AccessToken::PermStateChangeScope &scopeInfo,
+        sptr<AudioPolicyServer> server) : PermStateChangeCallbackCustomize(scopeInfo), server_(server) {}
+        ~PerStateChangeCbCustomizeCallback() {}
+
+        void PermStateChangeCallback(Security::AccessToken::PermStateChangeInfo& result);
+        int32_t getUidByBundleName(std::string bundle_name, int user_id);
+
+        bool ready_;
+    private:
+        sptr<AudioPolicyServer> server_;
+    };
+
 protected:
     void OnAddSystemAbility(int32_t systemAbilityId, const std::string& deviceId) override;
 

@@ -57,6 +57,8 @@ public:
 
     int32_t SetStreamMute(AudioStreamType streamType, bool mute) const;
 
+    int32_t SetSourceOutputStreamMute(int32_t uid, bool setMute) const;
+
     bool GetStreamMute(AudioStreamType streamType) const;
 
     bool IsStreamActive(AudioStreamType streamType) const;
