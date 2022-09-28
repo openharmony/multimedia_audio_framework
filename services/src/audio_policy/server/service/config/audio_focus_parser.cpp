@@ -56,20 +56,20 @@ AudioFocusParser::~AudioFocusParser()
     forceMap.clear();
 }
 
-void AudioFocusParser::LoadDefaultConfig(AudioFocusEntry &focusTable)
+void AudioFocusParser::LoadDefaultConfig(std::map<std::pair<AudioStreamType, AudioStreamType>,
+    AudioFocusEntry> &focusMap)
 {
 }
 
-int32_t AudioFocusParser::LoadConfig(AudioFocusEntry &focusTable)
+int32_t AudioFocusParser::LoadConfig(std::map<std::pair<AudioStreamType, AudioStreamType>,
+    AudioFocusEntry> &focusMap)
 {
     xmlDoc *doc = nullptr;
     xmlNode *rootElement = nullptr;
 
-    pIntrAction = &focusTable;
-
     if ((doc = xmlReadFile(AUDIO_FOCUS_CONFIG_FILE, nullptr, 0)) == nullptr) {
         MEDIA_ERR_LOG("error: could not parse file %s", AUDIO_FOCUS_CONFIG_FILE);
-        LoadDefaultConfig(focusTable);
+        LoadDefaultConfig(focusMap);
         return ERROR;
     }
 
@@ -79,7 +79,7 @@ int32_t AudioFocusParser::LoadConfig(AudioFocusEntry &focusTable)
     if (!xmlStrcmp(currNode->name, reinterpret_cast<const xmlChar*>("audio_focus_policy"))) {
         if ((currNode->children) && (currNode->children->next)) {
             currNode = currNode->children->next;
-            ParseStreams(currNode);
+            ParseStreams(currNode, focusMap);
         } else {
             MEDIA_ERR_LOG("empty focus policy in : %s", AUDIO_FOCUS_CONFIG_FILE);
             return SUCCESS;
@@ -94,7 +94,8 @@ int32_t AudioFocusParser::LoadConfig(AudioFocusEntry &focusTable)
     return SUCCESS;
 }
 
-void AudioFocusParser::ParseFocusTable(xmlNode *node, char *curStream)
+void AudioFocusParser::ParseFocusMap(xmlNode *node, char *curStream,
+    std::map<std::pair<AudioStreamType, AudioStreamType>, AudioFocusEntry> &focusMap)
 {
     xmlNode *currNode = node;
     while (currNode != nullptr) {
@@ -105,9 +106,9 @@ void AudioFocusParser::ParseFocusTable(xmlNode *node, char *curStream)
                 while (sNode) {
                     if (sNode->type == XML_ELEMENT_NODE) {
                         if (!xmlStrcmp(sNode->name, reinterpret_cast<const xmlChar*>("deny"))) {
-                            ParseRejectedStreams(sNode->children, curStream);
+                            ParseRejectedStreams(sNode->children, curStream, focusMap);
                         } else {
-                            ParseAllowedStreams(sNode->children, curStream);
+                            ParseAllowedStreams(sNode->children, curStream, focusMap);
                         }
                     }
                     sNode = sNode->next;
@@ -118,7 +119,8 @@ void AudioFocusParser::ParseFocusTable(xmlNode *node, char *curStream)
     }
 }
 
-void AudioFocusParser::ParseStreams(xmlNode *node)
+void AudioFocusParser::ParseStreams(xmlNode *node,
+    std::map<std::pair<AudioStreamType, AudioStreamType>, AudioFocusEntry> &focusMap)
 {
     xmlNode *currNode = node;
     while (currNode) {
@@ -128,7 +130,7 @@ void AudioFocusParser::ParseStreams(xmlNode *node)
             std::map<std::string, AudioStreamType>::iterator it = streamMap.find(sType);
             if (it != streamMap.end()) {
                 MEDIA_INFO_LOG("stream type: %{public}s",  sType);
-                ParseFocusTable(currNode->children, sType);
+                ParseFocusMap(currNode->children, sType, focusMap);
             }
             xmlFree(sType);
         }
@@ -136,7 +138,8 @@ void AudioFocusParser::ParseStreams(xmlNode *node)
     }
 }
 
-void AudioFocusParser::ParseRejectedStreams(xmlNode *node, char *curStream)
+void AudioFocusParser::ParseRejectedStreams(xmlNode *node, char *curStream,
+    std::map<std::pair<AudioStreamType, AudioStreamType>, AudioFocusEntry> &focusMap)
 {
     xmlNode *currNode = node;
 
@@ -148,18 +151,19 @@ void AudioFocusParser::ParseRejectedStreams(xmlNode *node, char *curStream)
 
                 std::map<std::string, AudioStreamType>::iterator it1 = streamMap.find(newStream);
                 if (it1 != streamMap.end()) {
-                    AudioFocusEntry *pAction = pIntrAction + (streamMap[curStream] * MAX_NUM_STREAMS) +
-                        streamMap[newStream];
-                    if (pAction != nullptr) {
-                        pAction->actionOn = INCOMING;
-                        pAction->hintType = INTERRUPT_HINT_NONE;
-                        pAction->forceType = INTERRUPT_FORCE;
-                        pAction->isReject = true;
+                    std::pair<AudioStreamType, AudioStreamType> rejectedStreamsPair =
+                        std::make_pair(streamMap[curStream], streamMap[newStream]);
+                    AudioFocusEntry rejectedFocusEntry;
+                    rejectedFocusEntry.actionOn = INCOMING;
+                    rejectedFocusEntry.hintType = INTERRUPT_HINT_NONE;
+                    rejectedFocusEntry.forceType = INTERRUPT_FORCE;
+                    rejectedFocusEntry.isReject = true;
+                    focusMap.emplace(rejectedStreamsPair, rejectedFocusEntry);
 
-                        MEDIA_INFO_LOG("current stream: %s, incoming stream: %s", curStream, newStream);
-                        MEDIA_INFO_LOG("actionOn: %d, hintType: %d, forceType: %d isReject: %d", pAction->actionOn,
-                            pAction->hintType, pAction->forceType, pAction->isReject);
-                    }
+                    MEDIA_INFO_LOG("current stream: %s, incoming stream: %s", curStream, newStream);
+                    MEDIA_INFO_LOG("actionOn: %d, hintType: %d, forceType: %d isReject: %d",
+                        rejectedFocusEntry.actionOn, rejectedFocusEntry.hintType,
+                        rejectedFocusEntry.forceType, rejectedFocusEntry.isReject);
                 }
                 xmlFree(newStream);
             }
@@ -168,7 +172,8 @@ void AudioFocusParser::ParseRejectedStreams(xmlNode *node, char *curStream)
     }
 }
 
-void AudioFocusParser::ParseAllowedStreams(xmlNode *node, char *curStream)
+void AudioFocusParser::ParseAllowedStreams(xmlNode *node, char *curStream,
+    std::map<std::pair<AudioStreamType, AudioStreamType>, AudioFocusEntry> &focusMap)
 {
     xmlNode *currNode = node;
 
@@ -190,16 +195,19 @@ void AudioFocusParser::ParseAllowedStreams(xmlNode *node, char *curStream)
                 std::map<std::string, InterruptForceType>::iterator it4 = forceMap.find(isForced);
                 if ((it1 != streamMap.end()) && (it2 != targetMap.end()) && (it3 != actionMap.end()) &&
                     (it4 != forceMap.end())) {
-                    AudioFocusEntry *pAction = pIntrAction + (streamMap[curStream] * MAX_NUM_STREAMS)  +
-                        streamMap[newStream];
-                    pAction->actionOn = targetMap[aTarget];
-                    pAction->hintType = actionMap[aType];
-                    pAction->forceType = forceMap[isForced];
-                    pAction->isReject = false;
+                    std::pair<AudioStreamType, AudioStreamType> allowedStreamsPair =
+                        std::make_pair(streamMap[curStream], streamMap[newStream]);
+                    AudioFocusEntry allowedFocusEntry;
+                    allowedFocusEntry.actionOn = targetMap[aTarget];
+                    allowedFocusEntry.hintType = actionMap[aType];
+                    allowedFocusEntry.forceType = forceMap[isForced];
+                    allowedFocusEntry.isReject = false;
+                    focusMap.emplace(allowedStreamsPair, allowedFocusEntry);
 
                     MEDIA_INFO_LOG("current stream: %s, incoming stream: %s", curStream, newStream);
-                    MEDIA_INFO_LOG("actionOn: %d, hintType: %d, forceType: %d isReject: %d", pAction->actionOn,
-                                   pAction->hintType, pAction->forceType, pAction->isReject);
+                    MEDIA_INFO_LOG("actionOn: %d, hintType: %d, forceType: %d isReject: %d",
+                        allowedFocusEntry.actionOn, allowedFocusEntry.hintType,
+                        allowedFocusEntry.forceType, allowedFocusEntry.isReject);
                 }
                 xmlFree(newStream);
                 xmlFree(aType);

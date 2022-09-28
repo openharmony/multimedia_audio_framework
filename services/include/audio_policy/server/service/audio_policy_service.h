@@ -63,9 +63,9 @@ public:
 
     bool IsAudioInterruptEnabled() const;
 
-    auto& GetAudioFocusTable() const
+    auto& GetAudioFocusMap() const
     {
-        return focusTable_;
+        return focusMap_;
     }
 
     AudioRingerMode GetRingerMode() const;
@@ -129,7 +129,7 @@ private:
     std::vector<sptr<AudioDeviceDescriptor>> mConnectedDevices;
     std::unordered_map<int32_t, sptr<IStandardAudioPolicyManagerListener>> deviceChangeCallbackMap_;
     AudioScene mAudioScene = AUDIO_SCENE_DEFAULT;
-    AudioFocusEntry focusTable_[MAX_NUM_STREAMS][MAX_NUM_STREAMS];
+    std::map<std::pair<AudioStreamType, AudioStreamType>, AudioFocusEntry> focusMap_ = {};
     std::unordered_map<ClassType, std::list<AudioModuleInfo>> deviceClassInfo_ = {};
     std::unordered_map<std::string, AudioIOHandle> mIOHandles = {};
     std::vector<DeviceType> ioDeviceList = {
