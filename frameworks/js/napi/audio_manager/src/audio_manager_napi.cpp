@@ -2863,10 +2863,10 @@ static napi_value Init(napi_env env, napi_value exports)
     AudioCapturerNapi::Init(env, exports);
     AudioRendererNapi::Init(env, exports);
     AudioParametersNapi::Init(env, exports);
-    RingtonePlayerNapi::Init(env, exports);
-    SystemSoundManagerNapi::Init(env, exports);
-    RingtoneOptionsNapi::Init(env, exports);
-    AudioRendererInfoNapi::Init(env, exports);
+    // RingtonePlayerNapi::Init(env, exports) need audio_ringtone_client
+    // SystemSoundManagerNapi::Init(env, exports) need audio_ringtone_client
+    // RingtoneOptionsNapi::Init(env, exports) need audio_ringtone_client
+    // AudioRendererInfoNapi::Init(env, exports) need audio_ringtone_client
     AudioStreamMgrNapi::Init(env, exports);
     AudioRoutingManagerNapi::Init(env, exports);
     AudioGroupManagerNapi::Init(env, exports);

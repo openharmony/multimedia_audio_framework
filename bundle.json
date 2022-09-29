@@ -116,17 +116,6 @@
                      "//foundation/multimedia/audio_framework/interfaces/kits/js/audio_renderer/include"
                 ]
               }
-            },
-            {
-              "type": "none",
-              "name": "//foundation/multimedia/audio_framework/frameworks/native/systemsound:audio_ringtone_client",
-              "header": {
-                "header_files": [
-                  "iringtone_player.h",
-                  "iringtone_sound_manager.h"
-                ],
-                "header_base": "//foundation/multimedia/audio_framework/interfaces/inner_api/native/audioringtone/include"
-              }
             }
           ],
           "test": [

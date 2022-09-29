@@ -55,16 +55,18 @@ ohos_shared_library("audio") {
     "audio_renderer/src/renderer_period_position_callback_napi.cpp",
     "audio_renderer/src/renderer_position_callback_napi.cpp",
     "audio_stream_manager/src/audio_stream_mgr_napi.cpp",
-    "ringtone_manager/src/audio_renderer_info_napi.cpp",
-    "ringtone_manager/src/ringtone_options_napi.cpp",
-    "ringtone_manager/src/ringtone_player_napi.cpp",
-    "ringtone_manager/src/system_sound_manager_napi.cpp",
+
+    # "ringtone_manager/src/audio_renderer_info_napi.cpp",
+    # "ringtone_manager/src/ringtone_options_napi.cpp",
+    # "ringtone_manager/src/ringtone_player_napi.cpp",
+    # "ringtone_manager/src/system_sound_manager_napi.cpp",
   ]
 
   deps = [
     "//foundation/multimedia/audio_framework/frameworks/native/audiocapturer:audio_capturer",
     "//foundation/multimedia/audio_framework/frameworks/native/audiorenderer:audio_renderer",
-    "//foundation/multimedia/audio_framework/frameworks/native/systemsound:audio_ringtone_client",
+
+    # "//foundation/multimedia/audio_framework/frameworks/native/systemsound:audio_ringtone_client",
     "//foundation/multimedia/audio_framework/services/audio_policy:audio_policy_client",
     "//foundation/multimedia/audio_framework/services/audio_service:audio_client",
   ]
