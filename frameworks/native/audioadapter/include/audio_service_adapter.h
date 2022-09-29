@@ -141,6 +141,16 @@ public:
     virtual int32_t SetMute(AudioStreamType streamType, bool mute) = 0;
 
     /**
+     * @brief set mute for give output streamType
+     *
+     * @param streamType the output streamType for which mute will be set, streamType defined in{@link audio_info.h}
+     * @param mute boolean value, true: Set mute; false: Set unmute
+     * @return Returns {@link SUCCESS} if mute/unmute is set successfully; returns an error code
+     * defined in {@link audio_errors.h} otherwise.
+     */
+    virtual int32_t SetSourceOutputMute(int32_t uid, bool setMute) = 0;
+
+    /**
      * @brief suspends the current active device
      *
      * @param audioPortName Name of the default audio sink to be suspended

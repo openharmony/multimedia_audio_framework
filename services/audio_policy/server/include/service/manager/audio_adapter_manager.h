@@ -59,6 +59,8 @@ public:
 
     int32_t SetStreamMute(AudioStreamType streamType, bool mute);
 
+    int32_t SetSourceOutputStreamMute(int32_t uid, bool setMute);
+
     bool GetStreamMute(AudioStreamType streamType);
 
     bool IsStreamActive(AudioStreamType streamType);

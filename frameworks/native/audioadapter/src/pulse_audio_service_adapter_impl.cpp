@@ -438,6 +438,29 @@ int32_t PulseAudioServiceAdapterImpl::SetVolume(AudioStreamType streamType, floa
     return SUCCESS;
 }
 
+int32_t PulseAudioServiceAdapterImpl::SetSourceOutputMute(int32_t uid, bool setMute)
+{
+    if (mContext == nullptr) {
+        AUDIO_ERR_LOG("[SetSourceOutputMute] mContext is nullptr");
+        return ERROR;
+    }
+    vector<SourceOutput> sourOutputs = GetAllSourceOutputs();
+    lock_guard<mutex> lock(mMutex);
+    int32_t streamSet = 0;
+    for (uint32_t i = 0; i < sourOutputs.size(); i ++) {
+        if (sourOutputs[i].uid == uid) {
+            pa_operation_unref(pa_context_set_source_output_mute(mContext, sourOutputs[i].paStreamId, (setMute ? 1 : 0),
+                nullptr, nullptr));
+            AUDIO_INFO_LOG("[SetSourceOutputMute] set source output Mute : %{public}s for stream :uid %{public}d",
+                (setMute ? "true" : "false"), sourOutputs[i].uid);
+            streamSet++;
+        }
+    }
+    AUDIO_INFO_LOG("[SetSourceOutputMute] set %{public}d %{public}s", streamSet, (setMute ? "mute" : "unmuted"));
+    return streamSet;
+}
+
+
 int32_t PulseAudioServiceAdapterImpl::SetMute(AudioStreamType streamType, bool mute)
 {
     lock_guard<mutex> lock(mMutex);
