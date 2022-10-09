@@ -21,9 +21,9 @@
                     <Port adapter_name="internal" id="0" channels="2" rate="44100" buffer_size="4096"/>
                 </Ports>
             </module>
-            <module name="Built_in_mic" lib="libmodule-hdi-source.z.so" role="source" channels="1" rate="44100" format="s32be" buffer_size="8192">
+            <module name="Built_in_mic" lib="libmodule-hdi-source.z.so" role="source" channels="2" rate="44100" format="s16be" buffer_size="8192">
                 <Ports>
-                    <Port adapter_name="internal" id="0" channels="1" rate="44100" buffer_size="8192"/>
+                    <Port adapter_name="internal" id="0" channels="2" rate="44100" buffer_size="8192"/>
                 </Ports>
             </module>
             <module name="fifo_output" lib="libmodule-pipe-sink.z.so" role="sink" file="/data/data/.pulse_dir/pipe_sink.pcm">
