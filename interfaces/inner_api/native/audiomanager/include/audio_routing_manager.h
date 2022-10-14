@@ -19,19 +19,10 @@
 #include <iostream>
 
 #include "audio_info.h"
+#include "audio_group_manager.h"
 
 namespace OHOS {
 namespace AudioStandard {
-class AudioManagerMicStateChangeCallback {
-public:
-    virtual ~AudioManagerMicStateChangeCallback() = default;
-    /**
-     * Called when the microphone state changes
-     *
-     * @param micStateChangeEvent Microphone Status Information.
-     */
-    virtual void OnMicStateUpdated(const MicStateChangeEvent &micStateChangeEvent) = 0;
-};
 
 class AudioRoutingManager {
 public:

@@ -35,13 +35,13 @@ uint32_t AudioRoutingManager::GetCallingPid()
 int32_t AudioRoutingManager::SetMicStateChangeCallback(
     const std::shared_ptr<AudioManagerMicStateChangeCallback> &callback)
 {
-    AUDIO_INFO_LOG("Entered AudioRoutingManager::%{public}s", __func__);
-    if (callback == nullptr) {
-        AUDIO_ERR_LOG("setMicrophoneMuteCallback::callback is null");
+    AudioSystemManager* audioSystemManager = AudioSystemManager::GetInstance();
+    std::shared_ptr<AudioGroupManager> groupManager = audioSystemManager->GetGroupManager(DEFAULT_VOLUME_GROUP_ID);
+    if (groupManager == nullptr) {
+        AUDIO_ERR_LOG("setMicrophoneMuteCallback falied, groupManager is null");
         return ERR_INVALID_PARAM;
     }
-    int32_t clientId = static_cast<int32_t>(GetCallingPid());
-    return AudioPolicyManager::GetInstance().SetMicStateChangeCallback(clientId, callback);
+    return groupManager->SetMicStateChangeCallback(callback);
 }
 } // namespace AudioStandard
 } // namespace OHOS

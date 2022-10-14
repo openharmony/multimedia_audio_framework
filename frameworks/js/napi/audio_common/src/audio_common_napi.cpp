@@ -15,6 +15,8 @@
 
 #include "audio_common_napi.h"
 #include "audio_log.h"
+#include "audio_manager_napi.h"
+#include "audio_info.h"
 
 namespace OHOS {
 namespace AudioStandard {
@@ -36,5 +38,137 @@ std::string AudioCommonNapi::GetStringArgument(napi_env env, napi_value value)
     }
     return strValue;
 }
+
+std::string AudioCommonNapi::getMessageByCode(int32_t &code)
+{
+    std::string err_message;
+    switch (code) {
+        case NAPI_ERR_INVALID_PARAM:
+            err_message = NAPI_ERR_INVALID_PARAM_INFO;
+            break;
+        case NAPI_ERR_NO_MEMORY:
+            err_message = NAPI_ERR_NO_MEMORY_INFO;
+            break;
+        case NAPI_ERR_ILLEGAL_STATE:
+            err_message = NAPI_ERR_ILLEGAL_STATE_INFO;
+            break;
+        case NAPI_ERR_UNSUPPORTED:
+            err_message = NAPI_ERR_UNSUPPORTED_INFO;
+            break;
+        case NAPI_ERR_TIMEOUT:
+            err_message = NAPI_ERR_TIMEOUT_INFO;
+            break;
+        case NAPI_ERR_STREAM_LIMIT:
+            err_message = NAPI_ERR_STREAM_LIMIT_INFO;
+            break;
+        case NAPI_ERR_SYSTEM:
+            err_message = NAPI_ERR_SYSTEM_INFO;
+            break;
+        case NAPI_ERR_INPUT_INVALID:
+            err_message = NAPI_ERR_INPUT_INVALID_INFO;
+            break;
+        default:
+            err_message = NAPI_ERR_SYSTEM_INFO;
+            code = NAPI_ERR_SYSTEM;
+            break;
+    }
+    return err_message;
+}
+
+void AudioCommonNapi::throwError(napi_env env, int32_t code)
+{
+    std::string messageValue = AudioCommonNapi::getMessageByCode(code);
+    napi_throw_error(env, (std::to_string(code)).c_str(), messageValue.c_str());
+}
+
+bool AudioCommonNapi::IsLegalInputArgumentVolLevel(int32_t volLevel)
+{
+    return (volLevel < MIN_VOLUME_LEVEL || volLevel > MAX_VOLUME_LEVEL) ? false : true;
+}
+
+bool AudioCommonNapi::IsLegalInputArgumentVolType(int32_t inputType)
+{
+    bool result = false;
+    switch (inputType) {
+        case AudioManagerNapi::RINGTONE:
+        case AudioManagerNapi::MEDIA:
+        case AudioManagerNapi::VOICE_CALL:
+        case AudioManagerNapi::VOICE_ASSISTANT:
+        case AudioManagerNapi::ALL:
+            result = true;
+            break;
+        default:
+            result = false;
+            break;
+    }
+    return result;
+}
+
+bool AudioCommonNapi::IsLegalInputArgumentDeviceFlag(int32_t deviceFlag)
+{
+    bool result = false;
+    switch (deviceFlag) {
+        case DeviceFlag::NONE_DEVICES_FLAG:
+        case DeviceFlag::OUTPUT_DEVICES_FLAG:
+        case DeviceFlag::INPUT_DEVICES_FLAG:
+        case DeviceFlag::ALL_DEVICES_FLAG:
+        case DeviceFlag::DISTRIBUTED_OUTPUT_DEVICES_FLAG:
+        case DeviceFlag::DISTRIBUTED_INPUT_DEVICES_FLAG:
+        case DeviceFlag::ALL_DISTRIBUTED_DEVICES_FLAG:
+        case DeviceFlag::ALL_L_D_DEVICES_FLAG:
+            result = true;
+            break;
+        default:
+            result = false;
+            break;
+    }
+    return result;
+}
+
+bool AudioCommonNapi::IsLegalInputArgumentActiveDeviceType(int32_t activeDeviceFlag)
+{
+    bool result = false;
+    switch (activeDeviceFlag) {
+        case ActiveDeviceType::SPEAKER:
+        case ActiveDeviceType::BLUETOOTH_SCO:
+            result = true;
+            break;
+        default:
+            result = false;
+            break;
+    }
+    return result;
+}
+
+bool AudioCommonNapi::IsLegalInputArgumentCommunicationDeviceType(int32_t communicationDeviceType)
+{
+    bool result = false;
+    switch (communicationDeviceType) {
+        case CommunicationDeviceType::COMMUNICATION_SPEAKER:
+            result = true;
+            break;
+        default:
+            result = false;
+            break;
+    }
+    return result;
+}
+
+bool AudioCommonNapi::IsLegalInputArgumentRingMode(int32_t ringerMode)
+{
+    bool result = false;
+    switch (ringerMode) {
+        case AudioRingerMode::RINGER_MODE_SILENT:
+        case AudioRingerMode::RINGER_MODE_VIBRATE:
+        case AudioRingerMode::RINGER_MODE_NORMAL:
+            result = true;
+            break;
+        default:
+            result = false;
+            break;
+    }
+    return result;
+}
+
 }  // namespace AudioStandard
 }  // namespace OHOS

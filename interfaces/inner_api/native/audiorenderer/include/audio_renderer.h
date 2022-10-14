@@ -316,6 +316,15 @@ public:
     virtual int32_t GetBufferSize(size_t &bufferSize) const = 0;
 
     /**
+     * @brief Obtains the renderer stream id.
+     *
+     * @param sessionId Indicates the reference variable into which stream id value will be written.
+     * @return Returns {@link SUCCESS} if stream id is successfully obtained; returns an error code
+     * defined in {@link audio_errors.h} otherwise.
+     */
+    virtual int32_t GetAudioStreamId(uint32_t &sessionID) const = 0;
+
+    /**
      * @brief Obtains the number of frames required in the current condition, in bytes per sample.
      *
      * @param frameCount Indicates the reference variable in which framecount will be written

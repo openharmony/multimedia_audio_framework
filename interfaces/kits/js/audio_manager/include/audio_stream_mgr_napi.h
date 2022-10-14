@@ -20,6 +20,7 @@
 #include "napi/native_api.h"
 #include "napi/native_node_api.h"
 #include "audio_stream_manager.h"
+#include "audio_system_manager.h"
 
 namespace OHOS {
 namespace AudioStandard {
@@ -40,6 +41,7 @@ private:
     static napi_value On(napi_env env, napi_callback_info info);
     static napi_value Off(napi_env env, napi_callback_info info);
     static napi_value IsAudioRendererLowLatencySupported(napi_env env, napi_callback_info info);
+    static napi_value IsStreamActive(napi_env env, napi_callback_info info);
     static void RegisterCallback(napi_env env, napi_value jsThis,
                                 napi_value* args, const std::string& cbName);
     static void RegisterCapturerStateChangeCallback(napi_env env, napi_value* args,
@@ -54,6 +56,7 @@ private:
     napi_env env_;
     napi_ref wrapper_;
     AudioStreamManager *audioStreamMngr_;
+    AudioSystemManager *audioMngr_;
     int32_t cachedClientId_ = -1;
     std::shared_ptr<AudioRendererStateChangeCallback> rendererStateChangeCallbackNapi_ = nullptr;
     std::shared_ptr<AudioCapturerStateChangeCallback> capturerStateChangeCallbackNapi_ = nullptr;

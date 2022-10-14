@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef AUDIO_ROUTING_MANAGER_CALLBACK_NAPI_H
-#define AUDIO_ROUTING_MANAGER_CALLBACK_NAPI_H
+#ifndef AUDIO_MIC_STATE_CHANGE_MANAGER_CALLBACK_NAPI_H
+#define AUDIO_MIC_STATE_CHANGE_MANAGER_CALLBACK_NAPI_H
 
 #include "audio_common_napi.h"
 #include "audio_routing_manager_napi.h"
@@ -24,21 +24,21 @@
 
 namespace OHOS {
 namespace AudioStandard {
-class AudioRoutingManagerCallbackNapi : public AudioManagerMicStateChangeCallback {
+class AudioManagerMicStateChangeCallbackNapi : public AudioManagerMicStateChangeCallback {
 public:
-    explicit AudioRoutingManagerCallbackNapi(napi_env env);
-    virtual ~AudioRoutingManagerCallbackNapi();
+    explicit AudioManagerMicStateChangeCallbackNapi(napi_env env);
+    virtual ~AudioManagerMicStateChangeCallbackNapi();
     void SaveCallbackReference(const std::string &callbackName, napi_value callback);
     void OnMicStateUpdated(const MicStateChangeEvent &micStateChangeEvent) override;
 
 private:
-    struct AudioRoutingManagerJsCallback {
+    struct AudioManagerMicStateChangeJsCallback {
         std::shared_ptr<AutoRef> callback = nullptr;
         std::string callbackName = "unknown";
         MicStateChangeEvent micStateChangeEvent;
     };
 
-    void OnJsCallbackMicStateChange(std::unique_ptr<AudioRoutingManagerJsCallback> &jsCb);
+    void OnJsCallbackMicStateChange(std::unique_ptr<AudioManagerMicStateChangeJsCallback> &jsCb);
 
     std::mutex mutex_;
     napi_env env_ = nullptr;
@@ -46,4 +46,4 @@ private:
 };
 }  // namespace AudioStandard
 }  // namespace OHOS
-#endif // AUDIO_MANAGER_CALLBACK_NAPI_H_
+#endif // AUDIO_MIC_STATE_CHANGE_MANAGER_CALLBACK_NAPI_H

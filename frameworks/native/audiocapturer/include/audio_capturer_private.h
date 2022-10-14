@@ -38,6 +38,7 @@ public:
     bool Flush() const override;
     bool Release() const override;
     int32_t GetBufferSize(size_t &bufferSize) const override;
+    int32_t GetAudioStreamId(uint32_t &sessionID) const override;
     int32_t SetCapturerPositionCallback(int64_t markPosition,
         const std::shared_ptr<CapturerPositionCallback> &callback) override;
     void UnsetCapturerPositionCallback() override;

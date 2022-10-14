@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef AUDIO_GROUP_MNGR_NAPI_H_
-#define AUDIO_GROUP_MNGR_NAPI_H_
+#ifndef AUDIO_VOLUME_GROUP_MNGR_NAPI_H_
+#define AUDIO_VOLUME_GROUP_MNGR_NAPI_H_
 
 #include <iostream>
 #include <map>
@@ -22,21 +22,28 @@
 #include "audio_system_manager.h"
 #include "napi/native_api.h"
 #include "napi/native_node_api.h"
-#include "audio_manager_napi.h"
+#include "audio_common_napi.h"
+#include "audio_ringermode_callback_napi.h"
+#include "audio_micstatechange_callback_napi.h"
 
 namespace OHOS {
 namespace AudioStandard {
-static const std::string AUDIO_GROUP_MNGR_NAPI_CLASS_NAME = "AudioGroupManager";
+static const std::string AUDIO_VOLUME_GROUP_MNGR_NAPI_CLASS_NAME = "AudioVolumeGroupManager";
 
-class AudioGroupManagerNapi {
+class AudioVolumeGroupManagerNapi {
 public:
 
+    enum AudioRingMode {
+        RINGER_MODE_SILENT = 0,
+        RINGER_MODE_VIBRATE,
+        RINGER_MODE_NORMAL
+    };
+
     static napi_value Init(napi_env env, napi_value exports);
-    static napi_value CreateAudioGroupManagerWrapper(napi_env env, int32_t groupId);
+    static napi_value CreateAudioVolumeGroupManagerWrapper(napi_env env, int32_t groupId);
 
 private:
     static void Destructor(napi_env env, void *nativeObject, void *finalize_hint);
-    static void GetGroupManagerAsyncCallbackComplete(napi_env env, napi_status status, void *data);
     static napi_value Construct(napi_env env, napi_callback_info info);
     static napi_value GetVolume(napi_env env, napi_callback_info info);
     static napi_value SetVolume(napi_env env, napi_callback_info info);
@@ -44,10 +51,18 @@ private:
     static napi_value GetMinVolume(napi_env env, napi_callback_info info);
     static napi_value SetMute(napi_env env, napi_callback_info info);
     static napi_value IsStreamMute(napi_env env, napi_callback_info info);
+    static napi_value SetRingerMode(napi_env env, napi_callback_info info);
+    static napi_value GetRingerMode(napi_env env, napi_callback_info info);
+    static napi_value SetMicrophoneMute(napi_env env, napi_callback_info info);
+    static napi_value IsMicrophoneMute(napi_env env, napi_callback_info info);
+    static napi_value On(napi_env env, napi_callback_info info);
     std::shared_ptr<AudioGroupManager> audioGroupMngr_ = nullptr;
+    int32_t cachedClientId_ = -1;
 
+    std::shared_ptr<AudioRingerModeCallback> ringerModecallbackNapi_ = nullptr;
+    std::shared_ptr<AudioManagerMicStateChangeCallback> micStateChangeCallbackNapi_ = nullptr;
     napi_ref wrapper_;
 };
 } // namespace AudioStandard
 } // namespace OHOS
-#endif // AUDIO_GROUP_MNGR_NAPI_H_
+#endif // AUDIO_VOLUME_GROUP_MNGR_NAPI_H_
