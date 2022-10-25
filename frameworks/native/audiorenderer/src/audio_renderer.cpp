@@ -448,6 +448,11 @@ int32_t AudioRendererPrivate::GetBufferSize(size_t &bufferSize) const
     return audioStream_->GetBufferSize(bufferSize);
 }
 
+int32_t AudioRendererPrivate::GetAudioStreamId(uint32_t &sessionID) const
+{
+    return audioStream_->GetAudioSessionID(sessionID);
+}
+
 int32_t AudioRendererPrivate::SetAudioRendererDesc(AudioRendererDesc audioRendererDesc) const
 {
     ContentType contentType = audioRendererDesc.contentType;

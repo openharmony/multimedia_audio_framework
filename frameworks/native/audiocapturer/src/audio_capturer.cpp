@@ -314,6 +314,11 @@ int32_t AudioCapturerPrivate::GetBufferSize(size_t &bufferSize) const
     return audioStream_->GetBufferSize(bufferSize);
 }
 
+int32_t AudioCapturerPrivate::GetAudioStreamId(uint32_t &sessionID) const
+{
+    return audioStream_->GetAudioSessionID(sessionID);
+}
+
 int32_t AudioCapturerPrivate::SetBufferDuration(uint64_t bufferDuration) const
 {
     if (bufferDuration < MINIMUM_BUFFER_SIZE_MSEC || bufferDuration > MAXIMUM_BUFFER_SIZE_MSEC) {

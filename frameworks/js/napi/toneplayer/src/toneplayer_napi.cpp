@@ -171,8 +171,13 @@ void TonePlayerNapi::CommonCallbackRoutine(napi_env env, TonePlayerAsyncContext*
         result[PARAM1] = valueParam;
     } else {
         napi_value message = nullptr;
-        napi_create_string_utf8(env, "Error, Operation not supported or Failed", NAPI_AUTO_LENGTH, &message);
-        napi_create_error(env, nullptr, message, &result[PARAM0]);
+        std::string messageValue = AudioCommonNapi::getMessageByCode(asyncContext->status);
+        napi_create_string_utf8(env, messageValue.c_str(), NAPI_AUTO_LENGTH, &message);
+
+        napi_value code = nullptr;
+        napi_create_string_utf8(env, (std::to_string(asyncContext->status)).c_str(), NAPI_AUTO_LENGTH, &code);
+
+        napi_create_error(env, code, message, &result[PARAM0]);
         napi_get_undefined(env, &result[PARAM1]);
     }
 
@@ -222,9 +227,12 @@ napi_value TonePlayerNapi::CreateTonePlayer(napi_env env, napi_callback_info inf
     bool inputRight = true;
 
     GET_PARAMS(env, info, ARGS_TWO);
-    NAPI_ASSERT(env, argc >= ARGS_ONE, "requires one parameters minimum");
 
     unique_ptr<TonePlayerAsyncContext> asyncContext = make_unique<TonePlayerAsyncContext>();
+    if (argc < ARGS_ONE) {
+        asyncContext->status = NAPI_ERR_INVALID_PARAM;
+    }
+
     CHECK_AND_RETURN_RET_LOG(asyncContext != nullptr, nullptr, "TonePlayerAsyncContext object creation failed");
 
     for (size_t i = PARAM0; i < argc; i++) {
@@ -236,8 +244,10 @@ napi_value TonePlayerNapi::CreateTonePlayer(napi_env env, napi_callback_info inf
                 inputRight = false;
                 break;
             }
-        } else if (i == PARAM1 && valueType == napi_function) {
-            napi_create_reference(env, argv[i], REFERENCE_CREATION_COUNT, &asyncContext->callbackRef);
+        } else if (i == PARAM1) {
+            if (valueType == napi_function) {
+                napi_create_reference(env, argv[i], REFERENCE_CREATION_COUNT, &asyncContext->callbackRef);
+            }
             break;
         } else {
             inputRight = false;
@@ -259,7 +269,7 @@ napi_value TonePlayerNapi::CreateTonePlayer(napi_env env, napi_callback_info inf
             env, nullptr, resource,
             [](napi_env env, void *data) {
                 auto context = static_cast<TonePlayerAsyncContext *>(data);
-                context->status = ERR_INVALID_PARAM;
+                context->status = NAPI_ERR_INVALID_PARAM;
                 HiLog::Error(LABEL, "CreateTonePlayer fail, invalid param!");
             },
             GetTonePlayerAsyncCallbackComplete, static_cast<void *>(asyncContext.get()), &asyncContext->work);
@@ -359,9 +369,12 @@ napi_value TonePlayerNapi::Load(napi_env env, napi_callback_info info)
     bool inputRight = true;
 
     GET_PARAMS(env, info, ARGS_TWO);
-    NAPI_ASSERT(env, argc >= ARGS_ONE, "requires 1 parameter minimum");
 
     unique_ptr<TonePlayerAsyncContext> asyncContext = make_unique<TonePlayerAsyncContext>();
+    if (argc < ARGS_ONE) {
+        asyncContext->status = NAPI_ERR_INVALID_PARAM;
+    }
+
     status = napi_unwrap(env, thisVar, reinterpret_cast<void **>(&asyncContext->objectInfo));
     if (status == napi_ok && asyncContext->objectInfo != nullptr) {
         for (size_t i = PARAM0; i < argc; i++) {
@@ -375,8 +388,10 @@ napi_value TonePlayerNapi::Load(napi_env env, napi_callback_info info)
                     inputRight = false;
                     break;
                 }
-            } else if (i == PARAM1 && valueType == napi_function) {
-                napi_create_reference(env, argv[i], refCount, &asyncContext->callbackRef);
+            } else if (i == PARAM1) {
+                if (valueType == napi_function) {
+                    napi_create_reference(env, argv[i], refCount, &asyncContext->callbackRef);
+                }
                 break;
             } else {
                 inputRight = false;
@@ -400,7 +415,7 @@ napi_value TonePlayerNapi::Load(napi_env env, napi_callback_info info)
                     auto context = static_cast<TonePlayerAsyncContext *>(data);
                     ToneType toneType = static_cast<ToneType>(context->toneType);
                     context->intValue = context->objectInfo->tonePlayer_->LoadTone(toneType);
-                    context->status = ERR_INVALID_PARAM;
+                    context->status = NAPI_ERR_INVALID_PARAM;
                     HiLog::Error(LABEL, "The Load parameter is invalid");
                 },
                 VoidAsyncCallbackComplete, static_cast<void *>(asyncContext.get()), &asyncContext->work);
@@ -409,9 +424,15 @@ napi_value TonePlayerNapi::Load(napi_env env, napi_callback_info info)
                 env, nullptr, resource,
                 [](napi_env env, void *data) {
                     auto context = static_cast<TonePlayerAsyncContext *>(data);
-                    ToneType toneType = static_cast<ToneType>(context->toneType);
-                    context->intValue = context->objectInfo->tonePlayer_->LoadTone(toneType);
-                    context->status = SUCCESS;
+                    if (context->status == SUCCESS) {
+                        ToneType toneType = static_cast<ToneType>(context->toneType);
+                        context->intValue = context->objectInfo->tonePlayer_->LoadTone(toneType);
+                        if (context->intValue) {
+                            context->status = SUCCESS;
+                        } else {
+                            context->status = NAPI_ERR_SYSTEM;
+                        }
+                    }
                 },
                 VoidAsyncCallbackComplete, static_cast<void *>(asyncContext.get()), &asyncContext->work);
         }
@@ -441,15 +462,11 @@ napi_value TonePlayerNapi::Start(napi_env env, napi_callback_info info)
 
     status = napi_unwrap(env, thisVar, reinterpret_cast<void**>(&asyncContext->objectInfo));
     if (status == napi_ok && asyncContext->objectInfo != nullptr) {
-        for (size_t i = PARAM0; i < argc; i++) {
+        if (argc > PARAM0) {
             napi_valuetype valueType = napi_undefined;
-            napi_typeof(env, argv[i], &valueType);
-
-            if (i == PARAM0 && valueType == napi_function) {
-                napi_create_reference(env, argv[i], refCount, &asyncContext->callbackRef);
-                break;
-            } else {
-                NAPI_ASSERT(env, false, "type mismatch");
+            napi_typeof(env, argv[PARAM0], &valueType);
+            if (valueType == napi_function) {
+                napi_create_reference(env, argv[PARAM0], refCount, &asyncContext->callbackRef);
             }
         }
 
@@ -467,7 +484,12 @@ napi_value TonePlayerNapi::Start(napi_env env, napi_callback_info info)
             [](napi_env env, void *data) {
                 auto context = static_cast<TonePlayerAsyncContext *>(data);
                 context->isTrue = context->objectInfo->tonePlayer_->StartTone();
-                context->status = SUCCESS;
+                if (context->isTrue) {
+                    context->status = SUCCESS;
+                } else {
+                    HiLog::Error(LABEL, "Start call failed, wrong timing!");
+                    context->status = NAPI_ERR_SYSTEM;
+                }
             },
             VoidAsyncCallbackComplete, static_cast<void*>(asyncContext.get()), &asyncContext->work);
         if (status != napi_ok) {
@@ -496,15 +518,11 @@ napi_value TonePlayerNapi::Stop(napi_env env, napi_callback_info info)
 
     status = napi_unwrap(env, thisVar, reinterpret_cast<void**>(&asyncContext->objectInfo));
     if (status == napi_ok && asyncContext->objectInfo != nullptr) {
-        for (size_t i = PARAM0; i < argc; i++) {
+        if (argc > PARAM0) {
             napi_valuetype valueType = napi_undefined;
-            napi_typeof(env, argv[i], &valueType);
-
-            if (i == PARAM0 && valueType == napi_function) {
-                napi_create_reference(env, argv[i], refCount, &asyncContext->callbackRef);
-                break;
-            } else {
-                NAPI_ASSERT(env, false, "type mismatch");
+            napi_typeof(env, argv[PARAM0], &valueType);
+            if (valueType == napi_function) {
+                napi_create_reference(env, argv[PARAM0], refCount, &asyncContext->callbackRef);
             }
         }
 
@@ -522,7 +540,12 @@ napi_value TonePlayerNapi::Stop(napi_env env, napi_callback_info info)
             [](napi_env env, void *data) {
                 auto context = static_cast<TonePlayerAsyncContext *>(data);
                 context->isTrue = context->objectInfo->tonePlayer_->StopTone();
-                context->status = SUCCESS;
+                if (context->isTrue) {
+                    context->status = SUCCESS;
+                } else {
+                    HiLog::Error(LABEL, "Stop call failed, wrong timing");
+                    context->status = NAPI_ERR_SYSTEM;
+                }
             },
             VoidAsyncCallbackComplete, static_cast<void*>(asyncContext.get()), &asyncContext->work);
         if (status != napi_ok) {
@@ -551,15 +574,11 @@ napi_value TonePlayerNapi::Release(napi_env env, napi_callback_info info)
 
     status = napi_unwrap(env, thisVar, reinterpret_cast<void**>(&asyncContext->objectInfo));
     if (status == napi_ok && asyncContext->objectInfo != nullptr) {
-        for (size_t i = PARAM0; i < argc; i++) {
+        if (argc > PARAM0) {
             napi_valuetype valueType = napi_undefined;
-            napi_typeof(env, argv[i], &valueType);
-
-            if (i == PARAM0 && valueType == napi_function) {
-                napi_create_reference(env, argv[i], refCount, &asyncContext->callbackRef);
-                break;
-            } else {
-                NAPI_ASSERT(env, false, "type mismatch");
+            napi_typeof(env, argv[PARAM0], &valueType);
+            if (valueType == napi_function) {
+                napi_create_reference(env, argv[PARAM0], refCount, &asyncContext->callbackRef);
             }
         }
 
@@ -577,7 +596,12 @@ napi_value TonePlayerNapi::Release(napi_env env, napi_callback_info info)
             [](napi_env env, void *data) {
                 auto context = static_cast<TonePlayerAsyncContext *>(data);
                 context->isTrue = context->objectInfo->tonePlayer_->Release();
-                context->status = SUCCESS;
+                if (context->isTrue) {
+                    context->status = SUCCESS;
+                } else {
+                    HiLog::Error(LABEL, "Release call failed, wrong timing");
+                    context->status = NAPI_ERR_SYSTEM;
+                }
             },
             VoidAsyncCallbackComplete, static_cast<void*>(asyncContext.get()), &asyncContext->work);
         if (status != napi_ok) {

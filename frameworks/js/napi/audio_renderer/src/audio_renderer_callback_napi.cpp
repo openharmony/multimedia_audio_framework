@@ -43,7 +43,7 @@ void AudioRendererCallbackNapi::SaveCallbackReference(const std::string &callbac
                          "AudioRendererCallbackNapi: creating reference for callback fail");
 
     std::shared_ptr<AutoRef> cb = std::make_shared<AutoRef>(env_, callback);
-    if (callbackName == INTERRUPT_CALLBACK_NAME) {
+    if (callbackName == INTERRUPT_CALLBACK_NAME || callbackName == AUDIO_INTERRUPT_CALLBACK_NAME) {
         interruptCallback_ = cb;
     } else if (callbackName == STATE_CHANGE_CALLBACK_NAME) {
         stateChangeCallback_ = cb;

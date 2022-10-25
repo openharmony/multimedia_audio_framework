@@ -31,6 +31,9 @@ AudioGroupManager::AudioGroupManager(int32_t groupId) : groupId_(groupId)
 AudioGroupManager::~AudioGroupManager()
 {
     AUDIO_DEBUG_LOG("AudioGroupManager start");
+    if (cbClientId_ != -1) {
+        UnsetRingerModeCallback(cbClientId_);
+    }
 }
 
 float AudioGroupManager::MapVolumeToHDI(int32_t volume)
@@ -307,6 +310,76 @@ bool AudioGroupManager::IsAlived()
 int32_t AudioGroupManager::GetGroupId()
 {
     return groupId_;
+}
+
+int32_t AudioGroupManager::SetRingerModeCallback(const int32_t clientId,
+    const std::shared_ptr<AudioRingerModeCallback> &callback)
+{
+    if (callback == nullptr) {
+        AUDIO_ERR_LOG("AudioSystemManager: callback is nullptr");
+        return ERR_INVALID_PARAM;
+    }
+
+    cbClientId_ = clientId;
+
+    return AudioPolicyManager::GetInstance().SetRingerModeCallback(clientId, callback);
+}
+
+int32_t AudioGroupManager::UnsetRingerModeCallback(const int32_t clientId) const
+{
+    return AudioPolicyManager::GetInstance().UnsetRingerModeCallback(clientId);
+}
+
+int32_t AudioGroupManager::SetRingerMode(AudioRingerMode ringMode) const
+{
+    if (netWorkId_ != LOCAL_NETWORK_ID) {
+        AUDIO_ERR_LOG("AudioGroupManager::SetRingerMode is not supported for local device.");
+        return ERROR;
+    }
+    /* Call Audio Policy SetRingerMode */
+    return AudioPolicyManager::GetInstance().SetRingerMode(ringMode);
+}
+
+AudioRingerMode AudioGroupManager::GetRingerMode() const
+{
+    /* Call Audio Policy GetRingerMode */
+    if (netWorkId_ != LOCAL_NETWORK_ID) {
+        AUDIO_ERR_LOG("AudioGroupManager::SetRingerMode is not supported for local device.");
+        return AudioRingerMode::RINGER_MODE_NORMAL;
+    }
+    return (AudioPolicyManager::GetInstance().GetRingerMode());
+}
+
+int32_t AudioGroupManager::SetMicrophoneMute(bool isMute)
+{
+    /* Call Audio Policy GetRingerMode */
+    if (netWorkId_ != LOCAL_NETWORK_ID) {
+        AUDIO_ERR_LOG("AudioGroupManager::SetRingerMode is not supported for local device.");
+        return ERROR;
+    }
+    return AudioPolicyManager::GetInstance().SetMicrophoneMute(isMute);
+}
+
+bool AudioGroupManager::IsMicrophoneMute()
+{
+    /* Call Audio Policy GetRingerMode */
+    if (netWorkId_ != LOCAL_NETWORK_ID) {
+        AUDIO_ERR_LOG("AudioGroupManager::SetRingerMode is not supported for local device.");
+        return false;
+    }
+    return AudioPolicyManager::GetInstance().IsMicrophoneMute();
+}
+
+int32_t AudioGroupManager::SetMicStateChangeCallback(
+    const std::shared_ptr<AudioManagerMicStateChangeCallback> &callback)
+{
+    AUDIO_INFO_LOG("Entered AudioRoutingManager::%{public}s", __func__);
+    if (callback == nullptr) {
+        AUDIO_ERR_LOG("setMicrophoneMuteCallback::callback is null");
+        return ERR_INVALID_PARAM;
+    }
+    int32_t clientId = static_cast<int32_t>(getpid());
+    return AudioPolicyManager::GetInstance().SetMicStateChangeCallback(clientId, callback);
 }
 } // namespace AudioStandard
 } // namespace OHOS

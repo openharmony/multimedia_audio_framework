@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-#include "audio_routing_manager_callback_napi.h"
+#include "audio_micstatechange_callback_napi.h"
 
 #include <uv.h>
 
@@ -22,31 +22,31 @@
 
 namespace OHOS {
 namespace AudioStandard {
-AudioRoutingManagerCallbackNapi::AudioRoutingManagerCallbackNapi(napi_env env)
+AudioManagerMicStateChangeCallbackNapi::AudioManagerMicStateChangeCallbackNapi(napi_env env)
     : env_(env)
 {
-    AUDIO_DEBUG_LOG("AudioRoutingManagerCallbackNapi: instance create");
+    AUDIO_DEBUG_LOG("AudioManagerMicStateChangeCallbackNapi: instance create");
 }
 
-AudioRoutingManagerCallbackNapi::~AudioRoutingManagerCallbackNapi()
+AudioManagerMicStateChangeCallbackNapi::~AudioManagerMicStateChangeCallbackNapi()
 {
     AUDIO_DEBUG_LOG("AudioManagerCallbackNapi: instance destroy");
 }
 
-void AudioRoutingManagerCallbackNapi::SaveCallbackReference(const std::string &callbackName, napi_value args)
+void AudioManagerMicStateChangeCallbackNapi::SaveCallbackReference(const std::string &callbackName, napi_value args)
 {
     std::lock_guard<std::mutex> lock(mutex_);
     napi_ref callback = nullptr;
     const int32_t refCount = 1;
     napi_status status = napi_create_reference(env_, args, refCount, &callback);
     CHECK_AND_RETURN_LOG(status == napi_ok && callback != nullptr,
-        "AudioRoutingManagerCallbackNapi: creating reference for callback fail");
+        "AudioManagerMicStateChangeCallbackNapi: creating reference for callback fail");
 
     std::shared_ptr<AutoRef> cb = std::make_shared<AutoRef>(env_, callback);
     if (callbackName == MIC_STATE_CHANGE_CALLBACK_NAME) {
         micStateChangeCallback_ = cb;
     } else {
-        AUDIO_ERR_LOG("AudioRoutingManagerCallbackNapi: Unknown callback type: %{public}s", callbackName.c_str());
+        AUDIO_ERR_LOG("AudioManagerMicStateChangeCallbackNapi:Unknown callback type:%{public}s", callbackName.c_str());
     }
 }
 
@@ -64,12 +64,12 @@ static void NativeMicStateChangeToJsObj(const napi_env &env, napi_value &jsObj,
     SetValueBoolean(env, "mute", micStateChangeEvent.mute, jsObj);
 }
 
-void AudioRoutingManagerCallbackNapi::OnMicStateUpdated(const MicStateChangeEvent &micStateChangeEvent)
+void AudioManagerMicStateChangeCallbackNapi::OnMicStateUpdated(const MicStateChangeEvent &micStateChangeEvent)
 {
     std::lock_guard<std::mutex> lock(mutex_);
     CHECK_AND_RETURN_LOG(micStateChangeCallback_ != nullptr, "callback not registered by JS client");
 
-    std::unique_ptr<AudioRoutingManagerJsCallback> cb = std::make_unique<AudioRoutingManagerJsCallback>();
+    std::unique_ptr<AudioManagerMicStateChangeJsCallback> cb = std::make_unique<AudioManagerMicStateChangeJsCallback>();
     CHECK_AND_RETURN_LOG(cb != nullptr, "No memory");
 
     cb->callback = micStateChangeCallback_;
@@ -78,7 +78,8 @@ void AudioRoutingManagerCallbackNapi::OnMicStateUpdated(const MicStateChangeEven
     return OnJsCallbackMicStateChange(cb);
 }
 
-void AudioRoutingManagerCallbackNapi::OnJsCallbackMicStateChange(std::unique_ptr<AudioRoutingManagerJsCallback> &jsCb)
+void AudioManagerMicStateChangeCallbackNapi::OnJsCallbackMicStateChange
+    (std::unique_ptr<AudioManagerMicStateChangeJsCallback> &jsCb)
 {
     uv_loop_s *loop = nullptr;
     napi_get_uv_event_loop(env_, &loop);
@@ -102,7 +103,8 @@ void AudioRoutingManagerCallbackNapi::OnJsCallbackMicStateChange(std::unique_ptr
 
     int ret = uv_queue_work(loop, work, [] (uv_work_t *work) {}, [] (uv_work_t *work, int status) {
         // Js Thread
-        AudioRoutingManagerJsCallback *event = reinterpret_cast<AudioRoutingManagerJsCallback *>(work->data);
+        AudioManagerMicStateChangeJsCallback *event =
+            reinterpret_cast<AudioManagerMicStateChangeJsCallback *>(work->data);
         std::string request = event->callbackName;
         napi_env env = event->callback->env_;
         napi_ref callback = event->callback->cb_;

@@ -141,16 +141,24 @@ void AudioSystemManager::init()
     }
 }
 
-int32_t AudioSystemManager::SetRingerMode(AudioRingerMode ringMode) const
+int32_t AudioSystemManager::SetRingerMode(AudioRingerMode ringMode)
 {
-    /* Call Audio Policy SetRingerMode */
-    return AudioPolicyManager::GetInstance().SetRingerMode(ringMode);
+    std::shared_ptr<AudioGroupManager> groupManager = GetGroupManager(DEFAULT_VOLUME_GROUP_ID);
+    if (groupManager == nullptr) {
+        AUDIO_ERR_LOG("SetRingerMode failed, groupManager is null");
+        return ERR_INVALID_PARAM;
+    }
+    return groupManager->SetRingerMode(ringMode);
 }
 
-AudioRingerMode AudioSystemManager::GetRingerMode() const
+AudioRingerMode AudioSystemManager::GetRingerMode()
 {
-    /* Call Audio Policy GetRingerMode */
-    return (AudioPolicyManager::GetInstance().GetRingerMode());
+    std::shared_ptr<AudioGroupManager> groupManager = GetGroupManager(DEFAULT_VOLUME_GROUP_ID);
+    if (groupManager == nullptr) {
+        AUDIO_ERR_LOG("GetRingerMode failed, groupManager is null");
+        return AudioRingerMode::RINGER_MODE_NORMAL;
+    }
+    return groupManager->GetRingerMode();
 }
 
 int32_t AudioSystemManager::SetAudioScene(const AudioScene &scene)
@@ -494,12 +502,22 @@ bool AudioSystemManager::IsAlived()
 
 int32_t AudioSystemManager::SetMicrophoneMute(bool isMute)
 {
-    return AudioPolicyManager::GetInstance().SetMicrophoneMute(isMute);
+    std::shared_ptr<AudioGroupManager> groupManager = GetGroupManager(DEFAULT_VOLUME_GROUP_ID);
+    if (groupManager == nullptr) {
+        AUDIO_ERR_LOG("SetMicrophoneMute failed, groupManager is null");
+        return ERR_INVALID_PARAM;
+    }
+    return groupManager->SetMicrophoneMute(isMute);
 }
 
 bool AudioSystemManager::IsMicrophoneMute()
 {
-    return AudioPolicyManager::GetInstance().IsMicrophoneMute();
+    std::shared_ptr<AudioGroupManager> groupManager = GetGroupManager(DEFAULT_VOLUME_GROUP_ID);
+    if (groupManager == nullptr) {
+        AUDIO_ERR_LOG("IsMicrophoneMute failed, groupManager is null");
+        return false;
+    }
+    return groupManager->IsMicrophoneMute();
 }
 
 int32_t AudioSystemManager::SelectOutputDevice(std::vector<sptr<AudioDeviceDescriptor>> audioDeviceDescriptors) const

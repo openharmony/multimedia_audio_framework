@@ -21,6 +21,8 @@
 #include <queue>
 
 #include "audio_renderer.h"
+#include "audio_errors.h"
+#include "audio_system_manager.h"
 #include "napi/native_api.h"
 #include "napi/native_node_api.h"
 
@@ -55,7 +57,7 @@ private:
         napi_async_work work;
         napi_deferred deferred;
         napi_ref callbackRef = nullptr;
-        int32_t status;
+        int32_t status = SUCCESS;
         int32_t intValue;
         int32_t audioRendererRate;
         int32_t rendererFlags;
@@ -64,6 +66,9 @@ private:
         uint64_t time;
         size_t bufferLen;
         size_t bufferSize;
+        int32_t volType;
+        int32_t volLevel;
+        uint32_t audioStreamId;
         size_t totalBytesWritten;
         void *data;
         AudioSampleFormat sampleFormat;
@@ -91,6 +96,8 @@ private:
     static napi_value Stop(napi_env env, napi_callback_info info);
     static napi_value Release(napi_env env, napi_callback_info info);
     static napi_value GetBufferSize(napi_env env, napi_callback_info info);
+    static napi_value GetAudioStreamId(napi_env env, napi_callback_info info);
+    static napi_value SetVolume(napi_env env, napi_callback_info info);
     static napi_value GetState(napi_env env, napi_callback_info info);
     static napi_value GetRendererInfo(napi_env env, napi_callback_info info);
     static napi_value GetStreamInfo(napi_env env, napi_callback_info info);
@@ -109,6 +116,7 @@ private:
     static void AudioParamsAsyncCallbackComplete(napi_env env, napi_status status, void *data);
     static void IsTrueAsyncCallbackComplete(napi_env env, napi_status status, void *data);
     static void GetBufferSizeAsyncCallbackComplete(napi_env env, napi_status status, void *data);
+    static void GetAudioStreamIdCallbackComplete(napi_env env, napi_status status, void *data);
     static void GetIntValueAsyncCallbackComplete(napi_env env, napi_status status, void *data);
     static void GetInt64ValueAsyncCallbackComplete(napi_env env, napi_status status, void *data);
     static void WriteAsyncCallbackComplete(napi_env env, napi_status status, void *data);
@@ -165,6 +173,7 @@ private:
     std::shared_ptr<RendererPositionCallback> positionCBNapi_ = nullptr;
     std::shared_ptr<RendererPeriodPositionCallback> periodPositionCBNapi_ = nullptr;
     std::shared_ptr<AudioRendererWriteCallback> dataRequestCBNapi_ = nullptr;
+    AudioSystemManager *audioMngr_;
 };
 
 static const std::map<std::string, InterruptType> interruptEventTypeMap = {

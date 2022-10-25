@@ -35,7 +35,8 @@ constexpr int32_t MIN_SERVICE_COUNT = 2;
 constexpr int32_t ROOT_UID = 0;
 constexpr int32_t INVALID_UID = -1;
 constexpr int32_t NETWORK_ID_SIZE = 80;
-
+constexpr int32_t DEFAULT_VOLUME_GROUP_ID = 1;
+constexpr int32_t DEFAULT_VOLUME_INTERRUPT_ID = 1;
 const std::string MICROPHONE_PERMISSION = "ohos.permission.MICROPHONE";
 const std::string MODIFY_AUDIO_SETTINGS_PERMISSION = "ohos.permission.MODIFY_AUDIO_SETTINGS";
 const std::string ACCESS_NOTIFICATION_POLICY_PERMISSION = "ohos.permission.ACCESS_NOTIFICATION_POLICY";
@@ -277,6 +278,34 @@ enum FocusType {
     FOCUS_TYPE_RECORDING = 0,
 };
 
+enum AudioErrors {
+    /**
+     * Common errors.
+     */
+    ERROR_INVALID_PARAM = 6800101,
+    ERROR_NO_MEMORY     = 6800102,
+    ERROR_ILLEGAL_STATE = 6800103,
+    ERROR_UNSUPPORTED   = 6800104,
+    ERROR_TIMEOUT       = 6800105,
+    /**
+     * Audio specific errors.
+     */
+    ERROR_STREAM_LIMIT  = 6800201,
+    /**
+     * Default error.
+     */
+    ERROR_SYSTEM        = 6800301
+};
+
+enum CommunicationDeviceType {
+    /**
+     * Speaker.
+     * @since 7
+     * @syscap SystemCapability.Multimedia.Audio.Communication
+     */
+    COMMUNICATION_SPEAKER = 2
+};
+
 enum InterruptMode {
     SHARE_MODE = 0,
     INDEPENDENT_MODE = 1
@@ -314,6 +343,22 @@ enum AudioChannel {
     CHANNEL_6 = 6,
     CHANNEL_7 = 7,
     CHANNEL_8 = 8
+};
+
+
+/**
+ * Enumerates the audio interrupt request type.
+ */
+enum InterruptRequestType {
+    INTERRUPT_REQUEST_TYPE_DEFAULT = 0,
+};
+
+/**
+ * Enumerates audio interrupt request result type.
+ */
+enum InterruptRequestResultType {
+    INTERRUPT_REQUEST_GRANT = 0,
+    INTERRUPT_REQUEST_REJECT = 1
 };
 
 // sampling rate

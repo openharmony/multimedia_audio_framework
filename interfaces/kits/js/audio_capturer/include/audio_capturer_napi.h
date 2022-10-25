@@ -55,6 +55,7 @@ private:
         uint8_t *buffer = nullptr;
         size_t bytesRead;
         size_t bufferSize;
+        uint32_t audioStreamId;
         bool isBlocking;
         bool isTrue;
         AudioSampleFormat audioSampleFormat;
@@ -82,6 +83,7 @@ private:
     static napi_value Stop(napi_env env, napi_callback_info info);
     static napi_value Release(napi_env env, napi_callback_info info);
     static napi_value GetBufferSize(napi_env env, napi_callback_info info);
+    static napi_value GetAudioStreamId(napi_env env, napi_callback_info info);
     static napi_value On(napi_env env, napi_callback_info info);
     static napi_value Off(napi_env env, napi_callback_info info);
     static napi_value GetState(napi_env env, napi_callback_info info);
@@ -96,6 +98,7 @@ private:
     static void ReadAsyncCallbackComplete(napi_env env, napi_status status, void *data);
     static void IsTrueAsyncCallbackComplete(napi_env env, napi_status status, void *data);
     static void GetBufferSizeAsyncCallbackComplete(napi_env env, napi_status status, void *data);
+    static void GetAudioStreamIdCallbackComplete(napi_env env, napi_status status, void *data);
     static void GetIntValueAsyncCallbackComplete(napi_env env, napi_status status, void *data);
     static void GetInt64ValueAsyncCallbackComplete(napi_env env, napi_status status, void *data);
     static void VoidAsyncCallbackComplete(napi_env env, napi_status status, void *data);
