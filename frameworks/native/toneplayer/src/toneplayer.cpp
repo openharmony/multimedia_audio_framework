@@ -69,8 +69,8 @@ TonePlayerPrivate::TonePlayerPrivate(const std::string cachePath, const AudioRen
         AUDIO_INFO_LOG("copy application cache path");
         cachePath_.assign(cachePath);
     }
-    AUDIO_INFO_LOG("TonePlayerPrivate constructor: volume=%{public}f", volume_);
-    AUDIO_INFO_LOG("TonePlayerPrivate constructor: size=%{public}zu", supportedTones_.size());
+    AUDIO_DEBUG_LOG("TonePlayerPrivate constructor: volume=%{public}f, size=%{public}zu",
+        volume_, supportedTones_.size());
 #ifdef DUMPFILE
     pfd = nullptr;
 #endif // DUMPFILE
@@ -84,7 +84,13 @@ TonePlayerPrivate::~TonePlayerPrivate()
 
     if (audioRenderer_ != nullptr) {
         StopTone();
-        audioRenderer_->Clear();
+        mutexLock_.lock();
+        if (audioRenderer_ != nullptr) {
+            audioRenderer_->Clear();
+        } else {
+            AUDIO_ERR_LOG("~TonePlayerPrivate audioRenderer_ is null");
+        }
+        mutexLock_.unlock();
     }
     if (toneDataGenLoop_ && toneDataGenLoop_->joinable()) {
         toneDataGenLoop_->join();
@@ -96,22 +102,27 @@ bool TonePlayerPrivate::LoadEventStateHandler()
 {
     AUDIO_INFO_LOG("TonePlayerPrivate::LoadEventStateHandler start");
     if (audioRenderer_ != nullptr) {
-        AUDIO_INFO_LOG("LoadEventStateHandler audioRenderer_ is not null");
         StopTone();
-        audioRenderer_->Clear();
+        mutexLock_.lock();
+        if (audioRenderer_ != nullptr) {
+            audioRenderer_->Clear();
+        } else {
+            AUDIO_ERR_LOG("LoadEventStateHandler audioRenderer_ is null");
+        }
+        mutexLock_.unlock();
         tonePlayerState_ = TONE_PLAYER_IDLE;
         audioRenderer_ = nullptr;
     }
     if (tonePlayerState_ == TONE_PLAYER_IDLE) {
-        AUDIO_INFO_LOG("Load Init AudioRenderer");
+        AUDIO_DEBUG_LOG("Load Init AudioRenderer");
         if ((audioRenderer_ == nullptr) && (!InitAudioRenderer())) {
-            AUDIO_INFO_LOG("LoadEventStateHandler InitAudioRenderer fail");
+            AUDIO_ERR_LOG("LoadEventStateHandler InitAudioRenderer fail");
             return false;
         }
         tonePlayerState_ = TONE_PLAYER_INIT;
     }
     if (InitToneWaveInfo() == false) {
-        AUDIO_INFO_LOG("Wave Initialization Failed");
+        AUDIO_ERR_LOG("Wave Initialization Failed");
         tonePlayerState_ = TONE_PLAYER_IDLE;
         return false;
     }
@@ -127,13 +138,19 @@ bool TonePlayerPrivate::PlayEventStateHandler()
 {
     status_t retStatus;
     mutexLock_.unlock();
-    audioRenderer_->Start();
+    mutexLock_.lock();
+    if (audioRenderer_ != nullptr) {
+        audioRenderer_->Start();
+    } else {
+        AUDIO_ERR_LOG("PlayEventStateHandler audioRenderer_ is null");
+    }
+    mutexLock_.unlock();
     mutexLock_.lock();
     if (tonePlayerState_ == TONE_PLAYER_STARTING) {
         mutexLock_.unlock();
         std::unique_lock<std::mutex> lock(cbkCondLock_);
         retStatus = waitAudioCbkCond_.wait_for(lock, std::chrono::seconds(CMAXWAIT));
-        AUDIO_INFO_LOG("Immediate start got notified");
+        AUDIO_DEBUG_LOG("Immediate start got notified, status %{public}d", retStatus);
         mutexLock_.lock();
         if (retStatus == std::cv_status::timeout) {
             AUDIO_ERR_LOG("Immediate start timed out, status %{public}d", retStatus);
@@ -157,7 +174,7 @@ bool TonePlayerPrivate::TonePlayerStateHandler(int16_t event)
                 tonePlayerState_ = TONE_PLAYER_IDLE;
                 return false;
             }
-            AUDIO_INFO_LOG("STARTTONE tonePlayerState_ %{public}d", tonePlayerState_);
+            AUDIO_DEBUG_LOG("PLAYER_EVENT tonePlayerState_ %{public}d", tonePlayerState_);
             break;
         case PLAYER_EVENT_STOP:
             StopEventStateHandler();
@@ -168,8 +185,8 @@ bool TonePlayerPrivate::TonePlayerStateHandler(int16_t event)
 
 bool TonePlayerPrivate::LoadTone(ToneType toneType)
 {
+    AUDIO_INFO_LOG("LoadTone type: %{public}d, tonePlayerState_ %{public}d", toneType, tonePlayerState_);
     bool result = false;
-    AUDIO_INFO_LOG("LoadTone tonePlayerState_ %{public}d", tonePlayerState_);
     if (toneType >= NUM_TONES) {
         return result;
     }
@@ -186,6 +203,11 @@ bool TonePlayerPrivate::LoadTone(ToneType toneType)
 
     // Get descriptor for requested tone
     initialToneInfo_ = AudioPolicyManager::GetInstance().GetToneConfig(toneType);
+    if (initialToneInfo_->segmentCnt == 0) {
+        AUDIO_ERR_LOG("LoadTone failed, calling GetToneConfig returned invalid");
+        mutexLock_.unlock();
+        return result;
+    }
     result = TonePlayerStateHandler(PLAYER_EVENT_LOAD);
     mutexLock_.unlock();
 #ifdef DUMPFILE
@@ -194,13 +216,13 @@ bool TonePlayerPrivate::LoadTone(ToneType toneType)
         AUDIO_ERR_LOG("Error opening pcm test file!");
     }
 #endif // DUMPFILE
-    return true;
+    return result;
 }
 
 bool TonePlayerPrivate::StartTone()
 {
-    bool retVal = false;
     AUDIO_INFO_LOG("STARTTONE tonePlayerState_ %{public}d", tonePlayerState_);
+    bool retVal = false;
     mutexLock_.lock();
     if (tonePlayerState_ == TONE_PLAYER_IDLE || tonePlayerState_ == TONE_PLAYER_INIT) {
         if (LoadEventStateHandler() == false) {
@@ -217,7 +239,13 @@ bool TonePlayerPrivate::Release()
 {
     if (audioRenderer_ != nullptr) {
         StopTone();
-        audioRenderer_->Clear();
+        mutexLock_.lock();
+        if (audioRenderer_ != nullptr) {
+            audioRenderer_->Clear();
+        } else {
+            AUDIO_ERR_LOG("Release audioRenderer_ is null");
+        }
+        mutexLock_.unlock();
         tonePlayerState_ = TONE_PLAYER_IDLE;
     }
     audioRenderer_ = nullptr;
@@ -226,8 +254,8 @@ bool TonePlayerPrivate::Release()
 
 bool TonePlayerPrivate::StopTone()
 {
-    bool retVal = true;
     AUDIO_INFO_LOG("StopTone tonePlayerState_ %{public}d", tonePlayerState_);
+    bool retVal = true;
     mutexLock_.lock();
     if (tonePlayerState_ == TONE_PLAYER_IDLE || tonePlayerState_ == TONE_PLAYER_INIT) {
         AUDIO_INFO_LOG("-stop tone End");
@@ -237,7 +265,13 @@ bool TonePlayerPrivate::StopTone()
 
     retVal = TonePlayerStateHandler(PLAYER_EVENT_STOP);
     mutexLock_.unlock();
-    audioRenderer_->Stop(); // Newly added
+    mutexLock_.lock();
+    if (audioRenderer_ != nullptr) {
+        audioRenderer_->Stop();
+    } else {
+        AUDIO_ERR_LOG("StopTone audioRenderer_ is null");
+    }
+    mutexLock_.unlock();
 #ifdef DUMPFILE
     if (pfd) {
         fclose(pfd);
@@ -252,7 +286,7 @@ bool TonePlayerPrivate::StopEventStateHandler()
     if (tonePlayerState_ == TONE_PLAYER_PLAYING || tonePlayerState_ == TONE_PLAYER_STARTING) {
         tonePlayerState_ = TONE_PLAYER_STOPPING;
     }
-    AUDIO_INFO_LOG("WAITING wait_for cond");
+    AUDIO_DEBUG_LOG("WAITING wait_for cond");
     mutexLock_.unlock();
     std::unique_lock<std::mutex> lock(cbkCondLock_);
     status_t retStatus = waitAudioCbkCond_.wait_for(lock, std::chrono::seconds(CMAXWAIT));
@@ -280,23 +314,23 @@ bool TonePlayerPrivate::InitAudioRenderer()
         return false;
     }
 
-    AUDIO_INFO_LOG("initAudioRenderer: Playback renderer created");
+    AUDIO_DEBUG_LOG("initAudioRenderer: Playback renderer created");
     if (audioRenderer_->SetRenderMode(RENDER_MODE_CALLBACK)) {
         AUDIO_ERR_LOG("initAudioRenderer: SetRenderMode failed");
         return false;
     }
-    AUDIO_INFO_LOG("initAudioRenderer: SetRenderMode Sucessful");
+    AUDIO_DEBUG_LOG("initAudioRenderer: SetRenderMode Sucessful");
     if (audioRenderer_->SetRendererWriteCallback(shared_from_this())) {
         AUDIO_ERR_LOG("initAudioRenderer: SetRendererWriteCallback failed");
         return false;
     }
-    AUDIO_INFO_LOG("initAudioRenderer: SetRendererWriteCallback Sucessful");
+    AUDIO_DEBUG_LOG("initAudioRenderer: SetRendererWriteCallback Sucessful");
     if (audioRenderer_->SetRendererCallback(shared_from_this())) {
         AUDIO_ERR_LOG("initAudioRenderer: SetRendererCallbackfailed");
         return false;
     }
 
-    AUDIO_INFO_LOG("initAudioRenderer: SetRendererCallback Sucessful");
+    AUDIO_DEBUG_LOG("initAudioRenderer: SetRendererCallback Sucessful");
     audioRenderer_->SetVolume(volume_);
     AUDIO_INFO_LOG("initAudioRenderer: SetVolume Sucessful");
     return true;
@@ -321,9 +355,9 @@ void TonePlayerPrivate::OnStateChange(const RendererState state)
 
 bool TonePlayerPrivate::CheckToneStopped()
 {
-    std::shared_ptr<ToneInfo> toneDesc = toneInfo_;
     AUDIO_INFO_LOG("CheckToneStopped state: %{public}d tot: %{public}d max: %{public}d not calling",
         tonePlayerState_, totalSample_, maxSample_);
+    std::shared_ptr<ToneInfo> toneDesc = toneInfo_;
     if (tonePlayerState_ == TONE_PLAYER_STOPPED) {
         return true;
     }
@@ -331,7 +365,7 @@ bool TonePlayerPrivate::CheckToneStopped()
         totalSample_ > maxSample_ || tonePlayerState_ == TONE_PLAYER_STOPPING) {
         if (tonePlayerState_ == TONE_PLAYER_PLAYING) {
             tonePlayerState_ = TONE_PLAYER_STOPPING;
-            AUDIO_INFO_LOG("Audicallback move playing to stoping");
+            AUDIO_DEBUG_LOG("Audicallback move playing to stoping");
         }
         return true;
     }
@@ -343,12 +377,12 @@ bool TonePlayerPrivate::CheckToneStarted(uint32_t reqSample, int8_t *audioBuffer
     std::shared_ptr<ToneInfo> toneDesc = toneInfo_;
     if (tonePlayerState_ == TONE_PLAYER_STARTING) {
         tonePlayerState_ = TONE_PLAYER_PLAYING;
-        AUDIO_INFO_LOG("Audicallback move to playing");
+        AUDIO_DEBUG_LOG("Audicallback move to playing");
         if (toneDesc->segments[currSegment_].duration != 0) {
             sampleCount_ = 0;
             GetSamples(toneDesc->segments[currSegment_].waveFreq, audioBuffer, reqSample);
         }
-        AUDIO_INFO_LOG("CheckToneStarted GenerateStartWave to currseg: %{public}d ", currSegment_);
+        AUDIO_DEBUG_LOG("CheckToneStarted GenerateStartWave to currseg: %{public}d ", currSegment_);
         return true;
     }
     return false;
@@ -375,17 +409,16 @@ void TonePlayerPrivate::GetCurrentSegmentUpdated(std::shared_ptr<ToneInfo> toneD
 
 bool TonePlayerPrivate::CheckToneContinuity()
 {
-    bool retVal = false;
     AUDIO_INFO_LOG("CheckToneContinuity Entry loopCounter_: %{public}d, currSegment_: %{public}d",
         loopCounter_, currSegment_);
+    bool retVal = false;
     std::shared_ptr<ToneInfo> toneDesc = toneInfo_;
     GetCurrentSegmentUpdated(toneDesc);
 
     // Handle loop if last segment reached
     if (toneDesc->segments[currSegment_].duration == 0) {
-        AUDIO_INFO_LOG("Last Seg: %{public}d", currSegment_);
+        AUDIO_DEBUG_LOG("Last Seg: %{public}d", currSegment_);
         if (currCount_ < toneDesc->repeatCnt) {
-            AUDIO_INFO_LOG("Repeating Count: %{public}d", currCount_);
             currSegment_ = toneDesc->repeatSegment;
             ++currCount_;
             retVal = true;
@@ -407,13 +440,12 @@ bool TonePlayerPrivate::ContinueToneplay(uint32_t reqSample, int8_t *audioBuffer
         return false;
     }
     if (totalSample_ <= nextSegSample_) {
-        AUDIO_INFO_LOG("ContinueToneplay Continue Playing Tone");
         if (toneDesc->segments[currSegment_].duration != 0) {
             GetSamples(toneDesc->segments[currSegment_].waveFreq, audioBuffer, reqSample);
         }
         return true;
     }
-    AUDIO_INFO_LOG(" Current Seg Last minute Playing Tone");
+    AUDIO_DEBUG_LOG(" Current Seg Last minute Playing Tone");
 
     if (CheckToneContinuity()) {
         if (toneDesc->segments[currSegment_].duration != 0) {
@@ -430,9 +462,8 @@ bool TonePlayerPrivate::ContinueToneplay(uint32_t reqSample, int8_t *audioBuffer
 void TonePlayerPrivate::AudioToneRendererCallback()
 {
     std::unique_lock<std::mutex> lock(dataCondLock_);
-    AUDIO_INFO_LOG("AudioToneRendererCallback Entered");
     if (toneDataState_ == TONE_DATA_LOADED) {
-        AUDIO_INFO_LOG("Notifing Data AudioRendererDataThreadFunc");
+        AUDIO_DEBUG_LOG("Notifing Data AudioToneRendererCallback");
         waitToneDataCond_.notify_all();
     }
     if (toneDataState_ == TONE_DATA_LOADING) {
@@ -465,10 +496,16 @@ bool TonePlayerPrivate::AudioToneSequenceGen(BufferDesc &bufDesc)
                 tonePlayerState_ = TONE_PLAYER_INIT;
                 totalBufAvailable = 0;
                 bufDesc.dataLength = 0;
-                AUDIO_INFO_LOG("Notifing all the STOP");
+                AUDIO_DEBUG_LOG("Notifing all the STOP");
                 mutexLock_.unlock();
                 waitAudioCbkCond_.notify_all();
-                audioRenderer_->Stop();
+                mutexLock_.lock();
+                if (audioRenderer_ != nullptr) {
+                    audioRenderer_->Stop();
+                } else {
+                    AUDIO_ERR_LOG("AudioToneSequenceGen audioRenderer_ is null");
+                }
+                mutexLock_.unlock();
                 return false;
             }
         } else if (CheckToneStarted(reqSamples, audioBuffer)) {
@@ -500,12 +537,19 @@ void TonePlayerPrivate::AudioToneDataThreadFunc()
         }
 
         BufferDesc bufDesc = {};
-        audioRenderer_->GetBufferDesc(bufDesc);
+        mutexLock_.lock();
+        if (audioRenderer_ != nullptr) {
+            audioRenderer_->GetBufferDesc(bufDesc);
+        } else {
+            AUDIO_ERR_LOG("AudioToneDataThreadFunc audioRenderer_ is null");
+        }
+        mutexLock_.unlock();
         std::shared_ptr<ToneInfo> lpToneDesc = toneInfo_;
         bufDesc.dataLength = 0;
-        AUDIO_INFO_LOG("AudioToneDataThread, buflen: %{public}zu", bufDesc.bufLength);
-        AUDIO_INFO_LOG("AudioToneDataThreadFunc, tonePlayerState_: %{public}d", tonePlayerState_);
+        AUDIO_DEBUG_LOG("AudioToneDataThreadFunc, tonePlayerState_: %{public}d", tonePlayerState_);
         if (bufDesc.bufLength == 0) {
+            AUDIO_DEBUG_LOG("notify bufDesc bufLength is 0");
+            waitAudioCbkCond_.notify_all();
             return;
         }
 
@@ -523,12 +567,27 @@ void TonePlayerPrivate::AudioToneDataThreadFunc()
                 AUDIO_ERR_LOG("Failed to write the file.");
             }
 #endif // DUMPFILE
-            audioRenderer_->Enqueue(bufDesc);
+            mutexLock_.lock();
+            if (audioRenderer_ != nullptr) {
+                audioRenderer_->Enqueue(bufDesc);
+            } else {
+                AUDIO_ERR_LOG("AudioToneDataThreadFunc Enqueue audioRenderer_ is null");
+            }
+            mutexLock_.unlock();
             if (toneDataState_ == TONE_DATA_REQUESTED) {
-                AUDIO_INFO_LOG("Notifing Data AudioRendererCallback");
+                AUDIO_INFO_LOG("Notifing Data AudioToneDataThreadFunc");
                 waitToneDataCond_.notify_all();
             }
             toneDataState_ = TONE_DATA_LOADING;
+            mutexLock_.lock();
+            if (tonePlayerState_ == TONE_PLAYER_STOPPED) {
+                AUDIO_INFO_LOG("Notifing tone player STOP");
+                tonePlayerState_ = TONE_PLAYER_INIT;
+                mutexLock_.unlock();
+                waitAudioCbkCond_.notify_all();
+                return;
+            }
+            mutexLock_.unlock();
         }
     }
 }
