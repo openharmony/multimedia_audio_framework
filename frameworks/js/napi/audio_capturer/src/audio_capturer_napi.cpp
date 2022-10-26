@@ -687,9 +687,9 @@ napi_value AudioCapturerNapi::GetAudioStreamId(napi_env env, napi_callback_info 
             env, nullptr, resource,
             [](napi_env env, void *data) {
                 auto context = static_cast<AudioCapturerAsyncContext *>(data);
-                size_t audioStreamId;
                 int32_t streamIdStatus;
-                streamIdStatus = context->objectInfo->audioCapturer_->GetAudioStreamId(audioStreamId);
+                streamIdStatus = context->objectInfo->audioCapturer_->
+                    GetAudioStreamId(context->audioStreamId);
                 if (streamIdStatus == ERR_ILLEGAL_STATE) {
                     context->status = NAPI_ERR_ILLEGAL_STATE;
                 } else if (streamIdStatus == ERR_INVALID_INDEX) {
@@ -697,7 +697,6 @@ napi_value AudioCapturerNapi::GetAudioStreamId(napi_env env, napi_callback_info 
                 } else {
                     context->status = SUCCESS;
                 }
-                context->audioStreamId = audioStreamId;
             },
             GetAudioStreamIdCallbackComplete, static_cast<void*>(asyncContext.get()), &asyncContext->work);
         if (status != napi_ok) {
