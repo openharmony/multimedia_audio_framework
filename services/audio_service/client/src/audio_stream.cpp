@@ -31,7 +31,7 @@ const unsigned long long TIME_CONVERSION_NS_US = 1000ULL; /* ns to us */
 const unsigned long long TIME_CONVERSION_NS_S = 1000000000ULL; /* ns to s */
 constexpr int32_t WRITE_RETRY_DELAY_IN_US = 500;
 constexpr int32_t READ_WRITE_WAIT_TIME_IN_US = 500;
-constexpr int32_t CB_WRITE_BUFFERS_WAIT_IN_US = 500;
+constexpr int32_t CB_WRITE_BUFFERS_WAIT_IN_MS = 80;
 constexpr int32_t CB_READ_BUFFERS_WAIT_IN_US = 500;
 
 const map<pair<ContentType, StreamUsage>, AudioStreamType> AudioStream::streamTypeMap_ = AudioStream::CreateStreamMap();
@@ -465,7 +465,8 @@ bool AudioStream::PauseAudioStream()
         return false;
     }
     State oldState = state_;
-    state_ = PAUSED; // Set it before stopping as Read/Write and Stop can be called from different threads
+    // Update state to stop write thread
+    state_ = PAUSED;
 
     if (captureMode_ == CAPTURE_MODE_CALLBACK) {
         isReadyToRead_ = false;
@@ -477,6 +478,8 @@ bool AudioStream::PauseAudioStream()
     // Ends the WriteCb thread
     if (renderMode_ == RENDER_MODE_CALLBACK) {
         isReadyToWrite_ = false;
+        // wake write thread to make pause faster
+        bufferQueueCV_.notify_all();
         if (writeThread_ && writeThread_->joinable()) {
             writeThread_->join();
         }
@@ -884,7 +887,7 @@ void AudioStream::WriteCbTheadLoop()
 
         while (true) {
             if (state_ != RUNNING) {
-                AUDIO_ERR_LOG("Write: Illegal  state:%{public}u", state_);
+                AUDIO_INFO_LOG("Write: not running state: %{public}u", state_);
                 isReadyToWrite_ = false;
                 break;
             }
@@ -893,7 +896,7 @@ void AudioStream::WriteCbTheadLoop()
 
             if (filledBufferQ_.empty()) {
                 // wait signal with timeout
-                bufferQueueCV_.wait_for(lock, chrono::milliseconds(CB_WRITE_BUFFERS_WAIT_IN_US));
+                bufferQueueCV_.wait_for(lock, chrono::milliseconds(CB_WRITE_BUFFERS_WAIT_IN_MS));
                 continue;
             }
             stream.buffer = filledBufferQ_.front().buffer;
