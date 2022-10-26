@@ -101,7 +101,11 @@ public:
 
     int32_t SetAudioScene(AudioScene audioScene) override;
 
+    int32_t SetMicrophoneMuteCommon(bool isMute);
+
     int32_t SetMicrophoneMute(bool isMute) override;
+
+    int32_t SetMicrophoneMuteAudioConfig(bool isMute) override;
 
     bool IsMicrophoneMute() override;
 

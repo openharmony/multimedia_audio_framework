@@ -34,6 +34,7 @@ private:
     void SetAudioSceneInternal(MessageParcel &data, MessageParcel &reply);
     void GetAudioSceneInternal(MessageParcel &data);
     void SetMicrophoneMuteInternal(MessageParcel &data, MessageParcel &reply);
+    void SetMicrophoneMuteAudioConfigInternal(MessageParcel &data, MessageParcel &reply);
     void IsMicrophoneMuteInternal(MessageParcel &data);
     void GetStreamVolumeInternal(MessageParcel &data, MessageParcel &reply);
     void SetLowPowerVolumeInternal(MessageParcel &data, MessageParcel &reply);

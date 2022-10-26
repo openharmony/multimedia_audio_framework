@@ -68,6 +68,8 @@ public:
 
     virtual int32_t SetMicrophoneMute(bool isMute) = 0;
 
+    virtual int32_t SetMicrophoneMuteAudioConfig(bool isMute) = 0;
+
     virtual bool IsMicrophoneMute() = 0;
 
     virtual AudioScene GetAudioScene() = 0;
