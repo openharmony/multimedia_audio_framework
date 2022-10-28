@@ -74,6 +74,8 @@ public:
 
     int32_t SetMicrophoneMute(bool isMute) override;
 
+    int32_t SetMicrophoneMuteAudioConfig(bool isMute) override;
+
     bool IsMicrophoneMute(void) override;
 
     AudioScene GetAudioScene() override;

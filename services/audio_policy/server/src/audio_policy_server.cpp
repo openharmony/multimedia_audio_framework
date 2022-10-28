@@ -443,14 +443,10 @@ std::vector<int32_t> AudioPolicyServer::GetSupportedTones()
     return mPolicyService.GetSupportedTones();
 }
 
-int32_t AudioPolicyServer::SetMicrophoneMute(bool isMute)
+
+int32_t AudioPolicyServer::SetMicrophoneMuteCommon(bool isMute)
 {
     AUDIO_INFO_LOG("Entered %{public}s", __func__);
-    if (!VerifyClientPermission(MICROPHONE_PERMISSION)) {
-        AUDIO_ERR_LOG("SetMicrophoneMute: MICROPHONE permission denied");
-        return ERR_PERMISSION_DENIED;
-    }
-    
     bool isMicrophoneMute = IsMicrophoneMute();
     int32_t ret = mPolicyService.SetMicrophoneMute(isMute);
     if (ret == SUCCESS && isMicrophoneMute != isMute) {
@@ -468,6 +464,26 @@ int32_t AudioPolicyServer::SetMicrophoneMute(bool isMute)
         }
     }
     return ret;
+}
+
+int32_t AudioPolicyServer::SetMicrophoneMute(bool isMute)
+{
+    AUDIO_INFO_LOG("Entered %{public}s", __func__);
+    if (!VerifyClientPermission(MICROPHONE_PERMISSION)) {
+        AUDIO_ERR_LOG("SetMicrophoneMute: MICROPHONE permission denied");
+        return ERR_PERMISSION_DENIED;
+    }
+    return SetMicrophoneMuteCommon(isMute);
+}
+
+int32_t AudioPolicyServer::SetMicrophoneMuteAudioConfig(bool isMute)
+{
+    AUDIO_INFO_LOG("Entered %{public}s", __func__);
+    if (!VerifyClientPermission(MANAGE_AUDIO_CONFIG)) {
+        AUDIO_ERR_LOG("SetMicrophoneMuteAudioConfig: MANAGE_AUDIO_CONFIG permission denied");
+        return ERR_PERMISSION_DENIED;
+    }
+    return SetMicrophoneMuteCommon(isMute);
 }
 
 bool AudioPolicyServer::IsMicrophoneMute()

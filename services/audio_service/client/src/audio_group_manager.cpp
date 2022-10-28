@@ -357,7 +357,7 @@ int32_t AudioGroupManager::SetMicrophoneMute(bool isMute)
         AUDIO_ERR_LOG("AudioGroupManager::SetRingerMode is not supported for local device.");
         return ERROR;
     }
-    return AudioPolicyManager::GetInstance().SetMicrophoneMute(isMute);
+    return AudioPolicyManager::GetInstance().SetMicrophoneMuteAudioConfig(isMute);
 }
 
 bool AudioGroupManager::IsMicrophoneMute()

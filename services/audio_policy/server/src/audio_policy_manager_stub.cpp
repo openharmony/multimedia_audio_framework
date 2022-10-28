@@ -137,6 +137,13 @@ void AudioPolicyManagerStub::SetMicrophoneMuteInternal(MessageParcel &data, Mess
     reply.WriteInt32(result);
 }
 
+void AudioPolicyManagerStub::SetMicrophoneMuteAudioConfigInternal(MessageParcel &data, MessageParcel &reply)
+{
+    bool isMute = data.ReadBool();
+    int32_t result = SetMicrophoneMuteAudioConfig(isMute);
+    reply.WriteInt32(result);
+}
+
 void AudioPolicyManagerStub::IsMicrophoneMuteInternal(MessageParcel &reply)
 {
     int32_t result = IsMicrophoneMute();
@@ -736,6 +743,10 @@ int AudioPolicyManagerStub::OnRemoteRequest(
         
         case SET_MICROPHONE_MUTE:
             SetMicrophoneMuteInternal(data, reply);
+            break;
+                    
+        case SET_MICROPHONE_MUTE_AUDIO_CONFIG:
+            SetMicrophoneMuteAudioConfigInternal(data, reply);
             break;
 
         case IS_MICROPHONE_MUTE:

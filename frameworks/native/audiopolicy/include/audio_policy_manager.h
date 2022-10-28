@@ -96,6 +96,8 @@ public:
 
     int32_t SetMicrophoneMute(bool isMute);
 
+    int32_t SetMicrophoneMuteAudioConfig(bool isMute);
+
     bool IsMicrophoneMute(void);
 
     AudioScene GetAudioScene();

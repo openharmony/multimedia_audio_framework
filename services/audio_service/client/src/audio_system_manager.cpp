@@ -502,12 +502,7 @@ bool AudioSystemManager::IsAlived()
 
 int32_t AudioSystemManager::SetMicrophoneMute(bool isMute)
 {
-    std::shared_ptr<AudioGroupManager> groupManager = GetGroupManager(DEFAULT_VOLUME_GROUP_ID);
-    if (groupManager == nullptr) {
-        AUDIO_ERR_LOG("SetMicrophoneMute failed, groupManager is null");
-        return ERR_INVALID_PARAM;
-    }
-    return groupManager->SetMicrophoneMute(isMute);
+    return AudioPolicyManager::GetInstance().SetMicrophoneMute(isMute);
 }
 
 bool AudioSystemManager::IsMicrophoneMute()

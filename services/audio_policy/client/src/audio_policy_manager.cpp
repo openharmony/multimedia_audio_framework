@@ -97,6 +97,11 @@ int32_t AudioPolicyManager::SetMicrophoneMute(bool isMute)
     return g_sProxy->SetMicrophoneMute(isMute);
 }
 
+int32_t AudioPolicyManager::SetMicrophoneMuteAudioConfig(bool isMute)
+{
+    return g_sProxy->SetMicrophoneMuteAudioConfig(isMute);
+}
+
 bool AudioPolicyManager::IsMicrophoneMute()
 {
     return g_sProxy->IsMicrophoneMute();
