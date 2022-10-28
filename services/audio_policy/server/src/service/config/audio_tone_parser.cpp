@@ -83,7 +83,7 @@ void AudioToneParser::ParseToneInfoAttribute(xmlNode *sNode, std::shared_ptr<Ton
         }
         char *pValue = nullptr;
         if (!xmlStrcmp(sNode->name, reinterpret_cast<const xmlChar*>("RepeatCount"))) {
-            AUDIO_DEBUG_LOG("node type: Element, name: %{public}s", sNode->name);
+            AUDIO_DEBUG_LOG("RepeatCount node type: Element, name: %{public}s", sNode->name);
             pValue = reinterpret_cast<char*>(xmlGetProp(sNode,
                 reinterpret_cast<xmlChar*>(const_cast<char*>("value"))));
             if (!xmlStrcmp(reinterpret_cast<const xmlChar*>(pValue), reinterpret_cast<const xmlChar*>("INF"))) {
@@ -93,13 +93,13 @@ void AudioToneParser::ParseToneInfoAttribute(xmlNode *sNode, std::shared_ptr<Ton
             }
             AUDIO_DEBUG_LOG("ParseToneInfo repeatCnt %{public}d", ltoneDesc->repeatCnt);
         } else if (!xmlStrcmp(sNode->name, reinterpret_cast<const xmlChar*>("RepeatSegment"))) {
-            AUDIO_DEBUG_LOG("node type: Element, name: %{public}s", sNode->name);
+            AUDIO_DEBUG_LOG("RepeatSegment node type: Element, name: %{public}s", sNode->name);
             pValue = reinterpret_cast<char*>(xmlGetProp(sNode,
                 reinterpret_cast<xmlChar*>(const_cast<char*>("value"))));
             ltoneDesc->repeatSegment = atoi(pValue);
             AUDIO_DEBUG_LOG("ParseToneInfo repeatSegment %{public}d", ltoneDesc->repeatSegment);
         } else if (!xmlStrcmp(sNode->name, reinterpret_cast<const xmlChar*>("SegmentCount"))) {
-            AUDIO_DEBUG_LOG("node type: Element, name: %{public}s", sNode->name);
+            AUDIO_DEBUG_LOG("SegmentCount node type: Element, name: %{public}s", sNode->name);
             pValue = reinterpret_cast<char*>(xmlGetProp(sNode,
                 reinterpret_cast<xmlChar*>(const_cast<char*>("value"))));
             segCnt = atoi(pValue);
@@ -128,7 +128,7 @@ void AudioToneParser::ParseToneInfo(xmlNode *node, std::unordered_map<int32_t,
         }
         if (!xmlStrcmp(currNode->name, reinterpret_cast<const xmlChar*>("ToneInfo"))) {
             std::shared_ptr<ToneInfo> ltoneDesc = std::make_shared<ToneInfo>(); // new ToneInfo();
-            AUDIO_INFO_LOG("node type: Element, name: %s", currNode->name);
+            AUDIO_DEBUG_LOG("node type: Element, name: %s", currNode->name);
             char *pToneType = reinterpret_cast<char*>(xmlGetProp(currNode,
                 reinterpret_cast<xmlChar*>(const_cast<char*>("toneType"))));
             int toneType = atoi(pToneType);
@@ -191,7 +191,7 @@ void AudioToneParser::ParseFrequency (std::string freqList, ToneSegment &ltonese
     }
 
     for (std::size_t i = 0; i < vect.size(); i++) {
-        AUDIO_INFO_LOG("Freq: %{public}d", vect[i]);
+        AUDIO_DEBUG_LOG("Freq: %{public}d", vect[i]);
         ltonesegment.waveFreq[i] = vect[i];
     }
 }
