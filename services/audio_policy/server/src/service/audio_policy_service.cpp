@@ -765,14 +765,14 @@ DeviceType AudioPolicyService::FetchHighPriorityDevice(bool isOutputDevice = tru
 int32_t AudioPolicyService::SetMicrophoneMute(bool isMute)
 {
     AUDIO_DEBUG_LOG("SetMicrophoneMute state[%{public}d]", isMute);
-
+    CHECK_AND_RETURN_RET_LOG(g_sProxy != nullptr, ERR_OPERATION_FAILED, "Service proxy unavailable");
     return g_sProxy->SetMicrophoneMute(isMute);
 }
 
 bool AudioPolicyService::IsMicrophoneMute() const
 {
     AUDIO_DEBUG_LOG("Enter IsMicrophoneMute");
-
+    CHECK_AND_RETURN_RET_LOG(g_sProxy != nullptr, false, "Service proxy unavailable");
     return g_sProxy->IsMicrophoneMute();
 }
 
