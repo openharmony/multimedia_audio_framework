@@ -1458,7 +1458,7 @@ HWTEST(AudioCapturerUnitTest, Audio_Capturer_GetAudioTime_004, TestSize.Level1)
 
     Timestamp timeStamp;
     bool getAudioTime = audioCapturer->GetAudioTime(timeStamp, Timestamp::Timestampbase::MONOTONIC);
-    EXPECT_EQ(true, getAudioTime);
+    EXPECT_EQ(false, getAudioTime);
 
     audioCapturer->Release();
 }

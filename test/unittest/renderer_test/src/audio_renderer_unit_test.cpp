@@ -1877,7 +1877,7 @@ HWTEST(AudioRendererUnitTest, Audio_Renderer_GetAudioTime_004, TestSize.Level1)
 
     Timestamp timeStamp;
     bool getAudioTime = audioRenderer->GetAudioTime(timeStamp, Timestamp::Timestampbase::MONOTONIC);
-    EXPECT_EQ(true, getAudioTime);
+    EXPECT_EQ(false, getAudioTime);
 
     audioRenderer->Release();
 }
