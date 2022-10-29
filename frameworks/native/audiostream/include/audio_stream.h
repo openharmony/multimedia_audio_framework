@@ -17,11 +17,11 @@
 
 #include <mutex>
 #include <condition_variable>
+#include "timestamp.h"
 #include "event_handler.h"
 #include "event_runner.h"
 #include "audio_info.h"
-#include "audio_session.h"
-#include "timestamp.h"
+#include "audio_service_client.h"
 #include "audio_stream_tracker.h"
 
 namespace OHOS {
@@ -29,7 +29,7 @@ namespace AudioStandard {
 static constexpr int32_t MAX_WRITECB_NUM_BUFFERS = 1;
 static constexpr int32_t MAX_READCB_NUM_BUFFERS = 3;
 
-class AudioStream : public AppExecFwk::EventHandler, public AudioSession {
+class AudioStream : public AppExecFwk::EventHandler, public AudioServiceClient {
 public:
     AudioStream(AudioStreamType eStreamType, AudioMode eMode, int32_t appUid);
     virtual ~AudioStream();

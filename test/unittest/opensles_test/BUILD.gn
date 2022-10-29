@@ -23,7 +23,6 @@ config("audio_renderer_config") {
     "//foundation/multimedia/audio_framework/interfaces/inner_api/native/audiocapturer/include",
     "//foundation/multimedia/audio_framework/interfaces/inner_api/native/audiocommon/include",
     "//foundation/multimedia/audio_framework/interfaces/inner_api/native/audiostream/include",
-    "//foundation/multimedia/audio_framework/interfaces/inner_api/native/audiosession/include",
     "//foundation/multimedia/audio_framework/interfaces/inner_api/native/audiomanager/include",
     "//foundation/multimedia/audio_framework/frameworks/native/audiorenderer/include",
     "//foundation/multimedia/audio_framework/frameworks/native/audiocapturer/include",
