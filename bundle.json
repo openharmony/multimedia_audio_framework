@@ -18,7 +18,9 @@
           "SystemCapability.Multimedia.Audio.Capturer",
           "SystemCapability.Multimedia.Audio.Device",
           "SystemCapability.Multimedia.Audio.Volume",
-          "SystemCapability.Multimedia.Audio.Communication"
+          "SystemCapability.Multimedia.Audio.Communication",
+          "SystemCapability.Multimedia.Audio.Tone",
+          "SystemCapability.Multimedia.Audio.Interrupt"
         ],
         "features": [],
         "adapted_system_type": [ "standard" ],
