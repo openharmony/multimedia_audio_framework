@@ -37,6 +37,7 @@ static __thread napi_ref g_capturerConstructor = nullptr;
 std::unique_ptr<AudioParameters> AudioCapturerNapi::sAudioParameters_ = nullptr;
 std::unique_ptr<AudioCapturerOptions> AudioCapturerNapi::sCapturerOptions_ = nullptr;
 mutex AudioCapturerNapi::createMutex_;
+int32_t AudioCapturerNapi::isConstructSuccess_ = SUCCESS;
 
 namespace {
     constexpr int ARGS_ONE = 1;
@@ -206,9 +207,12 @@ napi_value AudioCapturerNapi::Construct(napi_env env, napi_callback_info info)
     }
     capturerNapi->audioCapturer_ = AudioCapturer::Create(capturerOptions, cacheDir);
 
-    CHECK_AND_RETURN_RET_LOG(capturerNapi->audioCapturer_ != nullptr, result, "Capturer Create failed");
+    if (capturerNapi->audioCapturer_ == nullptr) {
+        HiLog::Error(LABEL, "Capturer Create failed");
+        AudioCapturerNapi::isConstructSuccess_ = NAPI_ERR_SYSTEM;
+    }
 
-    if (capturerNapi->callbackNapi_ == nullptr) {
+    if (capturerNapi->audioCapturer_ != nullptr && capturerNapi->callbackNapi_ == nullptr) {
         capturerNapi->callbackNapi_ = std::make_shared<AudioCapturerCallbackNapi>(env);
         CHECK_AND_RETURN_RET_LOG(capturerNapi->callbackNapi_ != nullptr, result, "No memory");
         int32_t ret = capturerNapi->audioCapturer_->SetCapturerCallback(capturerNapi->callbackNapi_);
@@ -360,6 +364,8 @@ void AudioCapturerNapi::GetCapturerAsyncCallbackComplete(napi_env env, napi_stat
             capturerOptions->capturerInfo.capturerFlags = asyncContext->capturerOptions.capturerInfo.capturerFlags;
 
             valueParam = CreateAudioCapturerWrapper(env, capturerOptions);
+            asyncContext->status = AudioCapturerNapi::isConstructSuccess_;
+            AudioCapturerNapi::isConstructSuccess_ = SUCCESS;
         }
         CommonCallbackRoutine(env, asyncContext, valueParam);
     } else {

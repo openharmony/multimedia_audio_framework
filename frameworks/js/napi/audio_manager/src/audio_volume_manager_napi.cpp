@@ -326,6 +326,8 @@ static void GetGroupMgrAsyncCallbackComplete(napi_env env, napi_status status, v
     if (asyncContext != nullptr) {
         if (!asyncContext->status) {
             valueParam = AudioVolumeGroupManagerNapi::CreateAudioVolumeGroupManagerWrapper(env, asyncContext->groupId);
+            asyncContext->status = AudioVolumeGroupManagerNapi::isConstructSuccess_;
+            AudioVolumeGroupManagerNapi::isConstructSuccess_ = SUCCESS;
         }
         CommonCallbackRoutine(env, asyncContext, valueParam);
     } else {

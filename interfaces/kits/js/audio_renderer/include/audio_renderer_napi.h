@@ -157,6 +157,7 @@ private:
     static std::unique_ptr<AudioParameters> sAudioParameters_;
     static std::unique_ptr<AudioRendererOptions> sRendererOptions_;
     static std::mutex createMutex_;
+    static int32_t isConstructSuccess_;
 
     ContentType contentType_;
     StreamUsage streamUsage_;
