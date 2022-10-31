@@ -155,8 +155,9 @@ void AudioServiceClient::PAStreamStartSuccessCb(pa_stream *stream, int32_t succe
     asClient->WriteStateChangedSysEvents();
     std::shared_ptr<AudioStreamCallback> streamCb = asClient->streamCallback_.lock();
     if (streamCb != nullptr) {
-        streamCb->OnStateChange(asClient->state_);
+        streamCb->OnStateChange(asClient->state_, asClient->stateChangeCmdType_);
     }
+    asClient->stateChangeCmdType_ = CMD_FROM_CLIENT;
     asClient->streamCmdStatus = success;
     pa_threaded_mainloop_signal(mainLoop, 0);
 }
@@ -195,8 +196,9 @@ void AudioServiceClient::PAStreamPauseSuccessCb(pa_stream *stream, int32_t succe
     asClient->WriteStateChangedSysEvents();
     std::shared_ptr<AudioStreamCallback> streamCb = asClient->streamCallback_.lock();
     if (streamCb != nullptr) {
-        streamCb->OnStateChange(asClient->state_);
+        streamCb->OnStateChange(asClient->state_, asClient->stateChangeCmdType_);
     }
+    asClient->stateChangeCmdType_ = CMD_FROM_CLIENT;
     asClient->streamCmdStatus = success;
     pa_threaded_mainloop_signal(mainLoop, 0);
 }
@@ -1034,7 +1036,7 @@ int32_t AudioServiceClient::GetSessionID(uint32_t &sessionID) const
     return AUDIO_CLIENT_SUCCESS;
 }
 
-int32_t AudioServiceClient::StartStream()
+int32_t AudioServiceClient::StartStream(StateChangeCmdType cmdType)
 {
     int error;
 
@@ -1056,6 +1058,7 @@ int32_t AudioServiceClient::StartStream()
     }
 
     streamCmdStatus = 0;
+    stateChangeCmdType_ = cmdType;
     operation = pa_stream_cork(paStream, 0, PAStreamStartSuccessCb, (void *)this);
 
     while (pa_operation_get_state(operation) == PA_OPERATION_RUNNING) {
@@ -1074,10 +1077,12 @@ int32_t AudioServiceClient::StartStream()
     }
 }
 
-int32_t AudioServiceClient::PauseStream()
+int32_t AudioServiceClient::PauseStream(StateChangeCmdType cmdType)
 {
     lock_guard<mutex> lock(ctrlMutex);
     PAStreamCorkSuccessCb = PAStreamPauseSuccessCb;
+    stateChangeCmdType_ = cmdType;
+
     int32_t ret = CorkStream();
     if (ret) {
         return ret;

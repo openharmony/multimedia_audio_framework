@@ -24,7 +24,7 @@ namespace AudioStandard {
 class AudioRendererCallbackTest : public AudioRendererCallback {
 public:
     void OnInterrupt(const InterruptEvent &interruptEvent) override {}
-    void OnStateChange(const RendererState state) override {}
+    void OnStateChange(const RendererState state, const StateChangeCmdType cmdType) override {}
 };
 
 class RendererPositionCallbackTest : public RendererPositionCallback {

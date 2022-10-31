@@ -50,7 +50,7 @@ namespace {
 class AudioRendererCallbackTestImpl : public AudioRendererCallback {
 public:
     void OnInterrupt(const InterruptEvent &interruptEvent) override {}
-    void OnStateChange(const RendererState state) override
+    void OnStateChange(const RendererState state, const StateChangeCmdType __attribute__((unused)) cmdType) override
     {
         AUDIO_DEBUG_LOG("AudioRendererCallbackTestImpl:: OnStateChange");
 

@@ -92,12 +92,12 @@ class AudioStreamCallback {
 public:
     virtual ~AudioStreamCallback() = default;
     /**
-    * Called when stream state is updated.
+     * Called when stream state is updated.
      *
      * @param state Indicates the InterruptEvent information needed by client.
      * For details, refer InterruptEvent struct in audio_info.h
      */
-    virtual void OnStateChange(const State state) = 0;
+    virtual void OnStateChange(const State state, const StateChangeCmdType cmdType = CMD_FROM_CLIENT) = 0;
 };
 
 class AudioRendererCallbacks {
@@ -164,7 +164,7 @@ public:
     *
     * @return Returns {@code 0} if success; returns {@code -1} otherwise.
     */
-    int32_t StartStream();
+    int32_t StartStream(StateChangeCmdType cmdType = CMD_FROM_CLIENT);
 
     /**
     * Stops the stream created using CreateStream
@@ -194,7 +194,7 @@ public:
     *
     * @return Returns {@code 0} if success; returns {@code -1} otherwise.
     */
-    int32_t PauseStream();
+    int32_t PauseStream(StateChangeCmdType cmdType = CMD_FROM_CLIENT);
 
     /**
     * Update the stream type
@@ -582,6 +582,7 @@ private:
 
     std::weak_ptr<AudioStreamCallback> streamCallback_;
     State state_;
+    StateChangeCmdType stateChangeCmdType_ = CMD_FROM_CLIENT;
     pa_stream_success_cb_t PAStreamCorkSuccessCb;
 
     // To be set while using audio stream

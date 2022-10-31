@@ -29,7 +29,7 @@ public:
     virtual ~AudioRendererCallbackNapi();
     void SaveCallbackReference(const std::string &callbackName, napi_value callback);
     void OnInterrupt(const InterruptEvent &interruptEvent) override;
-    void OnStateChange(const RendererState state) override;
+    void OnStateChange(const RendererState state, const StateChangeCmdType __attribute__((unused)) cmdType) override;
 private:
     struct AudioRendererJsCallback {
         std::shared_ptr<AutoRef> callback = nullptr;
