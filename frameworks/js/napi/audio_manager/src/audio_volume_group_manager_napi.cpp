@@ -26,7 +26,7 @@ using OHOS::HiviewDFX::HiLogLabel;
 namespace OHOS {
 namespace AudioStandard {
 static __thread napi_ref g_groupmanagerConstructor = nullptr;
-
+int32_t AudioVolumeGroupManagerNapi::isConstructSuccess_ = SUCCESS;
 #define GET_PARAMS(env, info, num) \
     size_t argc = num;             \
     napi_value argv[num] = {0};    \
@@ -243,8 +243,7 @@ napi_value AudioVolumeGroupManagerNapi::Construct(napi_env env, napi_callback_in
             groupmanagerNapi->audioGroupMngr_ = AudioSystemManager::GetInstance()->GetGroupManager(groupId);
             if (groupmanagerNapi->audioGroupMngr_ == nullptr) {
                 HiLog::Error(LABEL, "Failed in AudioVolumeGroupManagerNapi::Construct()!");
-
-                return undefinedResult;
+                AudioVolumeGroupManagerNapi::isConstructSuccess_ = NAPI_ERR_SYSTEM;
             }
             status = napi_wrap(env, jsThis, static_cast<void*>(groupmanagerNapi.get()),
                 AudioVolumeGroupManagerNapi::Destructor, nullptr, &(groupmanagerNapi->wrapper_));

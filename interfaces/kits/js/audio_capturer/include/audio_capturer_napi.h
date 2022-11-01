@@ -123,6 +123,7 @@ private:
     static std::unique_ptr<AudioParameters> sAudioParameters_;
     static std::unique_ptr<AudioCapturerOptions> sCapturerOptions_;
     static std::mutex createMutex_;
+    static int32_t isConstructSuccess_;
 
     std::unique_ptr<AudioCapturer> audioCapturer_;
     ContentType contentType_;

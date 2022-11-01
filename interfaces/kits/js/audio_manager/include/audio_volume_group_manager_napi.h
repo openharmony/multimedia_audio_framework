@@ -41,7 +41,7 @@ public:
 
     static napi_value Init(napi_env env, napi_value exports);
     static napi_value CreateAudioVolumeGroupManagerWrapper(napi_env env, int32_t groupId);
-
+    static int32_t isConstructSuccess_;
 private:
     static void Destructor(napi_env env, void *nativeObject, void *finalize_hint);
     static napi_value Construct(napi_env env, napi_callback_info info);

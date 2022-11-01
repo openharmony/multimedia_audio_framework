@@ -45,6 +45,7 @@ napi_ref AudioRendererNapi::interruptForceType_ = nullptr;
 napi_ref AudioRendererNapi::audioState_ = nullptr;
 napi_ref AudioRendererNapi::sampleFormat_ = nullptr;
 mutex AudioRendererNapi::createMutex_;
+int32_t AudioRendererNapi::isConstructSuccess_ = SUCCESS;
 
 namespace {
     const int ARGS_ONE = 1;
@@ -479,9 +480,13 @@ napi_value AudioRendererNapi::Construct(napi_env env, napi_callback_info info)
     rendererNapi->audioRenderer_ = AudioRenderer::Create(cacheDir, rendererOptions);
     rendererNapi->audioMngr_ = AudioSystemManager::GetInstance();
 
-    CHECK_AND_RETURN_RET_LOG(rendererNapi->audioRenderer_ != nullptr, result, "Renderer Create failed");
+    if (rendererNapi->audioRenderer_ == nullptr) {
+        HiLog::Error(LABEL, "Renderer Create failed");
+        unique_ptr<AudioRendererAsyncContext> asyncContext = make_unique<AudioRendererAsyncContext>();
+        AudioRendererNapi::isConstructSuccess_ = NAPI_ERR_SYSTEM;
+    }
 
-    if (rendererNapi->callbackNapi_ == nullptr) {
+    if (rendererNapi->audioRenderer_ != nullptr && rendererNapi->callbackNapi_ == nullptr) {
         rendererNapi->callbackNapi_ = std::make_shared<AudioRendererCallbackNapi>(env);
         CHECK_AND_RETURN_RET_LOG(rendererNapi->callbackNapi_ != nullptr, result, "No memory");
         int32_t ret = rendererNapi->audioRenderer_->SetRendererCallback(rendererNapi->callbackNapi_);
@@ -934,6 +939,8 @@ void AudioRendererNapi::GetRendererAsyncCallbackComplete(napi_env env, napi_stat
             rendererOptions->rendererInfo.rendererFlags = asyncContext->rendererOptions.rendererInfo.rendererFlags;
 
             valueParam = CreateAudioRendererWrapper(env, rendererOptions);
+            asyncContext->status = AudioRendererNapi::isConstructSuccess_;
+            AudioRendererNapi::isConstructSuccess_ = SUCCESS;
         }
         CommonCallbackRoutine(env, asyncContext, valueParam);
     } else {
