@@ -2559,9 +2559,6 @@ napi_value AudioManagerNapi::On(napi_env env, napi_callback_info info)
         std::static_pointer_cast<AudioManagerCallbackNapi>(managerNapi->deviceChangeCallbackNapi_);
         cb->SaveCallbackReference(callbackName, args[PARAM1]);
         AUDIO_INFO_LOG("AudioManagerNapi::On SetDeviceChangeCallback is successful");
-    } else {
-        AUDIO_ERR_LOG("AudioVolumeGroupManagerNapi::No such callback supported");
-        AudioCommonNapi::throwError(env, NAPI_ERR_INVALID_PARAM);
     }
     return undefinedResult;
 }
