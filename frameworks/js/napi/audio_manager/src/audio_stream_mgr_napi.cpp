@@ -488,6 +488,7 @@ void AudioStreamMgrNapi::UnregisterCallback(napi_env env, napi_value jsThis, con
         AUDIO_INFO_LOG("AudioStreamMgrNapi:UnRegistering of capturer State Change Callback successful");
     } else {
         AUDIO_ERR_LOG("AudioStreamMgrNapi::No such callback supported");
+        AudioCommonNapi::throwError(env, NAPI_ERR_INVALID_PARAM);
     }
 }
 
@@ -502,11 +503,11 @@ napi_value AudioStreamMgrNapi::Off(napi_env env, napi_callback_info info)
     napi_value args[requireArgc] = {nullptr};
     napi_value jsThis = nullptr;
     napi_status status = napi_get_cb_info(env, info, &argc, args, &jsThis, nullptr);
-    NAPI_ASSERT(env, status == napi_ok && argc >= requireArgc, "AudioStreamMgrNapi: Off: requires min 1 parameters");
+    THROW_ERROR_ASSERT(env, status == napi_ok && argc >= requireArgc, NAPI_ERR_INPUT_INVALID);
 
     napi_valuetype eventType = napi_undefined;
     napi_typeof(env, args[0], &eventType);
-    NAPI_ASSERT(env, eventType == napi_string, "AudioStreamMgrNapi:Off: type mismatch for event name, parameter 1");
+    THROW_ERROR_ASSERT(env, eventType == napi_string, NAPI_ERR_INPUT_INVALID);
 
     std::string callbackName = AudioCommonNapi::GetStringArgument(env, args[0]);
     AUDIO_DEBUG_LOG("AudioStreamMgrNapi: Off callbackName: %{public}s", callbackName.c_str());
