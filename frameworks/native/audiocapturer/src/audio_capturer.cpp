@@ -51,7 +51,13 @@ std::unique_ptr<AudioCapturer> AudioCapturer::Create(const std::string cachePath
     AudioCapturerParams params;
     params.audioSampleFormat = capturerOptions.streamInfo.format;
     params.samplingRate = capturerOptions.streamInfo.samplingRate;
-    params.audioChannel = capturerOptions.streamInfo.channels;
+    bool isChange = false;
+    if (AudioChannel::CHANNEL_3 == capturerOptions.streamInfo.channels) {
+        params.audioChannel = AudioChannel::STEREO;
+        isChange = true;
+    } else {
+        params.audioChannel = capturerOptions.streamInfo.channels;
+    }
     params.audioEncoding = capturerOptions.streamInfo.encoding;
 
     auto capturer = std::make_unique<AudioCapturerPrivate>(audioStreamType);
@@ -71,7 +77,9 @@ std::unique_ptr<AudioCapturer> AudioCapturer::Create(const std::string cachePath
 
     capturer->capturerInfo_.sourceType = sourceType;
     capturer->capturerInfo_.capturerFlags = capturerOptions.capturerInfo.capturerFlags;
-
+    if (isChange) {
+        capturer->isChannelChange_ = true;
+    }
     return capturer;
 }
 
@@ -154,7 +162,11 @@ int32_t AudioCapturerPrivate::GetStreamInfo(AudioStreamInfo &streamInfo) const
     if (SUCCESS == result) {
         streamInfo.format = static_cast<AudioSampleFormat>(audioStreamParams.format);
         streamInfo.samplingRate = static_cast<AudioSamplingRate>(audioStreamParams.samplingRate);
-        streamInfo.channels = static_cast<AudioChannel>(audioStreamParams.channels);
+        if (this->isChannelChange_) {
+            streamInfo.channels = AudioChannel::CHANNEL_3;
+        } else {
+            streamInfo.channels = static_cast<AudioChannel>(audioStreamParams.channels);
+        }
         streamInfo.encoding = static_cast<AudioEncodingType>(audioStreamParams.encoding);
     }
 
