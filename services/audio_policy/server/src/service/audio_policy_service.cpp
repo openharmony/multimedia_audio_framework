@@ -735,6 +735,27 @@ std::vector<sptr<AudioDeviceDescriptor>> AudioPolicyService::GetDevices(DeviceFl
     return deviceList;
 }
 
+std::vector<sptr<AudioDeviceDescriptor>> AudioPolicyService::GetActiveOutputDeviceDescriptors()
+{
+    AUDIO_INFO_LOG("Entered AudioPolicyService::%{public}s", __func__);
+    std::vector<sptr<AudioDeviceDescriptor>> deviceList = {};
+    for (const auto& device : connectedDevices_) {
+        if (device == nullptr) {
+            continue;
+        }
+        bool filterLocalOutput = ((currentActiveDevice_ == device->deviceType_)
+            && (device->networkId_ == LOCAL_NETWORK_ID)
+            && (device->deviceRole_ == DeviceRole::OUTPUT_DEVICE));
+        if (filterLocalOutput) {
+            sptr<AudioDeviceDescriptor> devDesc = new(std::nothrow) AudioDeviceDescriptor(*device);
+            deviceList.push_back(devDesc);
+            return deviceList;
+        }
+    }
+
+    return deviceList;
+}
+
 DeviceType AudioPolicyService::FetchHighPriorityDevice(bool isOutputDevice = true)
 {
     AUDIO_DEBUG_LOG("Entered AudioPolicyService::%{public}s", __func__);

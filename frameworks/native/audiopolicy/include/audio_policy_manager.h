@@ -180,6 +180,8 @@ public:
     std::vector<sptr<VolumeGroupInfo>> GetVolumeGroupInfos();
 
     bool IsAudioRendererLowLatencySupported(const AudioStreamInfo &audioStreamInfo);
+
+    std::vector<sptr<AudioDeviceDescriptor>> GetActiveOutputDeviceDescriptors();
 private:
     AudioPolicyManager()
     {

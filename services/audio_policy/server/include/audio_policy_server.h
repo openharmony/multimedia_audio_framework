@@ -194,6 +194,8 @@ public:
 
     std::vector<sptr<VolumeGroupInfo>> GetVolumeGroupInfos() override;
 
+    std::vector<sptr<AudioDeviceDescriptor>> GetActiveOutputDeviceDescriptors() override;
+
     class RemoteParameterCallback : public AudioParameterCallback {
     public:
         RemoteParameterCallback(sptr<AudioPolicyServer> server);

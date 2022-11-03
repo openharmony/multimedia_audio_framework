@@ -169,6 +169,11 @@ std::vector<sptr<AudioDeviceDescriptor>> AudioPolicyManager::GetDevices(DeviceFl
     return g_sProxy->GetDevices(deviceFlag);
 }
 
+std::vector<sptr<AudioDeviceDescriptor>> AudioPolicyManager::GetActiveOutputDeviceDescriptors()
+{
+    return g_sProxy->GetActiveOutputDeviceDescriptors();
+}
+
 std::vector<int32_t> AudioPolicyManager::GetSupportedTones()
 {
     return g_sProxy->GetSupportedTones();
