@@ -958,11 +958,13 @@ napi_value AudioRoutingManagerNapi::Off(napi_env env, napi_callback_info info)
     napi_status status = napi_get_cb_info(env, info, &argCount, args, &jsThis, nullptr);
     if (status != napi_ok || argCount < minArgCount) {
         AUDIO_ERR_LOG("Off fail to napi_get_cb_info/Requires min 1 parameters");
+        AudioCommonNapi::throwError(env, NAPI_ERR_INPUT_INVALID);
         return undefinedResult;
     }
 
     napi_valuetype eventType = napi_undefined;
     if (napi_typeof(env, args[PARAM0], &eventType) != napi_ok || eventType != napi_string) {
+        AudioCommonNapi::throwError(env, NAPI_ERR_INPUT_INVALID);
         return undefinedResult;
     }
     std::string callbackName = AudioCommonNapi::GetStringArgument(env, args[0]);
@@ -984,6 +986,9 @@ napi_value AudioRoutingManagerNapi::Off(napi_env env, napi_callback_info info)
             routingMgrNapi->deviceChangeCallbackNapi_ = nullptr;
         }
         AUDIO_INFO_LOG("AudioManagerNapi::Off UnsetDeviceChangeCallback Success");
+    } else {
+        AUDIO_ERR_LOG("AudioRoutingMgrNapi:: off no such supported");
+        AudioCommonNapi::throwError(env, NAPI_ERR_INVALID_PARAM);
     }
     return undefinedResult;
 }
