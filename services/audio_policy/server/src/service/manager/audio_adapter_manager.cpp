@@ -35,6 +35,17 @@ bool AudioAdapterManager::Init()
         testModeOn_ = true;
     }
 
+    char currentVolumeValue[3] = {0};
+    auto ret = GetParameter("persist.multimedia.audio.mediavolume", "15",
+        currentVolumeValue, sizeof(currentVolumeValue));
+    if (ret > 0) {
+        int32_t valueNumber = atoi(currentVolumeValue);
+        mVolumeMap[STREAM_MUSIC] = AudioGroupManager::MapVolumeToHDI(valueNumber);
+        AUDIO_INFO_LOG("[AudioAdapterManager] Get music volume to map success %{public}f", mVolumeMap[STREAM_MUSIC]);
+    } else {
+        AUDIO_ERR_LOG("[AudioAdapterManager] Get volume parameter failed %{public}d", ret);
+    }
+
     return true;
 }
 
@@ -108,6 +119,19 @@ int32_t AudioAdapterManager::SetStreamVolume(AudioStreamType streamType, float v
     mVolumeMap[streamForVolumeMap] = volume;
     WriteVolumeToKvStore(currentActiveDevice_, streamType, volume);
 
+    // Set the power on default volume to the database
+    if (streamType == STREAM_MUSIC) {
+        int32_t maxMediaVolume = 15; // The max volume is 15;
+        int32_t volumeInt = (int) round(volume * maxMediaVolume);
+        AUDIO_INFO_LOG("[AudioAdapterManager] Start set volume value to %{public}d", volumeInt);
+        int ret = SetParameter("persist.multimedia.audio.mediavolume", std::to_string(volumeInt).c_str());
+        if (ret == 0) {
+            AUDIO_INFO_LOG("[AudioAdapterManager] Save media volume success %{public}d", volumeInt);
+        } else {
+            AUDIO_ERR_LOG("[AudioAdapterManager] Save media volume failed, result %{public}d", ret);
+        }
+    }
+    
     return mAudioServiceAdapter->SetVolume(streamType, volume);
 }
 
