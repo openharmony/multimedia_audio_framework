@@ -241,12 +241,13 @@ napi_value AudioCapturerNapi::CreateAudioCapturer(napi_env env, napi_callback_in
 
     GET_PARAMS(env, info, ARGS_TWO);
     unique_ptr<AudioCapturerAsyncContext> asyncContext = make_unique<AudioCapturerAsyncContext>();
-    if (argc < ARGS_ONE) {
-        asyncContext->status = NAPI_ERR_INVALID_PARAM;
-    }
 
     if (asyncContext == nullptr) {
         return result;
+    }
+
+    if (argc < ARGS_ONE) {
+        asyncContext->status = NAPI_ERR_INVALID_PARAM;
     }
 
     for (size_t i = PARAM0; i < argc; i++) {

@@ -656,8 +656,11 @@ napi_value AudioStreamMgrNapi::IsAudioRendererLowLatencySupported(napi_env env, 
     napi_get_undefined(env, &result);
     GET_PARAMS(env, info, ARGS_TWO);
     unique_ptr<AudioStreamMgrAsyncContext> asyncContext = make_unique<AudioStreamMgrAsyncContext>();
+    if (asyncContext == nullptr) {
+        return result;
+    }
     status = napi_unwrap(env, thisVar, reinterpret_cast<void**>(&asyncContext->objectInfo));
-    if (status != napi_ok || asyncContext == nullptr) {
+    if (status != napi_ok) {
         return result;
     }
 

@@ -438,19 +438,18 @@ static void SetDevicesInfo(AudioRoutingManagerAsyncContext* asyncContext, napi_e
 static void GetDevicesAsyncCallbackComplete(napi_env env, napi_status status, void* data)
 {
     auto asyncContext = static_cast<AudioRoutingManagerAsyncContext*>(data);
+    if (asyncContext == nullptr) {
+        HiLog::Error(LABEL, "ERROR: AudioRoutingManagerAsyncContext* is Null!");
+    }
     napi_value result[ARGS_TWO] = {0};
     napi_value valueParam = nullptr;
     SetDevicesInfo(asyncContext, env, result, valueParam);
 
     napi_get_undefined(env, &result[PARAM0]);
-    if (asyncContext != nullptr) {
-        if (!asyncContext->status) {
-            napi_get_undefined(env, &valueParam);
-        }
-        CommonCallbackRoutine(env, asyncContext, result[PARAM1]);
-    } else {
-        HiLog::Error(LABEL, "ERROR: AudioRoutingManagerAsyncContext* is Null!");
+    if (!asyncContext->status) {
+        napi_get_undefined(env, &valueParam);
     }
+    CommonCallbackRoutine(env, asyncContext, result[PARAM1]);
 }
 
 napi_value AudioRoutingManagerNapi::GetDevices(napi_env env, napi_callback_info info)
