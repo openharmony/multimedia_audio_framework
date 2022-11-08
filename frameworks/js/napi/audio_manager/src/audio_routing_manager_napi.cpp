@@ -933,8 +933,17 @@ napi_value AudioRoutingManagerNapi::On(napi_env env, napi_callback_info info)
         deviceFlag = 3; // 3 for ALL_DEVICES_FLAG
     }
     if (argc == maxArgc) {
-        napi_get_value_int32(env, args[PARAM1], &deviceFlag);
-        AUDIO_INFO_LOG("AudioRoutingMgrNapi:On deviceFlag: %{public}d", deviceFlag);
+        napi_valuetype valueType = napi_undefined;
+        napi_typeof(env, args[PARAM1], &valueType);
+        if (valueType == napi_number) {
+            napi_get_value_int32(env, args[PARAM1], &deviceFlag);
+            AUDIO_INFO_LOG("AudioRoutingMgrNapi:On deviceFlag: %{public}d", deviceFlag);
+            if (!AudioCommonNapi::IsLegalInputArgumentDeviceFlag(deviceFlag)) {
+                THROW_ERROR_ASSERT(env, false, NAPI_ERR_INVALID_PARAM);
+            }
+        } else {
+            THROW_ERROR_ASSERT(env, false, NAPI_ERR_INPUT_INVALID);
+        }
 
         napi_valuetype handler = napi_undefined;
         napi_typeof(env, args[PARAM2], &handler);

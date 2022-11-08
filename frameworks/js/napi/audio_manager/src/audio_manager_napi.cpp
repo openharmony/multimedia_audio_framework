@@ -1354,7 +1354,7 @@ napi_value AudioManagerNapi::GetRingerMode(napi_env env, napi_callback_info info
 
 napi_value AudioManagerNapi::SetAudioScene(napi_env env, napi_callback_info info)
 {
-    HiLog::Error(LABEL, "Enter SetAudioScene!");
+    HiLog::Info(LABEL, "Enter SetAudioScene!");
     napi_status status;
     const int32_t refCount = 1;
     napi_value result = nullptr;
@@ -1365,12 +1365,18 @@ napi_value AudioManagerNapi::SetAudioScene(napi_env env, napi_callback_info info
 
     status = napi_unwrap(env, thisVar, reinterpret_cast<void**>(&asyncContext->objectInfo));
     if (status == napi_ok && asyncContext->objectInfo != nullptr) {
+        if (argc < ARGS_ONE) {
+            asyncContext->status = NAPI_ERR_INVALID_PARAM;
+        }
         for (size_t i = PARAM0; i < argc; i++) {
             napi_valuetype valueType = napi_undefined;
             napi_typeof(env, argv[i], &valueType);
 
             if (i == PARAM0 && valueType == napi_number) {
                 napi_get_value_int32(env, argv[i], &asyncContext->scene);
+                if ((asyncContext->scene < AUDIO_SCENE_DEFAULT) || (asyncContext->scene > AUDIO_SCENE_PHONE_CHAT)) {
+                    asyncContext->status = NAPI_ERR_UNSUPPORTED;
+                }
             } else if (i == PARAM1) {
                 if (valueType == napi_function) {
                     napi_create_reference(env, argv[i], refCount, &asyncContext->callbackRef);
@@ -1394,11 +1400,10 @@ napi_value AudioManagerNapi::SetAudioScene(napi_env env, napi_callback_info info
             env, nullptr, resource,
             [](napi_env env, void *data) {
                 auto context = static_cast<AudioManagerAsyncContext*>(data);
-                if ((context->scene < AUDIO_SCENE_DEFAULT) || (context->scene > AUDIO_SCENE_PHONE_CHAT)) {
-                    context->status = NAPI_ERR_INVALID_PARAM;
-                } else {
+                if (context->status == SUCCESS) {
                     context->status =
                         context->objectInfo->audioMngr_->SetAudioScene(static_cast<AudioScene>(context->scene));
+                    context->status = SUCCESS;
                 }
             },
             SetFunctionAsyncCallbackComplete, static_cast<void*>(asyncContext.get()), &asyncContext->work);
@@ -2328,7 +2333,7 @@ napi_value AudioManagerNapi::GetDevices(napi_env env, napi_callback_info info)
 
     status = napi_unwrap(env, thisVar, reinterpret_cast<void**>(&asyncContext->objectInfo));
     if (status == napi_ok && asyncContext->objectInfo != nullptr) {
-        if (argc < PARAM0) {
+        if (argc < PARAM1) {
             asyncContext->status = NAPI_ERR_INVALID_PARAM;
         }
         for (size_t i = PARAM0; i < argc; i++) {
