@@ -942,6 +942,7 @@ int32_t AudioServiceClient::CreateStream(AudioStreamParams audioParams, AudioStr
         switch (audioParams.channels) {
             case CHANNEL_8:
                 map.map[CHANNEL8_IDX] = PA_CHANNEL_POSITION_AUX1;
+                [[fallthrough]];
             case CHANNEL_7:
                 map.map[CHANNEL1_IDX] = PA_CHANNEL_POSITION_FRONT_LEFT;
                 map.map[CHANNEL2_IDX] = PA_CHANNEL_POSITION_FRONT_LEFT_OF_CENTER;
