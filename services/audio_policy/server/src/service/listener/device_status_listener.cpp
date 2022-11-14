@@ -29,6 +29,7 @@
 namespace OHOS {
 namespace AudioStandard {
 const std::string AUDIO_HDI_SERVICE_NAME = "audio_hdi_service";
+const std::string AUDIO_HDI_PNP_SERVICE_NAME = "audio_hdi_pnp_service";
 const std::string AUDIO_BLUETOOTH_HDI_SERVICE_NAME = "audio_bluetooth_hdi_service";
 
 const std::string DAUDIO_HDI_SERVICE_NAME = "daudio_primary_service";
@@ -42,6 +43,9 @@ static DeviceType GetInternalDeviceType(AudioDeviceType hdiDeviceType)
     switch (hdiDeviceType) {
         case AudioDeviceType::HDF_AUDIO_HEADSET:
             internalDeviceType = DEVICE_TYPE_WIRED_HEADSET;
+            break;
+        case AudioDeviceType::HDF_AUDIO_HEADPHONE:
+            internalDeviceType = DEVICE_TYPE_WIRED_HEADPHONES;
             break;
         case AudioDeviceType::HDF_AUDIO_USB_HEADSET:
             internalDeviceType = DEVICE_TYPE_USB_HEADSET;
@@ -75,6 +79,24 @@ static void ReceviceDistributedInfo(struct ServiceStatus* serviceStatus, std::st
     }
 }
 
+static void OnDeviceStatusChange(std::string info, DeviceStatusListener *devListener)
+{
+    CHECK_AND_RETURN_LOG(!info.empty(), "OnDeviceStatusChange invalid info");
+    AudioDeviceType hdiDeviceType = HDF_AUDIO_DEVICE_UNKOWN;
+    AudioEventType hdiEventType = HDF_AUDIO_EVENT_UNKOWN;
+    if (sscanf_s(info.c_str(), "EVENT_TYPE=%d;DEVICE_TYPE=%d", &hdiEventType, &hdiDeviceType) < EVENT_PARAMS) {
+        AUDIO_WARNING_LOG("[DeviceStatusListener]: Failed to scan info string %{public}s", info.c_str());
+        return;
+    }
+
+    DeviceType internalDevice = GetInternalDeviceType(hdiDeviceType);
+    CHECK_AND_RETURN_LOG(internalDevice != DEVICE_TYPE_NONE, "Unsupported device %{public}d", hdiDeviceType);
+
+    bool isConnected = (hdiEventType == HDF_AUDIO_DEVICE_ADD) ? true : false;
+    AudioStreamInfo streamInfo = {};
+    devListener->deviceObserver_.OnDeviceStatusUpdated(internalDevice, isConnected, "", "", streamInfo);
+}
+
 static void OnServiceStatusReceived(struct ServiceStatusListener *listener, struct ServiceStatus *serviceStatus)
 {
     CHECK_AND_RETURN_LOG(serviceStatus != nullptr, "Invalid ServiceStatus");
@@ -89,20 +111,12 @@ static void OnServiceStatusReceived(struct ServiceStatusListener *listener, stru
             devListener->deviceObserver_.OnServiceConnected(AudioServiceIndex::HDI_SERVICE_INDEX);
         } else if (serviceStatus->status == SERVIE_STATUS_STOP) {
             devListener->deviceObserver_.OnServiceDisconnected(AudioServiceIndex::HDI_SERVICE_INDEX);
-        } else if (serviceStatus->status == SERVIE_STATUS_CHANGE && !info.empty()) {
-            AudioDeviceType hdiDeviceType = HDF_AUDIO_DEVICE_UNKOWN;
-            AudioEventType hdiEventType = HDF_AUDIO_EVENT_UNKOWN;
-            if (sscanf_s(info.c_str(), "EVENT_TYPE=%d;DEVICE_TYPE=%d", &hdiEventType, &hdiDeviceType) < EVENT_PARAMS) {
-                AUDIO_WARNING_LOG("[DeviceStatusListener]: Failed to scan info string %{public}s", info.c_str());
-                return;
-            }
-
-            DeviceType internalDevice = GetInternalDeviceType(hdiDeviceType);
-            CHECK_AND_RETURN_LOG(internalDevice != DEVICE_TYPE_NONE, "Unsupported device %{public}d", hdiDeviceType);
-
-            bool isConnected = (hdiEventType == HDF_AUDIO_DEVICE_ADD) ? true : false;
-            AudioStreamInfo streamInfo = {};
-            devListener->deviceObserver_.OnDeviceStatusUpdated(internalDevice, isConnected, "", "", streamInfo);
+        } else if (serviceStatus->status == SERVIE_STATUS_CHANGE) {
+            OnDeviceStatusChange(info, devListener);
+        }
+    } else if (serviceStatus->serviceName == AUDIO_HDI_PNP_SERVICE_NAME) {
+        if (serviceStatus->status == SERVIE_STATUS_CHANGE) {
+            OnDeviceStatusChange(info, devListener);
         }
     } else if (serviceStatus->serviceName == AUDIO_BLUETOOTH_HDI_SERVICE_NAME) {
 #ifdef BLUETOOTH_ENABLE
