@@ -2181,6 +2181,9 @@ static void SetValueString(const napi_env &env, const std::string &fieldStr, con
 static void GetDevicesAsyncCallbackComplete(napi_env env, napi_status status, void *data)
 {
     auto asyncContext = static_cast<AudioManagerAsyncContext*>(data);
+    if (asyncContext == nullptr) {
+        HiLog::Error(LABEL, "ERROR: AudioRoutingManagerAsyncContext* is Null!");
+    }
     napi_value result[ARGS_TWO] = {0};
     napi_value valueParam = nullptr;
     size_t size = asyncContext->deviceDescriptors.size();
@@ -2223,14 +2226,10 @@ static void GetDevicesAsyncCallbackComplete(napi_env env, napi_status status, vo
     }
 
     napi_get_undefined(env, &result[PARAM0]);
-    if (asyncContext != nullptr) {
-        if (!asyncContext->status) {
-            napi_get_undefined(env, &valueParam);
-        }
-        CommonCallbackRoutine(env, asyncContext, result[PARAM1]);
-    } else {
-        HiLog::Error(LABEL, "ERROR: AudioRoutingManagerAsyncContext* is Null!");
+    if (!asyncContext->status) {
+        napi_get_undefined(env, &valueParam);
     }
+    CommonCallbackRoutine(env, asyncContext, result[PARAM1]);
 }
 
 napi_value AudioManagerNapi::GetDevices(napi_env env, napi_callback_info info)
