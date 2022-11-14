@@ -827,10 +827,12 @@ int32_t AudioServiceClient::ConnectStreamToPA()
         preBuf_ = make_unique<uint8_t[]>(bufferAttr.maxlength);
         if (preBuf_ == nullptr) {
             AUDIO_ERR_LOG("Allocate memory for buffer failed.");
+            pa_threaded_mainloop_unlock(mainLoop);
             return AUDIO_CLIENT_INIT_ERR;
         }
         if (memset_s(preBuf_.get(), bufferAttr.maxlength, 0, bufferAttr.maxlength) != 0) {
             AUDIO_ERR_LOG("memset_s for buffer failed.");
+            pa_threaded_mainloop_unlock(mainLoop);
             return AUDIO_CLIENT_INIT_ERR;
         }
     } else {
@@ -921,6 +923,7 @@ int32_t AudioServiceClient::CreateStream(AudioStreamParams audioParams, AudioStr
     if (propList == nullptr) {
         AUDIO_ERR_LOG("pa_proplist_new failed");
         ResetPAAudioClient();
+        pa_threaded_mainloop_unlock(mainLoop);
         return AUDIO_CLIENT_CREATE_STREAM_ERR;
     }
 
@@ -953,6 +956,7 @@ int32_t AudioServiceClient::CreateStream(AudioStreamParams audioParams, AudioStr
                 break;
             default:
                 AUDIO_ERR_LOG("Invalid channel count");
+                pa_threaded_mainloop_unlock(mainLoop);
                 return AUDIO_CLIENT_CREATE_STREAM_ERR;
         }
 
@@ -1342,6 +1346,7 @@ int32_t AudioServiceClient::DrainAudioCache()
     int32_t error = 0;
     if (acache.buffer == nullptr) {
         AUDIO_ERR_LOG("Drain cache failed");
+        pa_threaded_mainloop_unlock(mainLoop);
         return AUDIO_CLIENT_ERR;
     }
 
@@ -1431,6 +1436,7 @@ size_t AudioServiceClient::WriteStream(const StreamBuffer &stream, int32_t &pErr
 
     if (acache.buffer == nullptr) {
         AUDIO_ERR_LOG("Buffer is null");
+        pa_threaded_mainloop_unlock(mainLoop);
         pError = AUDIO_CLIENT_WRITE_STREAM_ERR;
         return cachedLen;
     }
@@ -1449,6 +1455,7 @@ size_t AudioServiceClient::WriteStream(const StreamBuffer &stream, int32_t &pErr
         if (size > 0) {
             if (memcpy_s(cacheBuffer, acache.totalCacheSize, cacheBuffer + offset, size)) {
                 AUDIO_ERR_LOG("Update cache failed");
+                pa_threaded_mainloop_unlock(mainLoop);
                 pError = AUDIO_CLIENT_WRITE_STREAM_ERR;
                 return cachedLen;
             }
@@ -1814,6 +1821,7 @@ int32_t AudioServiceClient::GetCurrentTimeStamp(uint64_t &timeStamp)
     const pa_timing_info *info = pa_stream_get_timing_info(paStream);
     if (info == nullptr) {
         AUDIO_ERR_LOG("pa_stream_get_timing_info failed");
+        pa_threaded_mainloop_unlock(mainLoop);
         return AUDIO_CLIENT_ERR;
     }
 
@@ -1822,6 +1830,7 @@ int32_t AudioServiceClient::GetCurrentTimeStamp(uint64_t &timeStamp)
     } else if (eAudioClientType == AUDIO_SERVICE_CLIENT_RECORD) {
         if (pa_stream_get_time(paStream, &timeStamp)) {
             AUDIO_ERR_LOG("AudioServiceClient::GetCurrentTimeStamp failed for AUDIO_SERVICE_CLIENT_RECORD");
+            pa_threaded_mainloop_unlock(mainLoop);
             return AUDIO_CLIENT_ERR;
         }
         int32_t uid = static_cast<int32_t>(getuid());
