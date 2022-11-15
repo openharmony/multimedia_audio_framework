@@ -2179,7 +2179,6 @@ void AudioServiceClient::SetPaVolume(const AudioServiceClient &client)
 int32_t AudioServiceClient::SetStreamRenderRate(AudioRendererRate audioRendererRate)
 {
     AUDIO_INFO_LOG("SetStreamRenderRate in");
-    renderRate = audioRendererRate;
     if (!paStream) {
         return AUDIO_CLIENT_SUCCESS;
     }
@@ -2197,6 +2196,7 @@ int32_t AudioServiceClient::SetStreamRenderRate(AudioRendererRate audioRendererR
         default:
             return AUDIO_CLIENT_INVALID_PARAMS_ERR;
     }
+    renderRate = audioRendererRate;
 
     pa_threaded_mainloop_lock(mainLoop);
     pa_operation *operation = pa_stream_update_sample_rate(paStream, rate, nullptr, nullptr);

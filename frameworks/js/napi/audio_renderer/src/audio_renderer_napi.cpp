@@ -1716,7 +1716,7 @@ napi_value AudioRendererNapi::SetVolume(napi_env env, napi_callback_info info)
                 auto context = static_cast<AudioRendererAsyncContext*>(data);
                 if (context->status == SUCCESS) {
                     if (!AudioCommonNapi::IsLegalInputArgumentVolLevel(context->volLevel)) {
-                        context->status = NAPI_ERR_INVALID_PARAM;
+                        context->status = NAPI_ERR_UNSUPPORTED;
                     } else {
                         context->status = context->objectInfo->audioMngr_->
                             SetVolume(GetNativeAudioVolumeType(context->volType), context->volLevel);
