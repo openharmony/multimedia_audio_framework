@@ -20,6 +20,7 @@
 #include <list>
 #include <string>
 #include <unordered_map>
+#include <mutex>
 #include "audio_group_handle.h"
 #include "audio_info.h"
 #include "audio_policy_manager_factory.h"
@@ -288,6 +289,7 @@ private:
     uint64_t audioLatencyInMsec_ = 50;
     uint32_t sinkLatencyInMsec_ {0};
     std::bitset<MIN_SERVICE_COUNT> serviceFlag_;
+    std::mutex serviceFlagMutex_;
     DeviceType currentActiveDevice_ = DEVICE_TYPE_NONE;
     DeviceType activeInputDevice_ = DEVICE_TYPE_NONE;
     std::unordered_map<int32_t, std::pair<std::string, int32_t>> routerMap_;
