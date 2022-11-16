@@ -1131,7 +1131,11 @@ void AudioPolicyServer::OnSessionRemoved(const uint32_t sessionID)
 AudioStreamType AudioPolicyServer::GetStreamInFocus()
 {
     AudioStreamType streamInFocus = STREAM_DEFAULT;
-    if (!curActiveOwnersList_.empty()) {
+    if (GetAudioScene() == AUDIO_SCENE_PHONE_CALL) {
+        // When a call stream is playing, the stream type in focus is still ring.
+        // So we set streamInFocus to call manually.
+        streamInFocus = STREAM_VOICE_CALL;
+    } else if (!curActiveOwnersList_.empty()) {
         streamInFocus = curActiveOwnersList_.front().streamType;
     }
 

@@ -96,11 +96,11 @@ void AudioPolicyManagerStub::GetToneInfoInternal(MessageParcel &data, MessagePar
     reply.WriteUint32(ltoneInfo->segmentCnt);
     reply.WriteUint32(ltoneInfo->repeatCnt);
     reply.WriteUint32(ltoneInfo->repeatSegment);
-    for (int i = 0; i<ltoneInfo->segmentCnt; i++) {
+    for (uint32_t i = 0; i < ltoneInfo->segmentCnt; i++) {
         reply.WriteUint32(ltoneInfo->segments[i].duration);
         reply.WriteUint16(ltoneInfo->segments[i].loopCnt);
         reply.WriteUint16(ltoneInfo->segments[i].loopIndx);
-        for (uint32_t j = 0; j<TONEINFO_MAX_WAVES+1; j++) {
+        for (uint32_t j = 0; j < TONEINFO_MAX_WAVES + 1; j++) {
             reply.WriteUint16(ltoneInfo->segments[i].waveFreq[j]);
         }
     }
