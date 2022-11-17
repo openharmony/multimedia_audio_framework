@@ -76,18 +76,19 @@ void AudioPolicyServer::OnDump()
 
 void AudioPolicyServer::OnStart()
 {
-    AUDIO_DEBUG_LOG("AudioPolicyService OnStart");
-    bool res = Publish(this);
-    if (res) {
-        AUDIO_DEBUG_LOG("AudioPolicyService OnStart res=%d", res);
-    }
+    AUDIO_INFO_LOG("AudioPolicyService OnStart");
+    mPolicyService.Init();
+
     AddSystemAbilityListener(DISTRIBUTED_KV_DATA_SERVICE_ABILITY_ID);
     AddSystemAbilityListener(MULTIMODAL_INPUT_SERVICE_ID);
     AddSystemAbilityListener(AUDIO_DISTRIBUTED_SERVICE_ID);
     AddSystemAbilityListener(BLUETOOTH_HOST_SYS_ABILITY_ID);
     AddSystemAbilityListener(ACCESSIBILITY_MANAGER_SERVICE_ID);
 
-    mPolicyService.Init();
+    bool res = Publish(this);
+    if (res) {
+        AUDIO_WARNING_LOG("AudioPolicyService OnStart res=%d", res);
+    }
 
     Security::AccessToken::PermStateChangeScope scopeInfo;
     scopeInfo.permList = {"ohos.permission.MICROPHONE"};
@@ -97,8 +98,6 @@ void AudioPolicyServer::OnStart()
     if (iRes < 0) {
         AUDIO_ERR_LOG("fail to call RegisterPermStateChangeCallback.");
     }
-
-    return;
 }
 
 void AudioPolicyServer::OnStop()
