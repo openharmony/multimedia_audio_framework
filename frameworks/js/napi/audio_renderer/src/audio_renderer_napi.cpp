@@ -612,16 +612,11 @@ void AudioRendererNapi::WriteAsyncCallbackComplete(napi_env env, napi_status sta
     napi_value retVal;
 
     auto asyncContext = static_cast<AudioRendererAsyncContext *>(data);
-    napi_value valueParam = nullptr;
 
     if (asyncContext != nullptr) {
         if (!asyncContext->status) {
-            napi_create_uint32(env, asyncContext->totalBytesWritten, &valueParam);
-            napi_get_undefined(env, &valueParam);
-        }
-        if (!asyncContext->status) {
             napi_get_undefined(env, &result[PARAM0]);
-            result[PARAM1] = valueParam;
+            napi_create_uint32(env, asyncContext->totalBytesWritten, &result[PARAM1]);
         } else {
             napi_value message = nullptr;
             std::string messageValue = AudioCommonNapi::getMessageByCode(asyncContext->status);
