@@ -77,7 +77,8 @@ public:
     ~AudioRendererPrivate();
 
 private:
-    void InitSharedInterrupt();
+    int32_t InitAudioInterruptCallback();
+    int32_t InitSharedInterrupt();
     static std::map<pid_t, std::map<AudioStreamType, AudioInterrupt>> sharedInterrupts_;
     std::shared_ptr<AudioStream> audioStream_;
     std::shared_ptr<AudioInterruptCallback> audioInterruptCallback_ = nullptr;
@@ -85,7 +86,7 @@ private:
     AppInfo appInfo_ = {};
     AudioInterrupt audioInterrupt_ =
         {STREAM_USAGE_UNKNOWN, CONTENT_TYPE_UNKNOWN, AudioStreamType::STREAM_DEFAULT, 0};
-     AudioInterrupt sharedInterrupt_ =
+    AudioInterrupt sharedInterrupt_ =
         {STREAM_USAGE_UNKNOWN, CONTENT_TYPE_UNKNOWN, AudioStreamType::STREAM_DEFAULT, 0};
     uint32_t sessionID_ = INVALID_SESSION_ID;
     AudioStandard::InterruptMode mode_ = AudioStandard::InterruptMode::SHARE_MODE;
