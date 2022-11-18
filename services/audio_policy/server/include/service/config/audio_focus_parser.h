@@ -25,7 +25,7 @@
 
 namespace OHOS {
 namespace AudioStandard {
-static constexpr char AUDIO_FOCUS_CONFIG_FILE[] = "vendor/etc/audio/audio_interrupt_policy_config.xml";
+static constexpr char AUDIO_FOCUS_CONFIG_FILE[] = "system/etc/audio/audio_interrupt_policy_config.xml";
 
 class AudioFocusParser {
 public:
