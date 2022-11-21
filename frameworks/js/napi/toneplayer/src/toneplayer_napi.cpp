@@ -411,7 +411,7 @@ napi_value TonePlayerNapi::Load(napi_env env, napi_callback_info info)
                 [](napi_env env, void *data) {
                     auto context = static_cast<TonePlayerAsyncContext *>(data);
                     HiLog::Error(LABEL, "The Load parameter is invalid");
-                    context->status = ERR_INVALID_PARAM;
+                    context->status = NAPI_ERR_INVALID_PARAM;
                 },
                 VoidAsyncCallbackComplete, static_cast<void *>(asyncContext.get()), &asyncContext->work);
         } else {
