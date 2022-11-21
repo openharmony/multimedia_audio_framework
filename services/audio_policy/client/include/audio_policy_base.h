@@ -154,6 +154,8 @@ public:
     virtual std::vector<sptr<VolumeGroupInfo>> GetVolumeGroupInfos() = 0;
 
     virtual bool IsAudioRendererLowLatencySupported(const AudioStreamInfo &audioStreamInfo) = 0;
+
+    virtual std::vector<sptr<AudioDeviceDescriptor>> GetActiveOutputDeviceDescriptors() = 0;
 public:
     DECLARE_INTERFACE_DESCRIPTOR(u"IAudioPolicy");
 };

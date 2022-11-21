@@ -227,6 +227,18 @@ void AudioPolicyManagerStub::GetDevicesInternal(MessageParcel &data, MessageParc
     }
 }
 
+void AudioPolicyManagerStub::GetActiveOutputDeviceDescriptorsInternal(MessageParcel &data, MessageParcel &reply)
+{
+    AUDIO_DEBUG_LOG("GET_ACTIVE_OUTPUT_DEVICE_DESCRIPTORS AudioManagerStub");
+    std::vector<sptr<AudioDeviceDescriptor>> devices = GetActiveOutputDeviceDescriptors();
+    int32_t size = static_cast<int32_t>(devices.size());
+    AUDIO_DEBUG_LOG("GET_ACTIVE_OUTPUT_DEVICE_DESCRIPTORS size= %{public}d", size);
+    reply.WriteInt32(size);
+    for (int i = 0; i < size; i++) {
+        devices[i]->Marshalling(reply);
+    }
+}
+
 void AudioPolicyManagerStub::SetDeviceActiveInternal(MessageParcel &data, MessageParcel &reply)
 {
     InternalDeviceType deviceType = static_cast<InternalDeviceType>(data.ReadInt32());
@@ -949,6 +961,10 @@ int AudioPolicyManagerStub::OnRemoteRequest(
         case GET_USING_PEMISSION_FROM_PRIVACY:
              getUsingPemissionFromPrivacyInternal(data, reply);
              break;
+
+        case GET_ACTIVE_OUTPUT_DEVICE_DESCRIPTORS:
+            GetActiveOutputDeviceDescriptorsInternal(data, reply);
+            break;
 
         default:
             AUDIO_ERR_LOG("default case, need check AudioPolicyManagerStub");

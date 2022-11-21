@@ -628,6 +628,11 @@ std::vector<sptr<AudioDeviceDescriptor>> AudioSystemManager::GetDevices(DeviceFl
     return AudioPolicyManager::GetInstance().GetDevices(deviceFlag);
 }
 
+std::vector<sptr<AudioDeviceDescriptor>> AudioSystemManager::GetActiveOutputDeviceDescriptors()
+{
+    return AudioPolicyManager::GetInstance().GetActiveOutputDeviceDescriptors();
+}
+
 int32_t AudioSystemManager::RegisterVolumeKeyEventCallback(const int32_t clientPid,
                                                            const std::shared_ptr<VolumeKeyEventCallback> &callback)
 {

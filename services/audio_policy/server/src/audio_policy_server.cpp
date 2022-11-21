@@ -370,6 +370,23 @@ std::vector<sptr<AudioDeviceDescriptor>> AudioPolicyServer::GetDevices(DeviceFla
     return deviceDescs;
 }
 
+std::vector<sptr<AudioDeviceDescriptor>> AudioPolicyServer::GetActiveOutputDeviceDescriptors()
+{
+    std::vector<sptr<AudioDeviceDescriptor>> deviceDescs = mPolicyService.GetActiveOutputDeviceDescriptors();
+    bool hasBTPermission = VerifyClientPermission(USE_BLUETOOTH_PERMISSION);
+    if (!hasBTPermission) {
+        for (sptr<AudioDeviceDescriptor> desc : deviceDescs) {
+            if ((desc->deviceType_ == DEVICE_TYPE_BLUETOOTH_A2DP)
+                || (desc->deviceType_ == DEVICE_TYPE_BLUETOOTH_SCO)) {
+                desc->deviceName_ = "";
+                desc->macAddress_ = "";
+            }
+        }
+    }
+
+    return deviceDescs;
+}
+
 bool AudioPolicyServer::IsStreamActive(AudioStreamType streamType)
 {
     return mPolicyService.IsStreamActive(streamType);
