@@ -37,6 +37,8 @@
 #include "audio_policy_manager.h"
 #include "audio_renderer.h"
 #include "audio_system_manager.h"
+#include "event_handler.h"
+#include "event_runner.h"
 
 namespace OHOS {
 namespace AudioStandard {
@@ -124,7 +126,7 @@ public:
     virtual void OnEventCb(AudioServiceEventTypes error) const = 0;
 };
 
-class AudioServiceClient : public AudioTimer {
+class AudioServiceClient : public AudioTimer, public AppExecFwk::EventHandler {
 public:
     static constexpr char PA_RUNTIME_DIR[] = "/data/data/.pulse_dir/runtime";
     static constexpr char PA_STATE_DIR[] = "/data/data/.pulse_dir/state";
@@ -504,10 +506,15 @@ public:
     float GetSingleStreamVol();
 
     // Audio timer callback
-    virtual void OnTimeOut();
+    virtual void OnTimeOut() override;
 
     void SetClientID(int32_t clientPid, int32_t clientUid);
+    void SendWriteBufferRequestEvent();
+    void HandleWriteRequestEvent();
+    int32_t SetRendererWriteCallback(const std::shared_ptr<AudioRendererWriteCallback> &callback);
 
+protected:
+    virtual void ProcessEvent(const AppExecFwk::InnerEvent::Pointer &event) override;
 private:
     pa_threaded_mainloop *mainLoop;
     pa_mainloop_api *api;
@@ -557,10 +564,9 @@ private:
 
     AudioRendererRate renderRate;
     AudioRenderMode renderMode_;
-    std::weak_ptr<AudioRendererWriteCallback> writeCallback_;
     AudioCaptureMode captureMode_;
     std::weak_ptr<AudioCapturerReadCallback> readCallback_;
-
+    std::shared_ptr<AudioRendererWriteCallback> writeCallback_;
     int64_t mWriteCbStamp = 0; // used to measure callback duration
     uint32_t mFrameSize = 0;
     bool mMarkReached = false;
@@ -671,6 +677,60 @@ private:
 
     static void GetSinkInputInfoCb(pa_context *c, const pa_sink_input_info *i, int eol, void *userdata);
     static void SetPaVolume(const AudioServiceClient &client);
+
+    // OnRenderMarkReach SetRenderMarkReached UnsetRenderMarkReach  by eventHandler
+    void SendRenderMarkReachedRequestEvent(uint64_t mFrameMarkPosition);
+    void HandleRenderMarkReachedEvent(uint64_t mFrameMarkPosition);
+    void SendSetRenderMarkReachedRequestEvent(const std::shared_ptr<RendererPositionCallback> &callback);
+    void HandleSetRenderMarkReachedEvent(const std::shared_ptr<RendererPositionCallback> &callback);
+    void SendUnsetRenderMarkReachedRequestEvent();
+    void HandleUnsetRenderMarkReachedEvent();
+
+    // OnRenderPeriodReach SetRenderPeriodReach UnsetRenderPeriodReach by eventHandler
+    void SendRenderPeriodReachedRequestEvent(uint64_t mFramePeriodNumber);
+    void HandleRenderPeriodReachedEvent(uint64_t mFramePeriodNumber);
+    void SendSetRenderPeriodReachedRequestEvent(const std::shared_ptr<RendererPeriodPositionCallback> &callback);
+    void HandleSetRenderPeriodReachedEvent(const std::shared_ptr<RendererPeriodPositionCallback> &callback);
+    void SendUnsetRenderPeriodReachedRequestEvent();
+    void HandleUnsetRenderPeriodReachedEvent();
+
+    // OnCapturerMarkReach SetCapturerMarkReach UnsetCapturerMarkReach by eventHandler
+    void SendCapturerMarkReachedRequestEvent(uint64_t mFrameMarkPosition);
+    void HandleCapturerMarkReachedEvent(uint64_t mFrameMarkPosition);
+    void SendSetCapturerMarkReachedRequestEvent(const std::shared_ptr<CapturerPositionCallback> &callback);
+    void HandleSetCapturerMarkReachedEvent(const std::shared_ptr<CapturerPositionCallback> &callback);
+    void SendUnsetCapturerMarkReachedRequestEvent();
+    void HandleUnsetCapturerMarkReachedEvent();
+
+    // OnCapturerPeriodReach SetCapturerPeriodReach UnsetCapturerPeriodReach by eventHandler
+    void SendCapturerPeriodReachedRequestEvent(uint64_t mFramePeriodNumber);
+    void HandleCapturerPeriodReachedEvent(uint64_t mFramePeriodNumber);
+    void SendSetCapturerPeriodReachedRequestEvent(
+        const std::shared_ptr<CapturerPeriodPositionCallback> &callback);
+    void HandleSetCapturerPeriodReachedEvent(
+        const std::shared_ptr<CapturerPeriodPositionCallback> &callback);
+    void SendUnsetCapturerPeriodReachedRequestEvent();
+    void HandleUnsetCapturerPeriodReachedEvent();
+
+    enum {
+        WRITE_BUFFER_REQUEST = 0,
+
+        RENDERER_MARK_REACHED_REQUEST = 1,
+        SET_RENDERER_MARK_REACHED_REQUEST = 2,
+        UNSET_RENDERER_MARK_REACHED_REQUEST = 3,
+
+        RENDERER_PERIOD_REACHED_REQUEST = 4,
+        SET_RENDERER_PERIOD_REACHED_REQUEST = 5,
+        UNSET_RENDERER_PERIOD_REACHED_REQUEST = 6,
+
+        CAPTURER_PERIOD_REACHED_REQUEST = 7,
+        SET_CAPTURER_PERIOD_REACHED_REQUEST = 8,
+        UNSET_CAPTURER_PERIOD_REACHED_REQUEST = 9,
+
+        CAPTURER_MARK_REACHED_REQUEST = 10,
+        SET_CAPTURER_MARK_REACHED_REQUEST = 11,
+        UNSET_CAPTURER_MARK_REACHED_REQUEST = 12,
+    };
 };
 } // namespace AudioStandard
 } // namespace OHOS
