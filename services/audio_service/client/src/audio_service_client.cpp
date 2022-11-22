@@ -1044,6 +1044,7 @@ int32_t AudioServiceClient::StartStream()
 
     pa_operation *operation = nullptr;
 
+    lock_guard<mutex> lockdata(dataMutex);
     pa_threaded_mainloop_lock(mainLoop);
 
     pa_stream_state_t state = pa_stream_get_state(paStream);
@@ -1076,7 +1077,8 @@ int32_t AudioServiceClient::StartStream()
 
 int32_t AudioServiceClient::PauseStream()
 {
-    lock_guard<mutex> lock(ctrlMutex);
+    lock_guard<mutex> lockdata(dataMutex);
+    lock_guard<mutex> lockctrl(ctrlMutex);
     PAStreamCorkSuccessCb = PAStreamPauseSuccessCb;
     int32_t ret = CorkStream();
     if (ret) {
@@ -1094,7 +1096,8 @@ int32_t AudioServiceClient::PauseStream()
 
 int32_t AudioServiceClient::StopStream()
 {
-    lock_guard<mutex> lock(ctrlMutex);
+    lock_guard<mutex> lockdata(dataMutex);
+    lock_guard<mutex> lockctrl(ctrlMutex);
     PAStreamCorkSuccessCb = PAStreamStopSuccessCb;
     int32_t ret = CorkStream();
     if (ret) {
@@ -1662,6 +1665,7 @@ int32_t AudioServiceClient::ReadStream(StreamBuffer &stream, bool isBlocking)
 int32_t AudioServiceClient::ReleaseStream()
 {
     state_ = RELEASED;
+    lock_guard<mutex> lockdata(dataMutex);
     WriteStateChangedSysEvents();
     ResetPAAudioClient();
 
