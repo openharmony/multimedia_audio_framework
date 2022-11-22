@@ -205,6 +205,10 @@ int32_t AudioStreamCollector::UpdateRendererStream(AudioStreamChangeInfo &stream
                 audioRendererChangeInfo.clientUID, audioRendererChangeInfo.sessionId);
 
             unique_ptr<AudioRendererChangeInfo> RendererChangeInfo = make_unique<AudioRendererChangeInfo>();
+            if (RendererChangeInfo == nullptr) {
+                AUDIO_ERR_LOG("AudioStreamCollector::RendererChangeInfo Memory Allocation Failed");
+                return ERR_MEMORY_ALLOC_FAILED;
+            }
             RendererChangeInfo->clientUID = streamChangeInfo.audioRendererChangeInfo.clientUID;
             RendererChangeInfo->sessionId = streamChangeInfo.audioRendererChangeInfo.sessionId;
             RendererChangeInfo->rendererState = streamChangeInfo.audioRendererChangeInfo.rendererState;
@@ -265,6 +269,10 @@ int32_t AudioStreamCollector::UpdateCapturerStream(AudioStreamChangeInfo &stream
                 streamChangeInfo.audioCapturerChangeInfo.sessionId);
 
             unique_ptr<AudioCapturerChangeInfo> CapturerChangeInfo = make_unique<AudioCapturerChangeInfo>();
+            if (CapturerChangeInfo == nullptr) {
+                AUDIO_ERR_LOG("AudioStreamCollector::CapturerChangeInfo Memory Allocation Failed");
+                return ERR_MEMORY_ALLOC_FAILED;
+            }
             CapturerChangeInfo->clientUID = streamChangeInfo.audioCapturerChangeInfo.clientUID;
             CapturerChangeInfo->sessionId = streamChangeInfo.audioCapturerChangeInfo.sessionId;
             CapturerChangeInfo->capturerState = streamChangeInfo.audioCapturerChangeInfo.capturerState;
@@ -451,6 +459,7 @@ void AudioStreamCollector::RegisteredStreamListenerClientDied(int32_t uid)
 int32_t AudioStreamCollector::UpdateStreamState(int32_t clientUid,
     StreamSetStateEventInternal &streamSetStateEventInternal)
 {
+    std::lock_guard<std::mutex> lock(streamsInfoMutex_);
     for (const auto &changeInfo : audioRendererChangeInfos_) {
         if (changeInfo->clientUID == clientUid) {
             std::shared_ptr<AudioClientTracker> callback = clientTracker_[changeInfo->sessionId];
