@@ -815,6 +815,141 @@ HWTEST(AudioRendererUnitTest, Audio_Renderer_GetParams_005, TestSize.Level1)
 }
 
 /**
+* @tc.name  : Test GetParams API via legal input.
+* @tc.number: Audio_Renderer_GetParams_006
+* @tc.desc  : Test GetParams interface. Returns 0 {SUCCESS}, if the getting is successful.
+*/
+HWTEST(AudioRendererUnitTest, Audio_Renderer_GetParams_006, TestSize.Level1)
+{
+    int32_t ret = -1;
+    unique_ptr<AudioRenderer> audioRenderer = AudioRenderer::Create(STREAM_MUSIC);
+    ASSERT_NE(nullptr, audioRenderer);
+
+    AudioRendererParams rendererParams;
+    rendererParams.sampleFormat = SAMPLE_S24LE;
+    rendererParams.sampleRate = SAMPLE_RATE_44100;
+    rendererParams.channelCount = STEREO;
+    rendererParams.encodingType = ENCODING_PCM;
+    ret = audioRenderer->SetParams(rendererParams);
+    EXPECT_EQ(SUCCESS, ret);
+
+    AudioRendererParams getRendererParams;
+    ret = audioRenderer->GetParams(getRendererParams);
+    EXPECT_EQ(SUCCESS, ret);
+    EXPECT_EQ(rendererParams.sampleFormat, getRendererParams.sampleFormat);
+    EXPECT_EQ(rendererParams.sampleRate, getRendererParams.sampleRate);
+    EXPECT_EQ(rendererParams.channelCount, getRendererParams.channelCount);
+    EXPECT_EQ(rendererParams.encodingType, getRendererParams.encodingType);
+
+    audioRenderer->Release();
+}
+
+/**
+* @tc.name  : Test GetParams API via legal input.
+* @tc.number: Audio_Renderer_GetParams_007
+* @tc.desc  : Test GetParams interface. Returns 0 {SUCCESS}, if the getting is successful.
+*/
+HWTEST(AudioRendererUnitTest, Audio_Renderer_GetParams_007, TestSize.Level1)
+{
+    int32_t ret = -1;
+    unique_ptr<AudioRenderer> audioRenderer = AudioRenderer::Create(STREAM_MUSIC);
+    ASSERT_NE(nullptr, audioRenderer);
+
+    AudioRendererParams rendererParams;
+    rendererParams.sampleFormat = SAMPLE_S32LE;
+    rendererParams.sampleRate = SAMPLE_RATE_44100;
+    rendererParams.channelCount = STEREO;
+    rendererParams.encodingType = ENCODING_PCM;
+    ret = audioRenderer->SetParams(rendererParams);
+    EXPECT_EQ(SUCCESS, ret);
+
+    AudioRendererParams getRendererParams;
+    ret = audioRenderer->GetParams(getRendererParams);
+    EXPECT_EQ(SUCCESS, ret);
+    EXPECT_EQ(rendererParams.sampleFormat, getRendererParams.sampleFormat);
+    EXPECT_EQ(rendererParams.sampleRate, getRendererParams.sampleRate);
+    EXPECT_EQ(rendererParams.channelCount, getRendererParams.channelCount);
+    EXPECT_EQ(rendererParams.encodingType, getRendererParams.encodingType);
+
+    audioRenderer->Release();
+}
+
+/**
+* @tc.name  : Test GetParams API via legal input.
+* @tc.number: Audio_Renderer_GetParams_008
+* @tc.desc  : Test GetParams interface. Returns 0 {SUCCESS}, if the getting is successful.
+*/
+HWTEST(AudioRendererUnitTest, Audio_Renderer_GetParams_008, TestSize.Level1)
+{
+    int32_t ret = -1;
+    unique_ptr<AudioRenderer> audioRenderer = AudioRenderer::Create(STREAM_MUSIC);
+    ASSERT_NE(nullptr, audioRenderer);
+
+    AudioRendererParams getRendererParams;
+    getRendererParams.sampleFormat = AudioSampleFormat::INVALID_WIDTH;
+    ret = audioRenderer->GetParams(getRendererParams);
+    EXPECT_EQ(true, ret < 0);
+    audioRenderer->Release();
+}
+
+/**
+* @tc.name  : Test SetInterruptMode API via legal input
+* @tc.number: Audio_Renderer_SetInterruptMode_001
+* @tc.desc  : Test SetInterruptMode interface. Returns 0 {SUCCESS}, if the setting is successful.
+*/
+HWTEST(AudioRendererUnitTest, Audio_Renderer_SetInterruptMode_001, TestSize.Level1)
+{
+    int32_t ret = -1;
+    unique_ptr<AudioRenderer> audioRenderer = AudioRenderer::Create(STREAM_MUSIC);
+    ASSERT_NE(nullptr, audioRenderer);
+
+    ret = AudioRendererUnitTest::InitializeRenderer(audioRenderer);
+    EXPECT_EQ(SUCCESS, ret);
+
+    audioRenderer->SetInterruptMode(SHARE_MODE);
+
+    bool isStarted = audioRenderer->Start();
+    EXPECT_EQ(true, isStarted);
+
+    bool isStopped = audioRenderer->Stop();
+    EXPECT_EQ(true, isStopped);
+    audioRenderer->Release();
+}
+
+/**
+* @tc.name  : Test GetBufQueueState 
+* @tc.number: Audio_Renderer_GetBufQueueState_001
+* @tc.desc  : Test GetBufQueueState interface. Returns BufferQueueState, if obtained successfully.
+*/
+HWTEST(AudioRendererUnitTest, Audio_Renderer_GetBufQueueState_001, TestSize.Level1)
+{
+    int32_t ret = -1;
+    AudioRendererOptions rendererOptions;
+
+    AudioRendererUnitTest::InitializeRendererOptions(rendererOptions);
+    unique_ptr<AudioRenderer> audioRenderer = AudioRenderer::Create(rendererOptions);
+    ASSERT_NE(nullptr, audioRenderer);
+
+    ret = audioRenderer->SetRenderMode(RENDER_MODE_CALLBACK);
+    EXPECT_EQ(SUCCESS, ret);
+    AudioRenderMode renderMode = audioRenderer->GetRenderMode();
+    EXPECT_EQ(RENDER_MODE_CALLBACK, renderMode);
+
+    shared_ptr<AudioRendererWriteCallback> cb = make_shared<AudioRenderModeCallbackTest>();
+
+    ret = audioRenderer->SetRendererWriteCallback(cb);
+    EXPECT_EQ(SUCCESS, ret);
+
+    BufferQueueState bQueueSate {};
+    bQueueSate.currentIndex = 1;
+    bQueueSate.numBuffers = 1;
+
+    ret = audioRenderer->GetBufQueueState(bQueueSate);
+    EXPECT_EQ(SUCCESS, ret);
+    audioRenderer->Release();
+}
+
+/**
 * @tc.name  : Test GetParams API stability.
 * @tc.number: Audio_Renderer_GetParams_Stability_001
 * @tc.desc  : Test GetParams interface stability.
