@@ -338,7 +338,8 @@ void AudioStreamCallbackCapturer::SaveCallback(const std::weak_ptr<AudioCapturer
     callback_ = callback;
 }
 
-void AudioStreamCallbackCapturer::OnStateChange(const State state)
+void AudioStreamCallbackCapturer::OnStateChange(const State state,
+    const StateChangeCmdType __attribute__((unused)) cmdType)
 {
     std::shared_ptr<AudioCapturerCallback> cb = callback_.lock();
     if (cb == nullptr) {

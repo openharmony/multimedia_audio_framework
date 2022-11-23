@@ -41,7 +41,8 @@ namespace {
     constexpr int32_t SAMPLE_FORMAT_S32LE = 32;
 }
 
-void AudioRendererCallbackTestImpl::OnStateChange(const RendererState state)
+void AudioRendererCallbackTestImpl::OnStateChange(const RendererState state,
+    const StateChangeCmdType __attribute__((unused)) cmdType)
 {
     AUDIO_DEBUG_LOG("AudioRendererCallbackTestImpl:: OnStateChange");
 

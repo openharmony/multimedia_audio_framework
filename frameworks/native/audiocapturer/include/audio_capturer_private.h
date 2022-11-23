@@ -71,7 +71,7 @@ class AudioStreamCallbackCapturer : public AudioStreamCallback {
 public:
     virtual ~AudioStreamCallbackCapturer() = default;
 
-    void OnStateChange(const State state) override;
+    void OnStateChange(const State state, const StateChangeCmdType __attribute__((unused)) cmdType) override;
     void SaveCallback(const std::weak_ptr<AudioCapturerCallback> &callback);
 private:
     std::weak_ptr<AudioCapturerCallback> callback_;

@@ -252,7 +252,7 @@ int32_t AudioRendererPrivate::GetStreamInfo(AudioStreamInfo &streamInfo) const
 int32_t AudioRendererPrivate::SetRendererCallback(const std::shared_ptr<AudioRendererCallback> &callback)
 {
     // If the client is using the deprecated SetParams API. SetRendererCallback must be invoked, after SetParams.
-    // In general, callbacks can only be set after the renderer state is  PREPARED.
+    // In general, callbacks can only be set after the renderer state is PREPARED.
     RendererState state = GetStatus();
     if (state == RENDERER_NEW || state == RENDERER_RELEASED) {
         AUDIO_DEBUG_LOG("AudioRendererPrivate::SetRendererCallback incorrect state:%{public}d to register cb", state);
@@ -324,7 +324,7 @@ void AudioRendererPrivate::UnsetRendererPeriodPositionCallback()
     audioStream_->UnsetRendererPeriodPositionCallback();
 }
 
-bool AudioRendererPrivate::Start() const
+bool AudioRendererPrivate::Start(StateChangeCmdType cmdType) const
 {
     AUDIO_INFO_LOG("AudioRenderer::Start");
     RendererState state = GetStatus();
@@ -333,7 +333,7 @@ bool AudioRendererPrivate::Start() const
         return false;
     }
     AUDIO_DEBUG_LOG("AudioRendererPrivate::Start::mode_::%{public}d", mode_);
-    
+
     AudioInterrupt audioInterrupt;
     switch (mode_) {
         case InterruptMode::SHARE_MODE:
@@ -356,7 +356,7 @@ bool AudioRendererPrivate::Start() const
         return false;
     }
 
-    return audioStream_->StartAudioStream();
+    return audioStream_->StartAudioStream(cmdType);
 }
 
 int32_t AudioRendererPrivate::Write(uint8_t *buffer, size_t bufferSize)
@@ -384,10 +384,10 @@ bool AudioRendererPrivate::Flush() const
     return audioStream_->FlushAudioStream();
 }
 
-bool AudioRendererPrivate::Pause() const
+bool AudioRendererPrivate::Pause(StateChangeCmdType cmdType) const
 {
     AUDIO_INFO_LOG("AudioRenderer::Pause");
-    bool result = audioStream_->PauseAudioStream();
+    bool result = audioStream_->PauseAudioStream(cmdType);
     AudioInterrupt audioInterrupt;
     switch (mode_) {
         case InterruptMode::SHARE_MODE:
@@ -643,7 +643,7 @@ void AudioStreamCallbackRenderer::SaveCallback(const std::weak_ptr<AudioRenderer
     callback_ = callback;
 }
 
-void AudioStreamCallbackRenderer::OnStateChange(const State state)
+void AudioStreamCallbackRenderer::OnStateChange(const State state, const StateChangeCmdType cmdType)
 {
     std::shared_ptr<AudioRendererCallback> cb = callback_.lock();
     if (cb == nullptr) {
@@ -651,7 +651,7 @@ void AudioStreamCallbackRenderer::OnStateChange(const State state)
         return;
     }
 
-    cb->OnStateChange(static_cast<RendererState>(state));
+    cb->OnStateChange(static_cast<RendererState>(state), cmdType);
 }
 
 std::vector<AudioSampleFormat> AudioRenderer::GetSupportedFormats()

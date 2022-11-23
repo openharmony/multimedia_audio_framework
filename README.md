@@ -106,7 +106,7 @@ You can use APIs provided in this repository to convert audio data into audible 
             }
         }
 
-        void OnStateChange(const RendererState state) override
+        void OnStateChange(const RendererState state, const StateChangeCmdType cmdType) override
         {
             switch (state) {
                 case RENDERER_PREPARED:

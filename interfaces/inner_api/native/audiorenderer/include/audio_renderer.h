@@ -54,12 +54,12 @@ public:
     virtual void OnInterrupt(const InterruptEvent &interruptEvent) = 0;
 
     /**
-    * Called when renderer state is updated.
+     * Called when renderer state is updated.
      *
      * @param state Indicates updated state of the renderer.
      * For details, refer RendererState enum.
      */
-    virtual void OnStateChange(const RendererState state) = 0;
+    virtual void OnStateChange(const RendererState state, const StateChangeCmdType cmdType = CMD_FROM_CLIENT) = 0;
 };
 
 class RendererPositionCallback {
@@ -227,7 +227,7 @@ public:
      *
      * @return Returns <b>true</b> if the rendering is successfully started; returns <b>false</b> otherwise.
      */
-    virtual bool Start() const = 0;
+    virtual bool Start(StateChangeCmdType cmdType = CMD_FROM_CLIENT) const = 0;
 
     /**
      * @brief Writes audio data.
@@ -289,7 +289,7 @@ public:
      *
      * @return Returns <b>true</b> if the rendering is successfully Paused; returns <b>false</b> otherwise.
      */
-    virtual bool Pause() const = 0;
+    virtual bool Pause(StateChangeCmdType cmdType = CMD_FROM_CLIENT) const = 0;
 
     /**
      * @brief Stops audio rendering.

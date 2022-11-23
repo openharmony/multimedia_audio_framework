@@ -346,7 +346,8 @@ void TonePlayerPrivate::OnWriteData(size_t length)
     AudioToneRendererCallback();
 }
 
-void TonePlayerPrivate::OnStateChange(const RendererState state)
+void TonePlayerPrivate::OnStateChange(const RendererState state,
+    const StateChangeCmdType __attribute__((unused)) cmdType)
 {
     AUDIO_INFO_LOG("OnStateChange Cbk: %{public}d not calling", state);
     if (state == RENDERER_RUNNING || state == RENDERER_STOPPED) {
