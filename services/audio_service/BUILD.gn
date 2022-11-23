@@ -28,7 +28,6 @@ config("audio_client_public_config") {
   include_dirs = [
     "//foundation/multimedia/audio_framework/frameworks/native/audiopolicy/include",
     "//foundation/multimedia/audio_framework/frameworks/native/audioutils/include",
-    "//foundation/multimedia/audio_framework/frameworks/native/audiosession/include",
     "//foundation/multimedia/audio_framework/frameworks/native/audiostream/include",
     "//foundation/multimedia/audio_framework/interfaces/inner_api/native/audiocapturer/include",
     "//foundation/multimedia/audio_framework/interfaces/inner_api/native/audiocommon/include",
@@ -72,7 +71,6 @@ ohos_shared_library("audio_client") {
     "client/src/audio_manager_proxy.cpp",
     "client/src/audio_routing_manager.cpp",
     "client/src/audio_service_client.cpp",
-    "client/src/audio_session.cpp",
     "client/src/audio_stream.cpp",
     "client/src/audio_stream_manager.cpp",
     "client/src/audio_stream_tracker.cpp",
