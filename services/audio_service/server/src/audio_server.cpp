@@ -477,7 +477,7 @@ std::vector<sptr<AudioDeviceDescriptor>> AudioServer::GetDevices(DeviceFlag devi
 void AudioServer::AudioServerDied(pid_t pid)
 {
     AUDIO_INFO_LOG("Policy server died: restart pulse audio");
-    exit(0);
+    _Exit(0);
 }
 
 void AudioServer::RegisterPolicyServerDeathRecipient()

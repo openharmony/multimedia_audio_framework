@@ -1456,7 +1456,7 @@ void AudioPolicyService::OnServiceDisconnected(AudioServiceIndex serviceIndex)
     CHECK_AND_RETURN_LOG(serviceIndex >= HDI_SERVICE_INDEX && serviceIndex <= AUDIO_SERVICE_INDEX, "invalid index");
     if (serviceIndex == HDI_SERVICE_INDEX) {
         AUDIO_ERR_LOG("Auto exit audio policy service for hdi service stopped!");
-        exit(0);
+        _Exit(0);
     }
 }
 
