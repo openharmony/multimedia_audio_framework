@@ -940,6 +940,10 @@ int32_t AudioPolicyService::ActivateNewDevice(DeviceType deviceType, bool isScen
     audioPolicyManager_.SuspendAudioDevice(portName, false);
 
     if (isUpdateRouteSupported_ && !isSceneActivation) {
+        if (deviceType == DEVICE_TYPE_SPEAKER && currentActiveDevice_ != DEVICE_TYPE_SPEAKER) {
+            AUDIO_INFO_LOG("Delay for device: [%{public}d]-->[%{public}d]", currentActiveDevice_, deviceType);
+            usleep(switchVolumeDelay_);
+        }
         UpdateActiveDeviceRoute(deviceType);
     }
 
