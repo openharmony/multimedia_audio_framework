@@ -32,7 +32,8 @@ namespace {
     constexpr int32_t SAMPLE_FORMAT_S24LE = 24;
     constexpr int32_t SAMPLE_FORMAT_S32LE = 32;
 }
-void AudioInterruptTest::OnStateChange(const RendererState state)
+void AudioInterruptTest::OnStateChange(const RendererState state,
+    const StateChangeCmdType __attribute__((unused)) cmdType)
 {
     AUDIO_DEBUG_LOG("AudioInterruptTest:: OnStateChange");
 

@@ -347,14 +347,14 @@ int32_t AudioStream::SetAudioStreamInfo(const AudioStreamParams info,
     return SUCCESS;
 }
 
-bool AudioStream::StartAudioStream()
+bool AudioStream::StartAudioStream(StateChangeCmdType cmdType)
 {
     if ((state_ != PREPARED) && (state_ != STOPPED) && (state_ != PAUSED)) {
         AUDIO_ERR_LOG("StartAudioStream Illegal state:%{public}u", state_);
         return false;
     }
 
-    int32_t ret = StartStream();
+    int32_t ret = StartStream(cmdType);
     if (ret != SUCCESS) {
         AUDIO_ERR_LOG("StartStream Start failed:%{public}d", ret);
         return false;
@@ -458,7 +458,7 @@ size_t AudioStream::Write(uint8_t *buffer, size_t buffer_size)
     return bytesWritten;
 }
 
-bool AudioStream::PauseAudioStream()
+bool AudioStream::PauseAudioStream(StateChangeCmdType cmdType)
 {
     if (state_ != RUNNING) {
         AUDIO_ERR_LOG("PauseAudioStream: State is not RUNNING. Illegal state:%{public}u", state_);
@@ -491,7 +491,7 @@ bool AudioStream::PauseAudioStream()
     
     AUDIO_DEBUG_LOG("AudioStream::PauseAudioStream:renderMode_ : %{public}d state_: %{public}d", renderMode_, state_);
 
-    int32_t ret = PauseStream();
+    int32_t ret = PauseStream(cmdType);
     if (ret != SUCCESS) {
         AUDIO_DEBUG_LOG("StreamPause fail,ret:%{public}d", ret);
         state_ = oldState;

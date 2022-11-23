@@ -27,7 +27,7 @@ namespace AudioStandard {
 class AudioRendererCallbackTestImpl : public AudioRendererCallback {
 public:
     void OnInterrupt(const InterruptEvent &interruptEvent) override;
-    void OnStateChange(const RendererState state) override;
+    void OnStateChange(const RendererState state, const StateChangeCmdType __attribute__((unused)) cmdType) override;
     bool isRendererPaused_ = false;
     bool isStopInProgress_ = false;
     bool isRendererStopped_ = false;

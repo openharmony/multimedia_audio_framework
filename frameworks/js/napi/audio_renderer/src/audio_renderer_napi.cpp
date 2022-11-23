@@ -515,10 +515,10 @@ napi_value AudioRendererNapi::CreateAudioRenderer(napi_env env, napi_callback_in
     GET_PARAMS(env, info, ARGS_TWO);
 
     unique_ptr<AudioRendererAsyncContext> asyncContext = make_unique<AudioRendererAsyncContext>();
+    CHECK_AND_RETURN_RET_LOG(asyncContext != nullptr, nullptr, "AudioRendererAsyncContext object creation failed");
     if (argc < ARGS_ONE) {
         asyncContext->status = NAPI_ERR_INVALID_PARAM;
     }
-    CHECK_AND_RETURN_RET_LOG(asyncContext != nullptr, nullptr, "AudioRendererAsyncContext object creation failed");
 
     for (size_t i = PARAM0; i < argc; i++) {
         napi_valuetype valueType = napi_undefined;
@@ -612,16 +612,11 @@ void AudioRendererNapi::WriteAsyncCallbackComplete(napi_env env, napi_status sta
     napi_value retVal;
 
     auto asyncContext = static_cast<AudioRendererAsyncContext *>(data);
-    napi_value valueParam = nullptr;
 
     if (asyncContext != nullptr) {
         if (!asyncContext->status) {
-            napi_create_uint32(env, asyncContext->totalBytesWritten, &valueParam);
-            napi_get_undefined(env, &valueParam);
-        }
-        if (!asyncContext->status) {
             napi_get_undefined(env, &result[PARAM0]);
-            result[PARAM1] = valueParam;
+            napi_create_uint32(env, asyncContext->totalBytesWritten, &result[PARAM1]);
         } else {
             napi_value message = nullptr;
             std::string messageValue = AudioCommonNapi::getMessageByCode(asyncContext->status);
@@ -1716,7 +1711,7 @@ napi_value AudioRendererNapi::SetVolume(napi_env env, napi_callback_info info)
                 auto context = static_cast<AudioRendererAsyncContext*>(data);
                 if (context->status == SUCCESS) {
                     if (!AudioCommonNapi::IsLegalInputArgumentVolLevel(context->volLevel)) {
-                        context->status = NAPI_ERR_INVALID_PARAM;
+                        context->status = NAPI_ERR_UNSUPPORTED;
                     } else {
                         context->status = context->objectInfo->audioMngr_->
                             SetVolume(GetNativeAudioVolumeType(context->volType), context->volLevel);
@@ -2188,11 +2183,10 @@ napi_value AudioRendererNapi::SetInterruptMode(napi_env env, napi_callback_info 
     GET_PARAMS(env, info, ARGS_TWO);
     
     unique_ptr<AudioRendererAsyncContext> asyncContext = make_unique<AudioRendererAsyncContext>();
+    CHECK_AND_RETURN_RET_LOG(asyncContext != nullptr, nullptr, "AudioRendererAsyncContext object creation failed");
     if (argc < ARGS_ONE) {
         asyncContext->status = NAPI_ERR_INVALID_PARAM;
     }
-
-    CHECK_AND_RETURN_RET_LOG(asyncContext != nullptr, nullptr, "AudioRendererAsyncContext object creation failed");
 
     status = napi_unwrap(env, thisVar, reinterpret_cast<void**>(&asyncContext->objectInfo));
     if (status == napi_ok && asyncContext->objectInfo != nullptr) {

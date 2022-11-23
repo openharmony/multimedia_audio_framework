@@ -194,6 +194,8 @@ public:
 
     std::vector<sptr<VolumeGroupInfo>> GetVolumeGroupInfos() override;
 
+    std::vector<sptr<AudioDeviceDescriptor>> GetActiveOutputDeviceDescriptors() override;
+
     class RemoteParameterCallback : public AudioParameterCallback {
     public:
         RemoteParameterCallback(sptr<AudioPolicyServer> server);
@@ -267,6 +269,7 @@ private:
     std::unordered_map<AudioStreamType, int32_t> interruptPriorityMap_;
     std::unordered_map<int32_t, std::shared_ptr<AudioRingerModeCallback>> ringerModeListenerCbsMap_;
     std::unordered_map<int32_t, std::shared_ptr<AudioManagerMicStateChangeCallback>> micStateChangeListenerCbsMap_;
+    std::vector<pid_t> clientDiedListenerState_;
     static constexpr int32_t MAX_VOLUME_LEVEL = 15;
     static constexpr int32_t MIN_VOLUME_LEVEL = 0;
     static constexpr int32_t CONST_FACTOR = 100;

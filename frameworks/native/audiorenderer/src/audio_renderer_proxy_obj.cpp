@@ -26,12 +26,12 @@ void AudioRendererProxyObj::SaveRendererObj(const AudioRenderer *rendererObj)
 
 void AudioRendererProxyObj::PausedStreamImpl(const StreamSetStateEventInternal &streamSetStateEventInternal)
 {
-    renderer->Pause();
+    renderer->Pause(CMD_FROM_SYSTEM);
 }
 
 void AudioRendererProxyObj::ResumeStreamImpl(const StreamSetStateEventInternal &streamSetStateEventInternal)
 {
-    renderer->Start();
+    renderer->Start(CMD_FROM_SYSTEM);
 }
 
 void AudioRendererProxyObj::SetLowPowerVolumeImpl(float volume)

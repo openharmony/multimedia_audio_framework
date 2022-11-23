@@ -76,18 +76,19 @@ void AudioPolicyServer::OnDump()
 
 void AudioPolicyServer::OnStart()
 {
-    AUDIO_DEBUG_LOG("AudioPolicyService OnStart");
-    bool res = Publish(this);
-    if (res) {
-        AUDIO_DEBUG_LOG("AudioPolicyService OnStart res=%d", res);
-    }
+    AUDIO_INFO_LOG("AudioPolicyService OnStart");
+    mPolicyService.Init();
+
     AddSystemAbilityListener(DISTRIBUTED_KV_DATA_SERVICE_ABILITY_ID);
     AddSystemAbilityListener(MULTIMODAL_INPUT_SERVICE_ID);
     AddSystemAbilityListener(AUDIO_DISTRIBUTED_SERVICE_ID);
     AddSystemAbilityListener(BLUETOOTH_HOST_SYS_ABILITY_ID);
     AddSystemAbilityListener(ACCESSIBILITY_MANAGER_SERVICE_ID);
 
-    mPolicyService.Init();
+    bool res = Publish(this);
+    if (res) {
+        AUDIO_WARNING_LOG("AudioPolicyService OnStart res=%d", res);
+    }
 
     Security::AccessToken::PermStateChangeScope scopeInfo;
     scopeInfo.permList = {"ohos.permission.MICROPHONE"};
@@ -97,8 +98,6 @@ void AudioPolicyServer::OnStart()
     if (iRes < 0) {
         AUDIO_ERR_LOG("fail to call RegisterPermStateChangeCallback.");
     }
-
-    return;
 }
 
 void AudioPolicyServer::OnStop()
@@ -357,6 +356,23 @@ int32_t AudioPolicyServer::SelectInputDevice(sptr<AudioCapturerFilter> audioCapt
 std::vector<sptr<AudioDeviceDescriptor>> AudioPolicyServer::GetDevices(DeviceFlag deviceFlag)
 {
     std::vector<sptr<AudioDeviceDescriptor>> deviceDescs = mPolicyService.GetDevices(deviceFlag);
+    bool hasBTPermission = VerifyClientPermission(USE_BLUETOOTH_PERMISSION);
+    if (!hasBTPermission) {
+        for (sptr<AudioDeviceDescriptor> desc : deviceDescs) {
+            if ((desc->deviceType_ == DEVICE_TYPE_BLUETOOTH_A2DP)
+                || (desc->deviceType_ == DEVICE_TYPE_BLUETOOTH_SCO)) {
+                desc->deviceName_ = "";
+                desc->macAddress_ = "";
+            }
+        }
+    }
+
+    return deviceDescs;
+}
+
+std::vector<sptr<AudioDeviceDescriptor>> AudioPolicyServer::GetActiveOutputDeviceDescriptors()
+{
+    std::vector<sptr<AudioDeviceDescriptor>> deviceDescs = mPolicyService.GetActiveOutputDeviceDescriptors();
     bool hasBTPermission = VerifyClientPermission(USE_BLUETOOTH_PERMISSION);
     if (!hasBTPermission) {
         for (sptr<AudioDeviceDescriptor> desc : deviceDescs) {
@@ -1131,7 +1147,11 @@ void AudioPolicyServer::OnSessionRemoved(const uint32_t sessionID)
 AudioStreamType AudioPolicyServer::GetStreamInFocus()
 {
     AudioStreamType streamInFocus = STREAM_DEFAULT;
-    if (!curActiveOwnersList_.empty()) {
+    if (GetAudioScene() == AUDIO_SCENE_PHONE_CALL) {
+        // When a call stream is playing, the stream type in focus is still ring.
+        // So we set streamInFocus to call manually.
+        streamInFocus = STREAM_VOICE_CALL;
+    } else if (!curActiveOwnersList_.empty()) {
         streamInFocus = curActiveOwnersList_.front().streamType;
     }
 
@@ -1519,6 +1539,12 @@ void AudioPolicyServer::RegisterClientDeathRecipient(const sptr<IRemoteObject> &
     } else {
         uid = IPCSkeleton::GetCallingPid();
     }
+    if (id == TRACKER_CLIENT && std::find(clientDiedListenerState_.begin(), clientDiedListenerState_.end(), uid)
+        != clientDiedListenerState_.end())
+    {
+        AUDIO_INFO_LOG("Tracker has been registered for %{public}d!", uid);
+        return;
+    }
     sptr<AudioServerDeathRecipient> deathRecipient_ = new(std::nothrow) AudioServerDeathRecipient(uid);
     if (deathRecipient_ != nullptr) {
         if (id == TRACKER_CLIENT) {
@@ -1530,6 +1556,9 @@ void AudioPolicyServer::RegisterClientDeathRecipient(const sptr<IRemoteObject> &
                 this, std::placeholders::_1));
         }
         bool result = object->AddDeathRecipient(deathRecipient_);
+        if (result && id == TRACKER_CLIENT) {
+            clientDiedListenerState_.push_back(uid);
+        }
         if (!result) {
             AUDIO_ERR_LOG("failed to add deathRecipient");
         }
@@ -1540,6 +1569,11 @@ void AudioPolicyServer::RegisteredTrackerClientDied(pid_t pid)
 {
     AUDIO_INFO_LOG("RegisteredTrackerClient died: remove entry, uid %{public}d", pid);
     mPolicyService.RegisteredTrackerClientDied(pid);
+    auto filter = [&pid](int val) {
+        return pid == val;
+    };
+    clientDiedListenerState_.erase(std::remove_if(clientDiedListenerState_.begin(), clientDiedListenerState_.end(),
+        filter), clientDiedListenerState_.end());
 }
 
 void AudioPolicyServer::RegisteredStreamListenerClientDied(pid_t pid)

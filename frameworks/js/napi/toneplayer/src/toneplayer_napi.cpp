@@ -229,11 +229,10 @@ napi_value TonePlayerNapi::CreateTonePlayer(napi_env env, napi_callback_info inf
     GET_PARAMS(env, info, ARGS_TWO);
 
     unique_ptr<TonePlayerAsyncContext> asyncContext = make_unique<TonePlayerAsyncContext>();
+    CHECK_AND_RETURN_RET_LOG(asyncContext != nullptr, nullptr, "TonePlayerAsyncContext object creation failed");
     if (argc < ARGS_ONE) {
         asyncContext->status = NAPI_ERR_INVALID_PARAM;
     }
-
-    CHECK_AND_RETURN_RET_LOG(asyncContext != nullptr, nullptr, "TonePlayerAsyncContext object creation failed");
 
     for (size_t i = PARAM0; i < argc; i++) {
         napi_valuetype valueType = napi_undefined;
@@ -412,7 +411,7 @@ napi_value TonePlayerNapi::Load(napi_env env, napi_callback_info info)
                 [](napi_env env, void *data) {
                     auto context = static_cast<TonePlayerAsyncContext *>(data);
                     HiLog::Error(LABEL, "The Load parameter is invalid");
-                    context->status = ERR_INVALID_PARAM;
+                    context->status = NAPI_ERR_INVALID_PARAM;
                 },
                 VoidAsyncCallbackComplete, static_cast<void *>(asyncContext.get()), &asyncContext->work);
         } else {

@@ -269,6 +269,7 @@ public:
     DeviceType GetTypeValueFromPin(AudioPin pin) const;
     std::vector<sptr<VolumeGroupInfo>> GetVolumeGroups(std::string networkId);
     std::shared_ptr<AudioGroupManager> GetGroupManager(int32_t groupId);
+    std::vector<sptr<AudioDeviceDescriptor>> GetActiveOutputDeviceDescriptors();
 private:
     static constexpr int32_t MAX_VOLUME_LEVEL = 15;
     static constexpr int32_t MIN_VOLUME_LEVEL = 0;
@@ -285,8 +286,10 @@ private:
 
     int32_t cbClientId_ = -1;
     int32_t volumeChangeClientPid_ = -1;
+    AudioRingerMode ringModeBackup_;
     std::shared_ptr<AudioManagerDeviceChangeCallback> deviceChangeCallback_ = nullptr;
     std::shared_ptr<AudioInterruptCallback> audioInterruptCallback_ = nullptr;
+    std::shared_ptr<AudioRingerModeCallback> ringerModeCallback_ = nullptr;
     std::vector<std::shared_ptr<AudioGroupManager>> groupManagerMap_;
 };
 } // namespace AudioStandard

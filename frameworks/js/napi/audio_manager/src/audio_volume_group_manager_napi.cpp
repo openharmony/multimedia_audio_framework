@@ -535,7 +535,7 @@ napi_value AudioVolumeGroupManagerNapi::GetMinVolume(napi_env env, napi_callback
                 }
                 break;
             } else {
-                NAPI_ASSERT(env, false, "type mismatch");
+                asyncContext->status = NAPI_ERR_INVALID_PARAM;
             }
         }
 
@@ -1040,7 +1040,7 @@ napi_value AudioVolumeGroupManagerNapi::On(napi_env env, napi_callback_info info
 
 napi_value AudioVolumeGroupManagerNapi::Init(napi_env env, napi_value exports)
 {
-    AUDIO_INFO_LOG("AudioRoutingManagerNapi::Init");
+    AUDIO_INFO_LOG("AudioVolumeGroupManagerNapi::Init");
     napi_status status;
     napi_value constructor;
     napi_value result = nullptr;
@@ -1077,7 +1077,7 @@ napi_value AudioVolumeGroupManagerNapi::Init(napi_env env, napi_value exports)
         }
     }
 
-    HiLog::Error(LABEL, "Failure in AudioRoutingManagerNapi::Init()");
+    HiLog::Error(LABEL, "Failure in AudioVolumeGroupManagerNapi::Init()");
     return result;
 }
 } // namespace AudioStandard

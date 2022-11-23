@@ -86,6 +86,8 @@ static const std::map<std::string, DeviceType> deviceTypeMap = {
     {"BLUETOOTH_SCO", DEVICE_TYPE_BLUETOOTH_SCO},
     {"BLUETOOTH_A2DP", DEVICE_TYPE_BLUETOOTH_A2DP},
     {"MIC", DEVICE_TYPE_MIC},
+    {"USB_HEADSET", DEVICE_TYPE_USB_HEADSET},
+    {"DEFAULT", DEVICE_TYPE_DEFAULT},
     {"MAX", DEVICE_TYPE_MAX},
 };
 

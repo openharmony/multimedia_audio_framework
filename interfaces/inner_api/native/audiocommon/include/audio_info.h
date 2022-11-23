@@ -879,6 +879,11 @@ enum AudioPermissionState {
     AUDIO_PERMISSION_START = 0,
     AUDIO_PERMISSION_STOP = 1,
 };
+
+enum StateChangeCmdType {
+    CMD_FROM_CLIENT = 0,
+    CMD_FROM_SYSTEM = 1
+};
 } // namespace AudioStandard
 } // namespace OHOS
 #endif // AUDIO_INFO_H

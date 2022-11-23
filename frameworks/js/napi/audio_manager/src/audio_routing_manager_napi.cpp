@@ -58,6 +58,7 @@ struct AudioRoutingManagerAsyncContext {
     sptr<AudioRendererFilter> audioRendererFilter;
     sptr<AudioCapturerFilter> audioCapturerFilter;
     vector<sptr<AudioDeviceDescriptor>> deviceDescriptors;
+    vector<sptr<AudioDeviceDescriptor>> outDeviceDescriptors;
 };
 
 AudioRoutingManagerNapi::AudioRoutingManagerNapi()
@@ -98,7 +99,7 @@ napi_value AudioRoutingManagerNapi::Init(napi_env env, napi_value exports)
         DECLARE_NAPI_FUNCTION("selectInputDeviceByFilter", SelectInputDeviceByFilter),
         DECLARE_NAPI_FUNCTION("setCommunicationDevice", SetCommunicationDevice),
         DECLARE_NAPI_FUNCTION("isCommunicationDeviceActive", IsCommunicationDeviceActive),
-        
+        DECLARE_NAPI_FUNCTION("getActiveOutputDeviceDescriptors", GetActiveOutputDeviceDescriptors),
     };
 
     status = napi_define_class(env, AUDIO_ROUTING_MANAGER_NAPI_CLASS_NAME.c_str(), NAPI_AUTO_LENGTH, Construct, nullptr,
@@ -387,47 +388,47 @@ static void SetValueString(const napi_env& env, const std::string& fieldStr, con
     napi_set_named_property(env, result, fieldStr.c_str(), value);
 }
 
-static void SetDevicesInfo(AudioRoutingManagerAsyncContext* asyncContext, napi_env env, napi_value* result,
+static void SetDevicesInfo(vector<sptr<AudioDeviceDescriptor>> deviceDescriptors, napi_env env, napi_value* result,
     napi_value valueParam)
 {
-    size_t size = asyncContext->deviceDescriptors.size();
+    size_t size = deviceDescriptors.size();
     HiLog::Info(LABEL, "number of devices = %{public}zu", size);
 
     napi_create_array_with_length(env, size, &result[PARAM1]);
     for (size_t i = 0; i < size; i++) {
-        if (asyncContext->deviceDescriptors[i] != nullptr) {
+        if (deviceDescriptors[i] != nullptr) {
             (void)napi_create_object(env, &valueParam);
             SetValueInt32(env, "deviceRole", static_cast<int32_t>(
-                asyncContext->deviceDescriptors[i]->deviceRole_), valueParam);
+                deviceDescriptors[i]->deviceRole_), valueParam);
             SetValueInt32(env, "deviceType", static_cast<int32_t>(
-                asyncContext->deviceDescriptors[i]->deviceType_), valueParam);
+                deviceDescriptors[i]->deviceType_), valueParam);
             SetValueInt32(env, "id", static_cast<int32_t>(
-                asyncContext->deviceDescriptors[i]->deviceId_), valueParam);
-            SetValueString(env, "name", asyncContext->deviceDescriptors[i]->deviceName_, valueParam);
-            SetValueString(env, "address", asyncContext->deviceDescriptors[i]->macAddress_, valueParam);
+                deviceDescriptors[i]->deviceId_), valueParam);
+            SetValueString(env, "name", deviceDescriptors[i]->deviceName_, valueParam);
+            SetValueString(env, "address", deviceDescriptors[i]->macAddress_, valueParam);
             SetValueString(env, "networkId", static_cast<std::string>(
-                asyncContext->deviceDescriptors[i]->networkId_), valueParam);
+                deviceDescriptors[i]->networkId_), valueParam);
             SetValueInt32(env, "interruptGroupId", static_cast<int32_t>(
-                asyncContext->deviceDescriptors[i]->interruptGroupId_), valueParam);
+                deviceDescriptors[i]->interruptGroupId_), valueParam);
             SetValueInt32(env, "volumeGroupId", static_cast<int32_t>(
-                asyncContext->deviceDescriptors[i]->volumeGroupId_), valueParam);
+                deviceDescriptors[i]->volumeGroupId_), valueParam);
 
             napi_value value = nullptr;
             napi_value sampleRates;
             napi_create_array_with_length(env, 1, &sampleRates);
-            napi_create_int32(env, asyncContext->deviceDescriptors[i]->audioStreamInfo_.samplingRate, &value);
+            napi_create_int32(env, deviceDescriptors[i]->audioStreamInfo_.samplingRate, &value);
             napi_set_element(env, sampleRates, 0, value);
             napi_set_named_property(env, valueParam, "sampleRates", sampleRates);
 
             napi_value channelCounts;
             napi_create_array_with_length(env, 1, &channelCounts);
-            napi_create_int32(env, asyncContext->deviceDescriptors[i]->audioStreamInfo_.channels, &value);
+            napi_create_int32(env, deviceDescriptors[i]->audioStreamInfo_.channels, &value);
             napi_set_element(env, channelCounts, 0, value);
             napi_set_named_property(env, valueParam, "channelCounts", channelCounts);
 
             napi_value channelMasks;
             napi_create_array_with_length(env, 1, &channelMasks);
-            napi_create_int32(env, asyncContext->deviceDescriptors[i]->channelMasks_, &value);
+            napi_create_int32(env, deviceDescriptors[i]->channelMasks_, &value);
             napi_set_element(env, channelMasks, 0, value);
             napi_set_named_property(env, valueParam, "channelMasks", channelMasks);
             napi_set_element(env, result[PARAM1], i, valueParam);
@@ -438,19 +439,18 @@ static void SetDevicesInfo(AudioRoutingManagerAsyncContext* asyncContext, napi_e
 static void GetDevicesAsyncCallbackComplete(napi_env env, napi_status status, void* data)
 {
     auto asyncContext = static_cast<AudioRoutingManagerAsyncContext*>(data);
-    napi_value result[ARGS_TWO] = {0};
-    napi_value valueParam = nullptr;
-    SetDevicesInfo(asyncContext, env, result, valueParam);
-
-    napi_get_undefined(env, &result[PARAM0]);
-    if (asyncContext != nullptr) {
-        if (!asyncContext->status) {
-            napi_get_undefined(env, &valueParam);
-        }
-        CommonCallbackRoutine(env, asyncContext, result[PARAM1]);
-    } else {
+    if (asyncContext == nullptr) {
         HiLog::Error(LABEL, "ERROR: AudioRoutingManagerAsyncContext* is Null!");
     }
+    napi_value result[ARGS_TWO] = {0};
+    napi_value valueParam = nullptr;
+    SetDevicesInfo(asyncContext->deviceDescriptors, env, result, valueParam);
+
+    napi_get_undefined(env, &result[PARAM0]);
+    if (!asyncContext->status) {
+        napi_get_undefined(env, &valueParam);
+    }
+    CommonCallbackRoutine(env, asyncContext, result[PARAM1]);
 }
 
 napi_value AudioRoutingManagerNapi::GetDevices(napi_env env, napi_callback_info info)
@@ -602,6 +602,78 @@ napi_value AudioRoutingManagerNapi::SelectOutputDevice(napi_env env, napi_callba
     return result;
 }
 
+static void GetActiveOutputDeviceAsyncCallbackComplete(napi_env env, napi_status status, void* data)
+{
+    auto asyncContext = static_cast<AudioRoutingManagerAsyncContext*>(data);
+    napi_value result[ARGS_TWO] = {0};
+    napi_value valueParam = nullptr;
+    SetDevicesInfo(asyncContext->outDeviceDescriptors, env, result, valueParam);
+
+    napi_get_undefined(env, &result[PARAM0]);
+    if (asyncContext != nullptr) {
+        if (!asyncContext->status) {
+            napi_get_undefined(env, &valueParam);
+        }
+        CommonCallbackRoutine(env, asyncContext, result[PARAM1]);
+    } else {
+        HiLog::Error(LABEL, "ERROR: AudioRoutingManagerAsyncContext* is Null!");
+    }
+}
+
+napi_value AudioRoutingManagerNapi::GetActiveOutputDeviceDescriptors(napi_env env, napi_callback_info info)
+{
+    napi_status status;
+    const int32_t refCount = 1;
+    napi_value result = nullptr;
+    size_t argc = ARGS_ONE;
+    napi_value argv[ARGS_ONE] = {0};
+    napi_value thisVar = nullptr;
+    void *data = nullptr;
+    napi_get_cb_info(env, info, &argc, argv, &thisVar, &data);
+
+    unique_ptr<AudioRoutingManagerAsyncContext> asyncContext = make_unique<AudioRoutingManagerAsyncContext>();
+
+    status = napi_unwrap(env, thisVar, reinterpret_cast<void**>(&asyncContext->objectInfo));
+    if (status == napi_ok && asyncContext->objectInfo != nullptr) {
+        napi_valuetype valueType = napi_undefined;
+        napi_typeof(env, argv[PARAM0], &valueType);
+
+        if (argc == PARAM1 && valueType == napi_function) {
+                napi_create_reference(env, argv[PARAM0], refCount, &asyncContext->callbackRef);
+        }
+
+        if (asyncContext->callbackRef == nullptr) {
+            napi_create_promise(env, &asyncContext->deferred, &result);
+        } else {
+            napi_get_undefined(env, &result);
+        }
+
+        napi_value resource = nullptr;
+        napi_create_string_utf8(env, "GetActiveOutputDeviceDescriptors", NAPI_AUTO_LENGTH, &resource);
+
+        status = napi_create_async_work(
+            env, nullptr, resource,
+            [](napi_env env, void *data) {
+                auto context = static_cast<AudioRoutingManagerAsyncContext*>(data);
+                if (context->status == SUCCESS) {
+                    context->outDeviceDescriptors = context->objectInfo->audioMngr_->GetActiveOutputDeviceDescriptors();
+                    context->status = SUCCESS;
+                }
+            },
+            GetActiveOutputDeviceAsyncCallbackComplete, static_cast<void*>(asyncContext.get()), &asyncContext->work);
+        if (status != napi_ok) {
+            result = nullptr;
+        } else {
+            status = napi_queue_async_work(env, asyncContext->work);
+            if (status == napi_ok) {
+                asyncContext.release();
+            } else {
+                result = nullptr;
+            }
+        }
+    }
+    return result;
+}
 napi_value AudioRoutingManagerNapi::SelectOutputDeviceByFilter(napi_env env, napi_callback_info info)
 {
     napi_status status;
@@ -933,8 +1005,17 @@ napi_value AudioRoutingManagerNapi::On(napi_env env, napi_callback_info info)
         deviceFlag = 3; // 3 for ALL_DEVICES_FLAG
     }
     if (argc == maxArgc) {
-        napi_get_value_int32(env, args[PARAM1], &deviceFlag);
-        AUDIO_INFO_LOG("AudioRoutingMgrNapi:On deviceFlag: %{public}d", deviceFlag);
+        napi_valuetype valueType = napi_undefined;
+        napi_typeof(env, args[PARAM1], &valueType);
+        if (valueType == napi_number) {
+            napi_get_value_int32(env, args[PARAM1], &deviceFlag);
+            AUDIO_INFO_LOG("AudioRoutingMgrNapi:On deviceFlag: %{public}d", deviceFlag);
+            if (!AudioCommonNapi::IsLegalInputArgumentDeviceFlag(deviceFlag)) {
+                THROW_ERROR_ASSERT(env, false, NAPI_ERR_INVALID_PARAM);
+            }
+        } else {
+            THROW_ERROR_ASSERT(env, false, NAPI_ERR_INPUT_INVALID);
+        }
 
         napi_valuetype handler = napi_undefined;
         napi_typeof(env, args[PARAM2], &handler);

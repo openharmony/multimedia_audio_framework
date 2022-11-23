@@ -407,6 +407,9 @@ void AudioStreamCollector::RegisteredTrackerClientDied(int32_t uid)
                 rendererStatequeue_.erase(make_pair(audioRendererChangeInfo->clientUID,
                     audioRendererChangeInfo->sessionId));
                 audioRendererChangeInfos_.erase(audioRendererChangeInfos_.begin() + i);
+                if ((sessionID != -1) && clientTracker_.erase(sessionID)) {
+                    AUDIO_DEBUG_LOG("AudioStreamCollector::TrackerClientDied:client %{public}d cleared", sessionID);
+                }
                 checkActiveStreams = true; // all entries are not checked yet
                 break;
             }
@@ -428,14 +431,13 @@ void AudioStreamCollector::RegisteredTrackerClientDied(int32_t uid)
                 capturerStatequeue_.erase(make_pair(audioCapturerChangeInfo->clientUID,
                     audioCapturerChangeInfo->sessionId));
                 audioCapturerChangeInfos_.erase(audioCapturerChangeInfos_.begin() + i);
+                if ((sessionID != -1) && clientTracker_.erase(sessionID)) {
+                    AUDIO_DEBUG_LOG("AudioStreamCollector::TrackerClientDied:client %{public}d cleared", sessionID);
+                }
                 checkActiveStreams = true; // all entries are not checked yet
                 break;
             }
         }
-    }
-    if ((sessionID != -1) && clientTracker_.erase(sessionID)) {
-        AUDIO_DEBUG_LOG("AudioStreamCollector::TrackerClientDied:client %{public}d cleared", sessionID);
-        return;
     }
 }
 

@@ -49,7 +49,7 @@ AudioPolicyService::~AudioPolicyService()
 
 bool AudioPolicyService::Init(void)
 {
-    AUDIO_DEBUG_LOG("AudioPolicyService init");
+    AUDIO_INFO_LOG("AudioPolicyService init");
     serviceFlag_.reset();
     audioPolicyManager_.Init();
     if (!configParser_.LoadConfiguration()) {
@@ -71,7 +71,7 @@ bool AudioPolicyService::Init(void)
 
     std::unique_ptr<AudioFocusParser> audioFocusParser = make_unique<AudioFocusParser>();
     CHECK_AND_RETURN_RET_LOG(audioFocusParser != nullptr, false, "Failed to create AudioFocusParser");
-    std::string AUDIO_FOCUS_CONFIG_FILE = "vendor/etc/audio/audio_interrupt_policy_config.xml";
+    std::string AUDIO_FOCUS_CONFIG_FILE = "system/etc/audio/audio_interrupt_policy_config.xml";
 
     if (audioFocusParser->LoadConfig(focusMap_)) {
         AUDIO_ERR_LOG("Audio Interrupt Load Configuration failed");
@@ -116,9 +116,7 @@ bool AudioPolicyService::ConnectServiceAdapter()
         return false;
     }
 
-    if (serviceFlag_.count() != MIN_SERVICE_COUNT) {
-        OnServiceConnected(AudioServiceIndex::AUDIO_SERVICE_INDEX);
-    }
+    OnServiceConnected(AudioServiceIndex::AUDIO_SERVICE_INDEX);
 
     return true;
 }
@@ -633,6 +631,7 @@ std::string AudioPolicyService::GetPortName(InternalDeviceType deviceType)
             break;
         case InternalDeviceType::DEVICE_TYPE_SPEAKER:
         case InternalDeviceType::DEVICE_TYPE_WIRED_HEADSET:
+        case InternalDeviceType::DEVICE_TYPE_WIRED_HEADPHONES:
         case InternalDeviceType::DEVICE_TYPE_USB_HEADSET:
         case InternalDeviceType::DEVICE_TYPE_BLUETOOTH_SCO:
             portName = PRIMARY_SPEAKER;
@@ -736,6 +735,27 @@ std::vector<sptr<AudioDeviceDescriptor>> AudioPolicyService::GetDevices(DeviceFl
     return deviceList;
 }
 
+std::vector<sptr<AudioDeviceDescriptor>> AudioPolicyService::GetActiveOutputDeviceDescriptors()
+{
+    AUDIO_INFO_LOG("Entered AudioPolicyService::%{public}s", __func__);
+    std::vector<sptr<AudioDeviceDescriptor>> deviceList = {};
+    for (const auto& device : connectedDevices_) {
+        if (device == nullptr) {
+            continue;
+        }
+        bool filterLocalOutput = ((currentActiveDevice_ == device->deviceType_)
+            && (device->networkId_ == LOCAL_NETWORK_ID)
+            && (device->deviceRole_ == DeviceRole::OUTPUT_DEVICE));
+        if (filterLocalOutput) {
+            sptr<AudioDeviceDescriptor> devDesc = new(std::nothrow) AudioDeviceDescriptor(*device);
+            deviceList.push_back(devDesc);
+            return deviceList;
+        }
+    }
+
+    return deviceList;
+}
+
 DeviceType AudioPolicyService::FetchHighPriorityDevice(bool isOutputDevice = true)
 {
     AUDIO_DEBUG_LOG("Entered AudioPolicyService::%{public}s", __func__);
@@ -790,6 +810,7 @@ void UpdateActiveDeviceRoute(InternalDeviceType deviceType)
             CHECK_AND_RETURN_LOG(ret == SUCCESS, "Failed to update the route for %{public}d", deviceType);
             break;
         }
+        case DEVICE_TYPE_WIRED_HEADPHONES:
         case DEVICE_TYPE_SPEAKER: {
             ret = g_sProxy->UpdateActiveDeviceRoute(deviceType, DeviceFlag::OUTPUT_DEVICES_FLAG);
             CHECK_AND_RETURN_LOG(ret == SUCCESS, "Failed to update the route for %{public}d", deviceType);
@@ -1124,7 +1145,8 @@ void AudioPolicyService::UpdateConnectedDevices(const AudioDeviceDescriptor &dev
         audioDescriptor = new(std::nothrow) AudioDeviceDescriptor(deviceDescriptor);
         audioDescriptor->deviceRole_ = OUTPUT_DEVICE;
         if ((deviceDescriptor.deviceType_ == DEVICE_TYPE_WIRED_HEADSET)
-            || (deviceDescriptor.deviceType_ == DEVICE_TYPE_USB_HEADSET)) {
+            || (deviceDescriptor.deviceType_ == DEVICE_TYPE_USB_HEADSET)
+            || (deviceDescriptor.deviceType_ == DEVICE_TYPE_WIRED_HEADPHONES)) {
             auto isSpeakerPresent = [](const sptr<AudioDeviceDescriptor> &devDesc) {
                 CHECK_AND_RETURN_RET_LOG(devDesc != nullptr, false, "Invalid device descriptor");
                 return (DEVICE_TYPE_SPEAKER == devDesc->deviceType_);
@@ -1383,6 +1405,7 @@ void AudioPolicyService::OnServiceConnected(AudioServiceIndex serviceIndex)
     CHECK_AND_RETURN_LOG(serviceIndex >= HDI_SERVICE_INDEX && serviceIndex <= AUDIO_SERVICE_INDEX, "invalid index");
 
     // If audio service or hdi service is not ready, donot load default modules
+    lock_guard<mutex> lock(serviceFlagMutex_);
     serviceFlag_.set(serviceIndex, true);
     if (serviceFlag_.count() != MIN_SERVICE_COUNT) {
         AUDIO_INFO_LOG("[module_load]::hdi service or audio service not up. Cannot load default module now");
@@ -1731,6 +1754,7 @@ AudioIOHandle AudioPolicyService::GetAudioIOHandle(InternalDeviceType deviceType
     AudioIOHandle ioHandle;
     switch (deviceType) {
         case InternalDeviceType::DEVICE_TYPE_WIRED_HEADSET:
+        case InternalDeviceType::DEVICE_TYPE_WIRED_HEADPHONES:
         case InternalDeviceType::DEVICE_TYPE_USB_HEADSET:
         case InternalDeviceType::DEVICE_TYPE_SPEAKER:
         case InternalDeviceType::DEVICE_TYPE_BLUETOOTH_SCO:
@@ -1795,7 +1819,8 @@ void AudioPolicyService::WriteDeviceChangedSysEvents(const vector<sptr<AudioDevi
     for (auto deviceDescriptor : desc) {
         if (deviceDescriptor != nullptr) {
             if ((deviceDescriptor->deviceType_ == DEVICE_TYPE_WIRED_HEADSET)
-                || (deviceDescriptor->deviceType_ == DEVICE_TYPE_USB_HEADSET)) {
+                || (deviceDescriptor->deviceType_ == DEVICE_TYPE_USB_HEADSET)
+                || (deviceDescriptor->deviceType_ == DEVICE_TYPE_WIRED_HEADPHONES)) {
                 HiviewDFX::HiSysEvent::Write("AUDIO", "AUDIO_HEADSET_CHANGE",
                     HiviewDFX::HiSysEvent::EventType::BEHAVIOR,
                     "ISCONNECT", isConnected ? 1 : 0,
@@ -1986,6 +2011,7 @@ DeviceRole AudioPolicyService::GetDeviceRole(DeviceType deviceType) const
         case DeviceType::DEVICE_TYPE_BLUETOOTH_SCO:
         case DeviceType::DEVICE_TYPE_BLUETOOTH_A2DP:
         case DeviceType::DEVICE_TYPE_WIRED_HEADSET:
+        case DeviceType::DEVICE_TYPE_WIRED_HEADPHONES:
         case DeviceType::DEVICE_TYPE_USB_HEADSET:
             return DeviceRole::OUTPUT_DEVICE;
         case DeviceType::DEVICE_TYPE_MIC:

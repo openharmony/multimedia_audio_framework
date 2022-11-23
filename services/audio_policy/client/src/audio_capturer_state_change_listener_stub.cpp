@@ -100,9 +100,9 @@ void AudioCapturerStateChangeListenerStub::OnCapturerStateChange(
     shared_ptr<AudioCapturerStateChangeCallback> cb = callback_.lock();
     if (cb == nullptr) {
         AUDIO_ERR_LOG("AudioCapturerStateChangeListenerStub: callback_ is nullptr");
+    } else {
+        cb->OnCapturerStateChange(audioCapturerChangeInfos);
     }
-
-    cb->OnCapturerStateChange(audioCapturerChangeInfos);
     return;
 }
 
