@@ -288,7 +288,7 @@ private:
     bool isBtListenerRegistered = false;
     const int32_t G_UNKNOWN_PID = -1;
     int32_t dAudioClientUid = 3055;
-    int32_t switchVolumeDelay_ = 60000; // 60ms
+    int32_t switchVolumeDelay_ = 500000; // us
     uint64_t audioLatencyInMsec_ = 50;
     uint32_t sinkLatencyInMsec_ {0};
     std::bitset<MIN_SERVICE_COUNT> serviceFlag_;
