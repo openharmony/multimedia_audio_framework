@@ -500,6 +500,9 @@ bool AudioStream::PauseAudioStream(StateChangeCmdType cmdType)
 
     AUDIO_INFO_LOG("PauseAudioStream SUCCESS");
 
+    // flush stream after stream paused
+    FlushAudioStream();
+
     if (audioStreamTracker_) {
         AUDIO_DEBUG_LOG("AudioStream:Calling Update tracker for Pause");
         audioStreamTracker_->UpdateTracker(sessionId_, state_, rendererInfo_, capturerInfo_);
