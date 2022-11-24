@@ -15,10 +15,9 @@ import("//build/config/features.gni")
 import("//build/test.gni")
 import("//drivers/hdf_core/adapter/uhdf2/uhdf.gni")
 
-ohos_fuzztest("AudioPolicyFuzzTest") {
-  module_out_path = "multimedia_audio_framework/audiopolicy"
-  fuzz_config_file =
-      "//foundation/multimedia/audio_framework/test/fuzztest/audiopolicy_fuzzer"
+ohos_fuzztest("AudioStreamCollectorFuzzTest") {
+  module_out_path = "multimedia_audio_framework/audiostreamcollector_fuzzer"
+  fuzz_config_file = "//foundation/multimedia/audio_framework/test/fuzztest/audiostreamcollector_fuzzer"
 
   include_dirs = [ "//foundation/multimedia/audio_framework/services/audio_policy/server/include" ]
 
@@ -30,7 +29,7 @@ ohos_fuzztest("AudioPolicyFuzzTest") {
   ]
   configs = [ "//foundation/multimedia/audio_framework/services/audio_policy:audio_policy_public_config" ]
 
-  sources = [ "audio_policy_fuzzer.cpp" ]
+  sources = [ "audio_stream_collector_fuzzer.cpp" ]
 
   deps = [
     "$hdf_uhdf_path/hdi:libhdi",
@@ -52,5 +51,5 @@ ohos_fuzztest("AudioPolicyFuzzTest") {
 
 group("fuzztest") {
   testonly = true
-  deps = [ ":AudioPolicyFuzzTest" ]
+  deps = [ ":AudioStreamCollectorFuzzTest" ]
 }

@@ -20,7 +20,10 @@ ohos_fuzztest("AudioServerFuzzTest") {
   fuzz_config_file =
       "//foundation/multimedia/audio_framework/test/fuzztest/audioserver_fuzzer"
 
-  include_dirs = [ "//foundation/multimedia/audio_framework/services/audio_service/server/include" ]
+  include_dirs = [
+    "//foundation/multimedia/audio_framework/frameworks/native/hdiadapter/sink/common",
+    "//foundation/multimedia/audio_framework/services/audio_service/server/include",
+  ]
 
   cflags = [
     "-g",
@@ -29,16 +32,12 @@ ohos_fuzztest("AudioServerFuzzTest") {
     "-fno-omit-frame-pointer",
   ]
 
-  sources = [
-    "audio_server_balance_fuzzer.cpp",
-    "audio_server_fuzzer.cpp",
-  ]
+  sources = [ "audio_server_fuzzer.cpp" ]
 
   configs = [ "//foundation/multimedia/audio_framework/services/audio_service:audio_service_config" ]
 
   deps = [
     "$hdf_uhdf_path/hdi:libhdi",
-    "//foundation/multimedia/audio_framework/services/audio_service:audio_client",
     "//foundation/multimedia/audio_framework/services/audio_service:audio_service",
   ]
   external_deps = [

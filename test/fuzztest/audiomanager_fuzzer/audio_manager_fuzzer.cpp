@@ -30,11 +30,10 @@ void AudioRendererStateCallbackFuzz::OnRendererStateChange(
 
 void AudioCapturerStateCallbackFuzz::OnCapturerStateChange(
     const std::vector<std::unique_ptr<AudioCapturerChangeInfo>> &audioCapturerChangeInfos) {}
-
+const int32_t LIMITSIZE = 4;
 void AudioManagerFuzzTest(const uint8_t* data, size_t size)
 {
-    if ((data == nullptr) || (size <= 0)) {
-        std::cout << "Invalid data" << std::endl;
+    if ((data == nullptr) || (size < LIMITSIZE)) {
         return;
     }
 
@@ -56,8 +55,7 @@ void AudioManagerFuzzTest(const uint8_t* data, size_t size)
 
 void AudioStreamManagerFuzzTest(const uint8_t* data, size_t size)
 {
-    if ((data == nullptr) || (size <= 0)) {
-        std::cout << "Invalid data" << std::endl;
+    if ((data == nullptr) || (size < LIMITSIZE)) {
         return;
     }
 

@@ -14,47 +14,55 @@
  */
 
 #include <iostream>
-#include "audio_policy_server.h"
 #include <cstddef>
 #include <cstdint>
+#include "audio_policy_server.h"
 #include "message_parcel.h"
 using namespace std;
 
 namespace OHOS {
-    constexpr int32_t OFFSET = 4;
-    const std::u16string FORMMGR_INTERFACE_TOKEN = u"IAudioPolicy";
-    const int32_t SYSTEM_ABILITY_ID = 3009;
-    const bool RUN_ON_CREATE = false;
-    namespace AudioStandard {
-        uint32_t Convert2Uint32(const uint8_t *ptr)
-        {
-            if (ptr == nullptr) {
-                return 0;
-            }
-            // 将第0个数字左移24位，将第1个数字左移16位，将第2个数字左移8位，第3个数字不左移
-            return (ptr[0] << 24) | (ptr[1] << 16) | (ptr[2] << 8) | (ptr[3]);
-        }
-        void AudioPolicyFuzzTest(const uint8_t *rawData, size_t size)
-        {
-            if (rawData == nullptr) {
-                std::cout << "Invalid data" << std::endl;
-                return;
-            }
-            uint32_t code = Convert2Uint32(rawData);
-            rawData = rawData + OFFSET;
-            size = size - OFFSET;
+namespace AudioStandard {
+constexpr int32_t OFFSET = 4;
+const std::u16string FORMMGR_INTERFACE_TOKEN = u"IAudioPolicy";
+const int32_t SYSTEM_ABILITY_ID = 3009;
+const bool RUN_ON_CREATE = false;
+const int32_t LIMITSIZE = 4;
+const int32_t SHIFT_LEFT_8 = 8;
+const int32_t SHIFT_LEFT_16 = 16;
+const int32_t SHIFT_LEFT_24 = 24;
 
-            MessageParcel data;
-            data.WriteInterfaceToken(FORMMGR_INTERFACE_TOKEN);
-            data.WriteBuffer(rawData, size);
-            data.RewindRead(0);
-            MessageParcel reply;
-            MessageOption option;
-            std::shared_ptr<AudioPolicyServer> AudioPolicyServerPtr =
-                std::make_shared<AudioPolicyServer>(SYSTEM_ABILITY_ID, RUN_ON_CREATE);
-            AudioPolicyServerPtr->OnRemoteRequest(code, data, reply, option);
-        }
-    } // namespace AudioStandard
+uint32_t Convert2Uint32(const uint8_t *ptr)
+{
+    if (ptr == nullptr) {
+        return 0;
+    }
+    /* Move the 0th digit to the left by 24 bits, the 1st digit to the left by 16 bits,
+       the 2nd digit to the left by 8 bits, and the 3rd digit not to the left */
+    return (ptr[0] << SHIFT_LEFT_24) | (ptr[1] << SHIFT_LEFT_16) | (ptr[2] << SHIFT_LEFT_8) | (ptr[3]);
+}
+
+void AudioPolicyFuzzTest(const uint8_t *rawData, size_t size)
+{
+    if (rawData == nullptr || size < LIMITSIZE) {
+        return;
+    }
+    uint32_t code = Convert2Uint32(rawData);
+    rawData = rawData + OFFSET;
+    size = size - OFFSET;
+
+    MessageParcel data;
+    data.WriteInterfaceToken(FORMMGR_INTERFACE_TOKEN);
+    data.WriteBuffer(rawData, size);
+    data.RewindRead(0);
+
+    MessageParcel reply;
+    MessageOption option;
+    std::shared_ptr<AudioPolicyServer> AudioPolicyServerPtr =
+        std::make_shared<AudioPolicyServer>(SYSTEM_ABILITY_ID, RUN_ON_CREATE);
+        
+    AudioPolicyServerPtr->OnRemoteRequest(code, data, reply, option);
+}
+} // namespace AudioStandard
 } // namesapce OHOS
 
 /* Fuzzer entry point */
