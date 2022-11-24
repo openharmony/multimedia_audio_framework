@@ -15,12 +15,11 @@ import("//build/config/features.gni")
 import("//build/test.gni")
 import("//drivers/hdf_core/adapter/uhdf2/uhdf.gni")
 
-ohos_fuzztest("AudioPolicyFuzzTest") {
-  module_out_path = "multimedia_audio_framework/audiopolicy"
-  fuzz_config_file =
-      "//foundation/multimedia/audio_framework/test/fuzztest/audiopolicy_fuzzer"
+ohos_fuzztest("AudioServerBalanceFuzzTest") {
+  module_out_path = "multimedia_audio_framework/audioserverbalance_fuzzer"
+  fuzz_config_file = "//foundation/multimedia/audio_framework/test/fuzztest/audioserverbalance_fuzzer"
 
-  include_dirs = [ "//foundation/multimedia/audio_framework/services/audio_policy/server/include" ]
+  include_dirs = [ "//foundation/multimedia/audio_framework/services/audio_service/server/include" ]
 
   cflags = [
     "-g",
@@ -28,29 +27,25 @@ ohos_fuzztest("AudioPolicyFuzzTest") {
     "-Wno-unused-variable",
     "-fno-omit-frame-pointer",
   ]
-  configs = [ "//foundation/multimedia/audio_framework/services/audio_policy:audio_policy_public_config" ]
 
-  sources = [ "audio_policy_fuzzer.cpp" ]
+  sources = [ "audio_server_balance_fuzzer.cpp" ]
+
+  configs = [ "//foundation/multimedia/audio_framework/services/audio_service:audio_service_config" ]
 
   deps = [
     "$hdf_uhdf_path/hdi:libhdi",
-    "//foundation/barrierfree/accessibility/interfaces/innerkits/acfwk:accessibilityconfig",
-    "//foundation/multimedia/audio_framework/services/audio_policy:audio_policy_service",
+    "//foundation/multimedia/audio_framework/services/audio_service:audio_service",
   ]
   external_deps = [
-    "ability_base:want",
     "access_token:libaccesstoken_sdk",
-    "access_token:libtoken_setproc",
-    "bundle_framework:appexecfwk_base",
-    "bundle_framework:appexecfwk_core",
     "c_utils:utils",
-    "hiviewdfx_hilog_native:libhilog",
     "ipc:ipc_core",
+    "power_manager:powermgr_client",
     "safwk:system_ability_fwk",
   ]
 }
 
 group("fuzztest") {
   testonly = true
-  deps = [ ":AudioPolicyFuzzTest" ]
+  deps = [ ":AudioServerBalanceFuzzTest" ]
 }

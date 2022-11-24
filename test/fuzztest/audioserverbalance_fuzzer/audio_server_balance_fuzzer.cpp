@@ -17,50 +17,58 @@
 #include <cstddef>
 #include <cstdint>
 
-#include "audio_server.h"
 #include "message_parcel.h"
+
+#include "audio_manager_base.h"
+#include "audio_server.h"
 using namespace std;
 
 namespace OHOS {
 namespace AudioStandard {
-constexpr int32_t OFFSET = 4;
-const std::u16string FORMMGR_INTERFACE_TOKEN = u"IStandardAudioService";
 const int32_t SYSTEM_ABILITY_ID = 3001;
 const bool RUN_ON_CREATE = false;
 const int32_t LIMITSIZE = 4;
-const int32_t SHIFT_LEFT_8 = 8;
-const int32_t SHIFT_LEFT_16 = 16;
-const int32_t SHIFT_LEFT_24 = 24;
 
-uint32_t Convert2Uint32(const uint8_t *ptr)
+float Convert2Float(const uint8_t *ptr)
 {
-    if (ptr == nullptr) {
-        return 0;
-    }
-    /* Move the 0th digit to the left by 24 bits, the 1st digit to the left by 16 bits,
-       the 2nd digit to the left by 8 bits, and the 3rd digit not to the left */
-    return (ptr[0] << SHIFT_LEFT_24) | (ptr[1] << SHIFT_LEFT_16) | (ptr[2] << SHIFT_LEFT_8) | (ptr[3]);
+    float floatValue = static_cast<float>(*ptr);
+    return floatValue / 128.0f - 1.0f;
 }
 
-void AudioServerFuzzTest(const uint8_t *rawData, size_t size)
+void AudioServerBalanceFuzzer(const uint8_t *rawData, size_t size, std::shared_ptr<AudioServer> AudioServerPtr)
+{
+    float balanceValue = Convert2Float(rawData);
+    MessageParcel data;
+    data.WriteFloat(balanceValue);
+    MessageParcel reply;
+    MessageOption option;
+    AudioServerPtr->OnRemoteRequest(AudioManagerStub::SET_AUDIO_BALANCE_VALUE, data, reply, option);
+}
+
+bool Convert2Bool(const uint8_t *ptr)
+{
+    return (ptr[0] & 1) ? true : false;
+}
+
+void AudioServerMonoFuzzer(const uint8_t *rawData, size_t size, std::shared_ptr<AudioServer> AudioServerPtr)
+{
+    bool monoState = Convert2Bool(rawData);
+    MessageParcel data;
+    data.WriteBool(monoState);
+    MessageParcel reply;
+    MessageOption option;
+    AudioServerPtr->OnRemoteRequest(AudioManagerStub::SET_AUDIO_MONO_STATE, data, reply, option);
+}
+
+void AudioServerBalanceFuzzTest(const uint8_t *rawData, size_t size)
 {
     if (rawData == nullptr || size < LIMITSIZE) {
         return;
     }
-    uint32_t code = Convert2Uint32(rawData);
-    rawData = rawData + OFFSET;
-    size = size - OFFSET;
-    
-    MessageParcel data;
-    data.WriteInterfaceToken(FORMMGR_INTERFACE_TOKEN);
-    data.WriteBuffer(rawData, size);
-    data.RewindRead(0);
-    MessageParcel reply;
-    MessageOption option;
-
     std::shared_ptr<AudioServer> AudioServerPtr =
         std::make_shared<AudioServer>(SYSTEM_ABILITY_ID, RUN_ON_CREATE);
-    AudioServerPtr->OnRemoteRequest(code, data, reply, option);
+    AudioServerBalanceFuzzer(rawData, size, AudioServerPtr);
+    AudioServerMonoFuzzer(rawData, size, AudioServerPtr);
 }
 } // namespace AudioStandard
 } // namesapce OHOS
@@ -69,6 +77,6 @@ void AudioServerFuzzTest(const uint8_t *rawData, size_t size)
 extern "C" int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
 {
     /* Run your code on data */
-    OHOS::AudioStandard::AudioServerFuzzTest(data, size);
+    OHOS::AudioStandard::AudioServerBalanceFuzzTest(data, size);
     return 0;
 }
