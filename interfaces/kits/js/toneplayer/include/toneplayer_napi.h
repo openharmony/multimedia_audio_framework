@@ -93,10 +93,11 @@ private:
     static void GetTonePlayerAsyncCallbackComplete(napi_env env, napi_status status, void *data);
     static std::unique_ptr<AudioRendererInfo> sRendererInfo_;
     static napi_ref toneType_;
+    static std::mutex createMutex_;
     napi_env env_;
     napi_ref wrapper_;
     std::shared_ptr<TonePlayer> tonePlayer_;
 };
 } // namespace AudioStandard
 } // namespace OHOS
-#endif /* TONE_PLAYER_NAPI_H_ */
+#endif // TONE_PLAYER_NAPI_H_

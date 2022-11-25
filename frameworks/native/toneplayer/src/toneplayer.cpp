@@ -16,7 +16,9 @@
 #include <sys/time.h>
 #include <utility>
 
+#include <climits>
 #include <cmath>
+#include <cfloat>
 #include "securec.h"
 #include "audio_log.h"
 #include "audio_policy_manager.h"
@@ -24,12 +26,14 @@
 
 namespace OHOS {
 namespace AudioStandard {
+namespace {
 constexpr int32_t C20MS = 20;
 constexpr int32_t C1000MS = 1000;
 constexpr int32_t CMAXWAIT = 3;
 constexpr int32_t CDOUBLE = 2;
 constexpr int32_t AMPLITUDE = 16000;
 constexpr int32_t BIT8 = 8;
+}
 
 #ifdef DUMPFILE
 const char *g_tonePlayerTestFilePath = "/data/local/tmp/toneplayer_test.pcm";
@@ -72,7 +76,7 @@ TonePlayerPrivate::TonePlayerPrivate(const std::string cachePath, const AudioRen
     AUDIO_DEBUG_LOG("TonePlayerPrivate constructor: volume=%{public}f, size=%{public}zu",
         volume_, supportedTones_.size());
 #ifdef DUMPFILE
-    pfd = nullptr;
+    pfd_ = nullptr;
 #endif // DUMPFILE
 }
 
@@ -81,7 +85,6 @@ TonePlayer::~TonePlayer() = default;
 TonePlayerPrivate::~TonePlayerPrivate()
 {
     AUDIO_INFO_LOG("TonePlayerPrivate destructor");
-
     if (audioRenderer_ != nullptr) {
         StopTone();
         mutexLock_.lock();
@@ -101,11 +104,14 @@ TonePlayerPrivate::~TonePlayerPrivate()
 bool TonePlayerPrivate::LoadEventStateHandler()
 {
     AUDIO_INFO_LOG("TonePlayerPrivate::LoadEventStateHandler start");
+    bool result = true;
     if (audioRenderer_ != nullptr) {
-        StopTone();
+        result = StopTone();
         mutexLock_.lock();
         if (audioRenderer_ != nullptr) {
-            audioRenderer_->Clear();
+            if (audioRenderer_->Clear() != 0) {
+                result = false;
+            }
         } else {
             AUDIO_ERR_LOG("LoadEventStateHandler audioRenderer_ is null");
         }
@@ -131,16 +137,17 @@ bool TonePlayerPrivate::LoadEventStateHandler()
     if (toneDataGenLoop_ == nullptr) {
         toneDataGenLoop_ = std::make_unique<std::thread>(&TonePlayerPrivate::AudioToneDataThreadFunc, this);
     }
-    return true;
+    return result;
 }
 
 bool TonePlayerPrivate::PlayEventStateHandler()
 {
+    bool result = true;
     status_t retStatus;
     mutexLock_.unlock();
     mutexLock_.lock();
     if (audioRenderer_ != nullptr) {
-        audioRenderer_->Start();
+        result = audioRenderer_->Start();
     } else {
         AUDIO_ERR_LOG("PlayEventStateHandler audioRenderer_ is null");
     }
@@ -157,7 +164,7 @@ bool TonePlayerPrivate::PlayEventStateHandler()
             return false;
         }
     }
-    return true;
+    return result;
 }
 
 bool TonePlayerPrivate::TonePlayerStateHandler(int16_t event)
@@ -211,8 +218,8 @@ bool TonePlayerPrivate::LoadTone(ToneType toneType)
     result = TonePlayerStateHandler(PLAYER_EVENT_LOAD);
     mutexLock_.unlock();
 #ifdef DUMPFILE
-    pfd = fopen(g_tonePlayerTestFilePath, "wb+");
-    if (pfd == nullptr) {
+    pfd_ = fopen(g_tonePlayerTestFilePath, "wb+");
+    if (pfd_ == nullptr) {
         AUDIO_ERR_LOG("Error opening pcm test file!");
     }
 #endif // DUMPFILE
@@ -237,11 +244,14 @@ bool TonePlayerPrivate::StartTone()
 
 bool TonePlayerPrivate::Release()
 {
+    bool retVal = true;
     if (audioRenderer_ != nullptr) {
-        StopTone();
+        retVal = StopTone();
         mutexLock_.lock();
         if (audioRenderer_ != nullptr) {
-            audioRenderer_->Clear();
+            if (audioRenderer_->Clear() != 0) {
+                retVal = false;
+            }
         } else {
             AUDIO_ERR_LOG("Release audioRenderer_ is null");
         }
@@ -249,7 +259,7 @@ bool TonePlayerPrivate::Release()
         tonePlayerState_ = TONE_PLAYER_IDLE;
     }
     audioRenderer_ = nullptr;
-    return true;
+    return retVal;
 }
 
 bool TonePlayerPrivate::StopTone()
@@ -267,21 +277,21 @@ bool TonePlayerPrivate::StopTone()
     mutexLock_.unlock();
     mutexLock_.lock();
     if (audioRenderer_ != nullptr) {
-        audioRenderer_->Stop();
+        retVal = audioRenderer_->Stop();
     } else {
         AUDIO_ERR_LOG("StopTone audioRenderer_ is null");
     }
     mutexLock_.unlock();
 #ifdef DUMPFILE
-    if (pfd) {
-        fclose(pfd);
-        pfd = nullptr;
+    if (pfd_) {
+        fclose(pfd_);
+        pfd_ = nullptr;
     }
 #endif // DUMPFILE
     return retVal;
 }
 
-bool TonePlayerPrivate::StopEventStateHandler()
+void TonePlayerPrivate::StopEventStateHandler()
 {
     if (tonePlayerState_ == TONE_PLAYER_PLAYING || tonePlayerState_ == TONE_PLAYER_STARTING) {
         tonePlayerState_ = TONE_PLAYER_STOPPING;
@@ -298,7 +308,6 @@ bool TonePlayerPrivate::StopEventStateHandler()
         AUDIO_ERR_LOG("Stop timed out");
         tonePlayerState_ = TONE_PLAYER_IDLE;
     }
-    return true;
 }
 
 bool TonePlayerPrivate::InitAudioRenderer()
@@ -338,6 +347,7 @@ bool TonePlayerPrivate::InitAudioRenderer()
 
 void TonePlayerPrivate::OnInterrupt(const InterruptEvent &interruptEvent)
 {
+    AUDIO_INFO_LOG("OnInterrupt eventType: %{public}d", interruptEvent.eventType);
 }
 
 void TonePlayerPrivate::OnWriteData(size_t length)
@@ -351,6 +361,7 @@ void TonePlayerPrivate::OnStateChange(const RendererState state,
 {
     AUDIO_INFO_LOG("OnStateChange Cbk: %{public}d not calling", state);
     if (state == RENDERER_RUNNING || state == RENDERER_STOPPED) {
+        AUDIO_INFO_LOG("OnStateChange state: %{public}d", state);
     }
 }
 
@@ -478,6 +489,7 @@ bool TonePlayerPrivate::AudioToneSequenceGen(BufferDesc &bufDesc)
 {
     int8_t *audioBuffer = (int8_t *)bufDesc.buffer;
     uint32_t totalBufAvailable = bufDesc.bufLength / sizeof(int16_t);
+    bool retVal = true;
     while (totalBufAvailable) {
         uint32_t reqSamples = totalBufAvailable < processSize_ * CDOUBLE ? totalBufAvailable : processSize_;
         bool lSignal = false;
@@ -502,7 +514,7 @@ bool TonePlayerPrivate::AudioToneSequenceGen(BufferDesc &bufDesc)
                 waitAudioCbkCond_.notify_all();
                 mutexLock_.lock();
                 if (audioRenderer_ != nullptr) {
-                    audioRenderer_->Stop();
+                    retVal = audioRenderer_->Stop();
                 } else {
                     AUDIO_ERR_LOG("AudioToneSequenceGen audioRenderer_ is null");
                 }
@@ -510,22 +522,22 @@ bool TonePlayerPrivate::AudioToneSequenceGen(BufferDesc &bufDesc)
                 return false;
             }
         } else if (CheckToneStarted(reqSamples, audioBuffer)) {
-            bufDesc.dataLength += reqSamples*sizeof(int16_t);
+            bufDesc.dataLength += reqSamples * sizeof(int16_t);
             lSignal = true;
         } else {
             if (ContinueToneplay(reqSamples, audioBuffer)) {
-                bufDesc.dataLength += reqSamples*sizeof(int16_t);
+                bufDesc.dataLength += reqSamples * sizeof(int16_t);
             }
         }
         totalBufAvailable -= reqSamples;
-        audioBuffer += reqSamples*sizeof(int16_t);
+        audioBuffer += reqSamples * sizeof(int16_t);
         mutexLock_.unlock();
         if (lSignal) {
-            AUDIO_INFO_LOG("Notifing all the");
+            AUDIO_INFO_LOG("Notifing all the start");
             waitAudioCbkCond_.notify_all();
         }
     }
-    return true;
+    return retVal;
 }
 
 void TonePlayerPrivate::AudioToneDataThreadFunc()
@@ -563,7 +575,7 @@ void TonePlayerPrivate::AudioToneDataThreadFunc()
             bufDesc.dataLength, tonePlayerState_);
         if (bufDesc.dataLength) {
 #ifdef DUMPFILE
-            size_t writeResult = fwrite((void*)bufDesc.buffer, 1, bufDesc.dataLength, pfd);
+            size_t writeResult = fwrite((void*)bufDesc.buffer, 1, bufDesc.dataLength, pfd_);
             if (writeResult != bufDesc.dataLength) {
                 AUDIO_ERR_LOG("Failed to write the file.");
             }
@@ -629,7 +641,7 @@ int32_t TonePlayerPrivate::GetSamples(uint16_t *freqs, int8_t *buffer, uint32_t 
         freqVal = freqs[i];
         index = sampleCount_;
         data = (uint8_t*)buffer;
-        double factor = freqVal * 2 * pi / // 2 is a parameter in the sine wave formula
+        double factor = freqVal * 2 * pi / samplingRate_; // 2 is a parameter in the sine wave formula
         for (uint32_t idx = 0; idx < reqSamples; idx++) {
             int16_t sample = AMPLITUDE * sin(factor * index);
             uint32_t result;
