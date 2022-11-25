@@ -45,7 +45,7 @@ int main(int argc, char *argv[])
     lToneGen->LoadTone((ToneType)toneType);
     AUDIO_INFO_LOG("start Tone.");
     lToneGen->StartTone();
-    usleep(30000);
+    usleep(30000); // 30ms sleep time
     AUDIO_INFO_LOG("stop Tone.");
     lToneGen->StopTone();
     AUDIO_INFO_LOG("release Tone.");
