@@ -72,6 +72,10 @@ void RendererPeriodPositionCallbackNapi::OnJsRendererPeriodPositionCallback(
     std::unique_ptr<RendererPeriodPositionJsCallback> &jsCb)
 {
     uv_loop_s *loop = nullptr;
+    if (env_ == nullptr) {
+        AUDIO_ERR_LOG("RendererPeriodPositionCallbackNapi: OnJsRendererPeriodPositionCallback: env_ is null");
+        return;
+    }
     napi_get_uv_event_loop(env_, &loop);
     if (loop == nullptr) {
         return;
