@@ -639,6 +639,7 @@ int32_t TonePlayerPrivate::GetSamples(uint16_t *freqs, int8_t *buffer, uint32_t 
             break;
         }
         freqVal = freqs[i];
+        AUDIO_INFO_LOG("GetSamples Freq: %{public}d sampleCount_: %{public}d", freqVal, sampleCount_);
         index = sampleCount_;
         data = (uint8_t*)buffer;
         double factor = freqVal * 2 * pi / samplingRate_; // 2 is a parameter in the sine wave formula
