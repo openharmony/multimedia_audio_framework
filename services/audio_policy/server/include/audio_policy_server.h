@@ -213,7 +213,8 @@ public:
     class PerStateChangeCbCustomizeCallback : public Security::AccessToken::PermStateChangeCallbackCustomize {
     public:
         explicit PerStateChangeCbCustomizeCallback(const Security::AccessToken::PermStateChangeScope &scopeInfo,
-        sptr<AudioPolicyServer> server) : PermStateChangeCallbackCustomize(scopeInfo), server_(server) {}
+            sptr<AudioPolicyServer> server) : PermStateChangeCallbackCustomize(scopeInfo),
+            ready_(false), server_(server) {}
         ~PerStateChangeCbCustomizeCallback() {}
 
         void PermStateChangeCallback(Security::AccessToken::PermStateChangeInfo& result);

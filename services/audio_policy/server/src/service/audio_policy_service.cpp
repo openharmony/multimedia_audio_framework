@@ -1669,7 +1669,7 @@ int32_t AudioPolicyService::GetCurrentRendererChangeInfos(
             }
         }
 
-        break;
+        return status;
     }
 
     return status;
@@ -1695,7 +1695,7 @@ int32_t AudioPolicyService::GetCurrentCapturerChangeInfos(
             }
         }
 
-        break;
+        return status;
     }
 
     return status;
