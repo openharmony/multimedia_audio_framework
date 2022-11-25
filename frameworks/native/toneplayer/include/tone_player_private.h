@@ -84,7 +84,7 @@ private:
     // to wait for audio rendere callback completion after a change is requested
     float volume_;  // Volume applied to audio Renderer
 #ifdef DUMPFILE
-    FILE *pfd;
+    FILE *pfd_;
 #endif // DUMPFILE
     uint32_t processSize_;  // In audioRenderer, Size of audio blocks generated at a time
     bool InitAudioRenderer();
@@ -95,7 +95,7 @@ private:
     int32_t GetSamples(uint16_t *freqs, int8_t *buffer, uint32_t samples);
     bool LoadEventStateHandler();
     bool PlayEventStateHandler();
-    bool StopEventStateHandler();
+    void StopEventStateHandler();
     bool ContinueToneplay(uint32_t sampleCnt, int8_t *audioBuf);
     bool CheckToneStarted(uint32_t sampleCnt, int8_t *audioBuf);
     bool CheckToneStopped();
