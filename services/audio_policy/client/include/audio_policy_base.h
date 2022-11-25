@@ -17,16 +17,18 @@
 #define I_AUDIO_POLICY_BASE_H
 
 #include "audio_interrupt_callback.h"
-#include "audio_policy_manager.h"
 #include "audio_policy_types.h"
 #include "i_audio_volume_key_event_callback.h"
 #include "ipc_types.h"
 #include "iremote_broker.h"
 #include "iremote_proxy.h"
 #include "iremote_stub.h"
+#include "audio_system_manager.h"
 
 namespace OHOS {
 namespace AudioStandard {
+using InternalDeviceType = DeviceType;
+
 class IAudioPolicy : public IRemoteBroker {
 public:
 

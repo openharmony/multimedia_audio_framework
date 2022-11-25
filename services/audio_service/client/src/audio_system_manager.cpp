@@ -38,7 +38,6 @@ sptr<IStandardAudioService> g_asProxy = nullptr;
 AudioSystemManager::AudioSystemManager()
 {
     AUDIO_DEBUG_LOG("AudioSystemManager start");
-    CheckProxy();
 }
 
 AudioSystemManager::~AudioSystemManager()
@@ -123,24 +122,24 @@ AudioStreamType AudioSystemManager::GetStreamType(ContentType contentType, Strea
     return streamType;
 }
 
-bool AudioSystemManager::CheckProxy()
+const sptr<IStandardAudioService> AudioSystemManager::GetAudioSystemManagerProxy()
 {
     lock_guard<mutex> lock(g_asProxyMutex);
     if (g_asProxy == nullptr) {
         auto samgr = SystemAbilityManagerClient::GetInstance().GetSystemAbilityManager();
         if (samgr == nullptr) {
-            AUDIO_ERR_LOG("get sa manager failed");
-            return false;
+            AUDIO_ERR_LOG("GetAudioSystemManagerProxy: get sa manager failed");
+            return nullptr;
         }
         sptr<IRemoteObject> object = samgr->GetSystemAbility(AUDIO_DISTRIBUTED_SERVICE_ID);
         if (object == nullptr) {
-            AUDIO_ERR_LOG("get audio service remote object failed");
-            return false;
+            AUDIO_ERR_LOG("GetAudioSystemManagerProxy: get audio service remote object failed");
+            return nullptr;
         }
         g_asProxy = iface_cast<IStandardAudioService>(object);
         if (g_asProxy == nullptr) {
-            AUDIO_ERR_LOG("get audio service proxy failed");
-            return false;
+            AUDIO_ERR_LOG("GetAudioSystemManagerProxy: get audio service proxy failed");
+            return nullptr;
         }
 
         // register death recipent to restore proxy
@@ -150,11 +149,12 @@ bool AudioSystemManager::CheckProxy()
                 std::placeholders::_1));
             bool result = object->AddDeathRecipient(asDeathRecipient);
             if (!result) {
-                AUDIO_ERR_LOG("failed to add deathRecipient");
+                AUDIO_ERR_LOG("GetAudioSystemManagerProxy: failed to add deathRecipient");
             }
         }
     }
-    return true;
+    sptr<IStandardAudioService> gasp = g_asProxy;
+    return gasp;
 }
 
 void AudioSystemManager::AudioServerDied(pid_t pid)
@@ -256,26 +256,42 @@ bool AudioSystemManager::IsStreamActive(AudioVolumeType volumeType) const
 
 const std::string AudioSystemManager::GetAudioParameter(const std::string key)
 {
-    CHECK_AND_RETURN_RET_LOG(CheckProxy(), "", "GetAudioParameter::Audio service unavailable");
-    return g_asProxy->GetAudioParameter(key);
+    const sptr<IStandardAudioService> gasp = GetAudioSystemManagerProxy();
+    if (gasp == nullptr) {
+        AUDIO_ERR_LOG("GetAudioParameter::Audio service unavailable.");
+        return nullptr;
+    }
+    return gasp->GetAudioParameter(key);
 }
 
 void AudioSystemManager::SetAudioParameter(const std::string &key, const std::string &value)
 {
-    CHECK_AND_RETURN_LOG(CheckProxy(), "SetAudioParameter::Audio service unavailable");
-    g_asProxy->SetAudioParameter(key, value);
+    const sptr<IStandardAudioService> gasp = GetAudioSystemManagerProxy();
+    if (gasp == nullptr) {
+        AUDIO_ERR_LOG("SetAudioParameter::Audio service unavailable.");
+        return;
+    }
+    gasp->SetAudioParameter(key, value);
 }
 
 const char *AudioSystemManager::RetrieveCookie(int32_t &size)
 {
-    CHECK_AND_RETURN_RET_LOG(CheckProxy(), nullptr, "RetrieveCookie::Audio service unavailable");
-    return g_asProxy->RetrieveCookie(size);
+    const sptr<IStandardAudioService> gasp = GetAudioSystemManagerProxy();
+    if (gasp == nullptr) {
+        AUDIO_ERR_LOG("RetrieveCookie::Audio service unavailable.");
+        return nullptr;
+    }
+    return gasp->RetrieveCookie(size);
 }
 
 uint64_t AudioSystemManager::GetTransactionId(DeviceType deviceType, DeviceRole deviceRole)
 {
-    CHECK_AND_RETURN_RET_LOG(CheckProxy(), 0, "GetTransactionId::Audio service unavailable");
-    return g_asProxy->GetTransactionId(deviceType, deviceRole);
+    const sptr<IStandardAudioService> gasp = GetAudioSystemManagerProxy();
+    if (gasp == nullptr) {
+        AUDIO_ERR_LOG("GetTransactionId::Audio service unavailable.");
+        return 0;
+    }
+    return gasp->GetTransactionId(deviceType, deviceRole);
 }
 
 int32_t AudioSystemManager::SetVolume(AudioVolumeType volumeType, int32_t volume) const
@@ -387,8 +403,12 @@ int32_t AudioSystemManager::GetMaxVolume(AudioVolumeType volumeType)
     if (volumeType == STREAM_ALL) {
         volumeType = STREAM_MUSIC;
     }
-    CHECK_AND_RETURN_RET_LOG(CheckProxy(), ERR_OPERATION_FAILED, "GetMaxVolume service unavailable");
-    return g_asProxy->GetMaxVolume(volumeType);
+    const sptr<IStandardAudioService> gasp = GetAudioSystemManagerProxy();
+    if (gasp == nullptr) {
+        AUDIO_ERR_LOG("GetMaxVolume::Audio service unavailable.");
+        return ERR_OPERATION_FAILED;
+    }
+    return gasp->GetMaxVolume(volumeType);
 }
 
 int32_t AudioSystemManager::GetMinVolume(AudioVolumeType volumeType)
@@ -396,8 +416,12 @@ int32_t AudioSystemManager::GetMinVolume(AudioVolumeType volumeType)
     if (volumeType == STREAM_ALL) {
         volumeType = STREAM_MUSIC;
     }
-    CHECK_AND_RETURN_RET_LOG(CheckProxy(), ERR_OPERATION_FAILED, "GetMinVolume service unavailable");
-    return g_asProxy->GetMinVolume(volumeType);
+    const sptr<IStandardAudioService> gasp = GetAudioSystemManagerProxy();
+    if (gasp == nullptr) {
+        AUDIO_ERR_LOG("GetMinVolume::Audio service unavailable.");
+        return ERR_OPERATION_FAILED;
+    }
+    return gasp->GetMinVolume(volumeType);
 }
 
 int32_t AudioSystemManager::SetMute(AudioVolumeType volumeType, bool mute) const
