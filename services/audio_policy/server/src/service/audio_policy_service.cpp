@@ -15,7 +15,6 @@
 
 #include "audio_errors.h"
 #include "audio_focus_parser.h"
-#include "audio_manager_base.h"
 #include "iservice_registry.h"
 #include "audio_log.h"
 #include "hisysevent.h"
@@ -38,8 +37,9 @@ const uint32_t PCM_16_BIT = 16;
 const uint32_t PCM_24_BIT = 24;
 const uint32_t PCM_32_BIT = 32;
 const uint32_t BT_BUFFER_ADJUSTMENT_FACTOR = 50;
-static sptr<IStandardAudioService> g_sProxy = nullptr;
+static sptr<IStandardAudioService> g_adProxy = nullptr;
 static int32_t startDeviceId = 1;
+mutex g_adProxyMutex;
 
 AudioPolicyService::~AudioPolicyService()
 {
@@ -86,6 +86,34 @@ bool AudioPolicyService::Init(void)
     return true;
 }
 
+const sptr<IStandardAudioService> AudioPolicyService::GetAudioPolicyServiceProxy()
+{
+    AUDIO_DEBUG_LOG("[Policy Service] Start get audio policy service proxy.");
+    lock_guard<mutex> lock(g_adProxyMutex);
+
+    if (g_adProxy == nullptr) {
+        auto samgr = SystemAbilityManagerClient::GetInstance().GetSystemAbilityManager();
+        if (samgr == nullptr) {
+            AUDIO_ERR_LOG("[Policy Service] Get samgr failed.");
+            return nullptr;
+        }
+
+        sptr<IRemoteObject> object = samgr->GetSystemAbility(AUDIO_DISTRIBUTED_SERVICE_ID);
+        if (object == nullptr) {
+            AUDIO_ERR_LOG("[Policy Service] audio service remote object is NULL.");
+            return nullptr;
+        }
+
+        g_adProxy = iface_cast<IStandardAudioService>(object);
+        if (g_adProxy == nullptr) {
+            AUDIO_ERR_LOG("[Policy Service] init g_adProxy is NULL.");
+            return nullptr;
+        }
+    }
+    const sptr<IStandardAudioService> gsp = g_adProxy;
+    return gsp;
+}
+
 void AudioPolicyService::InitKVStore()
 {
     audioPolicyManager_.InitKVStore();
@@ -95,24 +123,6 @@ bool AudioPolicyService::ConnectServiceAdapter()
 {
     if (!audioPolicyManager_.ConnectServiceAdapter()) {
         AUDIO_ERR_LOG("AudioPolicyService::ConnectServiceAdapter  Error in connecting to audio service adapter");
-        return false;
-    }
-
-    auto samgr = SystemAbilityManagerClient::GetInstance().GetSystemAbilityManager();
-    if (samgr == nullptr) {
-        AUDIO_ERR_LOG("[Policy Service] Get samgr failed");
-        return false;
-    }
-
-    sptr<IRemoteObject> object = samgr->GetSystemAbility(AUDIO_DISTRIBUTED_SERVICE_ID);
-    if (object == nullptr) {
-        AUDIO_DEBUG_LOG("[Policy Service] audio service remote object is NULL.");
-        return false;
-    }
-
-    g_sProxy = iface_cast<IStandardAudioService>(object);
-    if (g_sProxy == nullptr) {
-        AUDIO_DEBUG_LOG("[Policy Service] init g_sProxy is NULL.");
         return false;
     }
 
@@ -143,13 +153,14 @@ int32_t AudioPolicyService::SetAudioSessionCallback(AudioSessionCallback *callba
     return audioPolicyManager_.SetAudioSessionCallback(callback);
 }
 
-int32_t AudioPolicyService::SetStreamVolume(AudioStreamType streamType, float volume) const
+int32_t AudioPolicyService::SetStreamVolume(AudioStreamType streamType, float volume)
 {
     if (streamType == STREAM_VOICE_CALL) {
-        if (g_sProxy == nullptr) {
-            AUDIO_ERR_LOG("AudioPolicyService: SetVoiceVolume g_sProxy null");
+        const sptr<IStandardAudioService> gsp = GetAudioPolicyServiceProxy();
+        if (gsp == nullptr) {
+            AUDIO_ERR_LOG("AudioPolicyService: SetVoiceVolume gsp null");
         } else {
-            g_sProxy->SetVoiceVolume(volume);
+            gsp->SetVoiceVolume(volume);
         }
     }
     return audioPolicyManager_.SetStreamVolume(streamType, volume);
@@ -371,8 +382,9 @@ int32_t AudioPolicyService::RememberRoutingInfo(sptr<AudioRendererFilter> audioR
         AUDIO_ERR_LOG("Device error: no such device:%{public}s", networkId.c_str());
         return ERR_INVALID_PARAM;
     }
-    CHECK_AND_RETURN_RET_LOG(g_sProxy != nullptr, ERR_OPERATION_FAILED, "Service proxy unavailable");
-    int32_t ret = g_sProxy->CheckRemoteDeviceState(networkId, deviceRole, true);
+    const sptr<IStandardAudioService> gsp = GetAudioPolicyServiceProxy();
+    CHECK_AND_RETURN_RET_LOG(gsp != nullptr, ERR_OPERATION_FAILED, "Service proxy unavailable");
+    int32_t ret = gsp->CheckRemoteDeviceState(networkId, deviceRole, true);
     CHECK_AND_RETURN_RET_LOG(ret == SUCCESS, ERR_OPERATION_FAILED, "remote device state is invalid!");
 
     routerMap_[audioRendererFilter->uid] = std::pair(networkId, G_UNKNOWN_PID);
@@ -459,8 +471,9 @@ int32_t AudioPolicyService::MoveToRemoteOutputDevice(std::vector<SinkInput> sink
         }
     }
 
-    CHECK_AND_RETURN_RET_LOG(g_sProxy != nullptr, ERR_OPERATION_FAILED, "Service proxy unavailable");
-    CHECK_AND_RETURN_RET_LOG((g_sProxy->CheckRemoteDeviceState(networkId, deviceRole, true) == SUCCESS),
+    const sptr<IStandardAudioService> gsp = GetAudioPolicyServiceProxy();
+    CHECK_AND_RETURN_RET_LOG(gsp != nullptr, ERR_OPERATION_FAILED, "Service proxy unavailable");
+    CHECK_AND_RETURN_RET_LOG((gsp->CheckRemoteDeviceState(networkId, deviceRole, true) == SUCCESS),
         ERR_OPERATION_FAILED, "remote device state is invalid!");
 
     // start move.
@@ -785,15 +798,17 @@ DeviceType AudioPolicyService::FetchHighPriorityDevice(bool isOutputDevice = tru
 int32_t AudioPolicyService::SetMicrophoneMute(bool isMute)
 {
     AUDIO_DEBUG_LOG("SetMicrophoneMute state[%{public}d]", isMute);
-    CHECK_AND_RETURN_RET_LOG(g_sProxy != nullptr, ERR_OPERATION_FAILED, "Service proxy unavailable");
-    return g_sProxy->SetMicrophoneMute(isMute);
+    const sptr<IStandardAudioService> gsp = GetAudioPolicyServiceProxy();
+    CHECK_AND_RETURN_RET_LOG(gsp != nullptr, ERR_OPERATION_FAILED, "Service proxy unavailable");
+    return gsp->SetMicrophoneMute(isMute);
 }
 
-bool AudioPolicyService::IsMicrophoneMute() const
+bool AudioPolicyService::IsMicrophoneMute()
 {
     AUDIO_DEBUG_LOG("Enter IsMicrophoneMute");
-    CHECK_AND_RETURN_RET_LOG(g_sProxy != nullptr, false, "Service proxy unavailable");
-    return g_sProxy->IsMicrophoneMute();
+    const sptr<IStandardAudioService> gsp = GetAudioPolicyServiceProxy();
+    CHECK_AND_RETURN_RET_LOG(gsp != nullptr, false, "Service proxy unavailable");
+    return gsp->IsMicrophoneMute();
 }
 
 void UpdateActiveDeviceRoute(InternalDeviceType deviceType)
@@ -806,18 +821,18 @@ void UpdateActiveDeviceRoute(InternalDeviceType deviceType)
         case DEVICE_TYPE_BLUETOOTH_SCO:
         case DEVICE_TYPE_USB_HEADSET:
         case DEVICE_TYPE_WIRED_HEADSET: {
-            ret = g_sProxy->UpdateActiveDeviceRoute(deviceType, DeviceFlag::ALL_DEVICES_FLAG);
+            ret = g_adProxy->UpdateActiveDeviceRoute(deviceType, DeviceFlag::ALL_DEVICES_FLAG);
             CHECK_AND_RETURN_LOG(ret == SUCCESS, "Failed to update the route for %{public}d", deviceType);
             break;
         }
         case DEVICE_TYPE_WIRED_HEADPHONES:
         case DEVICE_TYPE_SPEAKER: {
-            ret = g_sProxy->UpdateActiveDeviceRoute(deviceType, DeviceFlag::OUTPUT_DEVICES_FLAG);
+            ret = g_adProxy->UpdateActiveDeviceRoute(deviceType, DeviceFlag::OUTPUT_DEVICES_FLAG);
             CHECK_AND_RETURN_LOG(ret == SUCCESS, "Failed to update the route for %{public}d", deviceType);
             break;
         }
         case DEVICE_TYPE_MIC: {
-            ret = g_sProxy->UpdateActiveDeviceRoute(deviceType, DeviceFlag::INPUT_DEVICES_FLAG);
+            ret = g_adProxy->UpdateActiveDeviceRoute(deviceType, DeviceFlag::INPUT_DEVICES_FLAG);
             CHECK_AND_RETURN_LOG(ret == SUCCESS, "Failed to update the route for %{public}d", deviceType);
             break;
         }
@@ -877,7 +892,9 @@ int32_t AudioPolicyService::SelectNewDevice(DeviceRole deviceRole, DeviceType de
 
     if (isUpdateRouteSupported_) {
         DeviceFlag deviceFlag = deviceRole == DeviceRole::OUTPUT_DEVICE ? OUTPUT_DEVICES_FLAG : INPUT_DEVICES_FLAG;
-        g_sProxy->UpdateActiveDeviceRoute(deviceType, deviceFlag);
+        const sptr<IStandardAudioService> gsp = GetAudioPolicyServiceProxy();
+        CHECK_AND_RETURN_RET_LOG(gsp != nullptr, ERR_OPERATION_FAILED, "Service proxy unavailable");
+        gsp->UpdateActiveDeviceRoute(deviceType, deviceFlag);
     }
 
     if (deviceRole == DeviceRole::OUTPUT_DEVICE) {
@@ -1045,7 +1062,8 @@ AudioRingerMode AudioPolicyService::GetRingerMode() const
 
 int32_t AudioPolicyService::SetAudioScene(AudioScene audioScene)
 {
-    CHECK_AND_RETURN_RET_LOG(g_sProxy != nullptr, ERR_OPERATION_FAILED, "Service proxy unavailable");
+    const sptr<IStandardAudioService> gsp = GetAudioPolicyServiceProxy();
+    CHECK_AND_RETURN_RET_LOG(gsp != nullptr, ERR_OPERATION_FAILED, "Service proxy unavailable");
     audioScene_ = audioScene;
 
     auto priorityDev = FetchHighPriorityDevice();
@@ -1056,7 +1074,7 @@ int32_t AudioPolicyService::SetAudioScene(AudioScene audioScene)
 
     currentActiveDevice_ = priorityDev;
 
-    result = g_sProxy->SetAudioScene(audioScene, priorityDev);
+    result = gsp->SetAudioScene(audioScene, priorityDev);
     CHECK_AND_RETURN_RET_LOG(result == SUCCESS, ERR_OPERATION_FAILED, "SetAudioScene failed [%{public}d]", result);
 
     return SUCCESS;
@@ -1383,8 +1401,9 @@ void AudioPolicyService::OnDeviceStatusUpdated(DStatusInfo statusInfo)
             AUDIO_ERR_LOG("=== DEVICE online but open audio device failed.");
             return;
         }
-        if (g_sProxy != nullptr && statusInfo.connectType == ConnectType::CONNECT_TYPE_DISTRIBUTED) {
-            g_sProxy->NotifyDeviceInfo(networkId, true);
+        const sptr<IStandardAudioService> gsp = GetAudioPolicyServiceProxy();
+        if (gsp != nullptr && statusInfo.connectType == ConnectType::CONNECT_TYPE_DISTRIBUTED) {
+            gsp->NotifyDeviceInfo(networkId, true);
         }
     } else {
         std::string moduleName = GetRemoteModuleName(networkId, GetDeviceRole(devType));
@@ -1463,21 +1482,23 @@ void AudioPolicyService::OnServiceDisconnected(AudioServiceIndex serviceIndex)
 void AudioPolicyService::OnMonoAudioConfigChanged(bool audioMono)
 {
     AUDIO_INFO_LOG("AudioPolicyService::OnMonoAudioConfigChanged: audioMono = %{public}s", audioMono? "true": "false");
-    if (g_sProxy == nullptr) {
-        AUDIO_ERR_LOG("Service proxy unavailable: g_sProxy null");
+    const sptr<IStandardAudioService> gsp = GetAudioPolicyServiceProxy();
+    if (gsp == nullptr) {
+        AUDIO_ERR_LOG("Service proxy unavailable: g_adProxy null");
         return;
     }
-    g_sProxy->SetAudioMonoState(audioMono);
+    gsp->SetAudioMonoState(audioMono);
 }
 
 void AudioPolicyService::OnAudioBalanceChanged(float audioBalance)
 {
     AUDIO_INFO_LOG("AudioPolicyService::OnAudioBalanceChanged: audioBalance = %{public}f", audioBalance);
-    if (g_sProxy == nullptr) {
-        AUDIO_ERR_LOG("Service proxy unavailable: g_sProxy null");
+    const sptr<IStandardAudioService> gsp = GetAudioPolicyServiceProxy();
+    if (gsp == nullptr) {
+        AUDIO_ERR_LOG("Service proxy unavailable: g_adProxy null");
         return;
     }
-    g_sProxy->SetAudioBalanceValue(audioBalance);
+    gsp->SetAudioBalanceValue(audioBalance);
 }
 
 void AudioPolicyService::AddAudioDevice(AudioModuleInfo& moduleInfo, InternalDeviceType devType)
@@ -2163,8 +2184,9 @@ void AudioPolicyService::SetParameterCallback(const std::shared_ptr<AudioParamet
         AUDIO_ERR_LOG("SetDeviceChangeCallback: parameterChangeCbStub null");
         return;
     }
-    if (g_sProxy == nullptr) {
-        AUDIO_ERR_LOG("SetDeviceChangeCallback: g_sProxy null");
+    const sptr<IStandardAudioService> gsp = GetAudioPolicyServiceProxy();
+    if (gsp == nullptr) {
+        AUDIO_ERR_LOG("SetDeviceChangeCallback: g_adProxy null");
         return;
     }
     parameterChangeCbStub->SetParameterCallback(callback);
@@ -2176,7 +2198,7 @@ void AudioPolicyService::SetParameterCallback(const std::shared_ptr<AudioParamet
         return;
     }
     AUDIO_INFO_LOG("AudioPolicyService: SetParameterCallback call SetParameterCallback.");
-    g_sProxy->SetParameterCallback(object);
+    gsp->SetParameterCallback(object);
 }
 
 void AudioPolicyService::RegisterBluetoothListener()

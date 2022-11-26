@@ -27,6 +27,7 @@
 #include "remote_audio_renderer_sink.h"
 #include "i_standard_audio_server_manager_listener.h"
 #include "audio_manager_base.h"
+#include "audio_system_manager.h"
 #include "audio_server_death_recipient.h"
 
 namespace OHOS {

@@ -23,6 +23,7 @@
 #include <mutex>
 #include "audio_group_handle.h"
 #include "audio_info.h"
+#include "audio_manager_base.h"
 #include "audio_policy_manager_factory.h"
 #include "audio_stream_collector.h"
 #include "audio_tone_parser.h"
@@ -49,7 +50,9 @@ public:
     void InitKVStore();
     bool ConnectServiceAdapter();
 
-    int32_t SetStreamVolume(AudioStreamType streamType, float volume) const;
+    const sptr<IStandardAudioService> GetAudioPolicyServiceProxy();
+
+    int32_t SetStreamVolume(AudioStreamType streamType, float volume);
 
     float GetStreamVolume(AudioStreamType streamType) const;
 
@@ -100,7 +103,7 @@ public:
 	
     int32_t SetMicrophoneMute(bool isMute);
 
-    bool IsMicrophoneMute() const;
+    bool IsMicrophoneMute();
 
     int32_t SetAudioScene(AudioScene audioScene);
 
