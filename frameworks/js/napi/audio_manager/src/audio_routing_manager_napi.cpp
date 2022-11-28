@@ -441,6 +441,7 @@ static void GetDevicesAsyncCallbackComplete(napi_env env, napi_status status, vo
     auto asyncContext = static_cast<AudioRoutingManagerAsyncContext*>(data);
     if (asyncContext == nullptr) {
         HiLog::Error(LABEL, "ERROR: AudioRoutingManagerAsyncContext* is Null!");
+        return;
     }
     napi_value result[ARGS_TWO] = {0};
     napi_value valueParam = nullptr;
@@ -607,17 +608,17 @@ static void GetActiveOutputDeviceAsyncCallbackComplete(napi_env env, napi_status
     auto asyncContext = static_cast<AudioRoutingManagerAsyncContext*>(data);
     napi_value result[ARGS_TWO] = {0};
     napi_value valueParam = nullptr;
+    if (asyncContext == nullptr) {
+        HiLog::Error(LABEL, "ERROR: AudioRoutingManagerAsyncContext* is Null!");
+        return;
+    }
     SetDevicesInfo(asyncContext->outDeviceDescriptors, env, result, valueParam);
 
     napi_get_undefined(env, &result[PARAM0]);
-    if (asyncContext != nullptr) {
-        if (!asyncContext->status) {
-            napi_get_undefined(env, &valueParam);
-        }
-        CommonCallbackRoutine(env, asyncContext, result[PARAM1]);
-    } else {
-        HiLog::Error(LABEL, "ERROR: AudioRoutingManagerAsyncContext* is Null!");
+    if (!asyncContext->status) {
+        napi_get_undefined(env, &valueParam);
     }
+    CommonCallbackRoutine(env, asyncContext, result[PARAM1]);
 }
 
 napi_value AudioRoutingManagerNapi::GetActiveOutputDeviceDescriptors(napi_env env, napi_callback_info info)

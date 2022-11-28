@@ -2060,6 +2060,7 @@ static void GetDevicesAsyncCallbackComplete(napi_env env, napi_status status, vo
     auto asyncContext = static_cast<AudioManagerAsyncContext*>(data);
     if (asyncContext == nullptr) {
         HiLog::Error(LABEL, "ERROR: AudioRoutingManagerAsyncContext* is Null!");
+        return;
     }
     napi_value result[ARGS_TWO] = {0};
     napi_value valueParam = nullptr;
