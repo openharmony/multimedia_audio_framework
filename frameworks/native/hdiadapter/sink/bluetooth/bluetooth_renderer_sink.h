@@ -43,7 +43,7 @@ public:
     int32_t Reset(void);
     int32_t Pause(void);
     int32_t Resume(void);
-    int32_t RenderFrame(char &frame, uint64_t len, uint64_t &writeLen);
+    int32_t RenderFrame(char &data, uint64_t len, uint64_t &writeLen);
     int32_t SetVolume(float left, float right);
     int32_t GetVolume(float &left, float &right);
     int32_t GetLatency(uint32_t *latency);

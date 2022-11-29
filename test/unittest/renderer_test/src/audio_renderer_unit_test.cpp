@@ -917,7 +917,7 @@ HWTEST(AudioRendererUnitTest, Audio_Renderer_SetInterruptMode_001, TestSize.Leve
 }
 
 /**
-* @tc.name  : Test GetBufQueueState 
+* @tc.name  : Test GetBufQueueState
 * @tc.number: Audio_Renderer_GetBufQueueState_001
 * @tc.desc  : Test GetBufQueueState interface. Returns BufferQueueState, if obtained successfully.
 */

@@ -55,7 +55,7 @@ public:
     int32_t GetVolume(float &left, float &right);
     int32_t GetLatency(uint32_t *latency);
     int32_t SetAudioScene(AudioScene audioScene);
-    int32_t OpenOutput(DeviceType deviceType);
+    int32_t OpenOutput(DeviceType outputDevice);
     static RemoteAudioRendererSink *GetInstance(const char *deviceNetworkId);
     bool rendererInited_;
     void RegisterParameterCallback(AudioSinkCallback* callback);

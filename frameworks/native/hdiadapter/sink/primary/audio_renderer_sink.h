@@ -54,8 +54,8 @@ public:
     int32_t GetLatency(uint32_t *latency);
     int32_t GetTransactionId(uint64_t *transactionId);
     int32_t SetAudioScene(AudioScene audioScene, DeviceType activeDevice);
-    int32_t SetOutputRoute(DeviceType deviceType, AudioPortPin &outputPortPin);
-    int32_t SetOutputRoute(DeviceType deviceType);
+    int32_t SetOutputRoute(DeviceType outputDevice, AudioPortPin &outputPortPin);
+    int32_t SetOutputRoute(DeviceType outputDevice);
     static AudioRendererSink *GetInstance(void);
     void SetAudioParameter(const AudioParamKey key, const std::string& condition, const std::string& value);
     std::string GetAudioParameter(const AudioParamKey key, const std::string& condition);
