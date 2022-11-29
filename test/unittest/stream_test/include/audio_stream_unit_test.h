@@ -57,6 +57,37 @@ public:
     virtual void OnEventCb(AudioServiceEventTypes error) const {}
 };
 
+class AudioStreamCallbackTest : public AudioStreamCallback {
+public:
+    virtual ~AudioStreamCallbackTest() = default;
+
+    virtual void OnStateChange(const State state, const StateChangeCmdType cmdType = CMD_FROM_CLIENT) {}
+};
+
+class AudioCapturerReadCallbackTest : public AudioCapturerReadCallback {
+public:
+    virtual ~AudioCapturerReadCallbackTest() = default;
+
+    /**
+     * Called when buffer to be enqueued.
+     *
+     * @param length Indicates requested buffer length.
+     */
+    virtual void OnReadData(size_t length) {};
+};
+
+class CapturerPeriodPositionCallbackTest : public CapturerPeriodPositionCallback {
+public:
+    virtual ~CapturerPeriodPositionCallbackTest() = default;
+
+    /**
+     * Called when the requested frame count is read.
+     *
+     * @param frameCount requested frame frame count for callback.
+     */
+    virtual void OnPeriodReached(const int64_t &frameNumber) {};
+};
+
 class AudioStreamUnitTest : public testing::Test {
 public:
     // SetUpTestCase: Called before all test cases
