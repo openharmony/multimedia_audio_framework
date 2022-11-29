@@ -241,11 +241,8 @@ void AudioServiceClient::PAStreamSetBufAttrSuccessCb(pa_stream *stream, int32_t 
     pa_threaded_mainloop *mainLoop = (pa_threaded_mainloop *)asClient->mainLoop;
 
     AUDIO_DEBUG_LOG("AAudioServiceClient::PAStreamSetBufAttrSuccessCb is called");
-    if (!success) {
-        AUDIO_ERR_LOG("AAudioServiceClient::PAStreamSetBufAttrSuccessCb SetBufAttr failed");
-    } else {
-        AUDIO_ERR_LOG("AAudioServiceClient::PAStreamSetBufAttrSuccessCb SetBufAttr success");
-    }
+    AUDIO_ERR_LOG("AAudioServiceClient::PAStreamSetBufAttrSuccessCb SetBufAttr %s", success ? "success" : "faild");
+
     pa_threaded_mainloop_signal(mainLoop, 0);
 }
 
@@ -586,6 +583,7 @@ void AudioServiceClient::ResetPAAudioClient()
 
 AudioServiceClient::~AudioServiceClient()
 {
+    lock_guard<mutex> lockdata(dataMutex);
     ResetPAAudioClient();
 }
 
@@ -654,11 +652,10 @@ int32_t AudioServiceClient::Initialize(ASClientType eClientType)
     SetEnv();
 
     mAudioSystemMgr = AudioSystemManager::GetInstance();
-
+    lock_guard<mutex> lockdata(dataMutex);
     mainLoop = pa_threaded_mainloop_new();
     if (mainLoop == nullptr)
         return AUDIO_CLIENT_INIT_ERR;
-
     api = pa_threaded_mainloop_get_api(mainLoop);
     if (api == nullptr) {
         ResetPAAudioClient();
