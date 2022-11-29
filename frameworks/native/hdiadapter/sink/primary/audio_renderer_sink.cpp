@@ -290,7 +290,7 @@ uint32_t PcmFormatToBits(enum AudioFormat format)
     }
 }
 
-int32_t AudioRendererSink::CreateRender(struct AudioPort &renderPort)
+int32_t AudioRendererSink::CreateRender(const struct AudioPort &renderPort)
 {
     int32_t ret;
     struct AudioSampleAttributes param;

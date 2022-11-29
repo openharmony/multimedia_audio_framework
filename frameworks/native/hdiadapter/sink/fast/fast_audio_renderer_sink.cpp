@@ -64,7 +64,7 @@ FastAudioRendererSink::FastAudioRendererSink()
 
 FastAudioRendererSink::~FastAudioRendererSink()
 {
-    DeInit();
+    FastAudioRendererSink::DeInit();
 }
 
 FastAudioRendererSink *FastAudioRendererSink::GetInstance()
@@ -259,7 +259,7 @@ int32_t FastAudioRendererSink::PrepareMmapBuffer()
 
 
 
-int32_t FastAudioRendererSink::CreateRender(struct AudioPort &renderPort)
+int32_t FastAudioRendererSink::CreateRender(const struct AudioPort &renderPort)
 {
     int32_t ret;
     struct AudioSampleAttributes param;

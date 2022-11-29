@@ -93,7 +93,6 @@ napi_value TonePlayerNapi::CreateToneTypeObject(napi_env env)
     if (status == napi_ok) {
         AUDIO_DEBUG_LOG("CreateToneTypeObject: napi_create_object");
         std::string propName;
-        int32_t refCount = 1;
         for (auto &iter: toneTypeMap) {
             propName = iter.first;
             status = AddNamedProperty(env, result, propName, iter.second);
@@ -103,6 +102,7 @@ napi_value TonePlayerNapi::CreateToneTypeObject(napi_env env)
             }
             propName.clear();
         }
+        int32_t refCount = 1;
         if (status == napi_ok) {
             AUDIO_DEBUG_LOG("CreateToneTypeObject: AddNamedProperty");
             status = napi_create_reference(env, result, refCount, &toneType_);
