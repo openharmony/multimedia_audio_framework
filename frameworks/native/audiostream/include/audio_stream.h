@@ -82,7 +82,7 @@ public:
     bool StartAudioStream(StateChangeCmdType cmdType = CMD_FROM_CLIENT);
     bool PauseAudioStream(StateChangeCmdType cmdType = CMD_FROM_CLIENT);
     bool StopAudioStream();
-    bool ReleaseAudioStream();
+    bool ReleaseAudioStream(bool releaseRunner = true);
     bool FlushAudioStream();
 
     // Playback related APIs
