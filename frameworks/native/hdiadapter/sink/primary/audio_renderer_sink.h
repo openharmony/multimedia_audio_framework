@@ -54,8 +54,8 @@ public:
     int32_t GetLatency(uint32_t *latency);
     int32_t GetTransactionId(uint64_t *transactionId);
     int32_t SetAudioScene(AudioScene audioScene, DeviceType activeDevice);
-    int32_t SetOutputRoute(DeviceType deviceType, AudioPortPin &outputPortPin);
-    int32_t SetOutputRoute(DeviceType deviceType);
+    int32_t SetOutputRoute(DeviceType outputDevice, AudioPortPin &outputPortPin);
+    int32_t SetOutputRoute(DeviceType outputDevice);
     static AudioRendererSink *GetInstance(void);
     void SetAudioParameter(const AudioParamKey key, const std::string& condition, const std::string& value);
     std::string GetAudioParameter(const AudioParamKey key, const std::string& condition);
@@ -85,7 +85,7 @@ private:
 
     std::shared_ptr<PowerMgr::RunningLock> mKeepRunningLock;
 
-    int32_t CreateRender(struct AudioPort &renderPort);
+    int32_t CreateRender(const struct AudioPort &renderPort);
     int32_t InitAudioManager();
     void AdjustStereoToMono(char *data, uint64_t len);
     void AdjustAudioBalance(char *data, uint64_t len);

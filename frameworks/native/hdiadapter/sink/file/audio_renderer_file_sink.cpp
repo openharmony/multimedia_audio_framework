@@ -35,7 +35,7 @@ AudioRendererFileSink::AudioRendererFileSink()
 
 AudioRendererFileSink::~AudioRendererFileSink()
 {
-    DeInit();
+    AudioRendererFileSink::DeInit();
 }
 
 AudioRendererFileSink *AudioRendererFileSink::GetInstance()

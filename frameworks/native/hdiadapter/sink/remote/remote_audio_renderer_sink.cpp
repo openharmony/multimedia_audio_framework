@@ -50,7 +50,7 @@ const uint32_t PARAM_VALUE_LENTH = 20;
 
 std::map<std::string, RemoteAudioRendererSink *> RemoteAudioRendererSink::allsinks;
 
-RemoteAudioRendererSink::RemoteAudioRendererSink(std::string deviceNetworkId)
+RemoteAudioRendererSink::RemoteAudioRendererSink(const std::string deviceNetworkId)
     : rendererInited_(false), started_(false), paused_(false), leftVolume_(DEFAULT_VOLUME_LEVEL),
     rightVolume_(DEFAULT_VOLUME_LEVEL), openSpeaker_(-1), audioAdapter_(nullptr),
     audioRender_(nullptr), callback_(nullptr)
@@ -67,7 +67,7 @@ RemoteAudioRendererSink::RemoteAudioRendererSink(std::string deviceNetworkId)
 RemoteAudioRendererSink::~RemoteAudioRendererSink()
 {
     if (rendererInited_ == true) {
-        DeInit();
+        RemoteAudioRendererSink::DeInit();
     } else {
         AUDIO_INFO_LOG("RemoteAudioRendererSink has already DeInit.");
     }
@@ -281,7 +281,7 @@ struct AudioManager *RemoteAudioRendererSink::GetAudioManager()
     return audioManager;
 }
 
-int32_t RemoteAudioRendererSink::CreateRender(struct AudioPort &renderPort)
+int32_t RemoteAudioRendererSink::CreateRender(const struct AudioPort &renderPort)
 {
     int32_t ret;
     int64_t start = GetNowTimeMs();
