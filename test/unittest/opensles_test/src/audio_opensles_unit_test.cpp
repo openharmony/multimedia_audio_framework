@@ -112,6 +112,17 @@ HWTEST(AudioOpenslesUnitTest, Audio_Opensles_GetState_002, TestSize.Level1)
     EXPECT_TRUE(result == SL_RESULT_SUCCESS);
 }
 
+HWTEST(AudioOpenslesUnitTest, Audio_Opensles_RegisterCallback_001, TestSize.Level1)
+{
+    SLresult result = (*outputMixObject_)->RegisterCallback(outputMixObject_, nullptr, nullptr);
+    EXPECT_TRUE(result == SL_RESULT_FEATURE_UNSUPPORTED);
+}
+
+HWTEST(AudioOpenslesUnitTest, Audio_Opensles_AbortAsyncOperation_001, TestSize.Level1)
+{
+    (*engineObject_)->AbortAsyncOperation(outputMixObject_);
+}
+
 HWTEST(AudioOpenslesUnitTest, Audio_Opensles_CreateAudioPlayer_001, TestSize.Level0)
 {
     wavFile_ = fopen(AUDIORENDER_TEST_FILE_PATH, "rb");
@@ -240,6 +251,12 @@ HWTEST(AudioOpenslesUnitTest, Audio_Opensles_CreateMetadataExtractor_001, TestSi
     EXPECT_TRUE(result == SL_RESULT_FEATURE_UNSUPPORTED);
 }
 
+HWTEST(AudioOpenslesUnitTest, Audio_Opensles_CreateExtensionObject_001, TestSize.Level1)
+{
+    SLresult result = (*engineEngine_)->CreateExtensionObject(engineEngine_, nullptr, nullptr, 0, 0, nullptr, nullptr);
+    EXPECT_TRUE(result == SL_RESULT_FEATURE_UNSUPPORTED);
+}
+
 HWTEST(AudioOpenslesUnitTest, Audio_Opensles_QueryNumSupportedInterfaces_001, TestSize.Level1)
 {
     SLresult result = (*engineEngine_)->QueryNumSupportedInterfaces(engineEngine_, 0, nullptr);
@@ -310,7 +327,7 @@ HWTEST(AudioOpenslesUnitTest, Audio_Opensles_GetBufferQueue_001, TestSize.Level0
     EXPECT_TRUE(result == SL_RESULT_SUCCESS);
 }
 
-HWTEST(AudioOpenslesUnitTest, Audio_Opensles_RegisterCallback_001, TestSize.Level0)
+HWTEST(AudioOpenslesUnitTest, Audio_Opensles_RegisterCallback_002, TestSize.Level0)
 {
     SLresult result = (*bufferQueueItf_)->RegisterCallback(bufferQueueItf_, BuqqerQueueCallback, wavFile_);
     EXPECT_TRUE(result == SL_RESULT_SUCCESS);
@@ -322,13 +339,19 @@ HWTEST(AudioOpenslesUnitTest, Audio_Opensles_SetPlayState_001, TestSize.Level0)
     EXPECT_TRUE(result == SL_RESULT_SUCCESS);
 }
 
+HWTEST(AudioOpenslesUnitTest, Audio_Opensles_SetPlayState_002, TestSize.Level1)
+{
+    SLresult result = (*playItf_)->SetPlayState(playItf_, -1);
+    EXPECT_TRUE(result == SL_RESULT_SUCCESS);
+}
+
 HWTEST(AudioOpenslesUnitTest, Audio_Opensles_GetDuration_001, TestSize.Level1)
 {
     SLresult result = (*playItf_)->GetDuration(playItf_, nullptr);
     EXPECT_TRUE(result == SL_RESULT_FEATURE_UNSUPPORTED);
 }
 
-HWTEST(AudioOpenslesUnitTest, Audio_Opensles_RegisterCallback_002, TestSize.Level1)
+HWTEST(AudioOpenslesUnitTest, Audio_Opensles_RegisterCallback_003, TestSize.Level1)
 {
     SLresult result = (*playItf_)->RegisterCallback(playItf_, nullptr, nullptr);
     EXPECT_TRUE(result == SL_RESULT_FEATURE_UNSUPPORTED);
@@ -342,7 +365,13 @@ HWTEST(AudioOpenslesUnitTest, Audio_Opensles_SetCallbackEventsMask_001, TestSize
 
 HWTEST(AudioOpenslesUnitTest, Audio_Opensles_GetCallbackEventsMask_001, TestSize.Level1)
 {
-    SLresult result = (*playItf_)->GetCallbackEventsMask(playItf_, nullptr);
+    SLresult result = (*playItf_)->GetCallbackEventsMask(playItf_, 0);
+    EXPECT_TRUE(result == SL_RESULT_FEATURE_UNSUPPORTED);
+}
+
+HWTEST(AudioOpenslesUnitTest, Audio_Opensles_SetMarkerPosition_001, TestSize.Level1)
+{
+    SLresult result = (*playItf_)->SetMarkerPosition(playItf_, 0);
     EXPECT_TRUE(result == SL_RESULT_FEATURE_UNSUPPORTED);
 }
 
@@ -389,24 +418,65 @@ HWTEST(AudioOpenslesUnitTest, Audio_Opensles_play_001, TestSize.Level0)
     }
 }
 
-HWTEST(AudioOpenslesUnitTest, Audio_Opensles_SetPlayState_002, TestSize.Level0)
+HWTEST(AudioOpenslesUnitTest, Audio_Opensles_SetPlayState_003, TestSize.Level0)
 {
     SLresult result = (*playItf_)->SetPlayState(playItf_, SL_PLAYSTATE_PAUSED);
     EXPECT_TRUE(result == SL_RESULT_SUCCESS);
 }
 
-HWTEST(AudioOpenslesUnitTest, Audio_Opensles_SetPlayState_003, TestSize.Level0)
+HWTEST(AudioOpenslesUnitTest, Audio_Opensles_SetPlayState_004, TestSize.Level0)
 {
     SLresult result = (*playItf_)->SetPlayState(playItf_, SL_PLAYSTATE_STOPPED);
     EXPECT_TRUE(result == SL_RESULT_SUCCESS);
 }
 
-HWTEST(AudioOpenslesUnitTest, Audio_Opensles_GetPlayState_001, TestSize.Level0)
+HWTEST(AudioOpenslesUnitTest, Audio_Opensles_SetPlayState_005, TestSize.Level1)
 {
-    SLuint32 state;
+    SLresult result = (*playItf_)->SetPlayState(nullptr, SL_PLAYSTATE_STOPPED);
+    EXPECT_TRUE(result == SL_RESULT_PARAMETER_INVALID);
+}
+
+HWTEST(AudioOpenslesUnitTest, Audio_Opensles_GetPlayState_001, TestSize.Level1)
+{
+    SLuint32 state = SL_PLAYSTATE_PAUSED;
     SLresult result = (*playItf_)->GetPlayState(playItf_, &state);
     EXPECT_TRUE(result == SL_RESULT_SUCCESS);
 }
+
+HWTEST(AudioOpenslesUnitTest, Audio_Opensles_GetPlayState_002, TestSize.Level1)
+{
+    SLuint32 state = SL_PLAYSTATE_PLAYING;
+    SLresult result = (*playItf_)->GetPlayState(playItf_, &state);
+    EXPECT_TRUE(result == SL_RESULT_SUCCESS);
+}
+
+HWTEST(AudioOpenslesUnitTest, Audio_Opensles_GetPlayState_003, TestSize.Level1)
+{
+    SLuint32 state = SL_PLAYSTATE_STOPPED;
+    SLresult result = (*playItf_)->GetPlayState(playItf_, &state);
+    EXPECT_TRUE(result == SL_RESULT_SUCCESS);
+}
+
+HWTEST(AudioOpenslesUnitTest, Audio_Opensles_GetPlayState_004, TestSize.Level1)
+{
+    SLuint32 state = -1;
+    SLresult result = (*playItf_)->GetPlayState(playItf_, &state);
+    EXPECT_TRUE(result == SL_RESULT_SUCCESS);
+}
+
+HWTEST(AudioOpenslesUnitTest, Audio_Opensles_GetPlayState_005, TestSize.Level1)
+{
+    SLuint32 state = -1;
+    SLresult result = (*playItf_)->GetPlayState(nullptr, &state);
+    EXPECT_TRUE(result == SL_RESULT_PARAMETER_INVALID);
+}
+
+HWTEST(AudioOpenslesUnitTest, Audio_Opensles_SetPlayState_006, TestSize.Level1)
+{
+    SLresult result = (*playItf_)->SetPlayState(playItf_, -1);
+    EXPECT_TRUE(result == SL_RESULT_SUCCESS);
+}
+
 
 HWTEST(AudioOpenslesUnitTest, Audio_Opensles_Destroy_001, TestSize.Level0)
 {
