@@ -144,7 +144,7 @@ void AudioStreamEventDispatcher::HandleStreamStateChange()
     while (!streamStateChangeQueue_.empty()) {
         std::unique_ptr<StreamStateChangeRequest> streamStateChangeRequest =
             std::move(streamStateChangeQueue_.front());
-        if (streamStateChangeRequest != nullptr){
+        if (streamStateChangeRequest != nullptr) {
             if (streamStateChangeRequest->mode == AUDIO_MODE_PLAYBACK) {
                 HandleRendererStreamStateChange(streamStateChangeRequest);
             } else {

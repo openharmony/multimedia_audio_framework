@@ -1153,61 +1153,61 @@ napi_value AudioManagerNapi::SetAudioScene(napi_env env, napi_callback_info info
     unique_ptr<AudioManagerAsyncContext> asyncContext = make_unique<AudioManagerAsyncContext>();
 
     status = napi_unwrap(env, thisVar, reinterpret_cast<void**>(&asyncContext->objectInfo));
-    if (status == napi_ok && asyncContext->objectInfo != nullptr) {
-        if (argc < ARGS_ONE) {
+    if (status != napi_ok || asyncContext->objectInfo == nullptr) {
+        return result;
+    }
+    if (argc < ARGS_ONE) {
+        asyncContext->status = NAPI_ERR_INVALID_PARAM;
+    }
+    for (size_t i = PARAM0; i < argc; i++) {
+        napi_valuetype valueType = napi_undefined;
+        napi_typeof(env, argv[i], &valueType);
+
+        if (i == PARAM0 && valueType == napi_number) {
+            napi_get_value_int32(env, argv[i], &asyncContext->scene);
+            if ((asyncContext->scene < AUDIO_SCENE_DEFAULT) || (asyncContext->scene > AUDIO_SCENE_PHONE_CHAT)) {
+                asyncContext->status = NAPI_ERR_UNSUPPORTED;
+            }
+        } else if (i == PARAM1) {
+            if (valueType == napi_function) {
+                napi_create_reference(env, argv[i], refCount, &asyncContext->callbackRef);
+            }
+            break;
+        } else {
             asyncContext->status = NAPI_ERR_INVALID_PARAM;
         }
-        for (size_t i = PARAM0; i < argc; i++) {
-            napi_valuetype valueType = napi_undefined;
-            napi_typeof(env, argv[i], &valueType);
-
-            if (i == PARAM0 && valueType == napi_number) {
-                napi_get_value_int32(env, argv[i], &asyncContext->scene);
-                if ((asyncContext->scene < AUDIO_SCENE_DEFAULT) || (asyncContext->scene > AUDIO_SCENE_PHONE_CHAT)) {
-                    asyncContext->status = NAPI_ERR_UNSUPPORTED;
-                }
-            } else if (i == PARAM1) {
-                if (valueType == napi_function) {
-                    napi_create_reference(env, argv[i], refCount, &asyncContext->callbackRef);
-                }
-                break;
-            } else {
-                asyncContext->status = NAPI_ERR_INVALID_PARAM;
-            }
-        }
-
-        if (asyncContext->callbackRef == nullptr) {
-            napi_create_promise(env, &asyncContext->deferred, &result);
-        } else {
-            napi_get_undefined(env, &result);
-        }
-
-        napi_value resource = nullptr;
-        napi_create_string_utf8(env, "SetAudioScene", NAPI_AUTO_LENGTH, &resource);
-
-        status = napi_create_async_work(
-            env, nullptr, resource,
-            [](napi_env env, void *data) {
-                auto context = static_cast<AudioManagerAsyncContext*>(data);
-                if (context->status == SUCCESS) {
-                    context->status =
-                        context->objectInfo->audioMngr_->SetAudioScene(static_cast<AudioScene>(context->scene));
-                    context->status = SUCCESS;
-                }
-            },
-            SetFunctionAsyncCallbackComplete, static_cast<void*>(asyncContext.get()), &asyncContext->work);
-        if (status != napi_ok) {
-            result = nullptr;
-        } else {
-            status = napi_queue_async_work(env, asyncContext->work);
-            if (status == napi_ok) {
-                asyncContext.release();
-            } else {
-                result = nullptr;
-            }
-        }
+    }
+    
+    if (asyncContext->callbackRef == nullptr) {
+        napi_create_promise(env, &asyncContext->deferred, &result);
+    } else {
+        napi_get_undefined(env, &result);
     }
 
+    napi_value resource = nullptr;
+    napi_create_string_utf8(env, "SetAudioScene", NAPI_AUTO_LENGTH, &resource);
+
+    status = napi_create_async_work(
+        env, nullptr, resource,
+        [](napi_env env, void *data) {
+            auto context = static_cast<AudioManagerAsyncContext*>(data);
+            if (context->status == SUCCESS) {
+                context->status =
+                    context->objectInfo->audioMngr_->SetAudioScene(static_cast<AudioScene>(context->scene));
+                context->status = SUCCESS;
+            }
+        },
+        SetFunctionAsyncCallbackComplete, static_cast<void*>(asyncContext.get()), &asyncContext->work);
+    if (status != napi_ok) {
+        result = nullptr;
+    } else {
+        status = napi_queue_async_work(env, asyncContext->work);
+        if (status == napi_ok) {
+            asyncContext.release();
+        } else {
+            result = nullptr;
+        }
+    }
     return result;
 }
 
