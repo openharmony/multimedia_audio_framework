@@ -28,6 +28,10 @@ const uint32_t DEFAULT_SAMPLING_RATE = 44100;
 const uint8_t DEFAULT_CHANNEL_COUNT = 2;
 const uint8_t DEFAULT_SAMPLE_SIZE = 2;
 const uint32_t DEFAULT_STREAM_VOLUME = 0;
+const int32_t AUDIO_CLIENT_ERR = -1;
+const int32_t AUDIO_CLIENT_INVALID_PARAMS_ERR = -2;
+const int32_t AUDIO_CLIENT_INIT_ERR = -3;
+
 void AudioStreamUnitTest::SetUpTestCase(void) {}
 void AudioStreamUnitTest::TearDownTestCase(void) {}
 void AudioStreamUnitTest::SetUp(void) {}
@@ -247,6 +251,205 @@ HWTEST(AudioStreamUnitTest, Audio_Stream_GetCaptureMode_001, TestSize.Level1)
     AudioStreamUnitTest::InitAudioStream(audioStream_);
     AudioCaptureMode captureMode = audioStream_->GetCaptureMode();
     EXPECT_EQ(captureMode, AudioCaptureMode::CAPTURE_MODE_NORMAL);
+}
+
+/**
+* @tc.name  : Test Audio_Stream_SetStreamCallback_001 via legal state
+* @tc.number: Audio_Stream_SetStreamCallback_001
+* @tc.desc  : Test SetStreamCallback interface. Returns success.
+*/
+HWTEST(AudioStreamUnitTest, Audio_Stream_SetStreamCallback_001, TestSize.Level1)
+{
+    std::shared_ptr<AudioStream> audioStream_;
+    AudioStreamUnitTest::InitAudioStream(audioStream_);
+
+    std::shared_ptr<AudioStreamCallback> audioStreamCallback_ = nullptr;
+    int32_t ret = audioStream_->SetStreamCallback(audioStreamCallback_);
+    EXPECT_EQ(ERR_INVALID_PARAM, ret);
+
+    audioStreamCallback_ = std::make_shared<AudioStreamCallbackTest>();
+    ret = audioStream_->SetStreamCallback(audioStreamCallback_);
+    EXPECT_EQ(SUCCESS, ret);
+}
+
+/**
+* @tc.name  : Test Audio_Stream_SetRenderMode_001 via legal state
+* @tc.number: Audio_Stream_SetRenderMode_001
+* @tc.desc  : Test SetRenderMode interface. Returns invalid.
+*/
+HWTEST(AudioStreamUnitTest, Audio_Stream_SetRenderMode_001, TestSize.Level1)
+{
+    std::shared_ptr<AudioStream> audioStream_;
+    AudioStreamUnitTest::InitAudioStream(audioStream_);
+    AudioRenderMode renderMode = AudioRenderMode::RENDER_MODE_NORMAL;
+    int32_t ret = audioStream_->SetRenderMode(renderMode);
+    EXPECT_EQ(SUCCESS, ret);
+}
+
+/**
+* @tc.name  : Test Audio_Stream_SetCaptureMode_001 via legal state
+* @tc.number: Audio_Stream_SetCaptureMode_001
+* @tc.desc  : Test SetCaptureMode interface. Returns success.
+*/
+HWTEST(AudioStreamUnitTest, Audio_Stream_SetCaptureMode_001, TestSize.Level1)
+{
+    std::shared_ptr<AudioStream> audioStream_;
+    AudioStreamUnitTest::InitAudioStream(audioStream_);
+    AudioCaptureMode captureMode = AudioCaptureMode::CAPTURE_MODE_NORMAL;
+    int32_t ret = audioStream_->SetCaptureMode(captureMode);
+    EXPECT_EQ(SUCCESS, ret);
+}
+
+/**
+* @tc.name  : Test Audio_Stream_SetCapturerReadCallback_001 via illegal state
+* @tc.number: Audio_Stream_SetCapturerReadCallback_001
+* @tc.desc  : Test SetCapturerReadCallback interface. Returns invalid.
+*/
+HWTEST(AudioStreamUnitTest, Audio_Stream_SetCapturerReadCallback_001, TestSize.Level1)
+{
+    std::shared_ptr<AudioStream> audioStream_;
+    AudioStreamUnitTest::InitAudioStream(audioStream_);
+
+    AudioCaptureMode captureMode = AudioCaptureMode::CAPTURE_MODE_NORMAL;
+    int32_t ret = audioStream_->SetCaptureMode(captureMode);
+    EXPECT_EQ(SUCCESS, ret);
+
+    std::shared_ptr<AudioCapturerReadCallback> callback = std::make_shared<AudioCapturerReadCallbackTest>();
+    ret = audioStream_->SetCapturerReadCallback(callback);
+    EXPECT_EQ(ERR_INCORRECT_MODE, ret);
+}
+
+/**
+* @tc.name  : Test Audio_Stream_SetCapturerReadCallback_002 via illegal state
+* @tc.number: Audio_Stream_SetCapturerReadCallback_002
+* @tc.desc  : Test SetCapturerReadCallback interface. Returns invalid.
+*/
+HWTEST(AudioStreamUnitTest, Audio_Stream_SetCapturerReadCallback_002, TestSize.Level1)
+{
+    std::shared_ptr<AudioStream> audioStream_;
+    AudioStreamUnitTest::InitAudioStream(audioStream_);
+
+    AudioCaptureMode captureMode = AudioCaptureMode::CAPTURE_MODE_CALLBACK;
+    int32_t ret = audioStream_->SetCaptureMode(captureMode);
+    EXPECT_EQ(SUCCESS, ret);
+
+    std::shared_ptr<AudioCapturerReadCallback> callback = nullptr;
+    ret = audioStream_->SetCapturerReadCallback(callback);
+    EXPECT_EQ(ERR_INVALID_PARAM, ret);
+}
+
+/**
+* @tc.name  : Test Audio_Stream_GetBufQueueState_001 via illegal state
+* @tc.number: Audio_Stream_GetBufQueueState_001
+* @tc.desc  : Test GetBufQueueState interface. Returns invalid.
+*/
+HWTEST(AudioStreamUnitTest, Audio_Stream_GetBufQueueState_001, TestSize.Level1)
+{
+    int32_t ret = -1;
+    std::shared_ptr<AudioStream> audioStream_;
+    AudioStreamUnitTest::InitAudioStream(audioStream_);
+
+    AudioCaptureMode captureMode = AudioCaptureMode::CAPTURE_MODE_NORMAL;
+    ret = audioStream_->SetCaptureMode(captureMode);
+    EXPECT_EQ(SUCCESS, ret);
+
+    AudioRenderMode renderMode = AudioRenderMode::RENDER_MODE_NORMAL;
+    ret = audioStream_->SetRenderMode(renderMode);
+    EXPECT_EQ(SUCCESS, ret);
+
+    BufferQueueState bufState;
+    ret = audioStream_->GetBufQueueState(bufState);
+    EXPECT_EQ(ERR_INCORRECT_MODE, ret);
+}
+
+/**
+* @tc.name  : Test Audio_Stream_SaveReadCallback_001 via illegal state
+* @tc.number: Audio_Stream_SaveReadCallback_001
+* @tc.desc  : Test SaveReadCallback interface. Returns invalid.
+*/
+HWTEST(AudioStreamUnitTest, Audio_Stream_SaveReadCallback_001, TestSize.Level1)
+{
+    int32_t ret = -1;
+    std::shared_ptr<AudioStream> audioStream_;
+    AudioStreamUnitTest::InitAudioStream(audioStream_);
+
+    std::weak_ptr<AudioCapturerReadCallback> callback;
+    ret = audioStream_->SaveReadCallback(callback);
+    EXPECT_EQ(AUDIO_CLIENT_INIT_ERR, ret);
+}
+
+/**
+* @tc.name  : Test Audio_Stream_SetStreamVolume_001 via legal state
+* @tc.number: Audio_Stream_SetStreamVolume_001
+* @tc.desc  : Test SetStreamVolume interface. Returns success.
+*/
+HWTEST(AudioStreamUnitTest, Audio_Stream_SetStreamVolume_001, TestSize.Level1)
+{
+    int32_t ret = -1;
+    std::shared_ptr<AudioStream> audioStream_;
+    AudioStreamUnitTest::InitAudioStream(audioStream_);
+
+    uint32_t sessionID = 1;
+    uint32_t volume =1;
+    ret = audioStream_->SetStreamVolume(sessionID, volume);
+    EXPECT_EQ(SUCCESS, ret);
+}
+
+/**
+* @tc.name  : Test Audio_Stream_SetStreamRenderRate_001 via illegal state
+* @tc.number: Audio_Stream_SetStreamRenderRate_001
+* @tc.desc  : Test SetStreamRenderRate interface. Returns invalid.
+*/
+HWTEST(AudioStreamUnitTest, Audio_Stream_SetStreamRenderRate_001, TestSize.Level1)
+{
+    int32_t ret = -1;
+    std::shared_ptr<AudioStream> audioStream_;
+    AudioStreamUnitTest::InitAudioStream(audioStream_);
+
+    AudioRendererRate audioRendererRateDouble = AudioRendererRate::RENDER_RATE_DOUBLE;
+    ret = audioStream_->SetStreamRenderRate(audioRendererRateDouble);
+    EXPECT_EQ(SUCCESS, ret);
+
+    AudioRendererRate audioRendererRateHalf = AudioRendererRate::RENDER_RATE_HALF;
+    ret = audioStream_->SetStreamRenderRate(audioRendererRateHalf);
+    EXPECT_EQ(SUCCESS, ret);
+}
+
+/**
+* @tc.name  : Test Audio_Stream_SetStreamLowPowerVolume_001 via illegal state
+* @tc.number: Audio_Stream_SetStreamLowPowerVolume_001
+* @tc.desc  : Test SetStreamLowPowerVolume interface. Returns invalid.
+*/
+HWTEST(AudioStreamUnitTest, Audio_Stream_SetStreamLowPowerVolume_001, TestSize.Level1)
+{
+    int32_t ret = -1;
+    std::shared_ptr<AudioStream> audioStream_;
+    AudioStreamUnitTest::InitAudioStream(audioStream_);
+
+    float powerVolumeFactor = 1.2;
+    ret = audioStream_->SetStreamLowPowerVolume(powerVolumeFactor);
+    EXPECT_EQ(AUDIO_CLIENT_ERR, ret);
+
+    ASClientType eClientType = ASClientType::AUDIO_SERVICE_CLIENT_PLAYBACK;
+    audioStream_->Initialize(eClientType);
+    ret = audioStream_->SetStreamLowPowerVolume(powerVolumeFactor);
+    EXPECT_EQ(AUDIO_CLIENT_INVALID_PARAMS_ERR, ret);
+}
+
+/**
+* @tc.name  : Test Audio_Stream_SetStreamRenderRate_002 via illegal state
+* @tc.number: Audio_Stream_SetStreamRenderRate_002
+* @tc.desc  : Test SetStreamRenderRate interface. Returns invalid.
+*/
+HWTEST(AudioStreamUnitTest, Audio_Stream_SetStreamRenderRate_002, TestSize.Level1)
+{
+    int32_t ret = -1;
+    std::shared_ptr<AudioStream> audioStream_;
+    AudioStreamUnitTest::InitAudioStream(audioStream_);
+
+    std::shared_ptr<AudioRendererWriteCallback> callback = nullptr;
+    ret = audioStream_->SetRendererWriteCallback(callback);
+    EXPECT_EQ(true, ret < 0);
 }
 } // namespace AudioStandard
 } // namespace OHOS
