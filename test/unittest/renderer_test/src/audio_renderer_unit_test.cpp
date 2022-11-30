@@ -917,7 +917,31 @@ HWTEST(AudioRendererUnitTest, Audio_Renderer_SetInterruptMode_001, TestSize.Leve
 }
 
 /**
-* @tc.name  : Test GetBufQueueState
+ * @tc.name  : Test SetInterruptMode API via legal input
+ * @tc.number: Audio_Renderer_SetInterruptMode_002
+ * @tc.desc  : Test SetInterruptMode interface. Returns 0 {SUCCESS}, if the setting is successful.
+ */
+HWTEST(AudioRendererUnitTest, Audio_Renderer_SetInterruptMode_002, TestSize.Level1)
+{
+    int32_t ret = -1;
+    unique_ptr<AudioRenderer> audioRenderer = AudioRenderer::Create(STREAM_MUSIC);
+    ASSERT_NE(nullptr, audioRenderer);
+
+    ret = AudioRendererUnitTest::InitializeRenderer(audioRenderer);
+    EXPECT_EQ(SUCCESS, ret);
+
+    audioRenderer->SetInterruptMode(INDEPENDENT_MODE);
+
+    bool isStarted = audioRenderer->Start();
+    EXPECT_EQ(true, isStarted);
+
+    bool isStopped = audioRenderer->Stop();
+    EXPECT_EQ(true, isStopped);
+    audioRenderer->Release();
+}
+
+/**
+* @tc.name  : Test GetBufQueueState 
 * @tc.number: Audio_Renderer_GetBufQueueState_001
 * @tc.desc  : Test GetBufQueueState interface. Returns BufferQueueState, if obtained successfully.
 */
@@ -1083,6 +1107,69 @@ HWTEST(AudioRendererUnitTest, Audio_Renderer_GetBufferSize_005, TestSize.Level1)
 
     size_t bufferLen;
     ret = audioRenderer->GetBufferSize(bufferLen);
+    EXPECT_EQ(SUCCESS, ret);
+
+    audioRenderer->Release();
+}
+
+/**
+ * @tc.name  : Test GetAudioStreamId API stability.
+ * @tc.number: Audio_Renderer_GetAudioStreamId_001
+ * @tc.desc  : Test GetAudioStreamId interface stability.
+ */
+HWTEST(AudioRendererUnitTest, Audio_Renderer_GetAudioStreamId_001, TestSize.Level1)
+{
+    int32_t ret = -1;
+    AudioRendererOptions rendererOptions;
+
+    AudioRendererUnitTest::InitializeRendererOptions(rendererOptions);
+    unique_ptr<AudioRenderer> audioRenderer = AudioRenderer::Create(rendererOptions);
+    ASSERT_NE(nullptr, audioRenderer);
+
+    uint32_t sessionID;
+    ret = audioRenderer->GetAudioStreamId(sessionID);
+    EXPECT_EQ(SUCCESS, ret);
+
+    audioRenderer->Release();
+}
+
+/**
+ * @tc.name  : Test SetAudioRendererDesc API stability.
+ * @tc.number: Audio_Renderer_SetAudioRendererDesc_001
+ * @tc.desc  : Test SetAudioRendererDesc interface stability.
+ */
+HWTEST(AudioRendererUnitTest, Audio_Renderer_SetAudioRendererDesc_001, TestSize.Level1)
+{
+    int32_t ret = -1;
+    AudioRendererOptions rendererOptions;
+
+    AudioRendererUnitTest::InitializeRendererOptions(rendererOptions);
+    unique_ptr<AudioRenderer> audioRenderer = AudioRenderer::Create(rendererOptions);
+    ASSERT_NE(nullptr, audioRenderer);
+
+    AudioRendererDesc audioRD = {CONTENT_TYPE_MUSIC, STREAM_USAGE_VOICE_COMMUNICATION};
+    ret = audioRenderer->SetAudioRendererDesc(audioRD);
+    EXPECT_EQ(SUCCESS, ret);
+
+    audioRenderer->Release();
+}
+
+/**
+ * @tc.name  : Test SetStreamType API stability.
+ * @tc.number: Audio_Renderer_SetStreamType_001
+ * @tc.desc  : Test SetStreamType interface stability.
+ */
+HWTEST(AudioRendererUnitTest, Audio_Renderer_SetStreamType_001, TestSize.Level1)
+{
+    int32_t ret = -1;
+    AudioRendererOptions rendererOptions;
+
+    AudioRendererUnitTest::InitializeRendererOptions(rendererOptions);
+    unique_ptr<AudioRenderer> audioRenderer = AudioRenderer::Create(rendererOptions);
+    ASSERT_NE(nullptr, audioRenderer);
+
+    AudioStreamType audioStreamType = STREAM_MUSIC;
+    ret = audioRenderer->SetStreamType(audioStreamType);
     EXPECT_EQ(SUCCESS, ret);
 
     audioRenderer->Release();
@@ -1395,6 +1482,48 @@ HWTEST(AudioRendererUnitTest, Audio_Renderer_GetVolume_003, TestSize.Level1)
 
     bool isReleased = audioRenderer->Release();
     EXPECT_EQ(true, isReleased);
+}
+
+/**
+ * @tc.name  : Test SetRenderRate
+ * @tc.number: Audio_Renderer_SetRenderRate_001
+ * @tc.desc  : Test SetRenderRate interface after set volume fails.
+ */
+HWTEST(AudioRendererUnitTest, Audio_Renderer_SetRenderRate_001, TestSize.Level1)
+{
+    int32_t ret = -1;
+    AudioRendererOptions rendererOptions;
+
+    AudioRendererUnitTest::InitializeRendererOptions(rendererOptions);
+    unique_ptr<AudioRenderer> audioRenderer = AudioRenderer::Create(rendererOptions);
+    ASSERT_NE(nullptr, audioRenderer);
+
+    AudioRendererRate renderRate = RENDER_RATE_NORMAL;
+    ret = audioRenderer->SetRenderRate(renderRate);
+    EXPECT_EQ(SUCCESS, ret);
+    audioRenderer->Release();
+}
+
+/**
+ * @tc.name  : Test GetRenderRate
+ * @tc.number: Audio_Renderer_GetRenderRate_001
+ * @tc.desc  : Test GetRenderRate interface after set volume fails.
+ */
+HWTEST(AudioRendererUnitTest, Audio_Renderer_GetRenderRate_001, TestSize.Level1)
+{
+    int32_t ret = -1;
+    AudioRendererOptions rendererOptions;
+
+    AudioRendererUnitTest::InitializeRendererOptions(rendererOptions);
+    unique_ptr<AudioRenderer> audioRenderer = AudioRenderer::Create(rendererOptions);
+    ASSERT_NE(nullptr, audioRenderer);
+
+    ret = audioRenderer->SetRenderRate(RENDER_RATE_DOUBLE);
+    EXPECT_EQ(SUCCESS, ret);
+
+    AudioRendererRate renderRate = audioRenderer->GetRenderRate();
+    EXPECT_EQ(RENDER_RATE_DOUBLE, renderRate);
+    audioRenderer->Release();
 }
 
 /**
