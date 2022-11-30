@@ -412,6 +412,94 @@ HWTEST(AudioCapturerUnitTest, Audio_Capturer_Create_014, TestSize.Level0)
 }
 
 /**
+ * @tc.name  : Test Create API via legal input.
+ * @tc.number: Audio_Capturer_Create_015
+ * @tc.desc  : Test Create function with two types of parameters: AudioCapturerOptions and AppInfo.
+ */
+HWTEST(AudioCapturerUnitTest, Audio_Capturer_Create_015, TestSize.Level0)
+{
+    AudioCapturerOptions capturerOptions;
+    AppInfo appInfo = {};
+    capturerOptions.streamInfo.samplingRate = AudioSamplingRate::SAMPLE_RATE_8000;
+    capturerOptions.streamInfo.encoding = AudioEncodingType::ENCODING_PCM;
+    capturerOptions.streamInfo.format = AudioSampleFormat::SAMPLE_U8;
+    capturerOptions.streamInfo.channels = AudioChannel::MONO;
+    capturerOptions.capturerInfo.sourceType = SourceType::SOURCE_TYPE_MIC;
+    capturerOptions.capturerInfo.capturerFlags = CAPTURER_FLAG;
+    appInfo.appTokenId = VALUE_THOUSAND;
+    appInfo.appUid = VALUE_HUNDRED;
+    unique_ptr<AudioCapturer> audioCapturer = AudioCapturer::Create(capturerOptions, appInfo);
+    ASSERT_NE(nullptr, audioCapturer);
+    audioCapturer->Release();
+}
+
+/**
+ * @tc.name  : Test Create API via legal input.
+ * @tc.number: Audio_Capturer_Create_016
+ * @tc.desc  : Test Create function with two types of parameters: AudioCapturerOptions and AppInfo,
+ *             and give different parameters.
+ */
+HWTEST(AudioCapturerUnitTest, Audio_Capturer_Create_016, TestSize.Level0)
+{
+    AudioCapturerOptions capturerOptions;
+    AppInfo appInfo = {};
+    capturerOptions.streamInfo.samplingRate = AudioSamplingRate::SAMPLE_RATE_16000;
+    capturerOptions.streamInfo.encoding = AudioEncodingType::ENCODING_PCM;
+    capturerOptions.streamInfo.format = AudioSampleFormat::SAMPLE_S16LE;
+    capturerOptions.streamInfo.channels = AudioChannel::MONO;
+    capturerOptions.capturerInfo.sourceType = SourceType::SOURCE_TYPE_VOICE_RECOGNITION;
+    capturerOptions.capturerInfo.capturerFlags = CAPTURER_FLAG;
+    appInfo.appTokenId = VALUE_THOUSAND;
+    appInfo.appUid = VALUE_HUNDRED;
+    unique_ptr<AudioCapturer> audioCapturer = AudioCapturer::Create(capturerOptions, appInfo);
+    ASSERT_NE(nullptr, audioCapturer);
+    audioCapturer->Release();
+}
+
+/**
+ * @tc.name  : Test Create API via legal input.
+ * @tc.number: Audio_Capturer_Create_017
+ * @tc.desc  : Test Create function with two types of parameters: AudioCapturerOptions and string.
+ */
+HWTEST(AudioCapturerUnitTest, Audio_Capturer_Create_017, TestSize.Level0)
+{
+    AudioCapturerOptions capturerOptions;
+    string cachePath = "/data/storage/el2/base/haps/entry/files";
+    capturerOptions.streamInfo.samplingRate = AudioSamplingRate::SAMPLE_RATE_16000;
+    capturerOptions.streamInfo.encoding = AudioEncodingType::ENCODING_PCM;
+    capturerOptions.streamInfo.format = AudioSampleFormat::SAMPLE_S16LE;
+    capturerOptions.streamInfo.channels = AudioChannel::MONO;
+    capturerOptions.capturerInfo.sourceType = SourceType::SOURCE_TYPE_VOICE_RECOGNITION;
+    capturerOptions.capturerInfo.capturerFlags = CAPTURER_FLAG;
+    unique_ptr<AudioCapturer> audioCapturer = AudioCapturer::Create(capturerOptions, cachePath.c_str());
+    ASSERT_NE(nullptr, audioCapturer);
+    audioCapturer->Release();
+}
+
+/**
+ * @tc.name  : Test Create API via legal input.
+ * @tc.number: Audio_Capturer_Create_018
+ * @tc.desc  : Test function Create uses three types of parameters: AudioCapturerOptions, string and AppInfo.
+ */
+HWTEST(AudioCapturerUnitTest, Audio_Capturer_Create_018, TestSize.Level0)
+{
+    AudioCapturerOptions capturerOptions;
+    AppInfo appInfo = {};
+    string cachePath = "/data/storage/el2/base/haps/entry/files";
+    capturerOptions.streamInfo.samplingRate = AudioSamplingRate::SAMPLE_RATE_16000;
+    capturerOptions.streamInfo.encoding = AudioEncodingType::ENCODING_PCM;
+    capturerOptions.streamInfo.format = AudioSampleFormat::SAMPLE_S16LE;
+    capturerOptions.streamInfo.channels = AudioChannel::MONO;
+    capturerOptions.capturerInfo.sourceType = SourceType::SOURCE_TYPE_VOICE_RECOGNITION;
+    capturerOptions.capturerInfo.capturerFlags = CAPTURER_FLAG;
+    appInfo.appTokenId = VALUE_THOUSAND;
+    appInfo.appUid = VALUE_HUNDRED;
+    unique_ptr<AudioCapturer> audioCapturer = AudioCapturer::Create(capturerOptions, cachePath.c_str(), appInfo);
+    ASSERT_NE(nullptr, audioCapturer);
+    audioCapturer->Release();
+}
+
+/**
 * @tc.name  : Test SetParams API via legal input
 * @tc.number: Audio_Capturer_SetParams_001
 * @tc.desc  : Test SetParams interface. Returns 0 {SUCCESS}, if the setting is successful.
@@ -768,6 +856,27 @@ HWTEST(AudioCapturerUnitTest, Audio_Capturer_GetParams_Stability_001, TestSize.L
         ret = audioCapturer->GetParams(getCapturerParams);
         EXPECT_EQ(SUCCESS, ret);
     }
+
+    audioCapturer->Release();
+}
+
+/**
+ * @tc.name  : Test GetParams API stability.
+ * @tc.number: Audio_Capturer_GetParams_Stability_001
+ * @tc.desc  : Test GetParams interface stability.
+ */
+HWTEST(AudioCapturerUnitTest, Audio_Capturer_GetAudioStreamId_001, TestSize.Level1)
+{
+    int32_t ret = -1;
+    AudioCapturerOptions capturerOptions;
+
+    AudioCapturerUnitTest::InitializeCapturerOptions(capturerOptions);
+    unique_ptr<AudioCapturer> audioCapturer = AudioCapturer::Create(capturerOptions);
+    ASSERT_NE(nullptr, audioCapturer);
+
+    uint32_t sessionID;
+    ret = audioCapturer->GetAudioStreamId(sessionID);
+    EXPECT_EQ(SUCCESS, ret);
 
     audioCapturer->Release();
 }
@@ -2667,6 +2776,57 @@ HWTEST(AudioCapturerUnitTest, Audio_Capturer_SetCapturerCallback_004, TestSize.L
     shared_ptr<AudioCapturerCallbackTest> audioCapturerCB = std::make_shared<AudioCapturerCallbackTest>();
     ret = audioCapturer->SetCapturerCallback(audioCapturerCB);
     EXPECT_EQ(SUCCESS, ret);
+}
+
+/**
+ * @tc.name  : Test SetCaptureMode via legal state.
+ * @tc.number: Audio_Capturer_SetCaptureMode_001
+ * @tc.desc  : Test SetCaptureMode interface. Returns success, if the set capture mode is successful.
+ */
+HWTEST(AudioCapturerUnitTest, Audio_Capturer_SetCaptureMode_001, TestSize.Level1)
+{
+    int32_t ret = -1;
+
+    AudioCapturerOptions capturerOptions;
+    capturerOptions.streamInfo.samplingRate = AudioSamplingRate::SAMPLE_RATE_44100;
+    capturerOptions.streamInfo.encoding = AudioEncodingType::ENCODING_PCM;
+    capturerOptions.streamInfo.format = AudioSampleFormat::SAMPLE_S16LE;
+    capturerOptions.streamInfo.channels = AudioChannel::MONO;
+    capturerOptions.capturerInfo.sourceType = SourceType::SOURCE_TYPE_MIC;
+    capturerOptions.capturerInfo.capturerFlags = CAPTURER_FLAG;
+
+    unique_ptr<AudioCapturer> audioCapturer = AudioCapturer::Create(capturerOptions);
+    ASSERT_NE(nullptr, audioCapturer);
+
+    ret = audioCapturer->SetCaptureMode(CAPTURE_MODE_CALLBACK);
+    EXPECT_EQ(SUCCESS, ret);
+}
+
+/**
+ * @tc.name  : Test GetCaptureMode via legal state.
+ * @tc.number: Audio_Capturer_GetCaptureMode_001
+ * @tc.desc  : Test GetCaptureMode interface. Returns success, if the get capture mode is successful.
+ */
+HWTEST(AudioCapturerUnitTest, Audio_Capturer_GetCaptureMode, TestSize.Level1)
+{
+    int32_t ret = -1;
+
+    AudioCapturerOptions capturerOptions;
+    capturerOptions.streamInfo.samplingRate = AudioSamplingRate::SAMPLE_RATE_44100;
+    capturerOptions.streamInfo.encoding = AudioEncodingType::ENCODING_PCM;
+    capturerOptions.streamInfo.format = AudioSampleFormat::SAMPLE_S16LE;
+    capturerOptions.streamInfo.channels = AudioChannel::MONO;
+    capturerOptions.capturerInfo.sourceType = SourceType::SOURCE_TYPE_MIC;
+    capturerOptions.capturerInfo.capturerFlags = CAPTURER_FLAG;
+
+    unique_ptr<AudioCapturer> audioCapturer = AudioCapturer::Create(capturerOptions);
+    ASSERT_NE(nullptr, audioCapturer);
+
+    ret = audioCapturer->SetCaptureMode(CAPTURE_MODE_CALLBACK);
+    EXPECT_EQ(SUCCESS, ret);
+
+    AudioCaptureMode captureMode = audioCapturer->GetCaptureMode();
+    EXPECT_EQ(CAPTURE_MODE_CALLBACK, captureMode);
 }
 } // namespace AudioStandard
 } // namespace OHOS
