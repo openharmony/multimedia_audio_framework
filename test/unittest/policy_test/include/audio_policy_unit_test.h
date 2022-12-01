@@ -22,6 +22,7 @@
 #include "audio_policy_proxy.h"
 #include "audio_stream_manager.h"
 #include "audio_stream.h"
+#include "audio_group_manager.h"
 
 namespace OHOS {
 namespace AudioStandard {
@@ -38,6 +39,50 @@ class AudioCapturerStateChangeCallbackTest : public AudioCapturerStateChangeCall
     virtual void OnCapturerStateChange(
         const std::vector<std::unique_ptr<AudioCapturerChangeInfo>> &audioCapturerChangeInfos) {}
 };
+
+class AudioRingerModeCallbackTest : public AudioRingerModeCallback {
+public:
+    virtual ~AudioRingerModeCallbackTest() = default;
+    /**
+     * Called when ringer mode is updated.
+     *
+     * @param ringerMode Indicates the updated ringer mode value.
+     * For details, refer RingerMode enum in audio_info.h
+     */
+    virtual void OnRingerModeUpdated(const AudioRingerMode &ringerMode) {};
+};
+
+class AudioManagerMicStateChangeCallbackTest : public AudioManagerMicStateChangeCallback {
+public:
+    virtual ~AudioManagerMicStateChangeCallbackTest() = default;
+    /**
+     * Called when the microphone state changes
+     *
+     * @param micStateChangeEvent Microphone Status Information.
+     */
+    virtual void OnMicStateUpdated(const MicStateChangeEvent &micStateChangeEvent) {};
+};
+
+class AudioClientTrackerTest : public AudioClientTracker {
+public:
+    virtual ~AudioClientTrackerTest() = default;
+    /**
+     * Paused Stream was controlled by system application
+     *
+     * @param streamSetStateEventInternal Contains the set even information.
+     */
+    virtual void PausedStreamImpl(const StreamSetStateEventInternal &streamSetStateEventInternal) {};
+     /**
+     * Resumed Stream was controlled by system application
+     *
+     * @param streamSetStateEventInternal Contains the set even information.
+     */
+    virtual void ResumeStreamImpl(const StreamSetStateEventInternal &streamSetStateEventInternal) {};
+    virtual void SetLowPowerVolumeImpl(float volume) {};
+    virtual void GetLowPowerVolumeImpl(float &volume) {};
+    virtual void GetSingleStreamVolumeImpl(float &volume) {};
+};
+
 class AudioPolicyUnitTest : public testing::Test {
 public:
     // SetUpTestCase: Called before all test cases
