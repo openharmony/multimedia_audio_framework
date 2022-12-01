@@ -2549,7 +2549,7 @@ void AudioServiceClient::ProcessEvent(const AppExecFwk::InnerEvent::Pointer &eve
             break;
 
         default:
-            ProcessEventCapturer(&event);
+            ProcessEventCapturer(event);
             break;
     }
 }
@@ -2563,10 +2563,6 @@ void AudioServiceClient::ProcessEvent(const AppExecFwk::InnerEvent::Pointer &eve
     std::shared_ptr<CapturerPeriodPositionCallback> capturePeriodPositionCb;
 
     switch (eventId) {
-        case WRITE_BUFFER_REQUEST:
-            HandleWriteRequestEvent();
-            break;
-
         // CapturerMarkReach
         case CAPTURER_MARK_REACHED_REQUEST:
             mFrameMarkPosition = event->GetParam();
