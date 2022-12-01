@@ -430,5 +430,508 @@ HWTEST(AudioOpenslesCaptureUnitTest, Prf_Audio_Opensles_CreateAudioRecorder_001,
     int64_t expectTime = 1000000000;
     EXPECT_TRUE(totalTime <= expectTime * performanceTestTimes);
 }
+
+HWTEST(AudioOpenslesCaptureUnitTest, Audio_Opensles_Capture_SlToOhosChannel_001, TestSize.Level1)
+{
+    wavFile_ = fopen(AUDIORENDER_TEST_FILE_PATH, "wb");
+    if (wavFile_ == nullptr) {
+        AUDIO_INFO_LOG("SlToOhosChannel_001: Unable to open record file.");
+    }
+
+    SLDataLocator_IODevice io_device = {
+        SL_DATALOCATOR_IODEVICE,
+        SL_IODEVICE_AUDIOINPUT,
+        SL_DEFAULTDEVICEID_AUDIOINPUT,
+        NULL
+    };
+
+    SLDataSource audioSource = {
+        &io_device,
+        NULL
+    };
+
+    SLDataLocator_BufferQueue buffer_queue = {
+        SL_DATALOCATOR_BUFFERQUEUE,
+        3
+    };
+
+    SLDataFormat_PCM format_pcm = {
+        SL_DATAFORMAT_PCM,
+        OHOS::AudioStandard::AudioChannel::MONO,
+        OHOS::AudioStandard::AudioSamplingRate::SAMPLE_RATE_8000,
+        SL_PCMSAMPLEFORMAT_FIXED_8,
+        0,
+        0,
+        0
+    };
+
+    SLDataSink audioSink = {
+        &buffer_queue,
+        &format_pcm
+    };
+    SLresult result = (*engineEngine_)->CreateAudioRecorder(engineEngine_, &pcmCapturerObject_, &audioSource,
+        &audioSink, 0, nullptr, nullptr);
+    EXPECT_TRUE(result == SL_RESULT_SUCCESS);
+}
+
+HWTEST(AudioOpenslesCaptureUnitTest, Audio_Opensles_Capture_SlToOhosChannel_002, TestSize.Level1)
+{
+    wavFile_ = fopen(AUDIORENDER_TEST_FILE_PATH, "wb");
+    if (wavFile_ == nullptr) {
+        AUDIO_INFO_LOG("SlToOhosChannel_002: Unable to open record file.");
+    }
+
+    SLDataLocator_IODevice io_device = {
+        SL_DATALOCATOR_IODEVICE,
+        SL_IODEVICE_AUDIOINPUT,
+        SL_DEFAULTDEVICEID_AUDIOINPUT,
+        NULL
+    };
+
+    SLDataSource audioSource = {
+        &io_device,
+        NULL
+    };
+
+    SLDataLocator_BufferQueue buffer_queue = {
+        SL_DATALOCATOR_BUFFERQUEUE,
+        3
+    };
+
+    SLDataFormat_PCM format_pcm = {
+        SL_DATAFORMAT_PCM,
+        OHOS::AudioStandard::AudioChannel::STEREO,
+        SL_SAMPLINGRATE_11_025,
+        SL_PCMSAMPLEFORMAT_FIXED_16,
+        0,
+        0,
+        0
+    };
+    SLDataSink audioSink = {
+        &buffer_queue,
+        &format_pcm
+    };
+    SLresult result = (*engineEngine_)->CreateAudioRecorder(engineEngine_, &pcmCapturerObject_, &audioSource,
+        &audioSink, 0, nullptr, nullptr);
+    EXPECT_TRUE(result == SL_RESULT_SUCCESS);
+}
+
+HWTEST(AudioOpenslesCaptureUnitTest, Audio_Opensles_Capture_SlToOhosChannel_003, TestSize.Level1)
+{
+    wavFile_ = fopen(AUDIORENDER_TEST_FILE_PATH, "wb");
+    if (wavFile_ == nullptr) {
+        AUDIO_INFO_LOG("SlToOhosChannel_003: Unable to open record file.");
+    }
+
+    SLDataLocator_IODevice io_device = {
+        SL_DATALOCATOR_IODEVICE,
+        SL_IODEVICE_AUDIOINPUT,
+        SL_DEFAULTDEVICEID_AUDIOINPUT,
+        NULL
+    };
+
+    SLDataSource audioSource = {
+        &io_device,
+        NULL
+    };
+
+    SLDataLocator_BufferQueue buffer_queue = {
+        SL_DATALOCATOR_BUFFERQUEUE,
+        3
+    };
+
+    SLDataFormat_PCM format_pcm = {
+        SL_DATAFORMAT_PCM,
+        3,
+        SL_SAMPLINGRATE_12,
+        SL_PCMSAMPLEFORMAT_FIXED_16,
+        0,
+        0,
+        0
+    };
+    SLDataSink audioSink = {
+        &buffer_queue,
+        &format_pcm
+    };
+    SLresult result = (*engineEngine_)->CreateAudioRecorder(engineEngine_, &pcmCapturerObject_, &audioSource,
+        &audioSink, 0, nullptr, nullptr);
+    EXPECT_TRUE(result == SL_RESULT_SUCCESS);
+}
+
+HWTEST(AudioOpenslesCaptureUnitTest, Audio_Opensles_Capture_SlToOhosChannel_004, TestSize.Level1)
+{
+    wavFile_ = fopen(AUDIORENDER_TEST_FILE_PATH, "wb");
+    if (wavFile_ == nullptr) {
+        AUDIO_INFO_LOG("SlToOhosChannel_004: Unable to open record file.");
+    }
+
+    SLDataLocator_IODevice io_device = {
+        SL_DATALOCATOR_IODEVICE,
+        SL_IODEVICE_AUDIOINPUT,
+        SL_DEFAULTDEVICEID_AUDIOINPUT,
+        NULL
+    };
+
+    SLDataSource audioSource = {
+        &io_device,
+        NULL
+    };
+
+    SLDataLocator_BufferQueue buffer_queue = {
+        SL_DATALOCATOR_BUFFERQUEUE,
+        3
+    };
+    SLDataFormat_PCM format_pcm = {
+        SL_DATAFORMAT_PCM,
+        OHOS::AudioStandard::AudioChannel::CHANNEL_3,
+        SL_SAMPLINGRATE_16,
+        SL_PCMSAMPLEFORMAT_FIXED_24,
+        0,
+        0,
+        0
+    };
+    SLDataSink audioSink = {
+        &buffer_queue,
+        &format_pcm
+    };
+    SLresult result = (*engineEngine_)->CreateAudioRecorder(engineEngine_, &pcmCapturerObject_, &audioSource,
+        &audioSink, 0, nullptr, nullptr);
+    EXPECT_TRUE(result == SL_RESULT_SUCCESS);
+}
+
+HWTEST(AudioOpenslesCaptureUnitTest, Audio_Opensles_Capture_SlToOhosChannel_005, TestSize.Level1)
+{
+    wavFile_ = fopen(AUDIORENDER_TEST_FILE_PATH, "wb");
+    if (wavFile_ == nullptr) {
+        AUDIO_INFO_LOG("SlToOhosChannel_005: Unable to open record file.");
+    }
+
+    SLDataLocator_IODevice io_device = {
+        SL_DATALOCATOR_IODEVICE,
+        SL_IODEVICE_AUDIOINPUT,
+        SL_DEFAULTDEVICEID_AUDIOINPUT,
+        NULL
+    };
+
+    SLDataSource audioSource = {
+        &io_device,
+        NULL
+    };
+
+    SLDataLocator_BufferQueue buffer_queue = {
+        SL_DATALOCATOR_BUFFERQUEUE,
+        3
+    };
+
+    SLDataFormat_PCM format_pcm = {
+        SL_DATAFORMAT_PCM,
+        OHOS::AudioStandard::AudioChannel::STEREO,
+        SL_SAMPLINGRATE_22_05,
+        SL_PCMSAMPLEFORMAT_FIXED_8,
+        0,
+        0,
+        0
+    };
+    SLDataSink audioSink = {
+        &buffer_queue,
+        &format_pcm
+    };
+
+    SLresult result = (*engineEngine_)->CreateAudioRecorder(engineEngine_, &pcmCapturerObject_, &audioSource,
+        &audioSink, 0, nullptr, nullptr);
+    EXPECT_TRUE(result == SL_RESULT_SUCCESS);
+}
+
+HWTEST(AudioOpenslesCaptureUnitTest, Audio_Opensles_Capture_SlToOhosChannel_006, TestSize.Level1)
+{
+    wavFile_ = fopen(AUDIORENDER_TEST_FILE_PATH, "wb");
+    if (wavFile_ == nullptr) {
+        AUDIO_INFO_LOG("SlToOhosChannel_006: Unable to open record file.");
+    }
+
+    SLDataLocator_IODevice io_device = {
+        SL_DATALOCATOR_IODEVICE,
+        SL_IODEVICE_AUDIOINPUT,
+        SL_DEFAULTDEVICEID_AUDIOINPUT,
+        NULL
+    };
+
+    SLDataSource audioSource = {
+        &io_device,
+        NULL
+    };
+
+    SLDataLocator_BufferQueue buffer_queue = {
+        SL_DATALOCATOR_BUFFERQUEUE,
+        3
+    };
+
+    SLDataFormat_PCM format_pcm = {
+        SL_DATAFORMAT_PCM,
+        OHOS::AudioStandard::AudioChannel::STEREO,
+        SL_SAMPLINGRATE_24,
+        SL_PCMSAMPLEFORMAT_FIXED_32,
+        0,
+        0,
+        0
+    };
+    SLDataSink audioSink = {
+        &buffer_queue,
+        &format_pcm
+    };
+    SLresult result = (*engineEngine_)->CreateAudioRecorder(engineEngine_, &pcmCapturerObject_, &audioSource,
+        &audioSink, 0, nullptr, nullptr);
+    EXPECT_TRUE(result == SL_RESULT_SUCCESS);
+}
+
+HWTEST(AudioOpenslesCaptureUnitTest, Audio_Opensles_Capture_SlToOhosChannel_007, TestSize.Level1)
+{
+    wavFile_ = fopen(AUDIORENDER_TEST_FILE_PATH, "wb");
+    if (wavFile_ == nullptr) {
+        AUDIO_INFO_LOG("SlToOhosChannel_007: Unable to open record file.");
+    }
+
+    SLDataLocator_IODevice io_device = {
+        SL_DATALOCATOR_IODEVICE,
+        SL_IODEVICE_AUDIOINPUT,
+        SL_DEFAULTDEVICEID_AUDIOINPUT,
+        NULL
+    };
+
+    SLDataSource audioSource = {
+        &io_device,
+        NULL
+    };
+
+    SLDataLocator_BufferQueue buffer_queue = {
+        SL_DATALOCATOR_BUFFERQUEUE,
+        3
+    };
+
+    SLDataFormat_PCM format_pcm = {
+        SL_DATAFORMAT_PCM,
+        OHOS::AudioStandard::AudioChannel::MONO,
+        SL_SAMPLINGRATE_32,
+        SL_PCMSAMPLEFORMAT_FIXED_8,
+        0,
+        0,
+        0
+    };
+    SLDataSink audioSink = {
+        &buffer_queue,
+        &format_pcm
+    };
+    SLresult result = (*engineEngine_)->CreateAudioRecorder(engineEngine_, &pcmCapturerObject_, &audioSource,
+        &audioSink, 0, nullptr, nullptr);
+    EXPECT_TRUE(result == SL_RESULT_SUCCESS);
+}
+
+HWTEST(AudioOpenslesCaptureUnitTest, Audio_Opensles_Capture_SlToOhosChannel_008, TestSize.Level1)
+{
+    wavFile_ = fopen(AUDIORENDER_TEST_FILE_PATH, "wb");
+    if (wavFile_ == nullptr) {
+        AUDIO_INFO_LOG("SlToOhosChannel_008: Unable to open record file.");
+    }
+
+    SLDataLocator_IODevice io_device = {
+        SL_DATALOCATOR_IODEVICE,
+        SL_IODEVICE_AUDIOINPUT,
+        SL_DEFAULTDEVICEID_AUDIOINPUT,
+        NULL
+    };
+
+    SLDataSource audioSource = {
+        &io_device,
+        NULL
+    };
+
+    SLDataLocator_BufferQueue buffer_queue = {
+        SL_DATALOCATOR_BUFFERQUEUE,
+        3
+    };
+    SLDataFormat_PCM format_pcm = {
+        SL_DATAFORMAT_PCM,
+        OHOS::AudioStandard::AudioChannel::STEREO,
+        SL_SAMPLINGRATE_44_1,
+        SL_PCMSAMPLEFORMAT_FIXED_16,
+        0,
+        0,
+        0
+    };
+    SLDataSink audioSink = {
+        &buffer_queue,
+        &format_pcm
+    };
+    SLresult result = (*engineEngine_)->CreateAudioRecorder(engineEngine_, &pcmCapturerObject_, &audioSource,
+        &audioSink, 0, nullptr, nullptr);
+    EXPECT_TRUE(result == SL_RESULT_SUCCESS);
+}
+
+HWTEST(AudioOpenslesCaptureUnitTest, Audio_Opensles_Capture_SlToOhosChannel_009, TestSize.Level1)
+{
+    wavFile_ = fopen(AUDIORENDER_TEST_FILE_PATH, "wb");
+    if (wavFile_ == nullptr) {
+        AUDIO_INFO_LOG("SlToOhosChannel_009: Unable to open record file.");
+    }
+
+    SLDataLocator_IODevice io_device = {
+        SL_DATALOCATOR_IODEVICE,
+        SL_IODEVICE_AUDIOINPUT,
+        SL_DEFAULTDEVICEID_AUDIOINPUT,
+        NULL
+    };
+
+    SLDataSource audioSource = {
+        &io_device,
+        NULL
+    };
+
+    SLDataLocator_BufferQueue buffer_queue = {
+        SL_DATALOCATOR_BUFFERQUEUE,
+        3
+    };
+
+    SLDataFormat_PCM format_pcm = {
+        SL_DATAFORMAT_PCM,
+        OHOS::AudioStandard::AudioChannel::CHANNEL_3,
+        SL_SAMPLINGRATE_48,
+        SL_PCMSAMPLEFORMAT_FIXED_16,
+        0,
+        0,
+        0
+    };
+    SLDataSink audioSink = {
+        &buffer_queue,
+        &format_pcm
+    };
+    SLresult result = (*engineEngine_)->CreateAudioRecorder(engineEngine_, &pcmCapturerObject_, &audioSource,
+        &audioSink, 0, nullptr, nullptr);
+    EXPECT_TRUE(result == SL_RESULT_SUCCESS);
+}
+
+HWTEST(AudioOpenslesCaptureUnitTest, Audio_Opensles_Capture_SlToOhosChannel_010, TestSize.Level1)
+{
+    wavFile_ = fopen(AUDIORENDER_TEST_FILE_PATH, "wb");
+    if (wavFile_ == nullptr) {
+        AUDIO_INFO_LOG("SlToOhosChannel_010: Unable to open record file.");
+    }
+
+    SLDataLocator_IODevice io_device = {
+        SL_DATALOCATOR_IODEVICE,
+        SL_IODEVICE_AUDIOINPUT,
+        SL_DEFAULTDEVICEID_AUDIOINPUT,
+        NULL
+    };
+
+    SLDataSource audioSource = {
+        &io_device,
+        NULL
+    };
+
+    SLDataLocator_BufferQueue buffer_queue = {
+        SL_DATALOCATOR_BUFFERQUEUE,
+        3
+    };
+
+    SLDataFormat_PCM format_pcm = {
+        SL_DATAFORMAT_PCM,
+        OHOS::AudioStandard::AudioChannel::CHANNEL_3,
+        SL_SAMPLINGRATE_64,
+        SL_PCMSAMPLEFORMAT_FIXED_8,
+        0,
+        0,
+        0
+    };
+    SLDataSink audioSink = {
+        &buffer_queue,
+        &format_pcm
+    };
+    SLresult result = (*engineEngine_)->CreateAudioRecorder(engineEngine_, &pcmCapturerObject_, &audioSource,
+        &audioSink, 0, nullptr, nullptr);
+    EXPECT_TRUE(result == SL_RESULT_SUCCESS);
+}
+
+HWTEST(AudioOpenslesCaptureUnitTest, Audio_Opensles_Capture_SlToOhosChannel_011, TestSize.Level1)
+{
+    wavFile_ = fopen(AUDIORENDER_TEST_FILE_PATH, "wb");
+    if (wavFile_ == nullptr) {
+        AUDIO_INFO_LOG("SlToOhosChannel_011: Unable to open record file.");
+    }
+
+    SLDataLocator_IODevice io_device = {
+        SL_DATALOCATOR_IODEVICE,
+        SL_IODEVICE_AUDIOINPUT,
+        SL_DEFAULTDEVICEID_AUDIOINPUT,
+        NULL
+    };
+
+    SLDataSource audioSource = {
+        &io_device,
+        NULL
+    };
+
+    SLDataLocator_BufferQueue buffer_queue = {
+        SL_DATALOCATOR_BUFFERQUEUE,
+        3
+    };
+
+    SLDataFormat_PCM format_pcm = {
+        SL_DATAFORMAT_PCM,
+        OHOS::AudioStandard::AudioChannel::CHANNEL_3,
+        SL_SAMPLINGRATE_96,
+        SL_PCMSAMPLEFORMAT_FIXED_16,
+        0,
+        0,
+        0
+    };
+    SLDataSink audioSink = {
+        &buffer_queue,
+        &format_pcm
+    };
+    SLresult result = (*engineEngine_)->CreateAudioRecorder(engineEngine_, &pcmCapturerObject_, &audioSource,
+        &audioSink, 0, nullptr, nullptr);
+    EXPECT_TRUE(result == SL_RESULT_SUCCESS);
+}
+
+HWTEST(AudioOpenslesCaptureUnitTest, Audio_Opensles_Capture_SlToOhosChannel_012, TestSize.Level1)
+{
+    wavFile_ = fopen(AUDIORENDER_TEST_FILE_PATH, "wb");
+    if (wavFile_ == nullptr) {
+        AUDIO_INFO_LOG("SlToOhosChannel_012: Unable to open record file.");
+    }
+
+    SLDataLocator_IODevice io_device = {
+        SL_DATALOCATOR_IODEVICE,
+        SL_IODEVICE_AUDIOINPUT,
+        SL_DEFAULTDEVICEID_AUDIOINPUT,
+        NULL
+    };
+
+    SLDataSource audioSource = {
+        &io_device,
+        NULL
+    };
+
+    SLDataLocator_BufferQueue buffer_queue = {
+        SL_DATALOCATOR_BUFFERQUEUE,
+        3
+    };
+    SLDataFormat_PCM format_pcm = {
+        SL_DATAFORMAT_PCM,
+        OHOS::AudioStandard::AudioChannel::CHANNEL_3,
+        SL_SAMPLINGRATE_88_2,
+        SL_PCMSAMPLEFORMAT_FIXED_16,
+        0,
+        0,
+        0
+    };
+    SLDataSink audioSink = {
+        &buffer_queue,
+        &format_pcm
+    };
+    SLresult result = (*engineEngine_)->CreateAudioRecorder(engineEngine_, &pcmCapturerObject_, &audioSource,
+        &audioSink, 0, nullptr, nullptr);
+    EXPECT_TRUE(result == SL_RESULT_SUCCESS);
+}
 } // namespace AudioStandard
 } // namespace OHOS
