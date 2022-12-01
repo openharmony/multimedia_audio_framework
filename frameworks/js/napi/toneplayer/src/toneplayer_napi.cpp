@@ -373,10 +373,10 @@ napi_value TonePlayerNapi::Load(napi_env env, napi_callback_info info)
     GET_PARAMS(env, info, ARGS_TWO);
 
     unique_ptr<TonePlayerAsyncContext> asyncContext = make_unique<TonePlayerAsyncContext>();
+    CHECK_AND_RETURN_RET_LOG(asyncContext != nullptr, result, "Load TonePlayerAsyncContext object creation failed");
     if (argc < ARGS_ONE) {
         asyncContext->status = NAPI_ERR_INVALID_PARAM;
     }
-    CHECK_AND_RETURN_RET_LOG(asyncContext != nullptr, nullptr, "Load TonePlayerAsyncContext object creation failed");
 
     status = napi_unwrap(env, thisVar, reinterpret_cast<void **>(&asyncContext->objectInfo));
     if (status == napi_ok && asyncContext->objectInfo != nullptr) {

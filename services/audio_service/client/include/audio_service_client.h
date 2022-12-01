@@ -515,6 +515,7 @@ public:
 
 protected:
     virtual void ProcessEvent(const AppExecFwk::InnerEvent::Pointer &event) override;
+    virtual void ProcessEventCapturer(const AppExecFwk::InnerEvent::Pointer &event) override;
 private:
     pa_threaded_mainloop *mainLoop;
     pa_mainloop_api *api;

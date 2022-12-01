@@ -41,13 +41,13 @@ const sptr<IAudioPolicy> AudioPolicyManager::GetAudioPolicyManagerProxy()
         }
 
         sptr<IRemoteObject> object = samgr->GetSystemAbility(AUDIO_POLICY_SERVICE_ID);
-        if (samgr == nullptr) {
+        if (object == nullptr) {
             AUDIO_ERR_LOG("GetAudioPolicyManagerProxy Object is NULL.");
             return nullptr;
         }
 
         g_apProxy = iface_cast<IAudioPolicy>(object);
-        if (samgr == nullptr) {
+        if (g_apProxy == nullptr) {
             AUDIO_ERR_LOG("GetAudioPolicyManagerProxy Init g_apProxy is NULL.");
             return nullptr;
         }
@@ -370,7 +370,7 @@ int32_t AudioPolicyManager::SetRingerModeCallback(const int32_t clientId,
     }
 
     ringerModelistenerStub_ = new(std::nothrow) AudioRingerModeUpdateListenerStub();
-    if (ringerModelistenerStub_ == nullptr || gsp == nullptr) {
+    if (ringerModelistenerStub_ == nullptr) {
         AUDIO_ERR_LOG("SetRingerModeCallback: object null");
         return ERROR;
     }
@@ -410,7 +410,7 @@ int32_t AudioPolicyManager::SetDeviceChangeCallback(const int32_t clientId, cons
     }
 
     auto deviceChangeCbStub = new(std::nothrow) AudioPolicyManagerListenerStub();
-    if (deviceChangeCbStub == nullptr || gsp == nullptr) {
+    if (deviceChangeCbStub == nullptr) {
         AUDIO_ERR_LOG("SetDeviceChangeCallback: object null");
         return ERROR;
     }
@@ -452,7 +452,7 @@ int32_t AudioPolicyManager::SetMicStateChangeCallback(const int32_t clientId,
     }
 
     auto micStateChangeCbStub = new(std::nothrow) AudioRoutingManagerListenerStub();
-    if (micStateChangeCbStub == nullptr || gsp == nullptr) {
+    if (micStateChangeCbStub == nullptr) {
         AUDIO_ERR_LOG("SetMicStateChangeCallback: object null");
         return ERROR;
     }
@@ -484,7 +484,7 @@ int32_t AudioPolicyManager::SetAudioInterruptCallback(const uint32_t sessionID,
     // can be called from different threads in multi renderer usage
     std::unique_lock<std::mutex> lock(listenerStubMutex_);
     listenerStub_ = new(std::nothrow) AudioPolicyManagerListenerStub();
-    if (listenerStub_ == nullptr || gsp == nullptr) {
+    if (listenerStub_ == nullptr) {
         AUDIO_ERR_LOG("SetAudioInterruptCallback: object null");
         return ERROR;
     }
@@ -627,7 +627,7 @@ int32_t AudioPolicyManager::SetVolumeKeyEventCallback(const int32_t clientPid,
 
     std::lock_guard<std::mutex> lock(volumeCallbackMutex_);
     volumeKeyEventListenerStub_ = new(std::nothrow) AudioVolumeKeyEventCallbackStub();
-    if (volumeKeyEventListenerStub_ == nullptr || gsp == nullptr) {
+    if (volumeKeyEventListenerStub_ == nullptr) {
         AUDIO_ERR_LOG("SetVolumeKeyEventCallback: object null");
         return ERROR;
     }
@@ -713,7 +713,7 @@ int32_t AudioPolicyManager::RegisterAudioCapturerEventListener(const int32_t cli
 
     std::unique_lock<std::mutex> lock(stateChangelistenerStubMutex_);
     capturerStateChangelistenerStub_ = new(std::nothrow) AudioCapturerStateChangeListenerStub();
-    if (capturerStateChangelistenerStub_ == nullptr || gsp == nullptr) {
+    if (capturerStateChangelistenerStub_ == nullptr) {
         AUDIO_ERR_LOG("RegisterAudioCapturerEventListener: object null");
         return ERROR;
     }
@@ -753,7 +753,7 @@ int32_t AudioPolicyManager::RegisterTracker(AudioMode &mode, AudioStreamChangeIn
 
     std::unique_lock<std::mutex> lock(clientTrackerStubMutex_);
     clientTrackerCbStub_ = new(std::nothrow) AudioClientTrackerCallbackStub();
-    if (clientTrackerCbStub_ == nullptr || gsp == nullptr) {
+    if (clientTrackerCbStub_ == nullptr) {
         AUDIO_ERR_LOG("clientTrackerCbStub: memory allocation failed");
         return ERROR;
     }
