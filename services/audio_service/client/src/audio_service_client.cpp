@@ -2554,7 +2554,7 @@ void AudioServiceClient::ProcessEvent(const AppExecFwk::InnerEvent::Pointer &eve
     }
 }
 
-void AudioServiceClient::ProcessEvent(const AppExecFwk::InnerEvent::Pointer &event)
+void AudioServiceClient::ProcessEventCapturer(const AppExecFwk::InnerEvent::Pointer &event)
 {
     uint32_t eventId = event->GetInnerEventId();
     uint64_t mFrameMarkPosition;
