@@ -206,7 +206,7 @@ int32_t AudioStreamCollector::UpdateRendererStream(AudioStreamChangeInfo &stream
 
             unique_ptr<AudioRendererChangeInfo> RendererChangeInfo = make_unique<AudioRendererChangeInfo>();
             CHECK_AND_RETURN_RET_LOG(RendererChangeInfo != nullptr,
-                ERR_MEMORY_ALLOC_FAILED, "AudioStreamCollector::RendererChangeInfo Memory Allocation Failed");    
+                ERR_MEMORY_ALLOC_FAILED, "AudioStreamCollector::RendererChangeInfo Memory Allocation Failed");
             RendererChangeInfo->clientUID = streamChangeInfo.audioRendererChangeInfo.clientUID;
             RendererChangeInfo->sessionId = streamChangeInfo.audioRendererChangeInfo.sessionId;
             RendererChangeInfo->rendererState = streamChangeInfo.audioRendererChangeInfo.rendererState;
