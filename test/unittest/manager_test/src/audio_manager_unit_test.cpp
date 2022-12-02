@@ -29,6 +29,7 @@ namespace AudioStandard {
 namespace {
     constexpr uint32_t MIN_DEVICE_COUNT = 2;
     constexpr uint32_t MIN_DEVICE_ID = 1;
+    constexpr uint32_t MIN_DEVICE_NUM = 1;
     constexpr uint32_t CONTENT_TYPE_UPPER_INVALID = 6;
     constexpr uint32_t STREAM_USAGE_UPPER_INVALID = 7;
     constexpr uint32_t STREAM_TYPE_UPPER_INVALID = 100;
@@ -358,7 +359,7 @@ HWTEST(AudioManagerUnitTest, SelectInputDevice_002, TestSize.Level1)
 
 /**
 * @tc.name  : Test SelectInputDevice API
-* @tc.number: SelectInputDevice_002
+* @tc.number: SelectInputDevice_003
 * @tc.desc  : Test SelectInputDevice interface. deviceDescriptorVector[0] set to nullptr
 */
 HWTEST(AudioManagerUnitTest, SelectInputDevice_003, TestSize.Level1)
@@ -368,6 +369,614 @@ HWTEST(AudioManagerUnitTest, SelectInputDevice_003, TestSize.Level1)
     EXPECT_LT(ret, SUCCESS);
 }
 
+/**
+* @tc.name  : Test SelectInputDevice API
+* @tc.number: SelectInputDevice_004
+* @tc.desc  : Test SelectInputDevice interface. normal
+*/
+HWTEST(AudioManagerUnitTest, SelectInputDevice_004, TestSize.Level1)
+{
+    sptr<AudioCapturerFilter> audioCapturerFilter = new(std::nothrow) AudioCapturerFilter();
+    audioCapturerFilter->uid = 20010041;
+
+    vector<sptr<AudioDeviceDescriptor>> deviceDescriptorVector;
+    auto audioDeviceDescriptors = AudioSystemManager::GetInstance()->GetDevices(DeviceFlag::INPUT_DEVICES_FLAG);
+    auto inputDevice =  audioDeviceDescriptors[0];
+    inputDevice->deviceRole_ = DeviceRole::INPUT_DEVICE;
+    inputDevice->networkId_ = LOCAL_NETWORK_ID;
+    deviceDescriptorVector.push_back(inputDevice);
+    auto ret = AudioSystemManager::GetInstance()->SelectInputDevice(audioCapturerFilter, deviceDescriptorVector);
+    EXPECT_EQ(SUCCESS, ret);
+}
+
+/**
+* @tc.name  : Test SelectInputDevice API
+* @tc.number: SelectInputDevice_005
+* @tc.desc  : Test SelectInputDevice interface. audioCapturerFilter set to nullptr
+*/
+HWTEST(AudioManagerUnitTest, SelectInputDevice_005, TestSize.Level1)
+{
+    sptr<AudioCapturerFilter> audioCapturerFilter = nullptr;
+
+    vector<sptr<AudioDeviceDescriptor>> deviceDescriptorVector;
+    auto audioDeviceDescriptors = AudioSystemManager::GetInstance()->GetDevices(DeviceFlag::INPUT_DEVICES_FLAG);
+    auto inputDevice =  audioDeviceDescriptors[0];
+    inputDevice->deviceRole_ = DeviceRole::INPUT_DEVICE;
+    inputDevice->networkId_ = LOCAL_NETWORK_ID;
+    deviceDescriptorVector.push_back(inputDevice);
+    auto ret = AudioSystemManager::GetInstance()->SelectInputDevice(audioCapturerFilter, deviceDescriptorVector);
+    EXPECT_LT(ret, SUCCESS);
+}
+
+/**
+* @tc.name  : Test SelectInputDevice API
+* @tc.number: SelectInputDevice_006
+* @tc.desc  : Test SelectInputDevice interface. deviceDescriptorVector.size() set to 0
+*/
+HWTEST(AudioManagerUnitTest, SelectInputDevice_006, TestSize.Level1)
+{
+    sptr<AudioCapturerFilter> audioCapturerFilter = new(std::nothrow) AudioCapturerFilter();
+    audioCapturerFilter->uid = 20010041;
+
+    vector<sptr<AudioDeviceDescriptor>> deviceDescriptorVector;
+    auto ret = AudioSystemManager::GetInstance()->SelectInputDevice(audioCapturerFilter, deviceDescriptorVector);
+    EXPECT_LT(ret, SUCCESS);
+}
+
+/**
+* @tc.name  : Test SelectInputDevice API
+* @tc.number: SelectInputDevice_007
+* @tc.desc  : Test SelectInputDevice interface. deviceDescriptorVector[0] set to nullptr
+*/
+HWTEST(AudioManagerUnitTest, SelectInputDevice_007, TestSize.Level1)
+{
+    sptr<AudioCapturerFilter> audioCapturerFilter = new(std::nothrow) AudioCapturerFilter();
+    audioCapturerFilter->uid = 20010041;
+
+    vector<sptr<AudioDeviceDescriptor>> deviceDescriptorVector;
+    deviceDescriptorVector.push_back(nullptr);
+    auto ret = AudioSystemManager::GetInstance()->SelectInputDevice(audioCapturerFilter, deviceDescriptorVector);
+    EXPECT_LT(ret, SUCCESS);
+}
+
+/**
+* @tc.name  : Test SelectInputDevice API
+* @tc.number: SelectInputDevice_008
+* @tc.desc  : Test SelectInputDevice interface. deviceDescriptorVector[0] set to nullptr
+*/
+HWTEST(AudioManagerUnitTest, SelectInputDevice_008, TestSize.Level1)
+{
+    sptr<AudioCapturerFilter> audioCapturerFilter = new(std::nothrow) AudioCapturerFilter();
+    audioCapturerFilter->uid = 20010041;
+
+    vector<sptr<AudioDeviceDescriptor>> deviceDescriptorVector;
+    deviceDescriptorVector.push_back(nullptr);
+    auto ret = AudioSystemManager::GetInstance()->SelectInputDevice(audioCapturerFilter, deviceDescriptorVector);
+    EXPECT_LT(ret, SUCCESS);
+}
+
+/**
+* @tc.name  : Test SelectInputDevice API
+* @tc.number: SelectInputDevice_009
+* @tc.desc  : Test SelectInputDevice interface. deviceRole_ set to DeviceRole::OUTPUT_DEVICE
+*/
+HWTEST(AudioManagerUnitTest, SelectInputDevice_009, TestSize.Level1)
+{
+    sptr<AudioCapturerFilter> audioCapturerFilter = new(std::nothrow) AudioCapturerFilter();
+    audioCapturerFilter->uid = 20010041;
+
+    vector<sptr<AudioDeviceDescriptor>> deviceDescriptorVector;
+    auto audioDeviceDescriptors = AudioSystemManager::GetInstance()->GetDevices(DeviceFlag::INPUT_DEVICES_FLAG);
+    auto inputDevice =  audioDeviceDescriptors[0];
+    inputDevice->deviceRole_ = DeviceRole::OUTPUT_DEVICE;
+    inputDevice->networkId_ = LOCAL_NETWORK_ID;
+    deviceDescriptorVector.push_back(inputDevice);
+    auto ret = AudioSystemManager::GetInstance()->SelectInputDevice(audioCapturerFilter, deviceDescriptorVector);
+    EXPECT_LT(ret, SUCCESS);
+}
+
+/**
+* @tc.name  : Test SelectInputDevice API
+* @tc.number: SelectInputDevice_010
+* @tc.desc  : Test SelectInputDevice interface. uid set to -1
+*/
+HWTEST(AudioManagerUnitTest, SelectInputDevice_010, TestSize.Level1)
+{
+    sptr<AudioCapturerFilter> audioCapturerFilter = new(std::nothrow) AudioCapturerFilter();
+    audioCapturerFilter->uid = -1;
+
+    vector<sptr<AudioDeviceDescriptor>> deviceDescriptorVector;
+    auto audioDeviceDescriptors = AudioSystemManager::GetInstance()->GetDevices(DeviceFlag::INPUT_DEVICES_FLAG);
+    auto inputDevice =  audioDeviceDescriptors[0];
+    inputDevice->deviceRole_ = DeviceRole::INPUT_DEVICE;
+    inputDevice->networkId_ = LOCAL_NETWORK_ID;
+    deviceDescriptorVector.push_back(inputDevice);
+    auto ret = AudioSystemManager::GetInstance()->SelectInputDevice(audioCapturerFilter, deviceDescriptorVector);
+    EXPECT_LT(ret, SUCCESS);
+}
+
+/**
+* @tc.name  : Test GetActiveOutputDeviceDescriptors API
+* @tc.number: GetActiveOutputDeviceDescriptors_001
+* @tc.desc  : Test GetActiveOutputDeviceDescriptors interface.
+*/
+HWTEST(AudioManagerUnitTest, GetActiveOutputDeviceDescriptors_001, TestSize.Level1)
+{
+    auto audioDeviceDescriptors = AudioSystemManager::GetInstance()->GetActiveOutputDeviceDescriptors();
+    auto ret = audioDeviceDescriptors.size();
+    EXPECT_GE(ret, MIN_DEVICE_NUM);
+}
+
+/**
+* @tc.name  : Test RegisterVolumeKeyEventCallback API
+* @tc.number: RegisterVolumeKeyEventCallback_001
+* @tc.desc  : Test RegisterVolumeKeyEventCallback interface.
+*/
+HWTEST(AudioManagerUnitTest, RegisterVolumeKeyEventCallback_001, TestSize.Level1)
+{
+    int32_t clientPid = 1;
+    std::shared_ptr<VolumeKeyEventCallback> callback = nullptr;
+    auto ret = AudioSystemManager::GetInstance()->RegisterVolumeKeyEventCallback(clientPid, callback);
+    EXPECT_LT(ret, SUCCESS);
+}
+
+/**
+* @tc.name  : Test SetAudioManagerCallback API
+* @tc.number: SetAudioManagerCallback_001
+* @tc.desc  : Test SetAudioManagerCallback interface.
+*/
+HWTEST(AudioManagerUnitTest, SetAudioManagerCallback_001, TestSize.Level1)
+{
+    AudioVolumeType streamType = AudioVolumeType::STREAM_VOICE_CALL;
+    std::shared_ptr<AudioManagerCallback> callback;
+    auto ret = AudioSystemManager::GetInstance()->SetAudioManagerCallback(streamType, callback);
+    EXPECT_EQ(ret, SUCCESS);
+}
+
+/**
+* @tc.name  : Test UnsetAudioManagerCallback API
+* @tc.number: UnsetAudioManagerCallback_001
+* @tc.desc  : Test UnsetAudioManagerCallback interface.
+*/
+HWTEST(AudioManagerUnitTest, UnsetAudioManagerCallback_001, TestSize.Level1)
+{
+    AudioVolumeType streamType = AudioVolumeType::STREAM_VOICE_CALL;
+    auto ret = AudioSystemManager::GetInstance()->UnsetAudioManagerCallback(streamType);
+    EXPECT_EQ(ret, SUCCESS);
+}
+
+/**
+* @tc.name  : Test ActivateAudioInterrupt API
+* @tc.number: ActivateAudioInterrupt_001
+* @tc.desc  : Test ActivateAudioInterrupt interface.
+*/
+HWTEST(AudioManagerUnitTest, ActivateAudioInterrupt_001, TestSize.Level1)
+{
+    AudioInterrupt audioInterrupt;
+    audioInterrupt.contentType = CONTENT_TYPE_RINGTONE;
+    audioInterrupt.streamUsage = STREAM_USAGE_NOTIFICATION_RINGTONE;
+    audioInterrupt.streamType = STREAM_ACCESSIBILITY;
+    auto ret = AudioSystemManager::GetInstance()->ActivateAudioInterrupt(audioInterrupt);
+    EXPECT_EQ(ret, SUCCESS);
+}
+
+/**
+* @tc.name  : Test DeactivateAudioInterrupt API
+* @tc.number: DeactivateAudioInterrupt_001
+* @tc.desc  : Test DeactivateAudioInterrupt interface.
+*/
+HWTEST(AudioManagerUnitTest, DeactivateAudioInterrupt_001, TestSize.Level1)
+{
+    AudioInterrupt audioInterrupt;
+    audioInterrupt.contentType = CONTENT_TYPE_RINGTONE;
+    audioInterrupt.streamUsage = STREAM_USAGE_NOTIFICATION_RINGTONE;
+    audioInterrupt.streamType = STREAM_ACCESSIBILITY;
+    auto ret = AudioSystemManager::GetInstance()->DeactivateAudioInterrupt(audioInterrupt);
+    EXPECT_EQ(ret, SUCCESS);
+}
+
+/**
+* @tc.name  : Test RequestIndependentInterrupt API
+* @tc.number: RequestIndependentInterrupt_001
+* @tc.desc  : Test RequestIndependentInterrupt interface.
+*/
+HWTEST(AudioManagerUnitTest, RequestIndependentInterrupt_001, TestSize.Level1)
+{
+    FocusType FocusType = FocusType::FOCUS_TYPE_RECORDING;
+    auto ret = AudioSystemManager::GetInstance()->RequestIndependentInterrupt(FocusType);
+    EXPECT_EQ(ret, SUCCESS);
+}
+
+/**
+* @tc.name  : Test AbandonIndependentInterrupt API
+* @tc.number: AbandonIndependentInterrupt_001
+* @tc.desc  : Test AbandonIndependentInterrupt interface.
+*/
+HWTEST(AudioManagerUnitTest, AbandonIndependentInterrupt_001, TestSize.Level1)
+{
+    FocusType FocusType = FocusType::FOCUS_TYPE_RECORDING;
+    auto ret = AudioSystemManager::GetInstance()->AbandonIndependentInterrupt(FocusType);
+    EXPECT_EQ(ret, SUCCESS);
+}
+
+/**
+* @tc.name  : Test GetPinValueFromType API
+* @tc.number: GetPinValueFromType_001
+* @tc.desc  : Test GetPinValueFromType interface. deviceType set to DEVICE_TYPE_NONE,
+* deviceRole set to DEVICE_ROLE_NONE
+*/
+HWTEST(AudioManagerUnitTest, GetPinValueFromType_001, TestSize.Level1)
+{
+    DeviceType deviceType = DeviceType::DEVICE_TYPE_NONE;
+    DeviceRole deviceRole = DeviceRole::DEVICE_ROLE_NONE;
+    AudioPin ret = AudioSystemManager::GetInstance()->GetPinValueFromType(deviceType, deviceRole);
+    EXPECT_EQ(ret, AudioPin::AUDIO_PIN_NONE);
+}
+
+/**
+* @tc.name  : Test GetPinValueFromType API
+* @tc.number: GetPinValueFromType_002
+* @tc.desc  : Test GetPinValueFromType interface. deviceType set to DEVICE_TYPE_INVALID,
+* deviceRole set to DEVICE_ROLE_NONE
+*/
+HWTEST(AudioManagerUnitTest, GetPinValueFromType_002, TestSize.Level1)
+{
+    DeviceType deviceType = DeviceType::DEVICE_TYPE_INVALID;
+    DeviceRole deviceRole = DeviceRole::DEVICE_ROLE_NONE;
+    AudioPin ret = AudioSystemManager::GetInstance()->GetPinValueFromType(deviceType, deviceRole);
+    EXPECT_EQ(ret, AudioPin::AUDIO_PIN_NONE);
+}
+
+/**
+* @tc.name  : Test GetPinValueFromType API
+* @tc.number: GetPinValueFromType_003
+* @tc.desc  : Test GetPinValueFromType interface. deviceType set to DEVICE_TYPE_DEFAULT,
+* deviceRole set to INPUT_DEVICE
+*/
+HWTEST(AudioManagerUnitTest, GetPinValueFromType_003, TestSize.Level1)
+{
+    DeviceType deviceType = DeviceType::DEVICE_TYPE_DEFAULT;
+    DeviceRole deviceRole = DeviceRole::INPUT_DEVICE;
+    AudioPin ret = AudioSystemManager::GetInstance()->GetPinValueFromType(deviceType, deviceRole);
+    EXPECT_EQ(ret, AudioPin::AUDIO_PIN_IN_DAUDIO_DEFAULT);
+}
+
+/**
+* @tc.name  : Test GetPinValueFromType API
+* @tc.number: GetPinValueFromType_004
+* @tc.desc  : Test GetPinValueFromType interface. deviceType set to DEVICE_TYPE_DEFAULT,
+* deviceRole set to DEVICE_ROLE_NONE
+*/
+HWTEST(AudioManagerUnitTest, GetPinValueFromType_004, TestSize.Level1)
+{
+    DeviceType deviceType = DeviceType::DEVICE_TYPE_DEFAULT;
+    DeviceRole deviceRole = DeviceRole::DEVICE_ROLE_NONE;
+    AudioPin ret = AudioSystemManager::GetInstance()->GetPinValueFromType(deviceType, deviceRole);
+    EXPECT_EQ(ret, AudioPin::AUDIO_PIN_OUT_DAUDIO_DEFAULT);
+}
+
+/**
+* @tc.name  : Test GetPinValueFromType API
+* @tc.number: GetPinValueFromType_005
+* @tc.desc  : Test GetPinValueFromType interface. deviceType set to DEVICE_TYPE_SPEAKER,
+* deviceRole set to DEVICE_ROLE_NONE
+*/
+HWTEST(AudioManagerUnitTest, GetPinValueFromType_005, TestSize.Level1)
+{
+    DeviceType deviceType = DeviceType::DEVICE_TYPE_SPEAKER;
+    DeviceRole deviceRole = DeviceRole::DEVICE_ROLE_NONE;
+    AudioPin ret = AudioSystemManager::GetInstance()->GetPinValueFromType(deviceType, deviceRole);
+    EXPECT_EQ(ret, AudioPin::AUDIO_PIN_OUT_SPEAKER);
+}
+
+/**
+* @tc.name  : Test GetPinValueFromType API
+* @tc.number: GetPinValueFromType_006
+* @tc.desc  : Test GetPinValueFromType interface. deviceType set to DEVICE_TYPE_MIC,
+* deviceRole set to DEVICE_ROLE_NONE
+*/
+HWTEST(AudioManagerUnitTest, GetPinValueFromType_006, TestSize.Level1)
+{
+    DeviceType deviceType = DeviceType::DEVICE_TYPE_MIC;
+    DeviceRole deviceRole = DeviceRole::DEVICE_ROLE_NONE;
+    AudioPin ret = AudioSystemManager::GetInstance()->GetPinValueFromType(deviceType, deviceRole);
+    EXPECT_EQ(ret, AudioPin::AUDIO_PIN_IN_MIC);
+}
+
+/**
+* @tc.name  : Test GetPinValueFromType API
+* @tc.number: GetPinValueFromType_007
+* @tc.desc  : Test GetPinValueFromType interface. deviceType set to DEVICE_TYPE_WIRED_HEADSET,
+* deviceRole set to INPUT_DEVICE
+*/
+HWTEST(AudioManagerUnitTest, GetPinValueFromType_007, TestSize.Level1)
+{
+    DeviceType deviceType = DeviceType::DEVICE_TYPE_WIRED_HEADSET;
+    DeviceRole deviceRole = DeviceRole::INPUT_DEVICE;
+    AudioPin ret = AudioSystemManager::GetInstance()->GetPinValueFromType(deviceType, deviceRole);
+    EXPECT_EQ(ret, AudioPin::AUDIO_PIN_IN_HS_MIC);
+}
+
+/**
+* @tc.name  : Test GetPinValueFromType API
+* @tc.number: GetPinValueFromType_008
+* @tc.desc  : Test GetPinValueFromType interface. deviceType set to DEVICE_TYPE_WIRED_HEADSET,
+* deviceRole set to OUTPUT_DEVICE
+*/
+HWTEST(AudioManagerUnitTest, GetPinValueFromType_008, TestSize.Level1)
+{
+    DeviceType deviceType = DeviceType::DEVICE_TYPE_WIRED_HEADSET;
+    DeviceRole deviceRole = DeviceRole::OUTPUT_DEVICE;
+    AudioPin ret = AudioSystemManager::GetInstance()->GetPinValueFromType(deviceType, deviceRole);
+    EXPECT_EQ(ret, AudioPin::AUDIO_PIN_OUT_HEADSET);
+}
+
+/**
+* @tc.name  : Test GetPinValueFromType API
+* @tc.number: GetPinValueFromType_009
+* @tc.desc  : Test GetPinValueFromType interface. deviceType set to DEVICE_TYPE_USB_HEADSET,
+* deviceRole set to OUTPUT_DEVICE
+*/
+HWTEST(AudioManagerUnitTest, GetPinValueFromType_009, TestSize.Level1)
+{
+    DeviceType deviceType = DeviceType::DEVICE_TYPE_USB_HEADSET;
+    DeviceRole deviceRole = DeviceRole::OUTPUT_DEVICE;
+    AudioPin ret = AudioSystemManager::GetInstance()->GetPinValueFromType(deviceType, deviceRole);
+    EXPECT_EQ(ret, AudioPin::AUDIO_PIN_NONE);
+}
+
+/**
+* @tc.name  : Test GetPinValueFromType API
+* @tc.number: GetPinValueFromType_010
+* @tc.desc  : Test GetPinValueFromType interface. deviceType set to DEVICE_TYPE_FILE_SINK,
+* deviceRole set to OUTPUT_DEVICE
+*/
+HWTEST(AudioManagerUnitTest, GetPinValueFromType_010, TestSize.Level1)
+{
+    DeviceType deviceType = DeviceType::DEVICE_TYPE_FILE_SINK;
+    DeviceRole deviceRole = DeviceRole::OUTPUT_DEVICE;
+    AudioPin ret = AudioSystemManager::GetInstance()->GetPinValueFromType(deviceType, deviceRole);
+    EXPECT_EQ(ret, AudioPin::AUDIO_PIN_NONE);
+}
+
+/**
+* @tc.name  : Test GetPinValueFromType API
+* @tc.number: GetPinValueFromType_011
+* @tc.desc  : Test GetPinValueFromType interface. deviceType set to DEVICE_TYPE_FILE_SOURCE,
+* deviceRole set to OUTPUT_DEVICE
+*/
+HWTEST(AudioManagerUnitTest, GetPinValueFromType_011, TestSize.Level1)
+{
+    DeviceType deviceType = DeviceType::DEVICE_TYPE_FILE_SOURCE;
+    DeviceRole deviceRole = DeviceRole::OUTPUT_DEVICE;
+    AudioPin ret = AudioSystemManager::GetInstance()->GetPinValueFromType(deviceType, deviceRole);
+    EXPECT_EQ(ret, AudioPin::AUDIO_PIN_NONE);
+}
+
+/**
+* @tc.name  : Test GetPinValueFromType API
+* @tc.number: GetPinValueFromType_012
+* @tc.desc  : Test GetPinValueFromType interface. deviceType set to DEVICE_TYPE_BLUETOOTH_SCO,
+* deviceRole set to OUTPUT_DEVICE
+*/
+HWTEST(AudioManagerUnitTest, GetPinValueFromType_012, TestSize.Level1)
+{
+    DeviceType deviceType = DeviceType::DEVICE_TYPE_BLUETOOTH_SCO;
+    DeviceRole deviceRole = DeviceRole::OUTPUT_DEVICE;
+    AudioPin ret = AudioSystemManager::GetInstance()->GetPinValueFromType(deviceType, deviceRole);
+    EXPECT_EQ(ret, AudioPin::AUDIO_PIN_NONE);
+}
+
+/**
+* @tc.name  : Test GetPinValueFromType API
+* @tc.number: GetPinValueFromType_013
+* @tc.desc  : Test GetPinValueFromType interface. deviceType set to DEVICE_TYPE_BLUETOOTH_A2DP,
+* deviceRole set to OUTPUT_DEVICE
+*/
+HWTEST(AudioManagerUnitTest, GetPinValueFromType_013, TestSize.Level1)
+{
+    DeviceType deviceType = DeviceType::DEVICE_TYPE_BLUETOOTH_A2DP;
+    DeviceRole deviceRole = DeviceRole::OUTPUT_DEVICE;
+    AudioPin ret = AudioSystemManager::GetInstance()->GetPinValueFromType(deviceType, deviceRole);
+    EXPECT_EQ(ret, AudioPin::AUDIO_PIN_NONE);
+}
+
+/**
+* @tc.name  : Test GetPinValueFromType API
+* @tc.number: GetPinValueFromType_014
+* @tc.desc  : Test GetPinValueFromType interface. deviceType set to DEVICE_TYPE_MAX,
+* deviceRole set to OUTPUT_DEVICE
+*/
+HWTEST(AudioManagerUnitTest, GetPinValueFromType_014, TestSize.Level1)
+{
+    DeviceType deviceType = DeviceType::DEVICE_TYPE_MAX;
+    DeviceRole deviceRole = DeviceRole::OUTPUT_DEVICE;
+    AudioPin ret = AudioSystemManager::GetInstance()->GetPinValueFromType(deviceType, deviceRole);
+    EXPECT_EQ(ret, AudioPin::AUDIO_PIN_NONE);
+}
+
+/**
+* @tc.name  : Test GetPinValueFromType API
+* @tc.number: GetPinValueFromType_015
+* @tc.desc  : Test GetPinValueFromType interface. deviceType set to DEVICE_TYPE_DEFAULT,
+* deviceRole set to OUTPUT_DEVICE
+*/
+HWTEST(AudioManagerUnitTest, GetPinValueFromType_015, TestSize.Level1)
+{
+    DeviceType deviceType = DeviceType::DEVICE_TYPE_DEFAULT;
+    DeviceRole deviceRole = DeviceRole::OUTPUT_DEVICE;
+    AudioPin ret = AudioSystemManager::GetInstance()->GetPinValueFromType(deviceType, deviceRole);
+    EXPECT_EQ(ret, AudioPin::AUDIO_PIN_NONE);
+}
+
+/**
+* @tc.name  : Test GetTypeValueFromPin API
+* @tc.number: GetTypeValueFromPin_001
+* @tc.desc  : Test GetTypeValueFromPin interface. pin set to AUDIO_PIN_NONE
+*/
+HWTEST(AudioManagerUnitTest, GetTypeValueFromPin_001, TestSize.Level1)
+{
+    AudioPin pin = AudioPin::AUDIO_PIN_NONE;
+    DeviceType ret = AudioSystemManager::GetInstance()->GetTypeValueFromPin(pin);
+    EXPECT_EQ(ret, DeviceType::DEVICE_TYPE_NONE);
+}
+
+/**
+* @tc.name  : Test GetTypeValueFromPin API
+* @tc.number: GetTypeValueFromPin_002
+* @tc.desc  : Test GetTypeValueFromPin interface. pin set to AUDIO_PIN_OUT_SPEAKER
+*/
+HWTEST(AudioManagerUnitTest, GetTypeValueFromPin_002, TestSize.Level1)
+{
+    AudioPin pin = AudioPin::AUDIO_PIN_OUT_SPEAKER;
+    DeviceType ret = AudioSystemManager::GetInstance()->GetTypeValueFromPin(pin);
+    EXPECT_EQ(ret, DeviceType::DEVICE_TYPE_SPEAKER);
+}
+
+/**
+* @tc.name  : Test GetTypeValueFromPin API
+* @tc.number: GetTypeValueFromPin_003
+* @tc.desc  : Test GetTypeValueFromPin interface. pin set to AUDIO_PIN_OUT_HEADSET
+*/
+HWTEST(AudioManagerUnitTest, GetTypeValueFromPin_003, TestSize.Level1)
+{
+    AudioPin pin = AudioPin::AUDIO_PIN_OUT_HEADSET;
+    DeviceType ret = AudioSystemManager::GetInstance()->GetTypeValueFromPin(pin);
+    EXPECT_EQ(ret, DeviceType::DEVICE_TYPE_NONE);
+}
+
+/**
+* @tc.name  : Test GetTypeValueFromPin API
+* @tc.number: GetTypeValueFromPin_004
+* @tc.desc  : Test GetTypeValueFromPin interface. pin set to AUDIO_PIN_OUT_LINEOUT
+*/
+HWTEST(AudioManagerUnitTest, GetTypeValueFromPin_004, TestSize.Level1)
+{
+    AudioPin pin = AudioPin::AUDIO_PIN_OUT_LINEOUT;
+    DeviceType ret = AudioSystemManager::GetInstance()->GetTypeValueFromPin(pin);
+    EXPECT_EQ(ret, DeviceType::DEVICE_TYPE_NONE);
+}
+
+/**
+* @tc.name  : Test GetTypeValueFromPin API
+* @tc.number: GetTypeValueFromPin_005
+* @tc.desc  : Test GetTypeValueFromPin interface. pin set to AUDIO_PIN_OUT_HDMI
+*/
+HWTEST(AudioManagerUnitTest, GetTypeValueFromPin_005, TestSize.Level1)
+{
+    AudioPin pin = AudioPin::AUDIO_PIN_OUT_HDMI;
+    DeviceType ret = AudioSystemManager::GetInstance()->GetTypeValueFromPin(pin);
+    EXPECT_EQ(ret, DeviceType::DEVICE_TYPE_NONE);
+}
+
+/**
+* @tc.name  : Test GetTypeValueFromPin API
+* @tc.number: GetTypeValueFromPin_006
+* @tc.desc  : Test GetTypeValueFromPin interface. pin set to AUDIO_PIN_OUT_USB
+*/
+HWTEST(AudioManagerUnitTest, GetTypeValueFromPin_006, TestSize.Level1)
+{
+    AudioPin pin = AudioPin::AUDIO_PIN_OUT_USB;
+    DeviceType ret = AudioSystemManager::GetInstance()->GetTypeValueFromPin(pin);
+    EXPECT_EQ(ret, DeviceType::DEVICE_TYPE_NONE);
+}
+
+/**
+* @tc.name  : Test GetTypeValueFromPin API
+* @tc.number: GetTypeValueFromPin_007
+* @tc.desc  : Test GetTypeValueFromPin interface. pin set to AUDIO_PIN_OUT_USB_EXT
+*/
+HWTEST(AudioManagerUnitTest, GetTypeValueFromPin_007, TestSize.Level1)
+{
+    AudioPin pin = AudioPin::AUDIO_PIN_OUT_USB_EXT;
+    DeviceType ret = AudioSystemManager::GetInstance()->GetTypeValueFromPin(pin);
+    EXPECT_EQ(ret, DeviceType::DEVICE_TYPE_NONE);
+}
+
+/**
+* @tc.name  : Test GetTypeValueFromPin API
+* @tc.number: GetTypeValueFromPin_008
+* @tc.desc  : Test GetTypeValueFromPin interface. pin set to AUDIO_PIN_OUT_DAUDIO_DEFAULT
+*/
+HWTEST(AudioManagerUnitTest, GetTypeValueFromPin_008, TestSize.Level1)
+{
+    AudioPin pin = AudioPin::AUDIO_PIN_OUT_DAUDIO_DEFAULT;
+    DeviceType ret = AudioSystemManager::GetInstance()->GetTypeValueFromPin(pin);
+    EXPECT_EQ(ret, DeviceType::DEVICE_TYPE_DEFAULT);
+}
+
+/**
+* @tc.name  : Test GetTypeValueFromPin API
+* @tc.number: GetTypeValueFromPin_009
+* @tc.desc  : Test GetTypeValueFromPin interface. pin set to AUDIO_PIN_IN_MIC
+*/
+HWTEST(AudioManagerUnitTest, GetTypeValueFromPin_009, TestSize.Level1)
+{
+    AudioPin pin = AudioPin::AUDIO_PIN_IN_MIC;
+    DeviceType ret = AudioSystemManager::GetInstance()->GetTypeValueFromPin(pin);
+    EXPECT_EQ(ret, DeviceType::DEVICE_TYPE_MIC);
+}
+
+/**
+* @tc.name  : Test GetTypeValueFromPin API
+* @tc.number: GetTypeValueFromPin_010
+* @tc.desc  : Test GetTypeValueFromPin interface. pin set to AUDIO_PIN_IN_HS_MIC
+*/
+HWTEST(AudioManagerUnitTest, GetTypeValueFromPin_010, TestSize.Level1)
+{
+    AudioPin pin = AudioPin::AUDIO_PIN_IN_HS_MIC;
+    DeviceType ret = AudioSystemManager::GetInstance()->GetTypeValueFromPin(pin);
+    EXPECT_EQ(ret, DeviceType::DEVICE_TYPE_WIRED_HEADSET);
+}
+
+/**
+* @tc.name  : Test GetTypeValueFromPin API
+* @tc.number: GetTypeValueFromPin_011
+* @tc.desc  : Test GetTypeValueFromPin interface. pin set to AUDIO_PIN_IN_LINEIN
+*/
+HWTEST(AudioManagerUnitTest, GetTypeValueFromPin_011, TestSize.Level1)
+{
+    AudioPin pin = AudioPin::AUDIO_PIN_IN_LINEIN;
+    DeviceType ret = AudioSystemManager::GetInstance()->GetTypeValueFromPin(pin);
+    EXPECT_EQ(ret, DeviceType::DEVICE_TYPE_NONE);
+}
+
+/**
+* @tc.name  : Test GetTypeValueFromPin API
+* @tc.number: GetTypeValueFromPin_012
+* @tc.desc  : Test GetTypeValueFromPin interface. pin set to AUDIO_PIN_IN_USB_EXT
+*/
+HWTEST(AudioManagerUnitTest, GetTypeValueFromPin_012, TestSize.Level1)
+{
+    AudioPin pin = AudioPin::AUDIO_PIN_IN_USB_EXT;
+    DeviceType ret = AudioSystemManager::GetInstance()->GetTypeValueFromPin(pin);
+    EXPECT_EQ(ret, DeviceType::DEVICE_TYPE_NONE);
+}
+
+/**
+* @tc.name  : Test GetTypeValueFromPin API
+* @tc.number: GetTypeValueFromPin_013
+* @tc.desc  : Test GetTypeValueFromPin interface. pin set to AUDIO_PIN_IN_DAUDIO_DEFAULT
+*/
+HWTEST(AudioManagerUnitTest, GetTypeValueFromPin_013, TestSize.Level1)
+{
+    AudioPin pin = AudioPin::AUDIO_PIN_IN_DAUDIO_DEFAULT;
+    DeviceType ret = AudioSystemManager::GetInstance()->GetTypeValueFromPin(pin);
+    EXPECT_EQ(ret, DeviceType::DEVICE_TYPE_DEFAULT);
+}
+
+/**
+* @tc.name  : Test GetTypeValueFromPin API
+* @tc.number: GetTypeValueFromPin_014
+* @tc.desc  : Test GetTypeValueFromPin interface. pin set to INVALID data
+*/
+HWTEST(AudioManagerUnitTest, GetTypeValueFromPin_014, TestSize.Level1)
+{
+    int32_t invalid_value = 128;
+    AudioPin pin = AudioPin(invalid_value);
+    DeviceType ret = AudioSystemManager::GetInstance()->GetTypeValueFromPin(pin);
+    EXPECT_EQ(ret, DeviceType::DEVICE_TYPE_NONE);
+}
 
 /**
 * @tc.name  : Test SetDeviceActive API
@@ -396,10 +1005,10 @@ HWTEST(AudioManagerUnitTest, SetDeviceActive_002, TestSize.Level1)
 
 /**
 * @tc.name  : Test SetDeviceActive API
-* @tc.number: SetDeviceActive_004
+* @tc.number: SetDeviceActive_003
 * @tc.desc  : Test SetDeviceActive interface. Actiavting invalid device should fail
 */
-HWTEST(AudioManagerUnitTest, SetDeviceActive_004, TestSize.Level1)
+HWTEST(AudioManagerUnitTest, SetDeviceActive_003, TestSize.Level1)
 {
     auto ret = AudioSystemManager::GetInstance()->SetDeviceActive(ActiveDeviceType::ACTIVE_DEVICE_TYPE_NONE, true);
     EXPECT_NE(SUCCESS, ret);
