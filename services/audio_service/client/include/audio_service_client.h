@@ -260,7 +260,7 @@ public:
     *
     * @return Returns {@code 0} if success; returns {@code -1} otherwise.
     */
-    int32_t ReleaseStream();
+    int32_t ReleaseStream(bool releaseRunner = true);
 
     /**
     * Provides the current timestamp for playback/record stream created using CreateStream
@@ -528,6 +528,8 @@ private:
     std::mutex capturerPeriodReachedMutex_;
     std::mutex rendererMarkReachedMutex_;
     std::mutex rendererPeriodReachedMutex_;
+    std::mutex runnerMutex_;
+    bool runnerReleased_ = false;
 
     AudioCache acache;
     const void *internalReadBuffer;

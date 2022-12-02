@@ -301,9 +301,9 @@ int32_t AudioStream::SetAudioStreamInfo(const AudioStreamParams info,
         return ERR_NOT_SUPPORTED;
     }
     if (state_ != NEW) {
-        AUDIO_DEBUG_LOG("AudioStream: State is not new, release existing stream");
+        AUDIO_INFO_LOG("AudioStream: State is not new, release existing stream");
         StopAudioStream();
-        ReleaseAudioStream();
+        ReleaseAudioStream(false);
     }
     int32_t ret = 0;
     switch (eMode_) {
@@ -593,7 +593,7 @@ bool AudioStream::DrainAudioStream()
     return true;
 }
 
-bool AudioStream::ReleaseAudioStream()
+bool AudioStream::ReleaseAudioStream(bool releaseRunner)
 {
     if (state_ == RELEASED || state_ == NEW) {
         AUDIO_ERR_LOG("Illegal state: state = %{public}u", state_);
@@ -604,7 +604,7 @@ bool AudioStream::ReleaseAudioStream()
         StopAudioStream();
     }
 
-    ReleaseStream();
+    ReleaseStream(releaseRunner);
     state_ = RELEASED;
     AUDIO_INFO_LOG("ReleaseAudiostream SUCCESS");
 
