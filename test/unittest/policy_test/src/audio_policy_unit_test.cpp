@@ -16,14 +16,16 @@
 #include <thread>
 #include "audio_errors.h"
 #include "audio_info.h"
+#include "parcel.h"
 #include "audio_policy_unit_test.h"
 #include "audio_system_manager.h"
 #include "iservice_registry.h"
 #include "system_ability_definition.h"
 #include "audio_capturer_state_change_listener_stub.h"
-#include "i_standard_renderer_state_change_listener.h"
-#include "i_standard_capturer_state_change_listener.h"
 #include "audio_renderer_state_change_listener_stub.h"
+#include "audio_ringermode_update_listener_stub.h"
+#include "audio_routing_manager_listener_stub.h"
+#include "audio_client_tracker_callback_stub.h"
 
 using namespace std;
 using namespace testing::ext;
@@ -634,6 +636,177 @@ HWTEST(AudioPolicyUnitTest, Audio_Policy_Manager_GetCurrentCapturerChangeInfos_0
     int32_t ret = AudioPolicyManager::GetInstance().GetCurrentCapturerChangeInfos(audioCapturerChangeInfos);
     EXPECT_EQ(true, audioCapturerChangeInfos.size() <= 0);
     EXPECT_EQ(SUCCESS, ret);
+}
+
+/**
+* @tc.name  : Test Audio_Capturer_State_Change_001 via legal state
+* @tc.number: Audio_Capturer_State_Change_001
+* @tc.desc  : Test AudioCapturerStateChangeListenerStub interface. Returns invalid.
+*/
+HWTEST(AudioPolicyUnitTest, Audio_Capturer_State_Change_001, TestSize.Level1)
+{
+    std::shared_ptr<AudioCapturerStateChangeListenerStub> capturerStub =
+        std::make_shared<AudioCapturerStateChangeListenerStub>();
+
+    vector<unique_ptr<AudioCapturerChangeInfo>> audioCapturerChangeInfos;
+    capturerStub->OnCapturerStateChange(audioCapturerChangeInfos);
+
+    weak_ptr<AudioCapturerStateChangeCallbackTest> callback =
+        std::make_shared<AudioCapturerStateChangeCallbackTest>();
+    capturerStub->SetCallback(callback);
+
+    uint32_t code = capturerStub->ON_CAPTURERSTATE_CHANGE;
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+    int ret = capturerStub->OnRemoteRequest(code, data, reply, option);
+    EXPECT_EQ(true, ret <= 0);
+
+    code = capturerStub->ON_ERROR;
+    capturerStub->OnRemoteRequest(code, data, reply, option);
+}
+
+/**
+* @tc.name  : Test Audio_Renderer_State_Change_001 via legal state
+* @tc.number: Audio_Renderer_State_Change_001
+* @tc.desc  : Test AudioRendererStateChangeListenerStub interface. Returns success.
+*/
+HWTEST(AudioPolicyUnitTest, Audio_Renderer_State_Change_001, TestSize.Level1)
+{
+    std::shared_ptr<AudioRendererStateChangeListenerStub> rendererStub =
+        std::make_shared<AudioRendererStateChangeListenerStub>();
+
+    vector<unique_ptr<AudioRendererChangeInfo>> audioRendererChangeInfos;
+    rendererStub->OnRendererStateChange(audioRendererChangeInfos);
+
+    weak_ptr<AudioRendererStateChangeCallbackTest> callback =
+        std::make_shared<AudioRendererStateChangeCallbackTest>();
+    rendererStub->SetCallback(callback);
+
+    uint32_t code = rendererStub->ON_RENDERERSTATE_CHANGE;
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+    int ret = rendererStub->OnRemoteRequest(code, data, reply, option);
+    EXPECT_EQ(true, ret <= 0);
+
+    code = rendererStub->ON_ERROR;
+    rendererStub->OnRemoteRequest(code, data, reply, option);
+}
+
+/**
+* @tc.name  : Test Audio_Ringermode_Update_Listener_001 via legal state
+* @tc.number: Audio_Ringermode_Update_Listener_001
+* @tc.desc  : Test AudioRingerModeUpdateListenerStub interface. Returns success.
+*/
+HWTEST(AudioPolicyUnitTest, Audio_Ringermode_Update_Listener_001, TestSize.Level1)
+{
+    std::shared_ptr<AudioRingerModeUpdateListenerStub> ringermodeStub =
+        std::make_shared<AudioRingerModeUpdateListenerStub>();
+    std::weak_ptr<AudioRingerModeCallbackTest> callback = std::make_shared<AudioRingerModeCallbackTest>();
+    AudioRingerMode ringerMode = AudioRingerMode::RINGER_MODE_SILENT;
+    
+    ringermodeStub->OnRingerModeUpdated(ringerMode);
+
+    ringermodeStub->SetCallback(callback);
+
+    ringermodeStub->OnRingerModeUpdated(ringerMode);
+
+    uint32_t code = ringermodeStub->ON_RINGERMODE_UPDATE;
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+    int ret = ringermodeStub->OnRemoteRequest(code, data, reply, option);
+
+    code = ringermodeStub->ON_ERROR;
+    ret = ringermodeStub->OnRemoteRequest(code, data, reply, option);
+    EXPECT_EQ(true, ret <= 0);
+}
+
+/**
+* @tc.name  : Test Audio_Rounting_Manager_Listener_001 via legal state
+* @tc.number: Audio_Rounting_Manager_Listener_001
+* @tc.desc  : Test AudioRoutingManagerListenerStub interface. Returns success.
+*/
+HWTEST(AudioPolicyUnitTest, Audio_Rounting_Manager_Listener_001, TestSize.Level1)
+{
+    std::shared_ptr<AudioRoutingManagerListenerStub> routingManagerStub =
+        std::make_shared<AudioRoutingManagerListenerStub>();
+    std::weak_ptr<AudioManagerMicStateChangeCallbackTest> callback =
+        std::make_shared<AudioManagerMicStateChangeCallbackTest>();
+    MicStateChangeEvent micStateChangeEvent;
+    micStateChangeEvent.mute = true;
+    
+    routingManagerStub->OnMicStateUpdated(micStateChangeEvent);
+
+    routingManagerStub->SetMicStateChangeCallback(callback);
+
+    routingManagerStub->OnMicStateUpdated(micStateChangeEvent);
+
+    uint32_t code = routingManagerStub->ON_MIC_STATE_UPDATED;
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+    int ret = routingManagerStub->OnRemoteRequest(code, data, reply, option);
+
+    code = routingManagerStub->ON_ERROR;
+    ret = routingManagerStub->OnRemoteRequest(code, data, reply, option);
+    EXPECT_EQ(true, ret <= 0);
+}
+
+/**
+* @tc.name  : Test Audio_Volume_Group_Info_001 via legal state
+* @tc.number: Audio_Volume_Group_Info_001
+* @tc.desc  : Test VolumeGroupInfo interface. Returns success.
+*/
+HWTEST(AudioPolicyUnitTest, Audio_Volume_Group_Info_001, TestSize.Level1)
+{
+    int32_t volumeGroupId = 1;
+    int32_t mappingId = 1;
+    std::string groupName = "TEST_UNIT";
+    std::string networkId = "UNIT";
+    ConnectType type = ConnectType::CONNECT_TYPE_LOCAL;
+
+    std::shared_ptr<VolumeGroupInfo> volumeGroupInfo =
+        std::make_shared<VolumeGroupInfo>(volumeGroupId, mappingId, groupName, networkId, type);
+
+    Parcel parcel;
+    bool ret = volumeGroupInfo->Marshalling(parcel);
+    EXPECT_EQ(true, ret);
+}
+
+/**
+* @tc.name  : Test Audio_Client_Tracker_Callback_Stub_001 via legal state
+* @tc.number: Audio_Client_Tracker_Callback_Stub_001
+* @tc.desc  : Test AudioClientTrackerCallbackStub interface. Returns success.
+*/
+HWTEST(AudioPolicyUnitTest, Audio_Client_Tracker_Callback_Stub_001, TestSize.Level1)
+{
+    std::shared_ptr<AudioClientTrackerCallbackStub> audioClientTrackerCallbackStub =
+        std::make_shared<AudioClientTrackerCallbackStub>();
+
+    StreamSetStateEventInternal streamSetStateEventInternal = {};
+    streamSetStateEventInternal.audioStreamType = AudioStreamType::STREAM_MUSIC;
+    std::weak_ptr<AudioClientTrackerTest> callback = std::make_shared<AudioClientTrackerTest>();
+
+    float volume = 0.5;
+    audioClientTrackerCallbackStub->SetLowPowerVolumeImpl(volume);
+    audioClientTrackerCallbackStub->GetLowPowerVolumeImpl(volume);
+    audioClientTrackerCallbackStub->GetSingleStreamVolumeImpl(volume);
+
+    streamSetStateEventInternal.streamSetState= StreamSetState::STREAM_RESUME;
+    audioClientTrackerCallbackStub->ResumeStreamImpl(streamSetStateEventInternal);
+
+    streamSetStateEventInternal.streamSetState= StreamSetState::STREAM_PAUSE;
+    audioClientTrackerCallbackStub->PausedStreamImpl(streamSetStateEventInternal);
+
+    audioClientTrackerCallbackStub->SetClientTrackerCallback(callback);
+
+    streamSetStateEventInternal.streamSetState= StreamSetState::STREAM_RESUME;
+    audioClientTrackerCallbackStub->ResumeStreamImpl(streamSetStateEventInternal);
+
+    streamSetStateEventInternal.streamSetState= StreamSetState::STREAM_PAUSE;
+    audioClientTrackerCallbackStub->PausedStreamImpl(streamSetStateEventInternal);
 }
 } // namespace AudioStandard
 } // namespace OHOS
