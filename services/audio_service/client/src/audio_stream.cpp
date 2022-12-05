@@ -113,7 +113,7 @@ AudioStream::~AudioStream()
     }
 
     if (state_ != RELEASED && state_ != NEW) {
-        ReleaseAudioStream();
+        ReleaseAudioStream(false);
     }
 
     if (audioStreamTracker_) {
