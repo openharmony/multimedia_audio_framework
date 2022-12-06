@@ -584,7 +584,7 @@ HWTEST(AudioManagerUnitTest, RequestIndependentInterrupt_001, TestSize.Level1)
 {
     FocusType FocusType = FocusType::FOCUS_TYPE_RECORDING;
     auto ret = AudioSystemManager::GetInstance()->RequestIndependentInterrupt(FocusType);
-    EXPECT_EQ(ret, SUCCESS);
+    EXPECT_TRUE(ret);
 }
 
 /**
@@ -596,7 +596,7 @@ HWTEST(AudioManagerUnitTest, AbandonIndependentInterrupt_001, TestSize.Level1)
 {
     FocusType FocusType = FocusType::FOCUS_TYPE_RECORDING;
     auto ret = AudioSystemManager::GetInstance()->AbandonIndependentInterrupt(FocusType);
-    EXPECT_EQ(ret, SUCCESS);
+    EXPECT_TRUE(ret);
 }
 
 /**
@@ -806,7 +806,7 @@ HWTEST(AudioManagerUnitTest, GetPinValueFromType_015, TestSize.Level1)
     DeviceType deviceType = DeviceType::DEVICE_TYPE_DEFAULT;
     DeviceRole deviceRole = DeviceRole::OUTPUT_DEVICE;
     AudioPin ret = AudioSystemManager::GetInstance()->GetPinValueFromType(deviceType, deviceRole);
-    EXPECT_EQ(ret, AudioPin::AUDIO_PIN_NONE);
+    EXPECT_EQ(ret, AudioPin::AUDIO_PIN_OUT_DAUDIO_DEFAULT);
 }
 
 /**
