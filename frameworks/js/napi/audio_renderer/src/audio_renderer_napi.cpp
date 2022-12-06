@@ -416,35 +416,6 @@ static shared_ptr<AbilityRuntime::Context> GetAbilityContext(napi_env env)
     return faContext;
 }
 
-static AudioVolumeType GetNativeAudioVolumeType(int32_t volumeType)
-{
-    AudioVolumeType result = STREAM_MUSIC;
-
-    switch (volumeType) {
-        case AudioManagerNapi::RINGTONE:
-            result = STREAM_RING;
-            break;
-        case AudioManagerNapi::MEDIA:
-            result = STREAM_MUSIC;
-            break;
-        case AudioManagerNapi::VOICE_CALL:
-            result = STREAM_VOICE_CALL;
-            break;
-        case AudioManagerNapi::VOICE_ASSISTANT:
-            result = STREAM_VOICE_ASSISTANT;
-            break;
-        case AudioManagerNapi::ALL:
-            result = STREAM_ALL;
-            break;
-        default:
-            result = STREAM_MUSIC;
-            HiLog::Error(LABEL, "Unknown volume type, Set it to default MEDIA!");
-            break;
-    }
-
-    return result;
-}
-
 napi_value AudioRendererNapi::Construct(napi_env env, napi_callback_info info)
 {
     napi_status status;
@@ -478,7 +449,6 @@ napi_value AudioRendererNapi::Construct(napi_env env, napi_callback_info info)
         cacheDir = "/data/storage/el2/base/haps/entry/files";
     }
     rendererNapi->audioRenderer_ = AudioRenderer::Create(cacheDir, rendererOptions);
-    rendererNapi->audioMngr_ = AudioSystemManager::GetInstance();
 
     if (rendererNapi->audioRenderer_ == nullptr) {
         HiLog::Error(LABEL, "Renderer Create failed");
@@ -1677,15 +1647,7 @@ napi_value AudioRendererNapi::SetVolume(napi_env env, napi_callback_info info)
             napi_valuetype valueType = napi_undefined;
             napi_typeof(env, argv[i], &valueType);
             if (i == PARAM0 && valueType == napi_number) {
-                AudioRendererInfo rendererInfo = {};
-                int32_t rendererInfoStatus = asyncContext->objectInfo->audioRenderer_->GetRendererInfo(rendererInfo);
-                if (rendererInfoStatus == SUCCESS) {
-                    asyncContext->volType = asyncContext->objectInfo->audioMngr_->
-                        GetStreamType(rendererInfo.contentType, rendererInfo.streamUsage);
-                } else {
-                    asyncContext->status = NAPI_ERR_SYSTEM;
-                }
-                napi_get_value_int32(env, argv[i], &asyncContext->volLevel);
+                napi_get_value_double(env, argv[i], &asyncContext->volLevel);
             } else if (i == PARAM1) {
                 if (valueType == napi_function) {
                     napi_create_reference(env, argv[i], refCount, &asyncContext->callbackRef);
@@ -1710,11 +1672,11 @@ napi_value AudioRendererNapi::SetVolume(napi_env env, napi_callback_info info)
             [](napi_env env, void *data) {
                 auto context = static_cast<AudioRendererAsyncContext*>(data);
                 if (context->status == SUCCESS) {
-                    if (!AudioCommonNapi::IsLegalInputArgumentVolLevel(context->volLevel)) {
+                    if (context->volLevel < MIN_VOLUME_IN_DOUBLE || context->volLevel > MAX_VOLUME_IN_DOUBLE) {
                         context->status = NAPI_ERR_UNSUPPORTED;
                     } else {
-                        context->status = context->objectInfo->audioMngr_->
-                            SetVolume(GetNativeAudioVolumeType(context->volType), context->volLevel);
+                        context->status = context->objectInfo->audioRenderer_->
+                            SetVolume(static_cast<float>(context->volLevel));
                     }
                 }
             },
