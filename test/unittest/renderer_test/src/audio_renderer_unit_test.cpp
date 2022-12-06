@@ -127,10 +127,10 @@ void StartRenderThread(AudioRenderer *audioRenderer, uint32_t limit)
 }
 
 /**
-* @tc.name  : Test GetSupportedFormats API
-* @tc.number: Audio_Renderer_GetSupportedFormats_001
-* @tc.desc  : Test GetSupportedFormats interface. Returns supported Formats on success.
-*/
+ * @tc.name  : Test GetSupportedFormats API
+ * @tc.number: Audio_Renderer_GetSupportedFormats_001
+ * @tc.desc  : Test GetSupportedFormats interface. Returns supported Formats on success.
+ */
 HWTEST(AudioRendererUnitTest, Audio_Renderer_GetSupportedFormats_001, TestSize.Level0)
 {
     vector<AudioSampleFormat> supportedFormatList = AudioRenderer::GetSupportedFormats();
@@ -138,10 +138,10 @@ HWTEST(AudioRendererUnitTest, Audio_Renderer_GetSupportedFormats_001, TestSize.L
 }
 
 /**
-* @tc.name  : Test GetSupportedChannels API
-* @tc.number: Audio_Renderer_GetSupportedChannels_001
-* @tc.desc  : Test GetSupportedChannels interface. Returns supported Channels on success.
-*/
+ * @tc.name  : Test GetSupportedChannels API
+ * @tc.number: Audio_Renderer_GetSupportedChannels_001
+ * @tc.desc  : Test GetSupportedChannels interface. Returns supported Channels on success.
+ */
 HWTEST(AudioRendererUnitTest, Audio_Renderer_GetSupportedChannels_001, TestSize.Level0)
 {
     vector<AudioChannel> supportedChannelList = AudioRenderer::GetSupportedChannels();
@@ -149,10 +149,10 @@ HWTEST(AudioRendererUnitTest, Audio_Renderer_GetSupportedChannels_001, TestSize.
 }
 
 /**
-* @tc.name  : Test GetSupportedEncodingTypes API
-* @tc.number: Audio_Renderer_GetSupportedEncodingTypes_001
-* @tc.desc  : Test GetSupportedEncodingTypes interface. Returns supported Encoding types on success.
-*/
+ * @tc.name  : Test GetSupportedEncodingTypes API
+ * @tc.number: Audio_Renderer_GetSupportedEncodingTypes_001
+ * @tc.desc  : Test GetSupportedEncodingTypes interface. Returns supported Encoding types on success.
+ */
 HWTEST(AudioRendererUnitTest, Audio_Renderer_GetSupportedEncodingTypes_001, TestSize.Level0)
 {
     vector<AudioEncodingType> supportedEncodingTypes
@@ -161,10 +161,10 @@ HWTEST(AudioRendererUnitTest, Audio_Renderer_GetSupportedEncodingTypes_001, Test
 }
 
 /**
-* @tc.name  : Test GetSupportedSamplingRates API
-* @tc.number: Audio_Renderer_GetSupportedSamplingRates_001
-* @tc.desc  : Test GetSupportedSamplingRates interface. Returns supported Sampling rates on success.
-*/
+ * @tc.name  : Test GetSupportedSamplingRates API
+ * @tc.number: Audio_Renderer_GetSupportedSamplingRates_001
+ * @tc.desc  : Test GetSupportedSamplingRates interface. Returns supported Sampling rates on success.
+ */
 HWTEST(AudioRendererUnitTest, Audio_Renderer_GetSupportedSamplingRates_001, TestSize.Level0)
 {
     vector<AudioSamplingRate> supportedSamplingRates = AudioRenderer::GetSupportedSamplingRates();
@@ -172,10 +172,10 @@ HWTEST(AudioRendererUnitTest, Audio_Renderer_GetSupportedSamplingRates_001, Test
 }
 
 /**
-* @tc.name  : Test Create API via legal input.
-* @tc.number: Audio_Renderer_Create_001
-* @tc.desc  : Test Create interface with STREAM_MUSIC. Returns audioRenderer instance, if create is successful.
-*/
+ * @tc.name  : Test Create API via legal input.
+ * @tc.number: Audio_Renderer_Create_001
+ * @tc.desc  : Test Create interface with STREAM_MUSIC. Returns audioRenderer instance, if create is successful.
+ */
 HWTEST(AudioRendererUnitTest, Audio_Renderer_Create_001, TestSize.Level0)
 {
     unique_ptr<AudioRenderer> audioRenderer = AudioRenderer::Create(STREAM_MUSIC);
@@ -183,10 +183,10 @@ HWTEST(AudioRendererUnitTest, Audio_Renderer_Create_001, TestSize.Level0)
 }
 
 /**
-* @tc.name  : Test Create API via legal input.
-* @tc.number: Audio_Renderer_Create_002
-* @tc.desc  : Test Create interface with STREAM_RING. Returns audioRenderer instance, if create is successful.
-*/
+ * @tc.name  : Test Create API via legal input.
+ * @tc.number: Audio_Renderer_Create_002
+ * @tc.desc  : Test Create interface with STREAM_RING. Returns audioRenderer instance, if create is successful.
+ */
 HWTEST(AudioRendererUnitTest, Audio_Renderer_Create_002, TestSize.Level0)
 {
     unique_ptr<AudioRenderer> audioRenderer = AudioRenderer::Create(STREAM_RING);
@@ -194,11 +194,11 @@ HWTEST(AudioRendererUnitTest, Audio_Renderer_Create_002, TestSize.Level0)
 }
 
 /**
-* @tc.name  : Test Create API via legal input.
-* @tc.number: Audio_Renderer_Create_003
-* @tc.desc  : Test Create interface with STREAM_VOICE_CALL. Returns audioRenderer instance if create is successful.
-*             Note: instance will be created but functional support for STREAM_VOICE_CALL not available yet.
-*/
+ * @tc.name  : Test Create API via legal input.
+ * @tc.number: Audio_Renderer_Create_003
+ * @tc.desc  : Test Create interface with STREAM_VOICE_CALL. Returns audioRenderer instance if create is successful.
+ *             Note: instance will be created but functional support for STREAM_VOICE_CALL not available yet.
+ */
 HWTEST(AudioRendererUnitTest, Audio_Renderer_Create_003, TestSize.Level0)
 {
     unique_ptr<AudioRenderer> audioRenderer = AudioRenderer::Create(STREAM_VOICE_CALL);
@@ -206,11 +206,11 @@ HWTEST(AudioRendererUnitTest, Audio_Renderer_Create_003, TestSize.Level0)
 }
 
 /**
-* @tc.name  : Test Create API via legal input.
-* @tc.number: Audio_Renderer_Create_004
-* @tc.desc  : Test Create interface with STREAM_SYSTEM. Returns audioRenderer instance, if create is successful.
-*             Note: instance will be created but functional support for STREAM_SYSTEM not available yet.
-*/
+ * @tc.name  : Test Create API via legal input.
+ * @tc.number: Audio_Renderer_Create_004
+ * @tc.desc  : Test Create interface with STREAM_SYSTEM. Returns audioRenderer instance, if create is successful.
+ *             Note: instance will be created but functional support for STREAM_SYSTEM not available yet.
+ */
 HWTEST(AudioRendererUnitTest, Audio_Renderer_Create_004, TestSize.Level0)
 {
     unique_ptr<AudioRenderer> audioRenderer = AudioRenderer::Create(STREAM_SYSTEM);
@@ -218,11 +218,11 @@ HWTEST(AudioRendererUnitTest, Audio_Renderer_Create_004, TestSize.Level0)
 }
 
 /**
-* @tc.name  : Test Create API via legal input.
-* @tc.number: Audio_Renderer_Create_005
-* @tc.desc  : Test Create interface with STREAM_BLUETOOTH_SCO. Returns audioRenderer instance, if create is successful.
-*             Note: instance will be created but functional support for STREAM_BLUETOOTH_SCO not available yet
-*/
+ * @tc.name  : Test Create API via legal input.
+ * @tc.number: Audio_Renderer_Create_005
+ * @tc.desc  : Test Create interface with STREAM_BLUETOOTH_SCO. Returns audioRenderer instance, if create is successful.
+ *             Note: instance will be created but functional support for STREAM_BLUETOOTH_SCO not available yet
+ */
 HWTEST(AudioRendererUnitTest, Audio_Renderer_Create_005, TestSize.Level0)
 {
     unique_ptr<AudioRenderer> audioRenderer = AudioRenderer::Create(STREAM_BLUETOOTH_SCO);
@@ -230,11 +230,11 @@ HWTEST(AudioRendererUnitTest, Audio_Renderer_Create_005, TestSize.Level0)
 }
 
 /**
-* @tc.name  : Test Create API via legal input.
-* @tc.number: Audio_Renderer_Create_006
-* @tc.desc  : Test Create interface with STREAM_ALARM. Returns audioRenderer instance, if create is successful.
-*             Note: instance will be created but functional support for STREAM_ALARM not available yet.
-*/
+ * @tc.name  : Test Create API via legal input.
+ * @tc.number: Audio_Renderer_Create_006
+ * @tc.desc  : Test Create interface with STREAM_ALARM. Returns audioRenderer instance, if create is successful.
+ *             Note: instance will be created but functional support for STREAM_ALARM not available yet.
+ */
 HWTEST(AudioRendererUnitTest, Audio_Renderer_Create_006, TestSize.Level0)
 {
     unique_ptr<AudioRenderer> audioRenderer = AudioRenderer::Create(STREAM_ALARM);
@@ -242,11 +242,11 @@ HWTEST(AudioRendererUnitTest, Audio_Renderer_Create_006, TestSize.Level0)
 }
 
 /**
-* @tc.name  : Test Create API via legal input.
-* @tc.number: Audio_Renderer_Create_007
-* @tc.desc  : Test Create interface with STREAM_NOTIFICATION. Returns audioRenderer instance, if create is successful.
-*             Note: instance will be created but functional support for STREAM_NOTIFICATION not available yet.
-*/
+ * @tc.name  : Test Create API via legal input.
+ * @tc.number: Audio_Renderer_Create_007
+ * @tc.desc  : Test Create interface with STREAM_NOTIFICATION. Returns audioRenderer instance, if create is successful.
+ *             Note: instance will be created but functional support for STREAM_NOTIFICATION not available yet.
+ */
 HWTEST(AudioRendererUnitTest, Audio_Renderer_Create_007, TestSize.Level0)
 {
     unique_ptr<AudioRenderer> audioRenderer = AudioRenderer::Create(STREAM_NOTIFICATION);
@@ -254,18 +254,18 @@ HWTEST(AudioRendererUnitTest, Audio_Renderer_Create_007, TestSize.Level0)
 }
 
 /**
-* @tc.name  : Test Create API via legal input.
-* @tc.number: Audio_Renderer_Create_008
-* @tc.desc  : Test Create interface with AudioRendererOptions below.
-*             Returns audioRenderer instance, if create is successful.
-*             rendererOptions.streamInfo.samplingRate = SAMPLE_RATE_96000;
-*             rendererOptions.streamInfo.encoding = ENCODING_PCM;
-*             rendererOptions.streamInfo.format = SAMPLE_U8;
-*             rendererOptions.streamInfo.channels = MONO;
-*             rendererOptions.rendererInfo.contentType = CONTENT_TYPE_MUSIC;
-*             rendererOptions.rendererInfo.streamUsage = STREAM_USAGE_MEDIA;
-*             rendererOptions.rendererInfo.rendererFlags = RENDERER_FLAG;
-*/
+ * @tc.name  : Test Create API via legal input.
+ * @tc.number: Audio_Renderer_Create_008
+ * @tc.desc  : Test Create interface with AudioRendererOptions below.
+ *             Returns audioRenderer instance, if create is successful.
+ *             rendererOptions.streamInfo.samplingRate = SAMPLE_RATE_96000;
+ *             rendererOptions.streamInfo.encoding = ENCODING_PCM;
+ *             rendererOptions.streamInfo.format = SAMPLE_U8;
+ *             rendererOptions.streamInfo.channels = MONO;
+ *             rendererOptions.rendererInfo.contentType = CONTENT_TYPE_MUSIC;
+ *             rendererOptions.rendererInfo.streamUsage = STREAM_USAGE_MEDIA;
+ *             rendererOptions.rendererInfo.rendererFlags = RENDERER_FLAG;
+ */
 HWTEST(AudioRendererUnitTest, Audio_Renderer_Create_008, TestSize.Level0)
 {
     AudioRendererOptions rendererOptions;
@@ -283,18 +283,18 @@ HWTEST(AudioRendererUnitTest, Audio_Renderer_Create_008, TestSize.Level0)
 }
 
 /**
-* @tc.name  : Test Create API via legal input.
-* @tc.number: Audio_Renderer_Create_009
-* @tc.desc  : Test Create interface with AudioRendererOptions below.
-*             Returns audioRenderer instance, if create is successful.
-*             rendererOptions.streamInfo.samplingRate = SAMPLE_RATE_96000;
-*             rendererOptions.streamInfo.encoding = ENCODING_PCM;
-*             rendererOptions.streamInfo.format = SAMPLE_U8;
-*             rendererOptions.streamInfo.channels = STEREO;
-*             rendererOptions.rendererInfo.contentType = CONTENT_TYPE_MOVIE;
-*             rendererOptions.rendererInfo.streamUsage = STREAM_USAGE_MEDIA;
-*             rendererOptions.rendererInfo.rendererFlags = RENDERER_FLAG;
-*/
+ * @tc.name  : Test Create API via legal input.
+ * @tc.number: Audio_Renderer_Create_009
+ * @tc.desc  : Test Create interface with AudioRendererOptions below.
+ *             Returns audioRenderer instance, if create is successful.
+ *             rendererOptions.streamInfo.samplingRate = SAMPLE_RATE_96000;
+ *             rendererOptions.streamInfo.encoding = ENCODING_PCM;
+ *             rendererOptions.streamInfo.format = SAMPLE_U8;
+ *             rendererOptions.streamInfo.channels = STEREO;
+ *             rendererOptions.rendererInfo.contentType = CONTENT_TYPE_MOVIE;
+ *             rendererOptions.rendererInfo.streamUsage = STREAM_USAGE_MEDIA;
+ *             rendererOptions.rendererInfo.rendererFlags = RENDERER_FLAG;
+ */
 HWTEST(AudioRendererUnitTest, Audio_Renderer_Create_009, TestSize.Level0)
 {
     AudioRendererOptions rendererOptions;
@@ -312,18 +312,18 @@ HWTEST(AudioRendererUnitTest, Audio_Renderer_Create_009, TestSize.Level0)
 }
 
 /**
-* @tc.name  : Test Create API via legal input.
-* @tc.number: Audio_Renderer_Create_010
-* @tc.desc  : Test Create interface with AudioRendererOptions below.
-*             Returns audioRenderer instance, if create is successful.
-*             rendererOptions.streamInfo.samplingRate = SAMPLE_RATE_64000;
-*             rendererOptions.streamInfo.encoding = ENCODING_PCM;
-*             rendererOptions.streamInfo.format = SAMPLE_S32LE;
-*             rendererOptions.streamInfo.channels = MONO;
-*             rendererOptions.rendererInfo.contentType = CONTENT_TYPE_RINGTONE;
-*             rendererOptions.rendererInfo.streamUsage = STREAM_USAGE_NOTIFICATION_RINGTONE;
-*             rendererOptions.rendererInfo.rendererFlags = RENDERER_FLAG;
-*/
+ * @tc.name  : Test Create API via legal input.
+ * @tc.number: Audio_Renderer_Create_010
+ * @tc.desc  : Test Create interface with AudioRendererOptions below.
+ *             Returns audioRenderer instance, if create is successful.
+ *             rendererOptions.streamInfo.samplingRate = SAMPLE_RATE_64000;
+ *             rendererOptions.streamInfo.encoding = ENCODING_PCM;
+ *             rendererOptions.streamInfo.format = SAMPLE_S32LE;
+ *             rendererOptions.streamInfo.channels = MONO;
+ *             rendererOptions.rendererInfo.contentType = CONTENT_TYPE_RINGTONE;
+ *             rendererOptions.rendererInfo.streamUsage = STREAM_USAGE_NOTIFICATION_RINGTONE;
+ *             rendererOptions.rendererInfo.rendererFlags = RENDERER_FLAG;
+ */
 HWTEST(AudioRendererUnitTest, Audio_Renderer_Create_010, TestSize.Level0)
 {
     AudioRendererOptions rendererOptions;
@@ -341,18 +341,18 @@ HWTEST(AudioRendererUnitTest, Audio_Renderer_Create_010, TestSize.Level0)
 }
 
 /**
-* @tc.name  : Test Create API via legal input.
-* @tc.number: Audio_Renderer_Create_011
-* @tc.desc  : Test Create interface with AudioRendererOptions below.
-*             Returns audioRenderer instance, if create is successful.
-*             rendererOptions.streamInfo.samplingRate = SAMPLE_RATE_48000;
-*             rendererOptions.streamInfo.encoding = ENCODING_PCM;
-*             rendererOptions.streamInfo.format = SAMPLE_S24LE;
-*             rendererOptions.streamInfo.channels = STEREO;
-*             rendererOptions.rendererInfo.contentType = CONTENT_TYPE_MOVIE;
-*             rendererOptions.rendererInfo.streamUsage = STREAM_USAGE_MEDIA;
-*             rendererOptions.rendererInfo.rendererFlags = RENDERER_FLAG;
-*/
+ * @tc.name  : Test Create API via legal input.
+ * @tc.number: Audio_Renderer_Create_011
+ * @tc.desc  : Test Create interface with AudioRendererOptions below.
+ *             Returns audioRenderer instance, if create is successful.
+ *             rendererOptions.streamInfo.samplingRate = SAMPLE_RATE_48000;
+ *             rendererOptions.streamInfo.encoding = ENCODING_PCM;
+ *             rendererOptions.streamInfo.format = SAMPLE_S24LE;
+ *             rendererOptions.streamInfo.channels = STEREO;
+ *             rendererOptions.rendererInfo.contentType = CONTENT_TYPE_MOVIE;
+ *             rendererOptions.rendererInfo.streamUsage = STREAM_USAGE_MEDIA;
+ *             rendererOptions.rendererInfo.rendererFlags = RENDERER_FLAG;
+ */
 HWTEST(AudioRendererUnitTest, Audio_Renderer_Create_011, TestSize.Level0)
 {
     AudioRendererOptions rendererOptions;
@@ -370,18 +370,18 @@ HWTEST(AudioRendererUnitTest, Audio_Renderer_Create_011, TestSize.Level0)
 }
 
 /**
-* @tc.name  : Test Create API via legal input.
-* @tc.number: Audio_Renderer_Create_012
-* @tc.desc  : Test Create interface with AudioRendererOptions below.
-*             Returns audioRenderer instance, if create is successful.
-*             rendererOptions.streamInfo.samplingRate = SAMPLE_RATE_44100;
-*             rendererOptions.streamInfo.encoding = ENCODING_PCM;
-*             rendererOptions.streamInfo.format = SAMPLE_S16LE;
-*             rendererOptions.streamInfo.channels = MONO;
-*             rendererOptions.rendererInfo.contentType = CONTENT_TYPE_SONIFICATION;
-*             rendererOptions.rendererInfo.streamUsage = STREAM_USAGE_VOICE_ASSISTANT;
-*             rendererOptions.rendererInfo.rendererFlags = RENDERER_FLAG;
-*/
+ * @tc.name  : Test Create API via legal input.
+ * @tc.number: Audio_Renderer_Create_012
+ * @tc.desc  : Test Create interface with AudioRendererOptions below.
+ *             Returns audioRenderer instance, if create is successful.
+ *             rendererOptions.streamInfo.samplingRate = SAMPLE_RATE_44100;
+ *             rendererOptions.streamInfo.encoding = ENCODING_PCM;
+ *             rendererOptions.streamInfo.format = SAMPLE_S16LE;
+ *             rendererOptions.streamInfo.channels = MONO;
+ *             rendererOptions.rendererInfo.contentType = CONTENT_TYPE_SONIFICATION;
+ *             rendererOptions.rendererInfo.streamUsage = STREAM_USAGE_VOICE_ASSISTANT;
+ *             rendererOptions.rendererInfo.rendererFlags = RENDERER_FLAG;
+ */
 HWTEST(AudioRendererUnitTest, Audio_Renderer_Create_012, TestSize.Level0)
 {
     AudioRendererOptions rendererOptions;
@@ -399,18 +399,18 @@ HWTEST(AudioRendererUnitTest, Audio_Renderer_Create_012, TestSize.Level0)
 }
 
 /**
-* @tc.name  : Test Create API via legal input.
-* @tc.number: Audio_Renderer_Create_013
-* @tc.desc  : Test Create interface with AudioRendererOptions below.
-*             Returns audioRenderer instance, if create is successful.
-*             rendererOptions.streamInfo.samplingRate = SAMPLE_RATE_22050;
-*             rendererOptions.streamInfo.encoding = ENCODING_PCM;
-*             rendererOptions.streamInfo.format = SAMPLE_S24LE;
-*             rendererOptions.streamInfo.channels = STEREO;
-*             rendererOptions.rendererInfo.contentType = CONTENT_TYPE_SPEECH;
-*             rendererOptions.rendererInfo.streamUsage = STREAM_USAGE_VOICE_COMMUNICATION;
-*             rendererOptions.rendererInfo.rendererFlags = RENDERER_FLAG;
-*/
+ * @tc.name  : Test Create API via legal input.
+ * @tc.number: Audio_Renderer_Create_013
+ * @tc.desc  : Test Create interface with AudioRendererOptions below.
+ *             Returns audioRenderer instance, if create is successful.
+ *             rendererOptions.streamInfo.samplingRate = SAMPLE_RATE_22050;
+ *             rendererOptions.streamInfo.encoding = ENCODING_PCM;
+ *             rendererOptions.streamInfo.format = SAMPLE_S24LE;
+ *             rendererOptions.streamInfo.channels = STEREO;
+ *             rendererOptions.rendererInfo.contentType = CONTENT_TYPE_SPEECH;
+ *             rendererOptions.rendererInfo.streamUsage = STREAM_USAGE_VOICE_COMMUNICATION;
+ *             rendererOptions.rendererInfo.rendererFlags = RENDERER_FLAG;
+ */
 HWTEST(AudioRendererUnitTest, Audio_Renderer_Create_013, TestSize.Level0)
 {
     AudioRendererOptions rendererOptions;
@@ -428,18 +428,18 @@ HWTEST(AudioRendererUnitTest, Audio_Renderer_Create_013, TestSize.Level0)
 }
 
 /**
-* @tc.name  : Test Create API via legal input.
-* @tc.number: Audio_Renderer_Create_014
-* @tc.desc  : Test Create interface with AudioRendererOptions below.
-*             Returns audioRenderer instance, if create is successful.
-*             rendererOptions.streamInfo.samplingRate = SAMPLE_RATE_12000;
-*             rendererOptions.streamInfo.encoding = ENCODING_PCM;
-*             rendererOptions.streamInfo.format = SAMPLE_S24LE;
-*             rendererOptions.streamInfo.channels = MONO;
-*             rendererOptions.rendererInfo.contentType = CONTENT_TYPE_MUSIC;
-*             rendererOptions.rendererInfo.streamUsage = STREAM_USAGE_VOICE_ASSISTANT;
-*             rendererOptions.rendererInfo.rendererFlags = RENDERER_FLAG;
-*/
+ * @tc.name  : Test Create API via legal input.
+ * @tc.number: Audio_Renderer_Create_014
+ * @tc.desc  : Test Create interface with AudioRendererOptions below.
+ *             Returns audioRenderer instance, if create is successful.
+ *             rendererOptions.streamInfo.samplingRate = SAMPLE_RATE_12000;
+ *             rendererOptions.streamInfo.encoding = ENCODING_PCM;
+ *             rendererOptions.streamInfo.format = SAMPLE_S24LE;
+ *             rendererOptions.streamInfo.channels = MONO;
+ *             rendererOptions.rendererInfo.contentType = CONTENT_TYPE_MUSIC;
+ *             rendererOptions.rendererInfo.streamUsage = STREAM_USAGE_VOICE_ASSISTANT;
+ *             rendererOptions.rendererInfo.rendererFlags = RENDERER_FLAG;
+ */
 HWTEST(AudioRendererUnitTest, Audio_Renderer_Create_014, TestSize.Level0)
 {
     AudioRendererOptions rendererOptions;
@@ -457,10 +457,10 @@ HWTEST(AudioRendererUnitTest, Audio_Renderer_Create_014, TestSize.Level0)
 }
 
 /**
-* @tc.name  : Test Renderer playback
-* @tc.number: Audio_Renderer_Playback_001
-* @tc.desc  : Test normal playback for 2 sec
-*/
+ * @tc.name  : Test Renderer playback
+ * @tc.number: Audio_Renderer_Playback_001
+ * @tc.desc  : Test normal playback for 2 sec
+ */
 HWTEST(AudioRendererUnitTest, Audio_Renderer_Playback_001, TestSize.Level0)
 {
     AudioRendererOptions rendererOptions;
@@ -483,14 +483,14 @@ HWTEST(AudioRendererUnitTest, Audio_Renderer_Playback_001, TestSize.Level0)
 }
 
 /**
-* @tc.name  : Test SetParams API via legal input
-* @tc.number: Audio_Renderer_SetParams_001
-* @tc.desc  : Test SetParams interface. Returns 0 {SUCCESS}, if the setting is successful.
-*             rendererParams.sampleFormat = SAMPLE_S16LE;
-*             rendererParams.sampleRate = SAMPLE_RATE_44100;
-*             rendererParams.channelCount = STEREO;
-*             rendererParams.encodingType = ENCODING_PCM;
-*/
+ * @tc.name  : Test SetParams API via legal input
+ * @tc.number: Audio_Renderer_SetParams_001
+ * @tc.desc  : Test SetParams interface. Returns 0 {SUCCESS}, if the setting is successful.
+ *             rendererParams.sampleFormat = SAMPLE_S16LE;
+ *             rendererParams.sampleRate = SAMPLE_RATE_44100;
+ *             rendererParams.channelCount = STEREO;
+ *             rendererParams.encodingType = ENCODING_PCM;
+ */
 HWTEST(AudioRendererUnitTest, Audio_Renderer_SetParams_001, TestSize.Level1)
 {
     unique_ptr<AudioRenderer> audioRenderer = AudioRenderer::Create(STREAM_MUSIC);
@@ -508,14 +508,14 @@ HWTEST(AudioRendererUnitTest, Audio_Renderer_SetParams_001, TestSize.Level1)
 }
 
 /**
-* @tc.name  : Test SetParams API via legal input.
-* @tc.number: Audio_Renderer_SetParams_002
-* @tc.desc  : Test SetParams interface. Returns 0 {SUCCESS}, if the setting is successful.
-*             rendererParams.sampleFormat = SAMPLE_S16LE;
-*             rendererParams.sampleRate = SAMPLE_RATE_8000;
-*             rendererParams.channelCount = MONO;
-*             rendererParams.encodingType = ENCODING_PCM;
-*/
+ * @tc.name  : Test SetParams API via legal input.
+ * @tc.number: Audio_Renderer_SetParams_002
+ * @tc.desc  : Test SetParams interface. Returns 0 {SUCCESS}, if the setting is successful.
+ *             rendererParams.sampleFormat = SAMPLE_S16LE;
+ *             rendererParams.sampleRate = SAMPLE_RATE_8000;
+ *             rendererParams.channelCount = MONO;
+ *             rendererParams.encodingType = ENCODING_PCM;
+ */
 HWTEST(AudioRendererUnitTest, Audio_Renderer_SetParams_002, TestSize.Level1)
 {
     unique_ptr<AudioRenderer> audioRenderer = AudioRenderer::Create(STREAM_MUSIC);
@@ -533,14 +533,14 @@ HWTEST(AudioRendererUnitTest, Audio_Renderer_SetParams_002, TestSize.Level1)
 }
 
 /**
-* @tc.name  : Test SetParams API via legal input.
-* @tc.number: Audio_Renderer_SetParams_003
-* @tc.desc  : Test SetParams interface. Returns 0 {SUCCESS}, if the setting is successful.
-*             rendererParams.sampleFormat = SAMPLE_S16LE;
-*             rendererParams.sampleRate = SAMPLE_RATE_11025;
-*             rendererParams.channelCount = STEREO;
-*             rendererParams.encodingType = ENCODING_PCM;
-*/
+ * @tc.name  : Test SetParams API via legal input.
+ * @tc.number: Audio_Renderer_SetParams_003
+ * @tc.desc  : Test SetParams interface. Returns 0 {SUCCESS}, if the setting is successful.
+ *             rendererParams.sampleFormat = SAMPLE_S16LE;
+ *             rendererParams.sampleRate = SAMPLE_RATE_11025;
+ *             rendererParams.channelCount = STEREO;
+ *             rendererParams.encodingType = ENCODING_PCM;
+ */
 HWTEST(AudioRendererUnitTest, Audio_Renderer_SetParams_003, TestSize.Level1)
 {
     unique_ptr<AudioRenderer> audioRenderer = AudioRenderer::Create(STREAM_MUSIC);
@@ -558,14 +558,14 @@ HWTEST(AudioRendererUnitTest, Audio_Renderer_SetParams_003, TestSize.Level1)
 }
 
 /**
-* @tc.name  : Test SetParams API via legal input.
-* @tc.number: Audio_Renderer_SetParams_004
-* @tc.desc  : Test SetParams interface. Returns 0 {SUCCESS}, if the setting is successful.
-*             rendererParams.sampleFormat = SAMPLE_S16LE;
-*             rendererParams.sampleRate = SAMPLE_RATE_22050;
-*             rendererParams.channelCount = MONO;
-*             rendererParams.encodingType = ENCODING_PCM;
-*/
+ * @tc.name  : Test SetParams API via legal input.
+ * @tc.number: Audio_Renderer_SetParams_004
+ * @tc.desc  : Test SetParams interface. Returns 0 {SUCCESS}, if the setting is successful.
+ *             rendererParams.sampleFormat = SAMPLE_S16LE;
+ *             rendererParams.sampleRate = SAMPLE_RATE_22050;
+ *             rendererParams.channelCount = MONO;
+ *             rendererParams.encodingType = ENCODING_PCM;
+ */
 HWTEST(AudioRendererUnitTest, Audio_Renderer_SetParams_004, TestSize.Level1)
 {
     unique_ptr<AudioRenderer> audioRenderer = AudioRenderer::Create(STREAM_MUSIC);
@@ -583,14 +583,14 @@ HWTEST(AudioRendererUnitTest, Audio_Renderer_SetParams_004, TestSize.Level1)
 }
 
 /**
-* @tc.name  : Test SetParams API via legal input.
-* @tc.number: Audio_Renderer_SetParams_005
-* @tc.desc  : Test SetParams interface. Returns 0 {SUCCESS}, if the setting is successful.
-*             rendererParams.sampleFormat = SAMPLE_S16LE;
-*             rendererParams.sampleRate = SAMPLE_RATE_96000;
-*             rendererParams.channelCount = MONO;
-*             rendererParams.encodingType = ENCODING_PCM;
-*/
+ * @tc.name  : Test SetParams API via legal input.
+ * @tc.number: Audio_Renderer_SetParams_005
+ * @tc.desc  : Test SetParams interface. Returns 0 {SUCCESS}, if the setting is successful.
+ *             rendererParams.sampleFormat = SAMPLE_S16LE;
+ *             rendererParams.sampleRate = SAMPLE_RATE_96000;
+ *             rendererParams.channelCount = MONO;
+ *             rendererParams.encodingType = ENCODING_PCM;
+ */
 HWTEST(AudioRendererUnitTest, Audio_Renderer_SetParams_005, TestSize.Level1)
 {
     unique_ptr<AudioRenderer> audioRenderer = AudioRenderer::Create(STREAM_MUSIC);
@@ -607,14 +607,14 @@ HWTEST(AudioRendererUnitTest, Audio_Renderer_SetParams_005, TestSize.Level1)
 }
 
 /**
-* @tc.name  : Test SetParams API via legal input.
-* @tc.number: Audio_Renderer_SetParams_006
-* @tc.desc  : Test SetParams interface. Returns 0 {SUCCESS}, if the setting is successful.
-*             rendererParams.sampleFormat = SAMPLE_S24LE;
-*             rendererParams.sampleRate = SAMPLE_RATE_64000;
-*             rendererParams.channelCount = MONO;
-*             rendererParams.encodingType = ENCODING_PCM;
-*/
+ * @tc.name  : Test SetParams API via legal input.
+ * @tc.number: Audio_Renderer_SetParams_006
+ * @tc.desc  : Test SetParams interface. Returns 0 {SUCCESS}, if the setting is successful.
+ *             rendererParams.sampleFormat = SAMPLE_S24LE;
+ *             rendererParams.sampleRate = SAMPLE_RATE_64000;
+ *             rendererParams.channelCount = MONO;
+ *             rendererParams.encodingType = ENCODING_PCM;
+ */
 HWTEST(AudioRendererUnitTest, Audio_Renderer_SetParams_006, TestSize.Level1)
 {
     unique_ptr<AudioRenderer> audioRenderer = AudioRenderer::Create(STREAM_MUSIC);
@@ -631,14 +631,14 @@ HWTEST(AudioRendererUnitTest, Audio_Renderer_SetParams_006, TestSize.Level1)
 }
 
 /**
-* @tc.name  : Test SetParams API via illegal input.
-* @tc.number: Audio_Renderer_SetParams_007
-* @tc.desc  : Test SetParams interface. Returns 0 {SUCCESS}, if the setting is successful.
-*             rendererParams.sampleFormat = SAMPLE_S16LE;
-*             rendererParams.sampleRate = SAMPLE_RATE_16000;
-*             rendererParams.channelCount = STEREO;
-*             rendererParams.encodingType = ENCODING_PCM;
-*/
+ * @tc.name  : Test SetParams API via illegal input.
+ * @tc.number: Audio_Renderer_SetParams_007
+ * @tc.desc  : Test SetParams interface. Returns 0 {SUCCESS}, if the setting is successful.
+ *             rendererParams.sampleFormat = SAMPLE_S16LE;
+ *             rendererParams.sampleRate = SAMPLE_RATE_16000;
+ *             rendererParams.channelCount = STEREO;
+ *             rendererParams.encodingType = ENCODING_PCM;
+ */
 HWTEST(AudioRendererUnitTest, Audio_Renderer_SetParams_007, TestSize.Level1)
 {
     unique_ptr<AudioRenderer> audioRenderer = AudioRenderer::Create(STREAM_MUSIC);
@@ -656,10 +656,10 @@ HWTEST(AudioRendererUnitTest, Audio_Renderer_SetParams_007, TestSize.Level1)
 }
 
 /**
-* @tc.name  : Test SetParams API stability.
-* @tc.number: Audio_Renderer_SetParams_Stability_001
-* @tc.desc  : Test SetParams interface stability.
-*/
+ * @tc.name  : Test SetParams API stability.
+ * @tc.number: Audio_Renderer_SetParams_Stability_001
+ * @tc.desc  : Test SetParams interface stability.
+ */
 HWTEST(AudioRendererUnitTest, Audio_Renderer_SetParams_Stability_001, TestSize.Level1)
 {
     int32_t ret = -1;
@@ -685,10 +685,10 @@ HWTEST(AudioRendererUnitTest, Audio_Renderer_SetParams_Stability_001, TestSize.L
 }
 
 /**
-* @tc.name  : Test GetParams API via legal input.
-* @tc.number: Audio_Renderer_GetParams_001
-* @tc.desc  : Test GetParams interface. Returns 0 {SUCCESS}, if the getting is successful.
-*/
+ * @tc.name  : Test GetParams API via legal input.
+ * @tc.number: Audio_Renderer_GetParams_001
+ * @tc.desc  : Test GetParams interface. Returns 0 {SUCCESS}, if the getting is successful.
+ */
 HWTEST(AudioRendererUnitTest, Audio_Renderer_GetParams_001, TestSize.Level1)
 {
     int32_t ret = -1;
@@ -715,10 +715,10 @@ HWTEST(AudioRendererUnitTest, Audio_Renderer_GetParams_001, TestSize.Level1)
 }
 
 /**
-* @tc.name  : Test GetParams API via legal state, RENDERER_RUNNING: GetParams after Start.
-* @tc.number: Audio_Renderer_GetParams_002
-* @tc.desc  : Test GetParams interface. Returns 0 {SUCCESS} if the getting is successful.
-*/
+ * @tc.name  : Test GetParams API via legal state, RENDERER_RUNNING: GetParams after Start.
+ * @tc.number: Audio_Renderer_GetParams_002
+ * @tc.desc  : Test GetParams interface. Returns 0 {SUCCESS} if the getting is successful.
+ */
 HWTEST(AudioRendererUnitTest, Audio_Renderer_GetParams_002, TestSize.Level1)
 {
     int32_t ret = -1;
@@ -744,10 +744,10 @@ HWTEST(AudioRendererUnitTest, Audio_Renderer_GetParams_002, TestSize.Level1)
 }
 
 /**
-* @tc.name  : Test GetParams API via illegal state, RENDERER_NEW: Call GetParams without SetParams.
-* @tc.number: Audio_Renderer_GetParams_003
-* @tc.desc  : Test GetParams interface. Returns error code, if the renderer state is RENDERER_NEW.
-*/
+ * @tc.name  : Test GetParams API via illegal state, RENDERER_NEW: Call GetParams without SetParams.
+ * @tc.number: Audio_Renderer_GetParams_003
+ * @tc.desc  : Test GetParams interface. Returns error code, if the renderer state is RENDERER_NEW.
+ */
 HWTEST(AudioRendererUnitTest, Audio_Renderer_GetParams_003, TestSize.Level1)
 {
     int32_t ret = -1;
@@ -766,10 +766,10 @@ HWTEST(AudioRendererUnitTest, Audio_Renderer_GetParams_003, TestSize.Level1)
 }
 
 /**
-* @tc.name  : Test GetParams API via illegal state, RENDERER_RELEASED: Call GetParams after Release.
-* @tc.number: Audio_Renderer_GetParams_004
-* @tc.desc  : Test GetParams interface. Returns error code, if the renderer state is RENDERER_RELEASED.
-*/
+ * @tc.name  : Test GetParams API via illegal state, RENDERER_RELEASED: Call GetParams after Release.
+ * @tc.number: Audio_Renderer_GetParams_004
+ * @tc.desc  : Test GetParams interface. Returns error code, if the renderer state is RENDERER_RELEASED.
+ */
 HWTEST(AudioRendererUnitTest, Audio_Renderer_GetParams_004, TestSize.Level1)
 {
     int32_t ret = -1;
@@ -788,10 +788,10 @@ HWTEST(AudioRendererUnitTest, Audio_Renderer_GetParams_004, TestSize.Level1)
 }
 
 /**
-* @tc.name  : Test GetParams API via legal state, RENDERER_STOPPED: GetParams after Stop.
-* @tc.number: Audio_Renderer_GetParams_005
-* @tc.desc  : Test GetParams interface. Returns 0 {SUCCESS}, if the getting is successful.
-*/
+ * @tc.name  : Test GetParams API via legal state, RENDERER_STOPPED: GetParams after Stop.
+ * @tc.number: Audio_Renderer_GetParams_005
+ * @tc.desc  : Test GetParams interface. Returns 0 {SUCCESS}, if the getting is successful.
+ */
 HWTEST(AudioRendererUnitTest, Audio_Renderer_GetParams_005, TestSize.Level1)
 {
     int32_t ret = -1;
@@ -815,10 +815,10 @@ HWTEST(AudioRendererUnitTest, Audio_Renderer_GetParams_005, TestSize.Level1)
 }
 
 /**
-* @tc.name  : Test GetParams API via legal input.
-* @tc.number: Audio_Renderer_GetParams_006
-* @tc.desc  : Test GetParams interface. Returns 0 {SUCCESS}, if the getting is successful.
-*/
+ * @tc.name  : Test GetParams API via legal input.
+ * @tc.number: Audio_Renderer_GetParams_006
+ * @tc.desc  : Test GetParams interface. Returns 0 {SUCCESS}, if the getting is successful.
+ */
 HWTEST(AudioRendererUnitTest, Audio_Renderer_GetParams_006, TestSize.Level1)
 {
     int32_t ret = -1;
@@ -845,10 +845,10 @@ HWTEST(AudioRendererUnitTest, Audio_Renderer_GetParams_006, TestSize.Level1)
 }
 
 /**
-* @tc.name  : Test GetParams API via legal input.
-* @tc.number: Audio_Renderer_GetParams_007
-* @tc.desc  : Test GetParams interface. Returns 0 {SUCCESS}, if the getting is successful.
-*/
+ * @tc.name  : Test GetParams API via legal input.
+ * @tc.number: Audio_Renderer_GetParams_007
+ * @tc.desc  : Test GetParams interface. Returns 0 {SUCCESS}, if the getting is successful.
+ */
 HWTEST(AudioRendererUnitTest, Audio_Renderer_GetParams_007, TestSize.Level1)
 {
     int32_t ret = -1;
@@ -875,10 +875,10 @@ HWTEST(AudioRendererUnitTest, Audio_Renderer_GetParams_007, TestSize.Level1)
 }
 
 /**
-* @tc.name  : Test GetParams API via legal input.
-* @tc.number: Audio_Renderer_GetParams_008
-* @tc.desc  : Test GetParams interface. Returns 0 {SUCCESS}, if the getting is successful.
-*/
+ * @tc.name  : Test GetParams API via legal input.
+ * @tc.number: Audio_Renderer_GetParams_008
+ * @tc.desc  : Test GetParams interface. Returns 0 {SUCCESS}, if the getting is successful.
+ */
 HWTEST(AudioRendererUnitTest, Audio_Renderer_GetParams_008, TestSize.Level1)
 {
     int32_t ret = -1;
@@ -893,10 +893,10 @@ HWTEST(AudioRendererUnitTest, Audio_Renderer_GetParams_008, TestSize.Level1)
 }
 
 /**
-* @tc.name  : Test SetInterruptMode API via legal input
-* @tc.number: Audio_Renderer_SetInterruptMode_001
-* @tc.desc  : Test SetInterruptMode interface. Returns 0 {SUCCESS}, if the setting is successful.
-*/
+ * @tc.name  : Test SetInterruptMode API via legal input
+ * @tc.number: Audio_Renderer_SetInterruptMode_001
+ * @tc.desc  : Test SetInterruptMode interface. Returns 0 {SUCCESS}, if the setting is successful.
+ */
 HWTEST(AudioRendererUnitTest, Audio_Renderer_SetInterruptMode_001, TestSize.Level1)
 {
     int32_t ret = -1;
@@ -941,10 +941,10 @@ HWTEST(AudioRendererUnitTest, Audio_Renderer_SetInterruptMode_002, TestSize.Leve
 }
 
 /**
-* @tc.name  : Test GetBufQueueState 
-* @tc.number: Audio_Renderer_GetBufQueueState_001
-* @tc.desc  : Test GetBufQueueState interface. Returns BufferQueueState, if obtained successfully.
-*/
+ * @tc.name  : Test GetBufQueueState
+ * @tc.number: Audio_Renderer_GetBufQueueState_001
+ * @tc.desc  : Test GetBufQueueState interface. Returns BufferQueueState, if obtained successfully.
+ */
 HWTEST(AudioRendererUnitTest, Audio_Renderer_GetBufQueueState_001, TestSize.Level1)
 {
     int32_t ret = -1;
@@ -974,10 +974,10 @@ HWTEST(AudioRendererUnitTest, Audio_Renderer_GetBufQueueState_001, TestSize.Leve
 }
 
 /**
-* @tc.name  : Test GetParams API stability.
-* @tc.number: Audio_Renderer_GetParams_Stability_001
-* @tc.desc  : Test GetParams interface stability.
-*/
+ * @tc.name  : Test GetParams API stability.
+ * @tc.number: Audio_Renderer_GetParams_Stability_001
+ * @tc.desc  : Test GetParams interface stability.
+ */
 HWTEST(AudioRendererUnitTest, Audio_Renderer_GetParams_Stability_001, TestSize.Level1)
 {
     int32_t ret = -1;
@@ -1003,10 +1003,10 @@ HWTEST(AudioRendererUnitTest, Audio_Renderer_GetParams_Stability_001, TestSize.L
 }
 
 /**
-* @tc.name  : Test GetBufferSize API via legal input.
-* @tc.number: Audio_Renderer_GetBufferSize_001
-* @tc.desc  : Test GetBufferSize interface. Returns 0 {SUCCESS}, if the getting is successful.
-*/
+ * @tc.name  : Test GetBufferSize API via legal input.
+ * @tc.number: Audio_Renderer_GetBufferSize_001
+ * @tc.desc  : Test GetBufferSize interface. Returns 0 {SUCCESS}, if the getting is successful.
+ */
 HWTEST(AudioRendererUnitTest, Audio_Renderer_GetBufferSize_001, TestSize.Level1)
 {
     int32_t ret = -1;
@@ -1024,10 +1024,10 @@ HWTEST(AudioRendererUnitTest, Audio_Renderer_GetBufferSize_001, TestSize.Level1)
 }
 
 /**
-* @tc.name  : Test GetBufferSize API via illegal state, RENDERER_NEW: without initializing the renderer.
-* @tc.number: Audio_Renderer_GetBufferSize_002
-* @tc.desc  : Test GetBufferSize interface. Returns error code, if the renderer state is RENDERER_NEW.
-*/
+ * @tc.name  : Test GetBufferSize API via illegal state, RENDERER_NEW: without initializing the renderer.
+ * @tc.number: Audio_Renderer_GetBufferSize_002
+ * @tc.desc  : Test GetBufferSize interface. Returns error code, if the renderer state is RENDERER_NEW.
+ */
 HWTEST(AudioRendererUnitTest, Audio_Renderer_GetBufferSize_002, TestSize.Level1)
 {
     int32_t ret = -1;
@@ -1040,10 +1040,10 @@ HWTEST(AudioRendererUnitTest, Audio_Renderer_GetBufferSize_002, TestSize.Level1)
 }
 
 /**
-* @tc.name  : Test GetBufferSize API via illegal state, RENDERER_RELEASED: call Release before GetBufferSize
-* @tc.number: Audio_Renderer_GetBufferSize_003
-* @tc.desc  : Test GetBufferSize interface. Returns error code, if the renderer state is RENDERER_RELEASED.
-*/
+ * @tc.name  : Test GetBufferSize API via illegal state, RENDERER_RELEASED: call Release before GetBufferSize
+ * @tc.number: Audio_Renderer_GetBufferSize_003
+ * @tc.desc  : Test GetBufferSize interface. Returns error code, if the renderer state is RENDERER_RELEASED.
+ */
 HWTEST(AudioRendererUnitTest, Audio_Renderer_GetBufferSize_003, TestSize.Level1)
 {
     int32_t ret = -1;
@@ -1062,10 +1062,10 @@ HWTEST(AudioRendererUnitTest, Audio_Renderer_GetBufferSize_003, TestSize.Level1)
 }
 
 /**
-* @tc.name  : Test GetBufferSize API via legal state, RENDERER_STOPPED: call Stop before GetBufferSize
-* @tc.number: Audio_Renderer_GetBufferSize_004
-* @tc.desc  : Test GetBufferSize interface. Returns 0 {SUCCESS}, if the getting is successful.
-*/
+ * @tc.name  : Test GetBufferSize API via legal state, RENDERER_STOPPED: call Stop before GetBufferSize
+ * @tc.number: Audio_Renderer_GetBufferSize_004
+ * @tc.desc  : Test GetBufferSize interface. Returns 0 {SUCCESS}, if the getting is successful.
+ */
 HWTEST(AudioRendererUnitTest, Audio_Renderer_GetBufferSize_004, TestSize.Level1)
 {
     int32_t ret = -1;
@@ -1089,10 +1089,10 @@ HWTEST(AudioRendererUnitTest, Audio_Renderer_GetBufferSize_004, TestSize.Level1)
 }
 
 /**
-* @tc.name  : Test GetBufferSize API via legal state, RENDERER_RUNNING: call Start before GetBufferSize
-* @tc.number: Audio_Renderer_GetBufferSize_005
-* @tc.desc  : test GetBufferSize interface. Returns 0 {SUCCESS}, if the getting is successful.
-*/
+ * @tc.name  : Test GetBufferSize API via legal state, RENDERER_RUNNING: call Start before GetBufferSize
+ * @tc.number: Audio_Renderer_GetBufferSize_005
+ * @tc.desc  : test GetBufferSize interface. Returns 0 {SUCCESS}, if the getting is successful.
+ */
 HWTEST(AudioRendererUnitTest, Audio_Renderer_GetBufferSize_005, TestSize.Level1)
 {
     int32_t ret = -1;
@@ -1176,10 +1176,10 @@ HWTEST(AudioRendererUnitTest, Audio_Renderer_SetStreamType_001, TestSize.Level1)
 }
 
 /**
-* @tc.name  : Test GetFrameCount API via legal input.
-* @tc.number: Audio_Renderer_GetFrameCount_001
-* @tc.desc  : test GetFrameCount interface, Returns 0 {SUCCESS}, if the getting is successful.
-*/
+ * @tc.name  : Test GetFrameCount API via legal input.
+ * @tc.number: Audio_Renderer_GetFrameCount_001
+ * @tc.desc  : test GetFrameCount interface, Returns 0 {SUCCESS}, if the getting is successful.
+ */
 HWTEST(AudioRendererUnitTest, Audio_Renderer_GetFrameCount_001, TestSize.Level1)
 {
     int32_t ret = -1;
@@ -1197,10 +1197,10 @@ HWTEST(AudioRendererUnitTest, Audio_Renderer_GetFrameCount_001, TestSize.Level1)
 }
 
 /**
-* @tc.name  : Test GetFrameCount API via illegal state, RENDERER_NEW: without initialiing the renderer.
-* @tc.number: Audio_Renderer_GetFrameCount_002
-* @tc.desc  : Test GetFrameCount interface. Returns error code, if the renderer state is RENDERER_NEW.
-*/
+ * @tc.name  : Test GetFrameCount API via illegal state, RENDERER_NEW: without initialiing the renderer.
+ * @tc.number: Audio_Renderer_GetFrameCount_002
+ * @tc.desc  : Test GetFrameCount interface. Returns error code, if the renderer state is RENDERER_NEW.
+ */
 HWTEST(AudioRendererUnitTest, Audio_Renderer_GetFrameCount_002, TestSize.Level1)
 {
     int32_t ret = -1;
@@ -1213,10 +1213,10 @@ HWTEST(AudioRendererUnitTest, Audio_Renderer_GetFrameCount_002, TestSize.Level1)
 }
 
 /**
-* @tc.name  : Test GetFrameCount API via legal state, RENDERER_RUNNING: call Start before GetFrameCount.
-* @tc.number: Audio_Renderer_GetFrameCount_003
-* @tc.desc  : Test GetFrameCount interface. Returns 0 {SUCCESS}, if the getting is successful.
-*/
+ * @tc.name  : Test GetFrameCount API via legal state, RENDERER_RUNNING: call Start before GetFrameCount.
+ * @tc.number: Audio_Renderer_GetFrameCount_003
+ * @tc.desc  : Test GetFrameCount interface. Returns 0 {SUCCESS}, if the getting is successful.
+ */
 HWTEST(AudioRendererUnitTest, Audio_Renderer_GetFrameCount_003, TestSize.Level1)
 {
     int32_t ret = -1;
@@ -1237,10 +1237,10 @@ HWTEST(AudioRendererUnitTest, Audio_Renderer_GetFrameCount_003, TestSize.Level1)
 }
 
 /**
-* @tc.name  : Test GetFrameCount API via legal state, RENDERER_STOPPED: call Stop before GetFrameCount
-* @tc.number: Audio_Renderer_GetFrameCount_004
-* @tc.desc  : Test GetFrameCount interface. Returns 0 {SUCCESS}, if the getting is successful.
-*/
+ * @tc.name  : Test GetFrameCount API via legal state, RENDERER_STOPPED: call Stop before GetFrameCount
+ * @tc.number: Audio_Renderer_GetFrameCount_004
+ * @tc.desc  : Test GetFrameCount interface. Returns 0 {SUCCESS}, if the getting is successful.
+ */
 HWTEST(AudioRendererUnitTest, Audio_Renderer_GetFrameCount_004, TestSize.Level1)
 {
     int32_t ret = -1;
@@ -1264,10 +1264,10 @@ HWTEST(AudioRendererUnitTest, Audio_Renderer_GetFrameCount_004, TestSize.Level1)
 }
 
 /**
-* @tc.name  : Test GetFrameCount API via illegal state, RENDERER_RELEASED: call Release before GetFrameCount
-* @tc.number: Audio_Renderer_GetFrameCount_005
-* @tc.desc  : Test GetFrameCount interface.  Returns error code, if the state is RENDERER_RELEASED.
-*/
+ * @tc.name  : Test GetFrameCount API via illegal state, RENDERER_RELEASED: call Release before GetFrameCount
+ * @tc.number: Audio_Renderer_GetFrameCount_005
+ * @tc.desc  : Test GetFrameCount interface.  Returns error code, if the state is RENDERER_RELEASED.
+ */
 HWTEST(AudioRendererUnitTest, Audio_Renderer_GetFrameCount_005, TestSize.Level1)
 {
     int32_t ret = -1;
@@ -1286,10 +1286,10 @@ HWTEST(AudioRendererUnitTest, Audio_Renderer_GetFrameCount_005, TestSize.Level1)
 }
 
 /**
-* @tc.name  : Test GetFrameCount API via legal state, RENDERER_PAUSED: call Pause before GetFrameCount
-* @tc.number: Audio_Renderer_GetFrameCount_006
-* @tc.desc  : Test GetFrameCount interface. Returns 0 {SUCCESS}, if the getting is successful.
-*/
+ * @tc.name  : Test GetFrameCount API via legal state, RENDERER_PAUSED: call Pause before GetFrameCount
+ * @tc.number: Audio_Renderer_GetFrameCount_006
+ * @tc.desc  : Test GetFrameCount interface. Returns 0 {SUCCESS}, if the getting is successful.
+ */
 HWTEST(AudioRendererUnitTest, Audio_Renderer_GetFrameCount_006, TestSize.Level1)
 {
     int32_t ret = -1;
@@ -1313,10 +1313,10 @@ HWTEST(AudioRendererUnitTest, Audio_Renderer_GetFrameCount_006, TestSize.Level1)
 }
 
 /**
-* @tc.name  : Test SetVolume
-* @tc.number: Audio_Renderer_SetVolume_001
-* @tc.desc  : Test SetVolume interface, Returns 0 {SUCCESS}, if the track volume is set.
-*/
+ * @tc.name  : Test SetVolume
+ * @tc.number: Audio_Renderer_SetVolume_001
+ * @tc.desc  : Test SetVolume interface, Returns 0 {SUCCESS}, if the track volume is set.
+ */
 HWTEST(AudioRendererUnitTest, Audio_Renderer_SetVolume_001, TestSize.Level1)
 {
     int32_t ret = -1;
@@ -1334,10 +1334,10 @@ HWTEST(AudioRendererUnitTest, Audio_Renderer_SetVolume_001, TestSize.Level1)
 }
 
 /**
-* @tc.name  : Test SetVolume
-* @tc.number: Audio_Renderer_SetVolume_002
-* @tc.desc  : Test SetVolume interface for minimum and maximum volumes.
-*/
+ * @tc.name  : Test SetVolume
+ * @tc.number: Audio_Renderer_SetVolume_002
+ * @tc.desc  : Test SetVolume interface for minimum and maximum volumes.
+ */
 HWTEST(AudioRendererUnitTest, Audio_Renderer_SetVolume_002, TestSize.Level1)
 {
     int32_t ret = -1;
@@ -1358,10 +1358,10 @@ HWTEST(AudioRendererUnitTest, Audio_Renderer_SetVolume_002, TestSize.Level1)
 }
 
 /**
-* @tc.name  : Test SetVolume
-* @tc.number: Audio_Renderer_SetVolume_003
-* @tc.desc  : Test SetVolume interface for out of range values.
-*/
+ * @tc.name  : Test SetVolume
+ * @tc.number: Audio_Renderer_SetVolume_003
+ * @tc.desc  : Test SetVolume interface for out of range values.
+ */
 HWTEST(AudioRendererUnitTest, Audio_Renderer_SetVolume_003, TestSize.Level1)
 {
     int32_t ret = -1;
@@ -1382,10 +1382,10 @@ HWTEST(AudioRendererUnitTest, Audio_Renderer_SetVolume_003, TestSize.Level1)
 }
 
 /**
-* @tc.name  : Test SetVolume
-* @tc.number: Audio_Renderer_SetVolume_Stability_001
-* @tc.desc  : Test SetVolume interface stability.
-*/
+ * @tc.name  : Test SetVolume
+ * @tc.number: Audio_Renderer_SetVolume_Stability_001
+ * @tc.desc  : Test SetVolume interface stability.
+ */
 HWTEST(AudioRendererUnitTest, Audio_Renderer_SetVolume_Stability_001, TestSize.Level1)
 {
     AudioRendererOptions rendererOptions;
@@ -1414,10 +1414,10 @@ HWTEST(AudioRendererUnitTest, Audio_Renderer_SetVolume_Stability_001, TestSize.L
 }
 
 /**
-* @tc.name  : Test GetVolume
-* @tc.number: Audio_Renderer_GetVolume_001
-* @tc.desc  : Test GetVolume interface to get the default value.
-*/
+ * @tc.name  : Test GetVolume
+ * @tc.number: Audio_Renderer_GetVolume_001
+ * @tc.desc  : Test GetVolume interface to get the default value.
+ */
 HWTEST(AudioRendererUnitTest, Audio_Renderer_GetVolume_001, TestSize.Level1)
 {
     AudioRendererOptions rendererOptions;
@@ -1434,10 +1434,10 @@ HWTEST(AudioRendererUnitTest, Audio_Renderer_GetVolume_001, TestSize.Level1)
 }
 
 /**
-* @tc.name  : Test GetVolume
-* @tc.number: Audio_Renderer_GetVolume_002
-* @tc.desc  : Test GetVolume interface after set volume call.
-*/
+ * @tc.name  : Test GetVolume
+ * @tc.number: Audio_Renderer_GetVolume_002
+ * @tc.desc  : Test GetVolume interface after set volume call.
+ */
 HWTEST(AudioRendererUnitTest, Audio_Renderer_GetVolume_002, TestSize.Level1)
 {
     int32_t ret = -1;
@@ -1458,10 +1458,10 @@ HWTEST(AudioRendererUnitTest, Audio_Renderer_GetVolume_002, TestSize.Level1)
 }
 
 /**
-* @tc.name  : Test GetVolume
-* @tc.number: Audio_Renderer_GetVolume_003
-* @tc.desc  : Test GetVolume interface after set volume fails.
-*/
+ * @tc.name  : Test GetVolume
+ * @tc.number: Audio_Renderer_GetVolume_003
+ * @tc.desc  : Test GetVolume interface after set volume fails.
+ */
 HWTEST(AudioRendererUnitTest, Audio_Renderer_GetVolume_003, TestSize.Level1)
 {
     int32_t ret = -1;
@@ -1527,10 +1527,10 @@ HWTEST(AudioRendererUnitTest, Audio_Renderer_GetRenderRate_001, TestSize.Level1)
 }
 
 /**
-* @tc.name  : Test Start API via legal state, RENDERER_PREPARED.
-* @tc.number: Audio_Renderer_Start_001
-* @tc.desc  : Test Start interface. Returns true if start is successful.
-*/
+ * @tc.name  : Test Start API via legal state, RENDERER_PREPARED.
+ * @tc.number: Audio_Renderer_Start_001
+ * @tc.desc  : Test Start interface. Returns true if start is successful.
+ */
 HWTEST(AudioRendererUnitTest, Audio_Renderer_Start_001, TestSize.Level1)
 {
     AudioRendererOptions rendererOptions;
@@ -1546,10 +1546,10 @@ HWTEST(AudioRendererUnitTest, Audio_Renderer_Start_001, TestSize.Level1)
 }
 
 /**
-* @tc.name  : Test Start API via illegal state, RENDERER_NEW: without initializing the renderer.
-* @tc.number: Audio_Renderer_Start_002
-* @tc.desc  : Test Start interface. Returns false, if the renderer state is RENDERER_NEW.
-*/
+ * @tc.name  : Test Start API via illegal state, RENDERER_NEW: without initializing the renderer.
+ * @tc.number: Audio_Renderer_Start_002
+ * @tc.desc  : Test Start interface. Returns false, if the renderer state is RENDERER_NEW.
+ */
 HWTEST(AudioRendererUnitTest, Audio_Renderer_Start_002, TestSize.Level1)
 {
     unique_ptr<AudioRenderer> audioRenderer = AudioRenderer::Create(STREAM_MUSIC);
@@ -1560,10 +1560,10 @@ HWTEST(AudioRendererUnitTest, Audio_Renderer_Start_002, TestSize.Level1)
 }
 
 /**
-* @tc.name  : Test Start API via illegal state, RENDERER_RELEASED: call Start after Release
-* @tc.number: Audio_Renderer_Start_003
-* @tc.desc  : Test Start interface. Returns false, if the renderer state is RENDERER_RELEASED.
-*/
+ * @tc.name  : Test Start API via illegal state, RENDERER_RELEASED: call Start after Release
+ * @tc.number: Audio_Renderer_Start_003
+ * @tc.desc  : Test Start interface. Returns false, if the renderer state is RENDERER_RELEASED.
+ */
 HWTEST(AudioRendererUnitTest, Audio_Renderer_Start_003, TestSize.Level1)
 {
     AudioRendererOptions rendererOptions;
@@ -1582,10 +1582,10 @@ HWTEST(AudioRendererUnitTest, Audio_Renderer_Start_003, TestSize.Level1)
 }
 
 /**
-* @tc.name  : Test Start API via legal state, RENDERER_STOPPED: Start Stop and then Start again
-* @tc.number: Audio_Renderer_Start_004
-* @tc.desc  : Test Start interface. Returns true, if the start is successful.
-*/
+ * @tc.name  : Test Start API via legal state, RENDERER_STOPPED: Start Stop and then Start again
+ * @tc.number: Audio_Renderer_Start_004
+ * @tc.desc  : Test Start interface. Returns true, if the start is successful.
+ */
 HWTEST(AudioRendererUnitTest, Audio_Renderer_Start_004, TestSize.Level1)
 {
     AudioRendererOptions rendererOptions;
@@ -1607,10 +1607,10 @@ HWTEST(AudioRendererUnitTest, Audio_Renderer_Start_004, TestSize.Level1)
 }
 
 /**
-* @tc.name  : Test Start API via illegal state, RENDERER_RUNNING : call Start repeatedly
-* @tc.number: Audio_Renderer_Start_005
-* @tc.desc  : Test Start interface. Returns false, if the renderer state is RENDERER_RUNNING.
-*/
+ * @tc.name  : Test Start API via illegal state, RENDERER_RUNNING : call Start repeatedly
+ * @tc.number: Audio_Renderer_Start_005
+ * @tc.desc  : Test Start interface. Returns false, if the renderer state is RENDERER_RUNNING.
+ */
 HWTEST(AudioRendererUnitTest, Audio_Renderer_Start_005, TestSize.Level1)
 {
     AudioRendererOptions rendererOptions;
@@ -1629,10 +1629,10 @@ HWTEST(AudioRendererUnitTest, Audio_Renderer_Start_005, TestSize.Level1)
 }
 
 /**
-* @tc.name  : Test Start API via legal state, RENDERER_PAUSED : call Start after pause
-* @tc.number: Audio_Renderer_Start_005
-* @tc.desc  : Test Start interface. Returns false, if the renderer state is RENDERER_PAUSED.
-*/
+ * @tc.name  : Test Start API via legal state, RENDERER_PAUSED : call Start after pause
+ * @tc.number: Audio_Renderer_Start_005
+ * @tc.desc  : Test Start interface. Returns false, if the renderer state is RENDERER_PAUSED.
+ */
 HWTEST(AudioRendererUnitTest, Audio_Renderer_Start_006, TestSize.Level1)
 {
     AudioRendererOptions rendererOptions;
@@ -1654,10 +1654,10 @@ HWTEST(AudioRendererUnitTest, Audio_Renderer_Start_006, TestSize.Level1)
 }
 
 /**
-* @tc.name  : Test Write API.
-* @tc.number: Audio_Renderer_Write_001
-* @tc.desc  : Test Write interface. Returns number of bytes written, if the write is successful.
-*/
+ * @tc.name  : Test Write API.
+ * @tc.number: Audio_Renderer_Write_001
+ * @tc.desc  : Test Write interface. Returns number of bytes written, if the write is successful.
+ */
 
 HWTEST(AudioRendererUnitTest, Audio_Renderer_Write_001, TestSize.Level1)
 {
@@ -1709,11 +1709,11 @@ HWTEST(AudioRendererUnitTest, Audio_Renderer_Write_001, TestSize.Level1)
 }
 
 /**
-* @tc.name  : Test Write API via illegl state, RENDERER_NEW : without Initializing the renderer.
-* @tc.number: Audio_Renderer_Write_002
-* @tc.desc  : Test Write interface. Returns error code, if the renderer state is RENDERER_NEW.
-*           : bufferLen is invalid here, firstly bufferLen is validated in Write. So it returns ERR_INVALID_PARAM.
-*/
+ * @tc.name  : Test Write API via illegl state, RENDERER_NEW : without Initializing the renderer.
+ * @tc.number: Audio_Renderer_Write_002
+ * @tc.desc  : Test Write interface. Returns error code, if the renderer state is RENDERER_NEW.
+ *           : bufferLen is invalid here, firstly bufferLen is validated in Write. So it returns ERR_INVALID_PARAM.
+ */
 HWTEST(AudioRendererUnitTest, Audio_Renderer_Write_002, TestSize.Level1)
 {
     int32_t ret = -1;
@@ -1742,10 +1742,10 @@ HWTEST(AudioRendererUnitTest, Audio_Renderer_Write_002, TestSize.Level1)
 }
 
 /**
-* @tc.name  : Test Write API via illegl state, RENDERER_PREPARED : Write without Start.
-* @tc.number: Audio_Renderer_Write_003
-* @tc.desc  : Test Write interface. Returns error code, if the renderer state is not RENDERER_RUNNING.
-*/
+ * @tc.name  : Test Write API via illegl state, RENDERER_PREPARED : Write without Start.
+ * @tc.number: Audio_Renderer_Write_003
+ * @tc.desc  : Test Write interface. Returns error code, if the renderer state is not RENDERER_RUNNING.
+ */
 HWTEST(AudioRendererUnitTest, Audio_Renderer_Write_003, TestSize.Level1)
 {
     int32_t ret = -1;
@@ -1776,10 +1776,10 @@ HWTEST(AudioRendererUnitTest, Audio_Renderer_Write_003, TestSize.Level1)
 }
 
 /**
-* @tc.name  : Test Write API via illegal input, bufferLength = 0.
-* @tc.number: Audio_Renderer_Write_004
-* @tc.desc  : Test Write interface. Returns error code, if the bufferLength <= 0.
-*/
+ * @tc.name  : Test Write API via illegal input, bufferLength = 0.
+ * @tc.number: Audio_Renderer_Write_004
+ * @tc.desc  : Test Write interface. Returns error code, if the bufferLength <= 0.
+ */
 HWTEST(AudioRendererUnitTest, Audio_Renderer_Write_004, TestSize.Level1)
 {
     FILE *wavFile = fopen(AUDIORENDER_TEST_FILE_PATH.c_str(), "rb");
@@ -1811,10 +1811,10 @@ HWTEST(AudioRendererUnitTest, Audio_Renderer_Write_004, TestSize.Level1)
 }
 
 /**
-* @tc.name  : Test Write API via illegal input, buffer = nullptr.
-* @tc.number: Audio_Renderer_Write_005
-* @tc.desc  : Test Write interface. Returns error code, if the buffer = nullptr.
-*/
+ * @tc.name  : Test Write API via illegal input, buffer = nullptr.
+ * @tc.number: Audio_Renderer_Write_005
+ * @tc.desc  : Test Write interface. Returns error code, if the buffer = nullptr.
+ */
 HWTEST(AudioRendererUnitTest, Audio_Renderer_Write_005, TestSize.Level1)
 {
     int32_t ret = -1;
@@ -1850,10 +1850,10 @@ HWTEST(AudioRendererUnitTest, Audio_Renderer_Write_005, TestSize.Level1)
 }
 
 /**
-* @tc.name  : Test Write API via illegal state, RENDERER_STOPPED: Write after Stop
-* @tc.number: Audio_Renderer_Write_006
-* @tc.desc  : Test Write interface. Returns error code, if the renderer state is not RENDERER_RUNNING
-*/
+ * @tc.name  : Test Write API via illegal state, RENDERER_STOPPED: Write after Stop
+ * @tc.number: Audio_Renderer_Write_006
+ * @tc.desc  : Test Write interface. Returns error code, if the renderer state is not RENDERER_RUNNING
+ */
 HWTEST(AudioRendererUnitTest, Audio_Renderer_Write_006, TestSize.Level1)
 {
     int32_t ret = -1;
@@ -1890,10 +1890,10 @@ HWTEST(AudioRendererUnitTest, Audio_Renderer_Write_006, TestSize.Level1)
 }
 
 /**
-* @tc.name  : Test Write API via illegal state, RENDERER_RELEASED: Write after Release
-* @tc.number: Audio_Renderer_Write_007
-* @tc.desc  : Test Write interface. Returns error code, if the renderer state is not RENDERER_RUNNING
-*/
+ * @tc.name  : Test Write API via illegal state, RENDERER_RELEASED: Write after Release
+ * @tc.number: Audio_Renderer_Write_007
+ * @tc.desc  : Test Write interface. Returns error code, if the renderer state is not RENDERER_RUNNING
+ */
 HWTEST(AudioRendererUnitTest, Audio_Renderer_Write_007, TestSize.Level1)
 {
     int32_t ret = -1;
@@ -1928,10 +1928,10 @@ HWTEST(AudioRendererUnitTest, Audio_Renderer_Write_007, TestSize.Level1)
 }
 
 /**
-* @tc.name  : Test Write API.
-* @tc.number: Audio_Renderer_Write_008
-* @tc.desc  : Test Write interface after pause and resume. Returns number of bytes written, if the write is successful.
-*/
+ * @tc.name  : Test Write API.
+ * @tc.number: Audio_Renderer_Write_008
+ * @tc.desc  : Test Write interface after pause and resume. Returns number of bytes written, if the write is successful.
+ */
 
 HWTEST(AudioRendererUnitTest, Audio_Renderer_Write_008, TestSize.Level1)
 {
@@ -1997,11 +1997,11 @@ HWTEST(AudioRendererUnitTest, Audio_Renderer_Write_008, TestSize.Level1)
 }
 
 /**
-* @tc.name  : Test Write API via illegl render mode, RENDER_MODE_CALLBACK.
-* @tc.number: Audio_Renderer_Write_009
-* @tc.desc  : Test Write interface. Returns error code, if the render mode is RENDER_MODE_CALLBACK.
-*           : In RENDER_MODE_CALLBACK Write API call not supported. By default render mode is RENDER_MODE_NORMAL.
-*/
+ * @tc.name  : Test Write API via illegl render mode, RENDER_MODE_CALLBACK.
+ * @tc.number: Audio_Renderer_Write_009
+ * @tc.desc  : Test Write interface. Returns error code, if the render mode is RENDER_MODE_CALLBACK.
+ *           : In RENDER_MODE_CALLBACK Write API call not supported. By default render mode is RENDER_MODE_NORMAL.
+ */
 HWTEST(AudioRendererUnitTest, Audio_Renderer_Write_009, TestSize.Level1)
 {
     int32_t ret = -1;
@@ -2038,10 +2038,10 @@ HWTEST(AudioRendererUnitTest, Audio_Renderer_Write_009, TestSize.Level1)
 }
 
 /**
-* @tc.name  : Test GetAudioTime API via legal input.
-* @tc.number: Audio_Renderer_GetAudioTime_001
-* @tc.desc  : Test GetAudioTime interface. Returns true, if the getting is successful.
-*/
+ * @tc.name  : Test GetAudioTime API via legal input.
+ * @tc.number: Audio_Renderer_GetAudioTime_001
+ * @tc.desc  : Test GetAudioTime interface. Returns true, if the getting is successful.
+ */
 HWTEST(AudioRendererUnitTest, Audio_Renderer_GetAudioTime_001, TestSize.Level1)
 {
     int32_t ret = -1;
@@ -2083,10 +2083,10 @@ HWTEST(AudioRendererUnitTest, Audio_Renderer_GetAudioTime_001, TestSize.Level1)
 }
 
 /**
-* @tc.name  : Test GetAudioTime API via illegal state, RENDERER_NEW: GetAudioTime without initializing the renderer.
-* @tc.number: Audio_Renderer_GetAudioTime_002
-* @tc.desc  : Test GetAudioTime interface. Returns false, if the renderer state is RENDERER_NEW
-*/
+ * @tc.name  : Test GetAudioTime API via illegal state, RENDERER_NEW: GetAudioTime without initializing the renderer.
+ * @tc.number: Audio_Renderer_GetAudioTime_002
+ * @tc.desc  : Test GetAudioTime interface. Returns false, if the renderer state is RENDERER_NEW
+ */
 HWTEST(AudioRendererUnitTest, Audio_Renderer_GetAudioTime_002, TestSize.Level1)
 {
     unique_ptr<AudioRenderer> audioRenderer = AudioRenderer::Create(STREAM_MUSIC);
@@ -2098,10 +2098,10 @@ HWTEST(AudioRendererUnitTest, Audio_Renderer_GetAudioTime_002, TestSize.Level1)
 }
 
 /**
-* @tc.name  : Test GetAudioTime API via legal state, RENDERER_RUNNING.
-* @tc.number: Audio_Renderer_GetAudioTime_003
-* @tc.desc  : test GetAudioTime interface. Returns true, if the getting is successful.
-*/
+ * @tc.name  : Test GetAudioTime API via legal state, RENDERER_RUNNING.
+ * @tc.number: Audio_Renderer_GetAudioTime_003
+ * @tc.desc  : test GetAudioTime interface. Returns true, if the getting is successful.
+ */
 HWTEST(AudioRendererUnitTest, Audio_Renderer_GetAudioTime_003, TestSize.Level1)
 {
     AudioRendererOptions rendererOptions;
@@ -2121,10 +2121,10 @@ HWTEST(AudioRendererUnitTest, Audio_Renderer_GetAudioTime_003, TestSize.Level1)
 }
 
 /**
-* @tc.name  : Test GetAudioTime API via legal state, RENDERER_STOPPED.
-* @tc.number: Audio_Renderer_GetAudioTime_004
-* @tc.desc  : Test GetAudioTime interface. Returns true, if the getting is successful.
-*/
+ * @tc.name  : Test GetAudioTime API via legal state, RENDERER_STOPPED.
+ * @tc.number: Audio_Renderer_GetAudioTime_004
+ * @tc.desc  : Test GetAudioTime interface. Returns true, if the getting is successful.
+ */
 HWTEST(AudioRendererUnitTest, Audio_Renderer_GetAudioTime_004, TestSize.Level1)
 {
     AudioRendererOptions rendererOptions;
@@ -2147,10 +2147,10 @@ HWTEST(AudioRendererUnitTest, Audio_Renderer_GetAudioTime_004, TestSize.Level1)
 }
 
 /**
-* @tc.name  : Test GetAudioTime API via illegal state, RENDERER_RELEASED: GetAudioTime after Release.
-* @tc.number: Audio_Renderer_GetAudioTime_005
-* @tc.desc  : Test GetAudioTime interface. Returns false, if the renderer state is RENDERER_RELEASED
-*/
+ * @tc.name  : Test GetAudioTime API via illegal state, RENDERER_RELEASED: GetAudioTime after Release.
+ * @tc.number: Audio_Renderer_GetAudioTime_005
+ * @tc.desc  : Test GetAudioTime interface. Returns false, if the renderer state is RENDERER_RELEASED
+ */
 HWTEST(AudioRendererUnitTest, Audio_Renderer_GetAudioTime_005, TestSize.Level1)
 {
     AudioRendererOptions rendererOptions;
@@ -2174,10 +2174,10 @@ HWTEST(AudioRendererUnitTest, Audio_Renderer_GetAudioTime_005, TestSize.Level1)
 }
 
 /**
-* @tc.name  : Test GetAudioTime API via legal state, RENDERER_PAUSED.
-* @tc.number: Audio_Renderer_GetAudioTime_006
-* @tc.desc  : Test GetAudioTime interface. Returns true, if the getting is successful.
-*/
+ * @tc.name  : Test GetAudioTime API via legal state, RENDERER_PAUSED.
+ * @tc.number: Audio_Renderer_GetAudioTime_006
+ * @tc.desc  : Test GetAudioTime interface. Returns true, if the getting is successful.
+ */
 HWTEST(AudioRendererUnitTest, Audio_Renderer_GetAudioTime_006, TestSize.Level1)
 {
     AudioRendererOptions rendererOptions;
@@ -2200,10 +2200,10 @@ HWTEST(AudioRendererUnitTest, Audio_Renderer_GetAudioTime_006, TestSize.Level1)
 }
 
 /**
-* @tc.name  : Test Drain API.
-* @tc.number: Audio_Renderer_Drain_001
-* @tc.desc  : Test Drain interface. Returns true, if the flush is successful.
-*/
+ * @tc.name  : Test Drain API.
+ * @tc.number: Audio_Renderer_Drain_001
+ * @tc.desc  : Test Drain interface. Returns true, if the flush is successful.
+ */
 HWTEST(AudioRendererUnitTest, Audio_Renderer_Drain_001, TestSize.Level1)
 {
     int32_t ret = -1;
@@ -2241,10 +2241,10 @@ HWTEST(AudioRendererUnitTest, Audio_Renderer_Drain_001, TestSize.Level1)
 }
 
 /**
-* @tc.name  : Test Drain API via illegal state, RENDERER_NEW: Without initializing the renderer.
-* @tc.number: Audio_Renderer_Drain_002
-* @tc.desc  : Test Drain interface. Returns false, if the renderer state is not RENDERER_RUNNING.
-*/
+ * @tc.name  : Test Drain API via illegal state, RENDERER_NEW: Without initializing the renderer.
+ * @tc.number: Audio_Renderer_Drain_002
+ * @tc.desc  : Test Drain interface. Returns false, if the renderer state is not RENDERER_RUNNING.
+ */
 HWTEST(AudioRendererUnitTest, Audio_Renderer_Drain_002, TestSize.Level1)
 {
     unique_ptr<AudioRenderer> audioRenderer = AudioRenderer::Create(STREAM_MUSIC);
@@ -2257,10 +2257,10 @@ HWTEST(AudioRendererUnitTest, Audio_Renderer_Drain_002, TestSize.Level1)
 }
 
 /**
-* @tc.name  : Test Drain API via illegal state, RENDERER_PREPARED: Without Start.
-* @tc.number: Audio_Renderer_Drain_003
-* @tc.desc  : Test Drain interface. Returns false, if the renderer state is not RENDERER_RUNNING.
-*/
+ * @tc.name  : Test Drain API via illegal state, RENDERER_PREPARED: Without Start.
+ * @tc.number: Audio_Renderer_Drain_003
+ * @tc.desc  : Test Drain interface. Returns false, if the renderer state is not RENDERER_RUNNING.
+ */
 HWTEST(AudioRendererUnitTest, Audio_Renderer_Drain_003, TestSize.Level1)
 {
     AudioRendererOptions rendererOptions;
@@ -2276,10 +2276,10 @@ HWTEST(AudioRendererUnitTest, Audio_Renderer_Drain_003, TestSize.Level1)
 }
 
 /**
-* @tc.name  : Test Drain API via illegal state, RENDERER_STOPPED: call Stop before Drain.
-* @tc.number: Audio_Renderer_Drain_004
-* @tc.desc  : Test Drain interface. Returns false, if the renderer state is not RENDERER_RUNNING.
-*/
+ * @tc.name  : Test Drain API via illegal state, RENDERER_STOPPED: call Stop before Drain.
+ * @tc.number: Audio_Renderer_Drain_004
+ * @tc.desc  : Test Drain interface. Returns false, if the renderer state is not RENDERER_RUNNING.
+ */
 HWTEST(AudioRendererUnitTest, Audio_Renderer_Drain_004, TestSize.Level1)
 {
     AudioRendererOptions rendererOptions;
@@ -2301,10 +2301,10 @@ HWTEST(AudioRendererUnitTest, Audio_Renderer_Drain_004, TestSize.Level1)
 }
 
 /**
-* @tc.name  : Test Drain API via illegal state, RENDERER_RELEASED: call Release before Drain.
-* @tc.number: Audio_Renderer_Drain_005
-* @tc.desc  : Test Drain interface. Returns false, if the renderer state is not RENDERER_RUNNING.
-*/
+ * @tc.name  : Test Drain API via illegal state, RENDERER_RELEASED: call Release before Drain.
+ * @tc.number: Audio_Renderer_Drain_005
+ * @tc.desc  : Test Drain interface. Returns false, if the renderer state is not RENDERER_RUNNING.
+ */
 HWTEST(AudioRendererUnitTest, Audio_Renderer_Drain_005, TestSize.Level1)
 {
     AudioRendererOptions rendererOptions;
@@ -2326,10 +2326,10 @@ HWTEST(AudioRendererUnitTest, Audio_Renderer_Drain_005, TestSize.Level1)
 }
 
 /**
-* @tc.name  : Test Drain API via illegal state, RENDERER_PAUSED: call Pause before Drain.
-* @tc.number: Audio_Renderer_Drain_006
-* @tc.desc  : Test Drain interface. Returns false, if the renderer state is not RENDERER_RUNNING.
-*/
+ * @tc.name  : Test Drain API via illegal state, RENDERER_PAUSED: call Pause before Drain.
+ * @tc.number: Audio_Renderer_Drain_006
+ * @tc.desc  : Test Drain interface. Returns false, if the renderer state is not RENDERER_RUNNING.
+ */
 HWTEST(AudioRendererUnitTest, Audio_Renderer_Drain_006, TestSize.Level1)
 {
     AudioRendererOptions rendererOptions;
@@ -2351,10 +2351,10 @@ HWTEST(AudioRendererUnitTest, Audio_Renderer_Drain_006, TestSize.Level1)
 }
 
 /**
-* @tc.name  : Test Drain API stability.
-* @tc.number: Audio_Renderer_Drain_Stability_001
-* @tc.desc  : Test Drain interface stability.
-*/
+ * @tc.name  : Test Drain API stability.
+ * @tc.number: Audio_Renderer_Drain_Stability_001
+ * @tc.desc  : Test Drain interface stability.
+ */
 HWTEST(AudioRendererUnitTest, Audio_Renderer_Drain_Stability_001, TestSize.Level1)
 {
     AudioRendererOptions rendererOptions;
@@ -2383,10 +2383,10 @@ HWTEST(AudioRendererUnitTest, Audio_Renderer_Drain_Stability_001, TestSize.Level
 }
 
 /**
-* @tc.name  : Test Flush API.
-* @tc.number: Audio_Renderer_Flush_001
-* @tc.desc  : Test Flush interface. Returns true, if the flush is successful.
-*/
+ * @tc.name  : Test Flush API.
+ * @tc.number: Audio_Renderer_Flush_001
+ * @tc.desc  : Test Flush interface. Returns true, if the flush is successful.
+ */
 HWTEST(AudioRendererUnitTest, Audio_Renderer_Flush_001, TestSize.Level1)
 {
     int32_t ret = -1;
@@ -2423,10 +2423,10 @@ HWTEST(AudioRendererUnitTest, Audio_Renderer_Flush_001, TestSize.Level1)
 }
 
 /**
-* @tc.name  : Test Flush API.
-* @tc.number: Audio_Renderer_Flush_002
-* @tc.desc  : Test Flush interface after Pause call. Returns true, if the flush is successful.
-*/
+ * @tc.name  : Test Flush API.
+ * @tc.number: Audio_Renderer_Flush_002
+ * @tc.desc  : Test Flush interface after Pause call. Returns true, if the flush is successful.
+ */
 HWTEST(AudioRendererUnitTest, Audio_Renderer_Flush_002, TestSize.Level1)
 {
     int32_t ret = -1;
@@ -2465,10 +2465,10 @@ HWTEST(AudioRendererUnitTest, Audio_Renderer_Flush_002, TestSize.Level1)
 }
 
 /**
-* @tc.name  : Test Flush API via illegal state, RENDERER_NEW: Without initializing the renderer.
-* @tc.number: Audio_Renderer_Flush_003
-* @tc.desc  : Test Flush interface. Returns false, if the renderer state is not RENDERER_RUNNING or RENDERER_PAUSED.
-*/
+ * @tc.name  : Test Flush API via illegal state, RENDERER_NEW: Without initializing the renderer.
+ * @tc.number: Audio_Renderer_Flush_003
+ * @tc.desc  : Test Flush interface. Returns false, if the renderer state is not RENDERER_RUNNING or RENDERER_PAUSED.
+ */
 HWTEST(AudioRendererUnitTest, Audio_Renderer_Flush_003, TestSize.Level1)
 {
     unique_ptr<AudioRenderer> audioRenderer = AudioRenderer::Create(STREAM_MUSIC);
@@ -2479,10 +2479,10 @@ HWTEST(AudioRendererUnitTest, Audio_Renderer_Flush_003, TestSize.Level1)
 }
 
 /**
-* @tc.name  : Test Flush API via illegal state, RENDERER_PREPARED: Without Start.
-* @tc.number: Audio_Renderer_Flush_004
-* @tc.desc  : Test Flush interface. Returns false, if the renderer state is not RENDERER_RUNNING or RENDERER_PAUSED.
-*/
+ * @tc.name  : Test Flush API via illegal state, RENDERER_PREPARED: Without Start.
+ * @tc.number: Audio_Renderer_Flush_004
+ * @tc.desc  : Test Flush interface. Returns false, if the renderer state is not RENDERER_RUNNING or RENDERER_PAUSED.
+ */
 HWTEST(AudioRendererUnitTest, Audio_Renderer_Flush_004, TestSize.Level1)
 {
     AudioRendererOptions rendererOptions;
@@ -2498,10 +2498,10 @@ HWTEST(AudioRendererUnitTest, Audio_Renderer_Flush_004, TestSize.Level1)
 }
 
 /**
-* @tc.name  : Test Flush API: call Stop before Flush.
-* @tc.number: Audio_Renderer_Flush_005
-* @tc.desc  : Test Flush interface. Returns true, if the renderer state is RENDERER_STOPPED.
-*/
+ * @tc.name  : Test Flush API: call Stop before Flush.
+ * @tc.number: Audio_Renderer_Flush_005
+ * @tc.desc  : Test Flush interface. Returns true, if the renderer state is RENDERER_STOPPED.
+ */
 HWTEST(AudioRendererUnitTest, Audio_Renderer_Flush_005, TestSize.Level1)
 {
     AudioRendererOptions rendererOptions;
@@ -2523,10 +2523,10 @@ HWTEST(AudioRendererUnitTest, Audio_Renderer_Flush_005, TestSize.Level1)
 }
 
 /**
-* @tc.name  : Test Flush API via illegal state, RENDERER_RELEASED: call Release before Flush.
-* @tc.number: Audio_Renderer_Flush_006
-* @tc.desc  : Test Flush interface. Returns false, if the renderer state is not RENDERER_RUNNING.
-*/
+ * @tc.name  : Test Flush API via illegal state, RENDERER_RELEASED: call Release before Flush.
+ * @tc.number: Audio_Renderer_Flush_006
+ * @tc.desc  : Test Flush interface. Returns false, if the renderer state is not RENDERER_RUNNING.
+ */
 HWTEST(AudioRendererUnitTest, Audio_Renderer_Flush_006, TestSize.Level1)
 {
     AudioRendererOptions rendererOptions;
@@ -2546,10 +2546,10 @@ HWTEST(AudioRendererUnitTest, Audio_Renderer_Flush_006, TestSize.Level1)
 }
 
 /**
-* @tc.name  : Test Flush API stability.
-* @tc.number: Audio_Renderer_Flush_Stability_001
-* @tc.desc  : Test Flush interface stability.
-*/
+ * @tc.name  : Test Flush API stability.
+ * @tc.number: Audio_Renderer_Flush_Stability_001
+ * @tc.desc  : Test Flush interface stability.
+ */
 HWTEST(AudioRendererUnitTest, Audio_Renderer_Flush_Stability_001, TestSize.Level1)
 {
     AudioRendererOptions rendererOptions;
@@ -2578,10 +2578,10 @@ HWTEST(AudioRendererUnitTest, Audio_Renderer_Flush_Stability_001, TestSize.Level
 }
 
 /**
-* @tc.name  : Test Pause API.
-* @tc.number: Audio_Renderer_Pause_001
-* @tc.desc  : Test Pause interface. Returns true, if the pause is successful.
-*/
+ * @tc.name  : Test Pause API.
+ * @tc.number: Audio_Renderer_Pause_001
+ * @tc.desc  : Test Pause interface. Returns true, if the pause is successful.
+ */
 HWTEST(AudioRendererUnitTest, Audio_Renderer_Pause_001, TestSize.Level1)
 {
     int32_t ret = -1;
@@ -2620,10 +2620,10 @@ HWTEST(AudioRendererUnitTest, Audio_Renderer_Pause_001, TestSize.Level1)
 }
 
 /**
-* @tc.name  : Test Pause API via illegal state, RENDERER_NEW: call Pause without Initializing the renderer.
-* @tc.number: Audio_Renderer_Pause_002
-* @tc.desc  : Test Pause interface. Returns false, if the renderer state is not RENDERER_RUNNING.
-*/
+ * @tc.name  : Test Pause API via illegal state, RENDERER_NEW: call Pause without Initializing the renderer.
+ * @tc.number: Audio_Renderer_Pause_002
+ * @tc.desc  : Test Pause interface. Returns false, if the renderer state is not RENDERER_RUNNING.
+ */
 HWTEST(AudioRendererUnitTest, Audio_Renderer_Pause_002, TestSize.Level1)
 {
     unique_ptr<AudioRenderer> audioRenderer = AudioRenderer::Create(STREAM_MUSIC);
@@ -2634,10 +2634,10 @@ HWTEST(AudioRendererUnitTest, Audio_Renderer_Pause_002, TestSize.Level1)
 }
 
 /**
-* @tc.name  : Test Pause API via illegal state, RENDERER_PREPARED: call Pause without Start.
-* @tc.number: Audio_Renderer_Pause_003
-* @tc.desc  : Test Pause interface. Returns false, if the renderer state is not RENDERER_RUNNING.
-*/
+ * @tc.name  : Test Pause API via illegal state, RENDERER_PREPARED: call Pause without Start.
+ * @tc.number: Audio_Renderer_Pause_003
+ * @tc.desc  : Test Pause interface. Returns false, if the renderer state is not RENDERER_RUNNING.
+ */
 HWTEST(AudioRendererUnitTest, Audio_Renderer_Pause_003, TestSize.Level1)
 {
     AudioRendererOptions rendererOptions;
@@ -2653,10 +2653,10 @@ HWTEST(AudioRendererUnitTest, Audio_Renderer_Pause_003, TestSize.Level1)
 }
 
 /**
-* @tc.name  : Test Pause API via illegal state, RENDERER_RELEASED: call Pause after Release.
-* @tc.number: Audio_Renderer_Pause_004
-* @tc.desc  : Test Pause interface. Returns false, if the renderer state is not RENDERER_RUNNING.
-*/
+ * @tc.name  : Test Pause API via illegal state, RENDERER_RELEASED: call Pause after Release.
+ * @tc.number: Audio_Renderer_Pause_004
+ * @tc.desc  : Test Pause interface. Returns false, if the renderer state is not RENDERER_RUNNING.
+ */
 HWTEST(AudioRendererUnitTest, Audio_Renderer_Pause_004, TestSize.Level1)
 {
     AudioRendererOptions rendererOptions;
@@ -2676,10 +2676,10 @@ HWTEST(AudioRendererUnitTest, Audio_Renderer_Pause_004, TestSize.Level1)
 }
 
 /**
-* @tc.name  : Test Pause and resume
-* @tc.number: Audio_Renderer_Pause_005
-* @tc.desc  : Test Pause interface. Returns true , if the pause is successful.
-*/
+ * @tc.name  : Test Pause and resume
+ * @tc.number: Audio_Renderer_Pause_005
+ * @tc.desc  : Test Pause interface. Returns true , if the pause is successful.
+ */
 HWTEST(AudioRendererUnitTest, Audio_Renderer_Pause_005, TestSize.Level1)
 {
     AudioRendererOptions rendererOptions;
@@ -2702,10 +2702,10 @@ HWTEST(AudioRendererUnitTest, Audio_Renderer_Pause_005, TestSize.Level1)
 }
 
 /**
-* @tc.name  : Test Pause API via illegal state, RENDERER_STOPPED: call Pause after Stop.
-* @tc.number: Audio_Renderer_Pause_006
-* @tc.desc  : Test Pause interface. Returns false, if the renderer state is not RENDERER_RUNNING.
-*/
+ * @tc.name  : Test Pause API via illegal state, RENDERER_STOPPED: call Pause after Stop.
+ * @tc.number: Audio_Renderer_Pause_006
+ * @tc.desc  : Test Pause interface. Returns false, if the renderer state is not RENDERER_RUNNING.
+ */
 HWTEST(AudioRendererUnitTest, Audio_Renderer_Pause_006, TestSize.Level1)
 {
     AudioRendererOptions rendererOptions;
@@ -2726,10 +2726,10 @@ HWTEST(AudioRendererUnitTest, Audio_Renderer_Pause_006, TestSize.Level1)
 }
 
 /**
-* @tc.name  : Test Pause and resume
-* @tc.number: Audio_Renderer_Pause_Stability_001
-* @tc.desc  : Test Pause interface for stability.
-*/
+ * @tc.name  : Test Pause and resume
+ * @tc.number: Audio_Renderer_Pause_Stability_001
+ * @tc.desc  : Test Pause interface for stability.
+ */
 HWTEST(AudioRendererUnitTest, Audio_Renderer_Pause_Stability_001, TestSize.Level1)
 {
     int32_t ret = -1;
@@ -2787,10 +2787,10 @@ HWTEST(AudioRendererUnitTest, Audio_Renderer_Pause_Stability_001, TestSize.Level
 }
 
 /**
-* @tc.name  : Test Stop API.
-* @tc.number: Audio_Renderer_Stop_001
-* @tc.desc  : Test Stop interface. Returns true, if the stop is successful.
-*/
+ * @tc.name  : Test Stop API.
+ * @tc.number: Audio_Renderer_Stop_001
+ * @tc.desc  : Test Stop interface. Returns true, if the stop is successful.
+ */
 HWTEST(AudioRendererUnitTest, Audio_Renderer_Stop_001, TestSize.Level1)
 {
     int32_t ret = -1;
@@ -2829,10 +2829,10 @@ HWTEST(AudioRendererUnitTest, Audio_Renderer_Stop_001, TestSize.Level1)
 }
 
 /**
-* @tc.name  : Test Stop API via illegal state, RENDERER_NEW: call Stop without Initializing the renderer.
-* @tc.number: Audio_Renderer_Stop_002
-* @tc.desc  : Test Stop interface. Returns false, if the renderer state is not RENDERER_RUNNING.
-*/
+ * @tc.name  : Test Stop API via illegal state, RENDERER_NEW: call Stop without Initializing the renderer.
+ * @tc.number: Audio_Renderer_Stop_002
+ * @tc.desc  : Test Stop interface. Returns false, if the renderer state is not RENDERER_RUNNING.
+ */
 HWTEST(AudioRendererUnitTest, Audio_Renderer_Stop_002, TestSize.Level1)
 {
     unique_ptr<AudioRenderer> audioRenderer = AudioRenderer::Create(STREAM_MUSIC);
@@ -2843,10 +2843,10 @@ HWTEST(AudioRendererUnitTest, Audio_Renderer_Stop_002, TestSize.Level1)
 }
 
 /**
-* @tc.name  : Test Stop API via illegal state, RENDERER_PREPARED: call Stop without Start.
-* @tc.number: Audio_Renderer_Stop_003
-* @tc.desc  : Test Stop interface. Returns false, if the renderer state is not RENDERER_RUNNING.
-*/
+ * @tc.name  : Test Stop API via illegal state, RENDERER_PREPARED: call Stop without Start.
+ * @tc.number: Audio_Renderer_Stop_003
+ * @tc.desc  : Test Stop interface. Returns false, if the renderer state is not RENDERER_RUNNING.
+ */
 HWTEST(AudioRendererUnitTest, Audio_Renderer_Stop_003, TestSize.Level1)
 {
     AudioRendererOptions rendererOptions;
@@ -2862,10 +2862,10 @@ HWTEST(AudioRendererUnitTest, Audio_Renderer_Stop_003, TestSize.Level1)
 }
 
 /**
-* @tc.name  : Test Stop API via illegal state, RENDERER_RELEASED: call Stop after Release.
-* @tc.number: Audio_Renderer_Stop_004
-* @tc.desc  : Test Stop interface. Returns false, if the renderer state is not RENDERER_RUNNING.
-*/
+ * @tc.name  : Test Stop API via illegal state, RENDERER_RELEASED: call Stop after Release.
+ * @tc.number: Audio_Renderer_Stop_004
+ * @tc.desc  : Test Stop interface. Returns false, if the renderer state is not RENDERER_RUNNING.
+ */
 HWTEST(AudioRendererUnitTest, Audio_Renderer_Stop_004, TestSize.Level1)
 {
     AudioRendererOptions rendererOptions;
@@ -2885,10 +2885,10 @@ HWTEST(AudioRendererUnitTest, Audio_Renderer_Stop_004, TestSize.Level1)
 }
 
 /**
-* @tc.name  : Test Stop API via legal state. call Start, Stop, Start and Stop again
-* @tc.number: Audio_Renderer_Stop_005
-* @tc.desc  : Test Stop interface. Returns true , if the stop is successful.
-*/
+ * @tc.name  : Test Stop API via legal state. call Start, Stop, Start and Stop again
+ * @tc.number: Audio_Renderer_Stop_005
+ * @tc.desc  : Test Stop interface. Returns true , if the stop is successful.
+ */
 HWTEST(AudioRendererUnitTest, Audio_Renderer_Stop_005, TestSize.Level1)
 {
     AudioRendererOptions rendererOptions;
@@ -2912,10 +2912,10 @@ HWTEST(AudioRendererUnitTest, Audio_Renderer_Stop_005, TestSize.Level1)
 }
 
 /**
-* @tc.name  : Test Stop API via legal state, RENDERER_PAUSED: call Stop after Pause.
-* @tc.number: Audio_Renderer_Stop_006
-* @tc.desc  : Test Stop interface. Returns false, if the renderer state is not RENDERER_RUNNING or RENDERER_PAUSED.
-*/
+ * @tc.name  : Test Stop API via legal state, RENDERER_PAUSED: call Stop after Pause.
+ * @tc.number: Audio_Renderer_Stop_006
+ * @tc.desc  : Test Stop interface. Returns false, if the renderer state is not RENDERER_RUNNING or RENDERER_PAUSED.
+ */
 HWTEST(AudioRendererUnitTest, Audio_Renderer_Stop_006, TestSize.Level1)
 {
     AudioRendererOptions rendererOptions;
@@ -2936,10 +2936,10 @@ HWTEST(AudioRendererUnitTest, Audio_Renderer_Stop_006, TestSize.Level1)
 }
 
 /**
-* @tc.name  : Test Release API.
-* @tc.number: Audio_Renderer_Release_001
-* @tc.desc  : Test Release interface. Returns true, if the release is successful.
-*/
+ * @tc.name  : Test Release API.
+ * @tc.number: Audio_Renderer_Release_001
+ * @tc.desc  : Test Release interface. Returns true, if the release is successful.
+ */
 HWTEST(AudioRendererUnitTest, Audio_Renderer_Release_001, TestSize.Level1)
 {
     int32_t ret = -1;
@@ -2977,10 +2977,10 @@ HWTEST(AudioRendererUnitTest, Audio_Renderer_Release_001, TestSize.Level1)
 }
 
 /**
-* @tc.name  : Test Release API via illegal state, RENDERER_NEW: Call Release without initializing the renderer.
-* @tc.number: Audio_Renderer_Release_002
-* @tc.desc  : Test Release interface, Returns false, if the state is RENDERER_NEW.
-*/
+ * @tc.name  : Test Release API via illegal state, RENDERER_NEW: Call Release without initializing the renderer.
+ * @tc.number: Audio_Renderer_Release_002
+ * @tc.desc  : Test Release interface, Returns false, if the state is RENDERER_NEW.
+ */
 HWTEST(AudioRendererUnitTest, Audio_Renderer_Release_002, TestSize.Level1)
 {
     unique_ptr<AudioRenderer> audioRenderer = AudioRenderer::Create(STREAM_MUSIC);
@@ -2991,10 +2991,10 @@ HWTEST(AudioRendererUnitTest, Audio_Renderer_Release_002, TestSize.Level1)
 }
 
 /**
-* @tc.name  : Test Release API via illegal state, RENDERER_RELEASED: call Release repeatedly.
-* @tc.number: Audio_Renderer_Release_003
-* @tc.desc  : Test Release interface. Returns false, if the state is already RENDERER_RELEASED.
-*/
+ * @tc.name  : Test Release API via illegal state, RENDERER_RELEASED: call Release repeatedly.
+ * @tc.number: Audio_Renderer_Release_003
+ * @tc.desc  : Test Release interface. Returns false, if the state is already RENDERER_RELEASED.
+ */
 HWTEST(AudioRendererUnitTest, Audio_Renderer_Release_003, TestSize.Level1)
 {
     AudioRendererOptions rendererOptions;
@@ -3011,10 +3011,10 @@ HWTEST(AudioRendererUnitTest, Audio_Renderer_Release_003, TestSize.Level1)
 }
 
 /**
-* @tc.name  : Test Release API via legal state, RENDERER_RUNNING: call Release after Start
-* @tc.number: Audio_Renderer_Release_004
-* @tc.desc  : Test Release interface. Returns true, if the release is successful.
-*/
+ * @tc.name  : Test Release API via legal state, RENDERER_RUNNING: call Release after Start
+ * @tc.number: Audio_Renderer_Release_004
+ * @tc.desc  : Test Release interface. Returns true, if the release is successful.
+ */
 HWTEST(AudioRendererUnitTest, Audio_Renderer_Release_004, TestSize.Level1)
 {
     AudioRendererOptions rendererOptions;
@@ -3031,10 +3031,10 @@ HWTEST(AudioRendererUnitTest, Audio_Renderer_Release_004, TestSize.Level1)
 }
 
 /**
-* @tc.name  : Test Release API via legal state, RENDERER_STOPPED: call release after Start and Stop
-* @tc.number: Audio_Renderer_Release_005
-* @tc.desc  : Test Release interface. Returns true, if the release is successful.
-*/
+ * @tc.name  : Test Release API via legal state, RENDERER_STOPPED: call release after Start and Stop
+ * @tc.number: Audio_Renderer_Release_005
+ * @tc.desc  : Test Release interface. Returns true, if the release is successful.
+ */
 HWTEST(AudioRendererUnitTest, Audio_Renderer_Release_005, TestSize.Level1)
 {
     AudioRendererOptions rendererOptions;
@@ -3054,10 +3054,10 @@ HWTEST(AudioRendererUnitTest, Audio_Renderer_Release_005, TestSize.Level1)
 }
 
 /**
-* @tc.name  : Test Release API via legal state, RENDERER_PAUSED: call release after Start and Pause
-* @tc.number: Audio_Renderer_Release_006
-* @tc.desc  : Test Release interface. Returns true, if the release is successful.
-*/
+ * @tc.name  : Test Release API via legal state, RENDERER_PAUSED: call release after Start and Pause
+ * @tc.number: Audio_Renderer_Release_006
+ * @tc.desc  : Test Release interface. Returns true, if the release is successful.
+ */
 HWTEST(AudioRendererUnitTest, Audio_Renderer_Release_006, TestSize.Level1)
 {
     AudioRendererOptions rendererOptions;
@@ -3077,10 +3077,10 @@ HWTEST(AudioRendererUnitTest, Audio_Renderer_Release_006, TestSize.Level1)
 }
 
 /**
-* @tc.name  : Test GetStatus API.
-* @tc.number: Audio_Renderer_GetStatus_001
-* @tc.desc  : Test GetStatus interface. Returns correct state on success.
-*/
+ * @tc.name  : Test GetStatus API.
+ * @tc.number: Audio_Renderer_GetStatus_001
+ * @tc.desc  : Test GetStatus interface. Returns correct state on success.
+ */
 HWTEST(AudioRendererUnitTest, Audio_Renderer_GetStatus_001, TestSize.Level1)
 {
     RendererState state = RENDERER_INVALID;
@@ -3111,10 +3111,10 @@ HWTEST(AudioRendererUnitTest, Audio_Renderer_GetStatus_001, TestSize.Level1)
 }
 
 /**
-* @tc.name  : Test GetStatus API, call Start without Initializing the renderer
-* @tc.number: Audio_Renderer_GetStatus_002
-* @tc.desc  : Test GetStatus interface. Not changes to RENDERER_RUNNING, if the current state is RENDERER_NEW.
-*/
+ * @tc.name  : Test GetStatus API, call Start without Initializing the renderer
+ * @tc.number: Audio_Renderer_GetStatus_002
+ * @tc.desc  : Test GetStatus interface. Not changes to RENDERER_RUNNING, if the current state is RENDERER_NEW.
+ */
 HWTEST(AudioRendererUnitTest, Audio_Renderer_GetStatus_002, TestSize.Level1)
 {
     RendererState state = RENDERER_INVALID;
@@ -3130,10 +3130,10 @@ HWTEST(AudioRendererUnitTest, Audio_Renderer_GetStatus_002, TestSize.Level1)
 }
 
 /**
-* @tc.name  : Test GetStatus API, call Stop without Start
-* @tc.number: Audio_Renderer_GetStatus_003
-* @tc.desc  : Test GetStatus interface. Not changes to RENDERER_STOPPED, if the current state is RENDERER_PREPARED.
-*/
+ * @tc.name  : Test GetStatus API, call Stop without Start
+ * @tc.number: Audio_Renderer_GetStatus_003
+ * @tc.desc  : Test GetStatus interface. Not changes to RENDERER_STOPPED, if the current state is RENDERER_PREPARED.
+ */
 HWTEST(AudioRendererUnitTest, Audio_Renderer_GetStatus_003, TestSize.Level1)
 {
     RendererState state = RENDERER_INVALID;
@@ -3153,10 +3153,10 @@ HWTEST(AudioRendererUnitTest, Audio_Renderer_GetStatus_003, TestSize.Level1)
 }
 
 /**
-* @tc.name  : Test GetStatus API, call Start, Stop and then Start again
-* @tc.number: Audio_Renderer_GetStatus_004
-* @tc.desc  : Test GetStatus interface.  Returns correct state on success.
-*/
+ * @tc.name  : Test GetStatus API, call Start, Stop and then Start again
+ * @tc.number: Audio_Renderer_GetStatus_004
+ * @tc.desc  : Test GetStatus interface.  Returns correct state on success.
+ */
 HWTEST(AudioRendererUnitTest, Audio_Renderer_GetStatus_004, TestSize.Level1)
 {
     RendererState state = RENDERER_INVALID;
@@ -3186,10 +3186,10 @@ HWTEST(AudioRendererUnitTest, Audio_Renderer_GetStatus_004, TestSize.Level1)
 }
 
 /**
-* @tc.name  : Test GetStatus API, call Release without initializing
-* @tc.number: Audio_Renderer_GetStatus_005
-* @tc.desc  : Test GetStatus interface. Not changes to RENDERER_RELEASED, if the current state is RENDERER_NEW.
-*/
+ * @tc.name  : Test GetStatus API, call Release without initializing
+ * @tc.number: Audio_Renderer_GetStatus_005
+ * @tc.desc  : Test GetStatus interface. Not changes to RENDERER_RELEASED, if the current state is RENDERER_NEW.
+ */
 HWTEST(AudioRendererUnitTest, Audio_Renderer_GetStatus_005, TestSize.Level1)
 {
     RendererState state = RENDERER_INVALID;
@@ -3205,10 +3205,10 @@ HWTEST(AudioRendererUnitTest, Audio_Renderer_GetStatus_005, TestSize.Level1)
 }
 
 /**
-* @tc.name  : Test GetLatency API.
-* @tc.number: Audio_Renderer_GetLatency_001
-* @tc.desc  : Test GetLatency interface. Returns 0 {SUCCESS}, if the getting is successful.
-*/
+ * @tc.name  : Test GetLatency API.
+ * @tc.number: Audio_Renderer_GetLatency_001
+ * @tc.desc  : Test GetLatency interface. Returns 0 {SUCCESS}, if the getting is successful.
+ */
 HWTEST(AudioRendererUnitTest, Audio_Renderer_GetLatency_001, TestSize.Level1)
 {
     int32_t ret = -1;
@@ -3262,10 +3262,10 @@ HWTEST(AudioRendererUnitTest, Audio_Renderer_GetLatency_001, TestSize.Level1)
 }
 
 /**
-* @tc.name  : Test GetLatency API via illegal state, RENDERER_NEW: without initializing the renderer
-* @tc.number: Audio_Renderer_GetLatency_002
-* @tc.desc  : Test GetLatency interface. Returns error code, if the renderer state is RENDERER_NEW.
-*/
+ * @tc.name  : Test GetLatency API via illegal state, RENDERER_NEW: without initializing the renderer
+ * @tc.number: Audio_Renderer_GetLatency_002
+ * @tc.desc  : Test GetLatency interface. Returns error code, if the renderer state is RENDERER_NEW.
+ */
 HWTEST(AudioRendererUnitTest, Audio_Renderer_GetLatency_002, TestSize.Level1)
 {
     int32_t ret = -1;
@@ -3282,10 +3282,10 @@ HWTEST(AudioRendererUnitTest, Audio_Renderer_GetLatency_002, TestSize.Level1)
 }
 
 /**
-* @tc.name  : Test GetLatency API via legal state, RENDERER_PREPARED
-* @tc.number: Audio_Renderer_GetLatency_003
-* @tc.desc  : Test GetLatency interface. Returns 0 {SUCCESS}, if the getting is successful.
-*/
+ * @tc.name  : Test GetLatency API via legal state, RENDERER_PREPARED
+ * @tc.number: Audio_Renderer_GetLatency_003
+ * @tc.desc  : Test GetLatency interface. Returns 0 {SUCCESS}, if the getting is successful.
+ */
 HWTEST(AudioRendererUnitTest, Audio_Renderer_GetLatency_003, TestSize.Level1)
 {
     int32_t ret = -1;
@@ -3303,10 +3303,10 @@ HWTEST(AudioRendererUnitTest, Audio_Renderer_GetLatency_003, TestSize.Level1)
 }
 
 /**
-* @tc.name  : Test GetLatency API via legal state, RENDERER_STOPPED: After Stop
-* @tc.number: Audio_Renderer_GetLatency_004
-* @tc.desc  : Test GetLatency interface. Returns 0 {SUCCESS}, if the getting is successful.
-*/
+ * @tc.name  : Test GetLatency API via legal state, RENDERER_STOPPED: After Stop
+ * @tc.number: Audio_Renderer_GetLatency_004
+ * @tc.desc  : Test GetLatency interface. Returns 0 {SUCCESS}, if the getting is successful.
+ */
 HWTEST(AudioRendererUnitTest, Audio_Renderer_GetLatency_004, TestSize.Level1)
 {
     int32_t ret = -1;
@@ -3330,10 +3330,10 @@ HWTEST(AudioRendererUnitTest, Audio_Renderer_GetLatency_004, TestSize.Level1)
 }
 
 /**
-* @tc.name  : Test GetLatency API via illegal state, RENDERER_RELEASED: After Release
-* @tc.number: Audio_Renderer_GetLatency_005
-* @tc.desc  : Test GetLatency interface. Returns error code, if the renderer state is RENDERER_RELEASED.
-*/
+ * @tc.name  : Test GetLatency API via illegal state, RENDERER_RELEASED: After Release
+ * @tc.number: Audio_Renderer_GetLatency_005
+ * @tc.desc  : Test GetLatency interface. Returns error code, if the renderer state is RENDERER_RELEASED.
+ */
 HWTEST(AudioRendererUnitTest, Audio_Renderer_GetLatency_005, TestSize.Level1)
 {
     int32_t ret = -1;
@@ -3355,10 +3355,10 @@ HWTEST(AudioRendererUnitTest, Audio_Renderer_GetLatency_005, TestSize.Level1)
 }
 
 /**
-* @tc.name  : Test SetRendererCallback with null pointer.
-* @tc.number: Audio_Renderer_SetRendererCallback_001
-* @tc.desc  : Test SetRendererCallback interface. Returns error code, if null pointer is set.
-*/
+ * @tc.name  : Test SetRendererCallback with null pointer.
+ * @tc.number: Audio_Renderer_SetRendererCallback_001
+ * @tc.desc  : Test SetRendererCallback interface. Returns error code, if null pointer is set.
+ */
 HWTEST(AudioRendererUnitTest, Audio_Renderer_SetRendererCallback_001, TestSize.Level1)
 {
     int32_t ret = -1;
@@ -3381,10 +3381,10 @@ HWTEST(AudioRendererUnitTest, Audio_Renderer_SetRendererCallback_001, TestSize.L
 }
 
 /**
-* @tc.name  : Test SetRendererCallback with valid callback pointer.
-* @tc.number: Audio_Renderer_SetRendererCallback_002
-* @tc.desc  : Test SetRendererCallback interface. Returns success, if valid callback is set.
-*/
+ * @tc.name  : Test SetRendererCallback with valid callback pointer.
+ * @tc.number: Audio_Renderer_SetRendererCallback_002
+ * @tc.desc  : Test SetRendererCallback interface. Returns success, if valid callback is set.
+ */
 HWTEST(AudioRendererUnitTest, Audio_Renderer_SetRendererCallback_002, TestSize.Level1)
 {
     int32_t ret = -1;
@@ -3407,10 +3407,10 @@ HWTEST(AudioRendererUnitTest, Audio_Renderer_SetRendererCallback_002, TestSize.L
 }
 
 /**
-* @tc.name  : Test SetRendererCallback via illegal state, RENDERER_RELEASED: After RELEASED
-* @tc.number: Audio_Renderer_SetRendererCallback_003
-* @tc.desc  : Test SetRendererCallback interface. Returns error, if callback is set in released state.
-*/
+ * @tc.name  : Test SetRendererCallback via illegal state, RENDERER_RELEASED: After RELEASED
+ * @tc.number: Audio_Renderer_SetRendererCallback_003
+ * @tc.desc  : Test SetRendererCallback interface. Returns error, if callback is set in released state.
+ */
 HWTEST(AudioRendererUnitTest, Audio_Renderer_SetRendererCallback_003, TestSize.Level1)
 {
     int32_t ret = -1;
@@ -3440,10 +3440,10 @@ HWTEST(AudioRendererUnitTest, Audio_Renderer_SetRendererCallback_003, TestSize.L
 }
 
 /**
-* @tc.name  : Test SetRendererCallback via legal state, RENDERER_PREPARED: After PREPARED
-* @tc.number: Audio_Renderer_SetRendererCallback_004
-* @tc.desc  : Test SetRendererCallback interface. Returns success, if callback is set in proper state.
-*/
+ * @tc.name  : Test SetRendererCallback via legal state, RENDERER_PREPARED: After PREPARED
+ * @tc.number: Audio_Renderer_SetRendererCallback_004
+ * @tc.desc  : Test SetRendererCallback interface. Returns success, if callback is set in proper state.
+ */
 HWTEST(AudioRendererUnitTest, Audio_Renderer_SetRendererCallback_004, TestSize.Level1)
 {
     int32_t ret = -1;
@@ -3469,10 +3469,10 @@ HWTEST(AudioRendererUnitTest, Audio_Renderer_SetRendererCallback_004, TestSize.L
 }
 
 /**
-* @tc.name  : Test SetRenderMode via legal input, RENDER_MODE_CALLBACK
-* @tc.number: Audio_Renderer_SetRenderMode_001
-* @tc.desc  : Test SetRenderMode interface. Returns SUCCESS, if the render mode is successfully set.
-*/
+ * @tc.name  : Test SetRenderMode via legal input, RENDER_MODE_CALLBACK
+ * @tc.number: Audio_Renderer_SetRenderMode_001
+ * @tc.desc  : Test SetRenderMode interface. Returns SUCCESS, if the render mode is successfully set.
+ */
 HWTEST(AudioRendererUnitTest, Audio_Renderer_SetRenderMode_001, TestSize.Level1)
 {
     int32_t ret = -1;
@@ -3489,10 +3489,10 @@ HWTEST(AudioRendererUnitTest, Audio_Renderer_SetRenderMode_001, TestSize.Level1)
 }
 
 /**
-* @tc.name  : Test SetRenderMode via legal input, RENDER_MODE_NORMAL
-* @tc.number: Audio_Renderer_SetRenderMode_002
-* @tc.desc  : Test SetRenderMode interface. Returns SUCCESS, if the render mode is successfully set.
-*/
+ * @tc.name  : Test SetRenderMode via legal input, RENDER_MODE_NORMAL
+ * @tc.number: Audio_Renderer_SetRenderMode_002
+ * @tc.desc  : Test SetRenderMode interface. Returns SUCCESS, if the render mode is successfully set.
+ */
 HWTEST(AudioRendererUnitTest, Audio_Renderer_SetRenderMode_002, TestSize.Level1)
 {
     int32_t ret = -1;
@@ -3509,10 +3509,10 @@ HWTEST(AudioRendererUnitTest, Audio_Renderer_SetRenderMode_002, TestSize.Level1)
 }
 
 /**
-* @tc.name  : Test GetRenderMode with, RENDER_MODE_CALLBACK
-* @tc.number: Audio_Renderer_GetRenderMode_001
-* @tc.desc  : Test GetRenderMode interface. Returns the current render mode.
-*/
+ * @tc.name  : Test GetRenderMode with, RENDER_MODE_CALLBACK
+ * @tc.number: Audio_Renderer_GetRenderMode_001
+ * @tc.desc  : Test GetRenderMode interface. Returns the current render mode.
+ */
 HWTEST(AudioRendererUnitTest, Audio_Renderer_GetRenderMode_001, TestSize.Level1)
 {
     int32_t ret = -1;
@@ -3531,10 +3531,10 @@ HWTEST(AudioRendererUnitTest, Audio_Renderer_GetRenderMode_001, TestSize.Level1)
 }
 
 /**
-* @tc.name  : Test GetRenderMode with, RENDER_MODE_NORMAL
-* @tc.number: Audio_Renderer_GetRenderMode_002
-* @tc.desc  : Test GetRenderMode interface. Returns the current render mode.
-*/
+ * @tc.name  : Test GetRenderMode with, RENDER_MODE_NORMAL
+ * @tc.number: Audio_Renderer_GetRenderMode_002
+ * @tc.desc  : Test GetRenderMode interface. Returns the current render mode.
+ */
 HWTEST(AudioRendererUnitTest, Audio_Renderer_GetRenderMode_002, TestSize.Level1)
 {
     int32_t ret = -1;
@@ -3553,10 +3553,10 @@ HWTEST(AudioRendererUnitTest, Audio_Renderer_GetRenderMode_002, TestSize.Level1)
 }
 
 /**
-* @tc.name  : Test GetRenderMode with, default renderMode
-* @tc.number: Audio_Renderer_GetRenderMode_003
-* @tc.desc  : Test GetRenderMode interface. Returns the default render mode RENDER_MODE_NORMAL.
-*/
+ * @tc.name  : Test GetRenderMode with, default renderMode
+ * @tc.number: Audio_Renderer_GetRenderMode_003
+ * @tc.desc  : Test GetRenderMode interface. Returns the default render mode RENDER_MODE_NORMAL.
+ */
 HWTEST(AudioRendererUnitTest, Audio_Renderer_GetRenderMode_003, TestSize.Level1)
 {
     AudioRendererOptions rendererOptions;
@@ -3572,10 +3572,10 @@ HWTEST(AudioRendererUnitTest, Audio_Renderer_GetRenderMode_003, TestSize.Level1)
 }
 
 /**
-* @tc.name  : Test SetRendererWriteCallback via legal render mode, RENDER_MODE_CALLBACK
-* @tc.number: Audio_Renderer_SetRendererWriteCallback_001
-* @tc.desc  : Test SetRendererWriteCallback interface. Returns SUCCESS, if the callback is successfully set.
-*/
+ * @tc.name  : Test SetRendererWriteCallback via legal render mode, RENDER_MODE_CALLBACK
+ * @tc.number: Audio_Renderer_SetRendererWriteCallback_001
+ * @tc.desc  : Test SetRendererWriteCallback interface. Returns SUCCESS, if the callback is successfully set.
+ */
 HWTEST(AudioRendererUnitTest, Audio_Renderer_SetRendererWriteCallback_001, TestSize.Level1)
 {
     int32_t ret = -1;
@@ -3599,10 +3599,10 @@ HWTEST(AudioRendererUnitTest, Audio_Renderer_SetRendererWriteCallback_001, TestS
 }
 
 /**
-* @tc.name  : Test SetRendererWriteCallback via illegal render mode, RENDER_MODE_NORMAL
-* @tc.number: Audio_Renderer_SetRendererWriteCallback_002
-* @tc.desc  : Test SetRendererWriteCallback interface. Returns error code, if the render mode is not callback.
-*/
+ * @tc.name  : Test SetRendererWriteCallback via illegal render mode, RENDER_MODE_NORMAL
+ * @tc.number: Audio_Renderer_SetRendererWriteCallback_002
+ * @tc.desc  : Test SetRendererWriteCallback interface. Returns error code, if the render mode is not callback.
+ */
 HWTEST(AudioRendererUnitTest, Audio_Renderer_SetRendererWriteCallback_002, TestSize.Level1)
 {
     int32_t ret = -1;
@@ -3626,10 +3626,10 @@ HWTEST(AudioRendererUnitTest, Audio_Renderer_SetRendererWriteCallback_002, TestS
 }
 
 /**
-* @tc.name  : Test SetRendererWriteCallback via illegal render mode, default render mode RENDER_MODE_NORMAL
-* @tc.number: Audio_Renderer_SetRendererWriteCallback_003
-* @tc.desc  : Test SetRendererWriteCallback interface. Returns error code, if the render mode is not callback.
-*/
+ * @tc.name  : Test SetRendererWriteCallback via illegal render mode, default render mode RENDER_MODE_NORMAL
+ * @tc.number: Audio_Renderer_SetRendererWriteCallback_003
+ * @tc.desc  : Test SetRendererWriteCallback interface. Returns error code, if the render mode is not callback.
+ */
 HWTEST(AudioRendererUnitTest, Audio_Renderer_SetRendererWriteCallback_003, TestSize.Level1)
 {
     int32_t ret = -1;
@@ -3648,10 +3648,10 @@ HWTEST(AudioRendererUnitTest, Audio_Renderer_SetRendererWriteCallback_003, TestS
 }
 
 /**
-* @tc.name  : Test SetRendererWriteCallback via illegal input, nullptr
-* @tc.number: Audio_Renderer_SetRendererWriteCallback_004
-* @tc.desc  : Test SetRendererWriteCallback interface. Returns error code, if the callback reference is nullptr.
-*/
+ * @tc.name  : Test SetRendererWriteCallback via illegal input, nullptr
+ * @tc.number: Audio_Renderer_SetRendererWriteCallback_004
+ * @tc.desc  : Test SetRendererWriteCallback interface. Returns error code, if the callback reference is nullptr.
+ */
 HWTEST(AudioRendererUnitTest, Audio_Renderer_SetRendererWriteCallback_004, TestSize.Level1)
 {
     int32_t ret = -1;
@@ -3673,10 +3673,10 @@ HWTEST(AudioRendererUnitTest, Audio_Renderer_SetRendererWriteCallback_004, TestS
 }
 
 /**
-* @tc.name  : Test GetBufferDesc via legal render mode, RENDER_MODE_CALLBACK
-* @tc.number: Audio_Renderer_GetBufferDesc_001
-* @tc.desc  : Test GetBufferDesc interface. Returns SUCCESS, if BufferDesc obtained successfully.
-*/
+ * @tc.name  : Test GetBufferDesc via legal render mode, RENDER_MODE_CALLBACK
+ * @tc.number: Audio_Renderer_GetBufferDesc_001
+ * @tc.desc  : Test GetBufferDesc interface. Returns SUCCESS, if BufferDesc obtained successfully.
+ */
 HWTEST(AudioRendererUnitTest, Audio_Renderer_GetBufferDesc_001, TestSize.Level1)
 {
     int32_t ret = -1;
@@ -3707,10 +3707,10 @@ HWTEST(AudioRendererUnitTest, Audio_Renderer_GetBufferDesc_001, TestSize.Level1)
 }
 
 /**
-* @tc.name  : Test GetBufferDesc via illegal render mode, RENDER_MODE_NORMAL
-* @tc.number: Audio_Renderer_GetBufferDesc_002
-* @tc.desc  : Test GetBufferDesc interface. Returns errorcode, if render mode is not callback.
-*/
+ * @tc.name  : Test GetBufferDesc via illegal render mode, RENDER_MODE_NORMAL
+ * @tc.number: Audio_Renderer_GetBufferDesc_002
+ * @tc.desc  : Test GetBufferDesc interface. Returns errorcode, if render mode is not callback.
+ */
 HWTEST(AudioRendererUnitTest, Audio_Renderer_GetBufferDesc_002, TestSize.Level1)
 {
     int32_t ret = -1;
@@ -3736,10 +3736,10 @@ HWTEST(AudioRendererUnitTest, Audio_Renderer_GetBufferDesc_002, TestSize.Level1)
 }
 
 /**
-* @tc.name  : Test Enqueue via legal render mode, RENDER_MODE_CALLBACK
-* @tc.number: Audio_Renderer_Enqueue_001
-* @tc.desc  : Test Enqueue interface. Returns SUCCESS , if the buff desc enqueued successfully.
-*/
+ * @tc.name  : Test Enqueue via legal render mode, RENDER_MODE_CALLBACK
+ * @tc.number: Audio_Renderer_Enqueue_001
+ * @tc.desc  : Test Enqueue interface. Returns SUCCESS , if the buff desc enqueued successfully.
+ */
 HWTEST(AudioRendererUnitTest, Audio_Renderer_Enqueue_001, TestSize.Level1)
 {
     int32_t ret = -1;
@@ -3777,10 +3777,10 @@ HWTEST(AudioRendererUnitTest, Audio_Renderer_Enqueue_001, TestSize.Level1)
 }
 
 /**
-* @tc.name  : Test Enqueue via illegal render mode, RENDER_MODE_NORMAL
-* @tc.number: Audio_Renderer_Enqueue_002
-* @tc.desc  : Test Enqueue interface. Returns error code, if the render mode is not callback.
-*/
+ * @tc.name  : Test Enqueue via illegal render mode, RENDER_MODE_NORMAL
+ * @tc.number: Audio_Renderer_Enqueue_002
+ * @tc.desc  : Test Enqueue interface. Returns error code, if the render mode is not callback.
+ */
 HWTEST(AudioRendererUnitTest, Audio_Renderer_Enqueue_002, TestSize.Level1)
 {
     int32_t ret = -1;
@@ -3812,10 +3812,10 @@ HWTEST(AudioRendererUnitTest, Audio_Renderer_Enqueue_002, TestSize.Level1)
 }
 
 /**
-* @tc.name  : Test Enqueue via illegal input, buffer nullptr
-* @tc.number: Audio_Renderer_Enqueue_003
-* @tc.desc  : Test Enqueue interface. Returns error code, if the buffer nullptr
-*/
+ * @tc.name  : Test Enqueue via illegal input, buffer nullptr
+ * @tc.number: Audio_Renderer_Enqueue_003
+ * @tc.desc  : Test Enqueue interface. Returns error code, if the buffer nullptr
+ */
 HWTEST(AudioRendererUnitTest, Audio_Renderer_Enqueue_003, TestSize.Level1)
 {
     int32_t ret = -1;
@@ -3850,10 +3850,10 @@ HWTEST(AudioRendererUnitTest, Audio_Renderer_Enqueue_003, TestSize.Level1)
 }
 
 /**
-* @tc.name  : Test Clear via legal render mode, RENDER_MODE_CALLBACK
-* @tc.number: Audio_Renderer_Clear_001
-* @tc.desc  : Test Clear interface. Returns SUCCESS , if the buff queue cleared successfully.
-*/
+ * @tc.name  : Test Clear via legal render mode, RENDER_MODE_CALLBACK
+ * @tc.number: Audio_Renderer_Clear_001
+ * @tc.desc  : Test Clear interface. Returns SUCCESS , if the buff queue cleared successfully.
+ */
 HWTEST(AudioRendererUnitTest, Audio_Renderer_Clear_001, TestSize.Level1)
 {
     int32_t ret = -1;
@@ -3894,10 +3894,10 @@ HWTEST(AudioRendererUnitTest, Audio_Renderer_Clear_001, TestSize.Level1)
 }
 
 /**
-* @tc.name  : Test Clear via illegal render mode, RENDER_MODE_NORMAL
-* @tc.number: Audio_Renderer_Clear_002
-* @tc.desc  : Test Clear interface. Returns error code, if the render mode is not callback.
-*/
+ * @tc.name  : Test Clear via illegal render mode, RENDER_MODE_NORMAL
+ * @tc.number: Audio_Renderer_Clear_002
+ * @tc.desc  : Test Clear interface. Returns error code, if the render mode is not callback.
+ */
 HWTEST(AudioRendererUnitTest, Audio_Renderer_Clear_002, TestSize.Level1)
 {
     int32_t ret = -1;
@@ -3932,10 +3932,10 @@ HWTEST(AudioRendererUnitTest, Audio_Renderer_Clear_002, TestSize.Level1)
 }
 
 /**
-* @tc.name  : Test GetRendererInfo API after calling create
-* @tc.number: Audio_Renderer_GetRendererInfo_001
-* @tc.desc  : Test GetRendererInfo interface. Check whether renderer info returns proper data
-*/
+ * @tc.name  : Test GetRendererInfo API after calling create
+ * @tc.number: Audio_Renderer_GetRendererInfo_001
+ * @tc.desc  : Test GetRendererInfo interface. Check whether renderer info returns proper data
+ */
 HWTEST(AudioRendererUnitTest, Audio_Renderer_GetRendererInfo_001, TestSize.Level1)
 {
     AudioRendererOptions rendererOptions;
@@ -3960,10 +3960,10 @@ HWTEST(AudioRendererUnitTest, Audio_Renderer_GetRendererInfo_001, TestSize.Level
 }
 
 /**
-* @tc.name  : Test GetRendererInfo API via legal state, RENDERER_RUNNING: GetRendererInfo after Start.
-* @tc.number: Audio_Renderer_GetRendererInfo_002
-* @tc.desc  : Test GetRendererInfo interface. Check whether renderer info returns proper data
-*/
+ * @tc.name  : Test GetRendererInfo API via legal state, RENDERER_RUNNING: GetRendererInfo after Start.
+ * @tc.number: Audio_Renderer_GetRendererInfo_002
+ * @tc.desc  : Test GetRendererInfo interface. Check whether renderer info returns proper data
+ */
 HWTEST(AudioRendererUnitTest, Audio_Renderer_GetRendererInfo_002, TestSize.Level1)
 {
     AudioRendererOptions rendererOptions;
@@ -3993,10 +3993,10 @@ HWTEST(AudioRendererUnitTest, Audio_Renderer_GetRendererInfo_002, TestSize.Level
 }
 
 /**
-* @tc.name  : Test GetRendererInfo API via legal state, RENDERER_RELEASED: Call GetRendererInfo after Release.
-* @tc.number: Audio_Renderer_GetRendererInfo_003
-* @tc.desc  : Test GetRendererInfo interface. Check whether renderer info returns proper data
-*/
+ * @tc.name  : Test GetRendererInfo API via legal state, RENDERER_RELEASED: Call GetRendererInfo after Release.
+ * @tc.number: Audio_Renderer_GetRendererInfo_003
+ * @tc.desc  : Test GetRendererInfo interface. Check whether renderer info returns proper data
+ */
 HWTEST(AudioRendererUnitTest, Audio_Renderer_GetRendererInfo_003, TestSize.Level1)
 {
     AudioRendererOptions rendererOptions;
@@ -4023,10 +4023,10 @@ HWTEST(AudioRendererUnitTest, Audio_Renderer_GetRendererInfo_003, TestSize.Level
 }
 
 /**
-* @tc.name  : Test GetRendererInfo API via legal state, RENDERER_STOPPED: Call GetRendererInfo after Stop.
-* @tc.number: Audio_Renderer_GetRendererInfo_004
-* @tc.desc  : Test GetRendererInfo interface. Check whether renderer info returns proper data
-*/
+ * @tc.name  : Test GetRendererInfo API via legal state, RENDERER_STOPPED: Call GetRendererInfo after Stop.
+ * @tc.number: Audio_Renderer_GetRendererInfo_004
+ * @tc.desc  : Test GetRendererInfo interface. Check whether renderer info returns proper data
+ */
 HWTEST(AudioRendererUnitTest, Audio_Renderer_GetRendererInfo_004, TestSize.Level1)
 {
     AudioRendererOptions rendererOptions;
@@ -4058,10 +4058,10 @@ HWTEST(AudioRendererUnitTest, Audio_Renderer_GetRendererInfo_004, TestSize.Level
 }
 
 /**
-* @tc.name  : Test GetRendererInfo API Stability
-* @tc.number: Audio_Renderer_GetRendererInfo_Stability_001
-* @tc.desc  : Test GetRendererInfo interface Stability
-*/
+ * @tc.name  : Test GetRendererInfo API Stability
+ * @tc.number: Audio_Renderer_GetRendererInfo_Stability_001
+ * @tc.desc  : Test GetRendererInfo interface Stability
+ */
 HWTEST(AudioRendererUnitTest, Audio_Renderer_GetRendererInfo_Stability_001, TestSize.Level1)
 {
     AudioRendererOptions rendererOptions;
@@ -4089,10 +4089,10 @@ HWTEST(AudioRendererUnitTest, Audio_Renderer_GetRendererInfo_Stability_001, Test
 }
 
 /**
-* @tc.name  : Test GetStreamInfo API after calling create
-* @tc.number: Audio_Renderer_GetStreamInfo_001
-* @tc.desc  : Test GetStreamInfo interface. Check whether stream related data is returned correctly
-*/
+ * @tc.name  : Test GetStreamInfo API after calling create
+ * @tc.number: Audio_Renderer_GetStreamInfo_001
+ * @tc.desc  : Test GetStreamInfo interface. Check whether stream related data is returned correctly
+ */
 HWTEST(AudioRendererUnitTest, Audio_Renderer_GetStreamInfo_001, TestSize.Level1)
 {
     AudioRendererOptions rendererOptions;
@@ -4118,10 +4118,10 @@ HWTEST(AudioRendererUnitTest, Audio_Renderer_GetStreamInfo_001, TestSize.Level1)
 }
 
 /**
-* @tc.name  : Test GetStreamInfo via legal state,  RENDERER_RUNNING: GetStreamInfo after Start.
-* @tc.number: Audio_Renderer_GetStreamInfo_002
-* @tc.desc  : Test GetStreamInfo interface. Check whether stream related data is returned correctly
-*/
+ * @tc.name  : Test GetStreamInfo via legal state,  RENDERER_RUNNING: GetStreamInfo after Start.
+ * @tc.number: Audio_Renderer_GetStreamInfo_002
+ * @tc.desc  : Test GetStreamInfo interface. Check whether stream related data is returned correctly
+ */
 HWTEST(AudioRendererUnitTest, Audio_Renderer_GetStreamInfo_002, TestSize.Level1)
 {
     int32_t ret = -1;
@@ -4155,10 +4155,10 @@ HWTEST(AudioRendererUnitTest, Audio_Renderer_GetStreamInfo_002, TestSize.Level1)
 }
 
 /**
-* @tc.name  : Test GetStreamInfo via illegal state, RENDERER_RELEASED: GetStreamInfo after Release.
-* @tc.number: Audio_Renderer_GetStreamInfo_003
-* @tc.desc  : Test GetStreamInfo interface. Returns error code, if the renderer state is RENDERER_RELEASED.
-*/
+ * @tc.name  : Test GetStreamInfo via illegal state, RENDERER_RELEASED: GetStreamInfo after Release.
+ * @tc.number: Audio_Renderer_GetStreamInfo_003
+ * @tc.desc  : Test GetStreamInfo interface. Returns error code, if the renderer state is RENDERER_RELEASED.
+ */
 HWTEST(AudioRendererUnitTest, Audio_Renderer_GetStreamInfo_003, TestSize.Level1)
 {
     int32_t ret = -1;
@@ -4185,10 +4185,10 @@ HWTEST(AudioRendererUnitTest, Audio_Renderer_GetStreamInfo_003, TestSize.Level1)
 }
 
 /**
-* @tc.name  : Test GetStreamInfo via legal state, RENDERER_STOPPED: GetStreamInfo after Stop.
-* @tc.number: Audio_Renderer_GetStreamInfo_004
-* @tc.desc  : Test GetStreamInfo interface. Check whether stream related data is returned correctly
-*/
+ * @tc.name  : Test GetStreamInfo via legal state, RENDERER_STOPPED: GetStreamInfo after Stop.
+ * @tc.number: Audio_Renderer_GetStreamInfo_004
+ * @tc.desc  : Test GetStreamInfo interface. Check whether stream related data is returned correctly
+ */
 HWTEST(AudioRendererUnitTest, Audio_Renderer_GetStreamInfo_004, TestSize.Level1)
 {
     int32_t ret = -1;
@@ -4224,10 +4224,10 @@ HWTEST(AudioRendererUnitTest, Audio_Renderer_GetStreamInfo_004, TestSize.Level1)
 }
 
 /**
-* @tc.name  : Test GetStreamInfo via legal state, RENDERER_PAUSED: GetStreamInfo after Pause.
-* @tc.number: Audio_Renderer_GetStreamInfo_005
-* @tc.desc  : Test GetStreamInfo interface. Check whether stream related data is returned correctly
-*/
+ * @tc.name  : Test GetStreamInfo via legal state, RENDERER_PAUSED: GetStreamInfo after Pause.
+ * @tc.number: Audio_Renderer_GetStreamInfo_005
+ * @tc.desc  : Test GetStreamInfo interface. Check whether stream related data is returned correctly
+ */
 HWTEST(AudioRendererUnitTest, Audio_Renderer_GetStreamInfo_005, TestSize.Level1)
 {
     int32_t ret = -1;
@@ -4264,10 +4264,10 @@ HWTEST(AudioRendererUnitTest, Audio_Renderer_GetStreamInfo_005, TestSize.Level1)
 }
 
 /**
-* @tc.name  : Test GetStreamInfo API stability.
-* @tc.number: Audio_Renderer_GetStreamInfo_Stability_001
-* @tc.desc  : Test GetStreamInfo interface stability
-*/
+ * @tc.name  : Test GetStreamInfo API stability.
+ * @tc.number: Audio_Renderer_GetStreamInfo_Stability_001
+ * @tc.desc  : Test GetStreamInfo interface stability
+ */
 HWTEST(AudioRendererUnitTest, Audio_Renderer_GetStreamInfo_Stability_001, TestSize.Level1)
 {
     int32_t ret = -1;
@@ -4299,10 +4299,10 @@ HWTEST(AudioRendererUnitTest, Audio_Renderer_GetStreamInfo_Stability_001, TestSi
 }
 
 /**
-* @tc.name  : Test SetBufferDuration API
-* @tc.number: Audio_Renderer_SetBufferDuration_001
-* @tc.desc  : Test SetBufferDuration interface. Check whether valid parameters are accepted.
-*/
+ * @tc.name  : Test SetBufferDuration API
+ * @tc.number: Audio_Renderer_SetBufferDuration_001
+ * @tc.desc  : Test SetBufferDuration interface. Check whether valid parameters are accepted.
+ */
 HWTEST(AudioRendererUnitTest, Audio_Renderer_SetBufferDuration_001, TestSize.Level1)
 {
     int32_t ret = -1;
@@ -4333,10 +4333,10 @@ HWTEST(AudioRendererUnitTest, Audio_Renderer_SetBufferDuration_001, TestSize.Lev
 }
 
 /**
-* @tc.name  : Test SetBufferDuration API
-* @tc.number: Audio_Renderer_SetBufferDuration_002
-* @tc.desc  : Test SetBufferDuration interface. Check whether invalid parameters are rejected.
-*/
+ * @tc.name  : Test SetBufferDuration API
+ * @tc.number: Audio_Renderer_SetBufferDuration_002
+ * @tc.desc  : Test SetBufferDuration interface. Check whether invalid parameters are rejected.
+ */
 HWTEST(AudioRendererUnitTest, Audio_Renderer_SetBufferDuration_002, TestSize.Level1)
 {
     int32_t ret = -1;
@@ -4364,10 +4364,10 @@ HWTEST(AudioRendererUnitTest, Audio_Renderer_SetBufferDuration_002, TestSize.Lev
 }
 
 /**
-* @tc.name  : Test SetRendererPositionCallback API
-* @tc.number: Audio_Renderer_SetRendererPositionCallback_001
-* @tc.desc  : Test SetRendererPositionCallback interface to check set position callback is success for valid callback.
-*/
+ * @tc.name  : Test SetRendererPositionCallback API
+ * @tc.number: Audio_Renderer_SetRendererPositionCallback_001
+ * @tc.desc  : Test SetRendererPositionCallback interface to check set position callback is success for valid callback.
+ */
 HWTEST(AudioRendererUnitTest, Audio_Renderer_SetRendererPositionCallback_001, TestSize.Level1)
 {
     int32_t ret = -1;
@@ -4381,10 +4381,10 @@ HWTEST(AudioRendererUnitTest, Audio_Renderer_SetRendererPositionCallback_001, Te
 }
 
 /**
-* @tc.name  : Test SetRendererPositionCallback API
-* @tc.number: Audio_Renderer_SetRendererPositionCallback_002
-* @tc.desc  : Test SetRendererPositionCallback interface again after unregister.
-*/
+ * @tc.name  : Test SetRendererPositionCallback API
+ * @tc.number: Audio_Renderer_SetRendererPositionCallback_002
+ * @tc.desc  : Test SetRendererPositionCallback interface again after unregister.
+ */
 HWTEST(AudioRendererUnitTest, Audio_Renderer_SetRendererPositionCallback_002, TestSize.Level1)
 {
     int32_t ret = -1;
@@ -4404,10 +4404,10 @@ HWTEST(AudioRendererUnitTest, Audio_Renderer_SetRendererPositionCallback_002, Te
 }
 
 /**
-* @tc.name  : Test SetRendererPositionCallback API
-* @tc.number: Audio_Renderer_SetRendererPositionCallback_003
-* @tc.desc  : Test SetRendererPositionCallback interface with null callback.
-*/
+ * @tc.name  : Test SetRendererPositionCallback API
+ * @tc.number: Audio_Renderer_SetRendererPositionCallback_003
+ * @tc.desc  : Test SetRendererPositionCallback interface with null callback.
+ */
 HWTEST(AudioRendererUnitTest, Audio_Renderer_SetRendererPositionCallback_003, TestSize.Level1)
 {
     int32_t ret = -1;
@@ -4420,10 +4420,10 @@ HWTEST(AudioRendererUnitTest, Audio_Renderer_SetRendererPositionCallback_003, Te
 }
 
 /**
-* @tc.name  : Test SetRendererPositionCallback API
-* @tc.number: Audio_Renderer_SetRendererPositionCallback_004
-* @tc.desc  : Test SetRendererPositionCallback interface with invalid parameter.
-*/
+ * @tc.name  : Test SetRendererPositionCallback API
+ * @tc.number: Audio_Renderer_SetRendererPositionCallback_004
+ * @tc.desc  : Test SetRendererPositionCallback interface with invalid parameter.
+ */
 HWTEST(AudioRendererUnitTest, Audio_Renderer_SetRendererPositionCallback_004, TestSize.Level1)
 {
     int32_t ret = -1;
@@ -4440,11 +4440,11 @@ HWTEST(AudioRendererUnitTest, Audio_Renderer_SetRendererPositionCallback_004, Te
 }
 
 /**
-* @tc.name  : Test SetRendererPeriodPositionCallback API
-* @tc.number: Audio_Renderer_SetRendererPeriodPositionCallback_001
-* @tc.desc  : Test SetRendererPeriodPositionCallback interface to check set period position
-*             callback is success for valid callback.
-*/
+ * @tc.name  : Test SetRendererPeriodPositionCallback API
+ * @tc.number: Audio_Renderer_SetRendererPeriodPositionCallback_001
+ * @tc.desc  : Test SetRendererPeriodPositionCallback interface to check set period position
+ *             callback is success for valid callback.
+ */
 HWTEST(AudioRendererUnitTest, Audio_Renderer_SetRendererPeriodPositionCallback_001, TestSize.Level1)
 {
     int32_t ret = -1;
@@ -4458,10 +4458,10 @@ HWTEST(AudioRendererUnitTest, Audio_Renderer_SetRendererPeriodPositionCallback_0
 }
 
 /**
-* @tc.name  : Test SetRendererPeriodPositionCallback API
-* @tc.number: Audio_Renderer_SetRendererPeriodPositionCallback_002
-* @tc.desc  : Test SetRendererPeriodPositionCallback interface again after unregister.
-*/
+ * @tc.name  : Test SetRendererPeriodPositionCallback API
+ * @tc.number: Audio_Renderer_SetRendererPeriodPositionCallback_002
+ * @tc.desc  : Test SetRendererPeriodPositionCallback interface again after unregister.
+ */
 HWTEST(AudioRendererUnitTest, Audio_Renderer_SetRendererPeriodPositionCallback_002, TestSize.Level1)
 {
     int32_t ret = -1;
@@ -4481,10 +4481,10 @@ HWTEST(AudioRendererUnitTest, Audio_Renderer_SetRendererPeriodPositionCallback_0
 }
 
 /**
-* @tc.name  : Test SetRendererPeriodPositionCallback API
-* @tc.number: Audio_Renderer_SetRendererPeriodPositionCallback_003
-* @tc.desc  : Test SetRendererPeriodPositionCallback interface with null callback.
-*/
+ * @tc.name  : Test SetRendererPeriodPositionCallback API
+ * @tc.number: Audio_Renderer_SetRendererPeriodPositionCallback_003
+ * @tc.desc  : Test SetRendererPeriodPositionCallback interface with null callback.
+ */
 HWTEST(AudioRendererUnitTest, Audio_Renderer_SetRendererPeriodPositionCallback_003, TestSize.Level1)
 {
     int32_t ret = -1;
@@ -4497,10 +4497,10 @@ HWTEST(AudioRendererUnitTest, Audio_Renderer_SetRendererPeriodPositionCallback_0
 }
 
 /**
-* @tc.name  : Test SetRendererPeriodPositionCallback API
-* @tc.number: Audio_Renderer_SetRendererPeriodPositionCallback_004
-* @tc.desc  : Test SetRendererPeriodPositionCallback interface with invalid parameter.
-*/
+ * @tc.name  : Test SetRendererPeriodPositionCallback API
+ * @tc.number: Audio_Renderer_SetRendererPeriodPositionCallback_004
+ * @tc.desc  : Test SetRendererPeriodPositionCallback interface with invalid parameter.
+ */
 HWTEST(AudioRendererUnitTest, Audio_Renderer_SetRendererPeriodPositionCallback_004, TestSize.Level1)
 {
     int32_t ret = -1;
