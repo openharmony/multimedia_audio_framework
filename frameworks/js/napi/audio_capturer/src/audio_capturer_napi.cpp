@@ -316,7 +316,7 @@ napi_value AudioCapturerNapi::CreateAudioCapturer(napi_env env, napi_callback_in
     napi_value resource = nullptr;
     napi_create_string_utf8(env, "CreateAudioCapturer", NAPI_AUTO_LENGTH, &resource);
 
-    if (inputRight == false){
+    if (inputRight == false) {
         status = napi_create_async_work(
             env, nullptr, resource,
             [](napi_env env, void *data) {
