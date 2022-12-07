@@ -2654,5 +2654,6 @@ void AudioServiceClient::ProcessEvent(const AppExecFwk::InnerEvent::Pointer &eve
             break;
     }
 }
+
 } // namespace AudioStandard
 } // namespace OHOS
