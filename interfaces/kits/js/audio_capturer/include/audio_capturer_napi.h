@@ -99,6 +99,7 @@ private:
     static void GetInt64ValueAsyncCallbackComplete(napi_env env, napi_status status, void *data);
     static void VoidAsyncCallbackComplete(napi_env env, napi_status status, void *data);
     static void GetCapturerAsyncCallbackComplete(napi_env env, napi_status status, void *data);
+    static void CheckCapturerAsyncCallbackComplete(napi_env env, napi_status status, void *data);
     static napi_status CreateReadAsyncWork(const AudioCapturerAsyncContext &asyncContext);
     static napi_status AddNamedProperty(napi_env env, napi_value object, const std::string name, int32_t enumValue);
     static bool ParseCapturerOptions(napi_env env, napi_value root, AudioCapturerOptions *opts);
