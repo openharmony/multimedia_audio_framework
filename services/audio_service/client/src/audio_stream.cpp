@@ -365,6 +365,10 @@ bool AudioStream::StartAudioStream(StateChangeCmdType cmdType)
         AUDIO_ERR_LOG("AudioStream::StartAudioStream get system elapsed time failed: %d", retCode);
     }
 
+    isFirstRead_ = true;
+    isFirstWrite_ = true;
+    state_ = RUNNING;
+
     if (renderMode_ == RENDER_MODE_CALLBACK) {
         isReadyToWrite_ = true;
         writeThread_ = std::make_unique<std::thread>(&AudioStream::WriteCbTheadLoop, this);
@@ -373,9 +377,6 @@ bool AudioStream::StartAudioStream(StateChangeCmdType cmdType)
         readThread_ = std::make_unique<std::thread>(&AudioStream::ReadCbThreadLoop, this);
     }
 
-    isFirstRead_ = true;
-    isFirstWrite_ = true;
-    state_ = RUNNING;
     AUDIO_INFO_LOG("StartAudioStream SUCCESS");
 
     if (audioStreamTracker_) {
