@@ -46,14 +46,9 @@ napi_ref SystemSoundManagerNapi::sConstructor_ = nullptr;
 napi_ref SystemSoundManagerNapi::ringtoneType_ = nullptr;
 
 SystemSoundManagerNapi::SystemSoundManagerNapi()
-    : env_(nullptr), wrapper_(nullptr), sysSoundMgrClient_(nullptr) {}
+    : env_(nullptr), sysSoundMgrClient_(nullptr) {}
 
-SystemSoundManagerNapi::~SystemSoundManagerNapi()
-{
-    if (wrapper_ != nullptr) {
-        napi_delete_reference(env_, wrapper_);
-    }
-}
+SystemSoundManagerNapi::~SystemSoundManagerNapi() = default;
 
 napi_status SystemSoundManagerNapi::AddNamedProperty(napi_env env, napi_value object,
                                                      const std::string name, int32_t enumValue)
@@ -189,7 +184,7 @@ napi_value SystemSoundManagerNapi::Construct(napi_env env, napi_callback_info in
             }
 
             status = napi_wrap(env, thisVar, reinterpret_cast<void*>(obj.get()),
-                               SystemSoundManagerNapi::Destructor, nullptr, &(obj->wrapper_));
+                               SystemSoundManagerNapi::Destructor, nullptr, nullptr);
             if (status == napi_ok) {
                 obj.release();
                 return thisVar;

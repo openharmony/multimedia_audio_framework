@@ -50,14 +50,9 @@ struct AudioInterruptManagerAsyncContext {
 };
 
 AudioInterruptManagerNapi::AudioInterruptManagerNapi()
-    : audioSystemMngr_(nullptr), env_(nullptr), wrapper_(nullptr) {}
+    : audioSystemMngr_(nullptr), env_(nullptr) {}
 
-AudioInterruptManagerNapi::~AudioInterruptManagerNapi()
-{
-    if (wrapper_ != nullptr) {
-        napi_delete_reference(env_, wrapper_);
-    }
-}
+AudioInterruptManagerNapi::~AudioInterruptManagerNapi() = default;
 
 void AudioInterruptManagerNapi::Destructor(napi_env env, void *nativeObject, void *finalize_hint)
 {
@@ -88,7 +83,7 @@ napi_value AudioInterruptManagerNapi::Construct(napi_env env, napi_callback_info
     audioInterruptManagerNapi->env_ = env;
 
     status = napi_wrap(env, thisVar, static_cast<void*>(audioInterruptManagerNapi.get()),
-        AudioInterruptManagerNapi::Destructor, nullptr, &(audioInterruptManagerNapi->wrapper_));
+        AudioInterruptManagerNapi::Destructor, nullptr, nullptr);
     if (status == napi_ok) {
         audioInterruptManagerNapi.release();
         return thisVar;

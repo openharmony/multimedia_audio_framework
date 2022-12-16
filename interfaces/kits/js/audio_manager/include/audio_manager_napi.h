@@ -132,7 +132,6 @@ private:
     std::shared_ptr<AudioRingerModeCallback> ringerModecallbackNapi_ = nullptr;
     std::shared_ptr<VolumeKeyEventCallback> volumeKeyEventCallbackNapi_ = nullptr;
     napi_env env_;
-    napi_ref wrapper_;
 };
 
 static const std::map<std::string, DeviceChangeType> DEVICE_CHANGE_TYPE_MAP = {

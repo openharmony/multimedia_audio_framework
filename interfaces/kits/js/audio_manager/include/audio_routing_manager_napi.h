@@ -64,7 +64,6 @@ private:
     std::shared_ptr<AudioManagerMicStateChangeCallback> micStateChangeCallbackNapi_ = nullptr;
 
     napi_env env_;
-    napi_ref wrapper_;
 };
 } // namespace AudioStandard
 } // namespace OHOS

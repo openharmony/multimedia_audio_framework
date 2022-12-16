@@ -110,13 +110,10 @@ namespace {
 }
 
 AudioManagerNapi::AudioManagerNapi()
-    : audioMngr_(nullptr), env_(nullptr), wrapper_(nullptr) {}
+    : audioMngr_(nullptr), env_(nullptr) {}
 
 AudioManagerNapi::~AudioManagerNapi()
 {
-    if (wrapper_ != nullptr) {
-        napi_delete_reference(env_, wrapper_);
-    }
     AUDIO_DEBUG_LOG("AudioManagerNapi::~AudioManagerNapi()");
 }
 
@@ -628,7 +625,7 @@ napi_value AudioManagerNapi::Construct(napi_env env, napi_callback_info info)
             }
 
             status = napi_wrap(env, jsThis, static_cast<void*>(managerNapi.get()),
-                               AudioManagerNapi::Destructor, nullptr, &(managerNapi->wrapper_));
+                               AudioManagerNapi::Destructor, nullptr, nullptr);
             if (status == napi_ok) {
                 managerNapi.release();
                 return jsThis;

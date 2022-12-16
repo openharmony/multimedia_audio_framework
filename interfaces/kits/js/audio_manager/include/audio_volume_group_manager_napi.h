@@ -61,7 +61,6 @@ private:
 
     std::shared_ptr<AudioRingerModeCallback> ringerModecallbackNapi_ = nullptr;
     std::shared_ptr<AudioManagerMicStateChangeCallback> micStateChangeCallbackNapi_ = nullptr;
-    napi_ref wrapper_;
 };
 } // namespace AudioStandard
 } // namespace OHOS

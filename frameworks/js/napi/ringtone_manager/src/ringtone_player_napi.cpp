@@ -41,14 +41,9 @@ namespace AudioStandard {
 napi_ref RingtonePlayerNapi::sConstructor_ = nullptr;
 shared_ptr<IRingtonePlayer> RingtonePlayerNapi::sIRingtonePlayer_ = nullptr;
 
-RingtonePlayerNapi::RingtonePlayerNapi() : env_(nullptr), wrapper_(nullptr) {}
+RingtonePlayerNapi::RingtonePlayerNapi() : env_(nullptr) {}
 
-RingtonePlayerNapi::~RingtonePlayerNapi()
-{
-    if (wrapper_ != nullptr) {
-        napi_delete_reference(env_, wrapper_);
-    }
-}
+RingtonePlayerNapi::~RingtonePlayerNapi() = default;
 
 napi_status RingtonePlayerNapi::AddNamedProperty(napi_env env, napi_value object,
                                                  const std::string name, int32_t enumValue)
@@ -115,7 +110,7 @@ napi_value RingtonePlayerNapi::RingtonePlayerNapiConstructor(napi_env env, napi_
             }
 
             status = napi_wrap(env, thisVar, reinterpret_cast<void*>(obj.get()),
-                RingtonePlayerNapi::RingtonePlayerNapiDestructor, nullptr, &(obj->wrapper_));
+                RingtonePlayerNapi::RingtonePlayerNapiDestructor, nullptr, nullptr);
             if (status == napi_ok) {
                 obj.release();
                 return thisVar;

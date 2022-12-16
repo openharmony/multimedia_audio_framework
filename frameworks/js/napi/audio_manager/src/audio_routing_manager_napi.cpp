@@ -62,14 +62,9 @@ struct AudioRoutingManagerAsyncContext {
 };
 
 AudioRoutingManagerNapi::AudioRoutingManagerNapi()
-    : audioMngr_(nullptr), env_(nullptr), wrapper_(nullptr) {}
+    : audioMngr_(nullptr), env_(nullptr) {}
 
-AudioRoutingManagerNapi::~AudioRoutingManagerNapi()
-{
-    if (wrapper_ != nullptr) {
-        napi_delete_reference(env_, wrapper_);
-    }
-}
+AudioRoutingManagerNapi::~AudioRoutingManagerNapi() = default;
 
 void AudioRoutingManagerNapi::Destructor(napi_env env, void *nativeObject, void *finalize_hint)
 {
@@ -161,7 +156,7 @@ napi_value AudioRoutingManagerNapi::Construct(napi_env env, napi_callback_info i
     audioRoutingManagerNapi->env_ = env;
 
     status = napi_wrap(env, thisVar, static_cast<void*>(audioRoutingManagerNapi.get()),
-        AudioRoutingManagerNapi::Destructor, nullptr, &(audioRoutingManagerNapi->wrapper_));
+        AudioRoutingManagerNapi::Destructor, nullptr, nullptr);
     if (status == napi_ok) {
         audioRoutingManagerNapi.release();
         return thisVar;

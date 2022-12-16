@@ -59,15 +59,9 @@ struct AudioVolumeManagerAsyncContext {
 };
 
 AudioVolumeManagerNapi::AudioVolumeManagerNapi()
-    : audioSystemMngr_(nullptr), env_(nullptr), wrapper_(nullptr) {}
+    : audioSystemMngr_(nullptr), env_(nullptr) {}
 
-AudioVolumeManagerNapi::~AudioVolumeManagerNapi()
-{
-    if (wrapper_ != nullptr) {
-        napi_delete_reference(env_, wrapper_);
-    }
-}
-
+AudioVolumeManagerNapi::~AudioVolumeManagerNapi() = default;
 
 void AudioVolumeManagerNapi::Destructor(napi_env env, void *nativeObject, void *finalize_hint)
 {
@@ -98,7 +92,7 @@ napi_value AudioVolumeManagerNapi::Construct(napi_env env, napi_callback_info in
     audioVolumeManagerNapi->env_ = env;
 
     status = napi_wrap(env, thisVar, static_cast<void*>(audioVolumeManagerNapi.get()),
-        AudioVolumeManagerNapi::Destructor, nullptr, &(audioVolumeManagerNapi->wrapper_));
+        AudioVolumeManagerNapi::Destructor, nullptr, nullptr);
     if (status == napi_ok) {
         audioVolumeManagerNapi.release();
         return thisVar;

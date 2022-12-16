@@ -53,14 +53,9 @@ namespace {
     napi_get_cb_info(env, info, &argc, argv, &thisVar, &data)
 }
 TonePlayerNapi::TonePlayerNapi()
-    : env_(nullptr), wrapper_(nullptr), tonePlayer_(nullptr) {}
+    : env_(nullptr), tonePlayer_(nullptr) {}
 
-TonePlayerNapi::~TonePlayerNapi()
-{
-    if (wrapper_ != nullptr) {
-        napi_delete_reference(env_, wrapper_);
-    }
-}
+TonePlayerNapi::~TonePlayerNapi() = default;
 
 void TonePlayerNapi::Destructor(napi_env env, void *nativeObject, void *finalize_hint)
 {
@@ -342,7 +337,7 @@ napi_value TonePlayerNapi::Construct(napi_env env, napi_callback_info info)
     CHECK_AND_RETURN_RET_LOG(tonePlayerNapi->tonePlayer_ != nullptr, result, "Toneplayer Create failed");
 
     status = napi_wrap(env, thisVar, static_cast<void*>(tonePlayerNapi.get()),
-                       TonePlayerNapi::Destructor, nullptr, &(tonePlayerNapi->wrapper_));
+                       TonePlayerNapi::Destructor, nullptr, nullptr);
     if (status == napi_ok) {
         tonePlayerNapi.release();
         return thisVar;

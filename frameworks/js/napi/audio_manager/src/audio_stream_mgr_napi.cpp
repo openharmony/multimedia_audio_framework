@@ -70,14 +70,9 @@ struct AudioStreamMgrAsyncContext {
 };
 
 AudioStreamMgrNapi::AudioStreamMgrNapi()
-    : env_(nullptr), wrapper_(nullptr), audioStreamMngr_(nullptr) {}
+    : env_(nullptr), audioStreamMngr_(nullptr) {}
 
-AudioStreamMgrNapi::~AudioStreamMgrNapi()
-{
-    if (wrapper_ != nullptr) {
-        napi_delete_reference(env_, wrapper_);
-    }
-}
+AudioStreamMgrNapi::~AudioStreamMgrNapi() = default;
 
 void AudioStreamMgrNapi::Destructor(napi_env env, void *nativeObject, void *finalize_hint)
 {
@@ -340,7 +335,7 @@ napi_value AudioStreamMgrNapi::Construct(napi_env env, napi_callback_info info)
     streamMgrNapi->cachedClientId_ = getpid();
 
     status = napi_wrap(env, thisVar, static_cast<void*>(streamMgrNapi.get()),
-                       AudioStreamMgrNapi::Destructor, nullptr, &(streamMgrNapi->wrapper_));
+                       AudioStreamMgrNapi::Destructor, nullptr, nullptr);
     if (status == napi_ok) {
         streamMgrNapi.release();
         return thisVar;

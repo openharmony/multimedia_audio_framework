@@ -32,15 +32,10 @@ namespace {
 }
 
 RingtoneOptionsNapi::RingtoneOptionsNapi()
-    : env_(nullptr), wrapper_(nullptr) {
+    : env_(nullptr) {
 }
 
-RingtoneOptionsNapi::~RingtoneOptionsNapi()
-{
-    if (wrapper_ != nullptr) {
-        napi_delete_reference(env_, wrapper_);
-    }
-}
+RingtoneOptionsNapi::~RingtoneOptionsNapi() = default;
 
 void RingtoneOptionsNapi::Destructor(napi_env env, void *nativeObject, void *finalize_hint)
 {
@@ -97,7 +92,7 @@ napi_value RingtoneOptionsNapi::Construct(napi_env env, napi_callback_info info)
             obj->volume_ = sVolume_;
             obj->loop_ = sLoop_;
             status = napi_wrap(env, jsThis, static_cast<void*>(obj.get()),
-                               RingtoneOptionsNapi::Destructor, nullptr, &(obj->wrapper_));
+                               RingtoneOptionsNapi::Destructor, nullptr, nullptr);
             if (status == napi_ok) {
                 obj.release();
                 return jsThis;

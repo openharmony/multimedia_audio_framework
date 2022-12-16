@@ -54,7 +54,6 @@ private:
     static bool ParseAudioStreamInfo(napi_env env, napi_value root, AudioStreamInfo &audioStreamInfo);
     static void IsLowLatencySupportedCallback(napi_env env, napi_status status, void *data);
     napi_env env_;
-    napi_ref wrapper_;
     AudioStreamManager *audioStreamMngr_;
     AudioSystemManager *audioMngr_;
     int32_t cachedClientId_ = -1;

@@ -95,7 +95,6 @@ private:
     static napi_ref toneType_;
     static std::mutex createMutex_;
     napi_env env_;
-    napi_ref wrapper_;
     std::shared_ptr<TonePlayer> tonePlayer_;
 };
 } // namespace AudioStandard
