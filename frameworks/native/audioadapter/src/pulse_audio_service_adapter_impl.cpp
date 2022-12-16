@@ -92,6 +92,7 @@ bool PulseAudioServiceAdapterImpl::Connect()
 bool PulseAudioServiceAdapterImpl::ConnectToPulseAudio()
 {
     if (mContext != nullptr) {
+        AUDIO_INFO_LOG("[PulseAudioServiceAdapterImpl] context is not null, disconnect first!");
         pa_context_disconnect(mContext);
         pa_context_set_state_callback(mContext, nullptr, nullptr);
         pa_context_set_subscribe_callback(mContext, nullptr, nullptr);
@@ -634,6 +635,7 @@ vector<SourceOutput> PulseAudioServiceAdapterImpl::GetAllSourceOutputs()
 void PulseAudioServiceAdapterImpl::Disconnect()
 {
     if (mContext != nullptr) {
+        AUDIO_INFO_LOG("[PulseAudioServiceAdapterImpl] disconnect context!");
         pa_context_disconnect(mContext);
         /* Make sure we don't get any further callbacks */
         pa_context_set_state_callback(mContext, nullptr, nullptr);
