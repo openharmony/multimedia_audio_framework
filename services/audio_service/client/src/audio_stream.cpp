@@ -512,7 +512,7 @@ bool AudioStream::PauseAudioStream(StateChangeCmdType cmdType)
 
 bool AudioStream::StopAudioStream()
 {
-    AUDIO_INFO_LOG("AudioStream: StopAudioStream begin");
+    AUDIO_INFO_LOG("AudioStream: begin StopAudioStream for sessionId %{public}d", sessionId_);
     if (state_ == PAUSED) {
         state_ = STOPPED;
         AUDIO_INFO_LOG("StopAudioStream SUCCESS");
