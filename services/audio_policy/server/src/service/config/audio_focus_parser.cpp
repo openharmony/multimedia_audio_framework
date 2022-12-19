@@ -24,6 +24,7 @@ AudioFocusParser::AudioFocusParser()
     streamMap = {
         {"STREAM_RING", STREAM_RING},
         {"STREAM_MUSIC", STREAM_MUSIC},
+        {"STREAM_VOICE_ASSISTANT", STREAM_VOICE_ASSISTANT},
         {"STREAM_VOICE_CALL", STREAM_VOICE_CALL},
     };
 
