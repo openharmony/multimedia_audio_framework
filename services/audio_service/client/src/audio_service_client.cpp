@@ -505,6 +505,7 @@ AudioServiceClient::AudioServiceClient()
 
 void AudioServiceClient::ResetPAAudioClient()
 {
+    AUDIO_INFO_LOG("Enter ResetPAAudioClient");
     lock_guard<mutex> lock(ctrlMutex);
     if (mainLoop && (isMainLoopStarted == true))
         pa_threaded_mainloop_stop(mainLoop);
@@ -584,6 +585,7 @@ void AudioServiceClient::ResetPAAudioClient()
 AudioServiceClient::~AudioServiceClient()
 {
     lock_guard<mutex> lockdata(dataMutex);
+    AUDIO_INFO_LOG("start ~AudioServiceClient");
     ResetPAAudioClient();
 }
 
@@ -640,6 +642,7 @@ bool AudioServiceClient::getUsingPemissionFromPrivacy(const std::string &permiss
 
 int32_t AudioServiceClient::Initialize(ASClientType eClientType)
 {
+    AUDIO_INFO_LOG("Enter AudioServiceClient::Initialize");
     int error = PA_ERR_INTERNAL;
     eAudioClientType = eClientType;
 
@@ -783,6 +786,7 @@ const std::string AudioServiceClient::GetStreamName(AudioStreamType audioType)
 
 int32_t AudioServiceClient::ConnectStreamToPA()
 {
+    AUDIO_INFO_LOG("Enter AudioServiceClient::ConnectStreamToPA");
     int error, result;
 
     if (CheckReturnIfinvalid(mainLoop && context && paStream, AUDIO_CLIENT_ERR) < 0) {
@@ -890,6 +894,7 @@ int32_t AudioServiceClient::InitializeAudioCache()
 
 int32_t AudioServiceClient::CreateStream(AudioStreamParams audioParams, AudioStreamType audioType)
 {
+    AUDIO_INFO_LOG("Enter AudioServiceClient::CreateStream");
     int error;
     lock_guard<mutex> lockdata(dataMutex);
     if (CheckReturnIfinvalid(mainLoop && context, AUDIO_CLIENT_ERR) < 0) {
@@ -1030,6 +1035,7 @@ int32_t AudioServiceClient::GetSessionID(uint32_t &sessionID) const
 
 int32_t AudioServiceClient::StartStream(StateChangeCmdType cmdType)
 {
+    AUDIO_INFO_LOG("Enter AudioServiceClient::StartStream");
     int error;
     lock_guard<mutex> lockdata(dataMutex);
     if (CheckPaStatusIfinvalid(mainLoop, context, paStream, AUDIO_CLIENT_PA_ERR) < 0) {
