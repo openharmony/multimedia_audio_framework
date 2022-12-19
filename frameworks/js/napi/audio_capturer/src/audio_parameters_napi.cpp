@@ -39,14 +39,11 @@ namespace {
 }
 
 AudioParametersNapi::AudioParametersNapi()
-    : env_(nullptr), wrapper_(nullptr) {
+    : env_(nullptr) {
 }
 
 AudioParametersNapi::~AudioParametersNapi()
 {
-    if (wrapper_ != nullptr) {
-        napi_delete_reference(env_, wrapper_);
-    }
     audioParameters_ = nullptr;
 }
 
@@ -379,7 +376,7 @@ napi_value AudioParametersNapi::Construct(napi_env env, napi_callback_info info)
             obj->env_ = env;
             obj->audioParameters_ = move(sAudioParameters_);
             status = napi_wrap(env, jsThis, static_cast<void*>(obj.get()),
-                               AudioParametersNapi::Destructor, nullptr, &(obj->wrapper_));
+                               AudioParametersNapi::Destructor, nullptr, nullptr);
             if (status == napi_ok) {
                 obj.release();
                 return jsThis;

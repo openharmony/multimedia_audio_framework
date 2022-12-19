@@ -165,7 +165,6 @@ private:
     DeviceType deviceType_;
     int32_t rendererFlags_;
     napi_env env_;
-    napi_ref wrapper_;
     std::queue<napi_async_work> writeRequestQ_;
     std::atomic<bool> scheduleFromApiCall_;
     std::atomic<bool> doNotScheduleWrite_;

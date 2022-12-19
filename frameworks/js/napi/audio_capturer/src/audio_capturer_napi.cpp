@@ -68,14 +68,9 @@ namespace {
 AudioCapturerNapi::AudioCapturerNapi()
     : audioCapturer_(nullptr), contentType_(CONTENT_TYPE_MUSIC), streamUsage_(STREAM_USAGE_MEDIA),
       deviceRole_(INPUT_DEVICE), deviceType_(DEVICE_TYPE_MIC), sourceType_(SOURCE_TYPE_MIC),
-      capturerFlags_(0), env_(nullptr), wrapper_(nullptr) {}
+      capturerFlags_(0), env_(nullptr) {}
 
-AudioCapturerNapi::~AudioCapturerNapi()
-{
-    if (wrapper_ != nullptr) {
-        napi_delete_reference(env_, wrapper_);
-    }
-}
+AudioCapturerNapi::~AudioCapturerNapi() = default;
 
 void AudioCapturerNapi::Destructor(napi_env env, void *nativeObject, void *finalize_hint)
 {
@@ -222,7 +217,7 @@ napi_value AudioCapturerNapi::Construct(napi_env env, napi_callback_info info)
     }
 
     status = napi_wrap(env, thisVar, static_cast<void*>(capturerNapi.get()),
-                       AudioCapturerNapi::Destructor, nullptr, &(capturerNapi->wrapper_));
+                       AudioCapturerNapi::Destructor, nullptr, nullptr);
     if (status == napi_ok) {
         capturerNapi.release();
         return thisVar;

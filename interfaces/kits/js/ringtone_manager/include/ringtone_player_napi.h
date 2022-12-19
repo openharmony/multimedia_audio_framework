@@ -48,7 +48,6 @@ private:
     static napi_status AddNamedProperty(napi_env env, napi_value object, const std::string name, int32_t enumValue);
 
     napi_env env_;
-    napi_ref wrapper_;
 
     std::shared_ptr<IRingtonePlayer> iRingtonePlayer;
 

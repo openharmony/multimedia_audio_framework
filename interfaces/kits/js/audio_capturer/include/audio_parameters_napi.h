@@ -150,7 +150,6 @@ private:
 
     std::unique_ptr<AudioParameters> audioParameters_;
     napi_env env_;
-    napi_ref wrapper_;
 };
 } // namespace AudioStandard
 } // namespace OHOS

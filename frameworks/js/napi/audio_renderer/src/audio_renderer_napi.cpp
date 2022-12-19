@@ -72,15 +72,10 @@ namespace {
 
 AudioRendererNapi::AudioRendererNapi()
     : audioRenderer_(nullptr), contentType_(CONTENT_TYPE_MUSIC), streamUsage_(STREAM_USAGE_MEDIA),
-      deviceRole_(OUTPUT_DEVICE), deviceType_(DEVICE_TYPE_SPEAKER), env_(nullptr), wrapper_(nullptr),
+      deviceRole_(OUTPUT_DEVICE), deviceType_(DEVICE_TYPE_SPEAKER), env_(nullptr),
       scheduleFromApiCall_(true), doNotScheduleWrite_(false), isDrainWriteQInProgress_(false) {}
 
-AudioRendererNapi::~AudioRendererNapi()
-{
-    if (wrapper_ != nullptr) {
-        napi_delete_reference(env_, wrapper_);
-    }
-}
+AudioRendererNapi::~AudioRendererNapi() = default;
 
 void AudioRendererNapi::Destructor(napi_env env, void *nativeObject, void *finalize_hint)
 {
@@ -466,7 +461,7 @@ napi_value AudioRendererNapi::Construct(napi_env env, napi_callback_info info)
     }
 
     status = napi_wrap(env, thisVar, static_cast<void*>(rendererNapi.get()),
-                       AudioRendererNapi::Destructor, nullptr, &(rendererNapi->wrapper_));
+                       AudioRendererNapi::Destructor, nullptr, nullptr);
     if (status == napi_ok) {
         rendererNapi.release();
         return thisVar;

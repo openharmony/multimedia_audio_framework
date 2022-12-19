@@ -30,15 +30,10 @@ namespace {
 }
 
 AudioRendererInfoNapi::AudioRendererInfoNapi()
-    : env_(nullptr), wrapper_(nullptr) {
+    : env_(nullptr) {
 }
 
-AudioRendererInfoNapi::~AudioRendererInfoNapi()
-{
-    if (wrapper_ != nullptr) {
-        napi_delete_reference(env_, wrapper_);
-    }
-}
+AudioRendererInfoNapi::~AudioRendererInfoNapi() = default;
 
 void AudioRendererInfoNapi::Destructor(napi_env env, void *nativeObject, void *finalize_hint)
 {
@@ -96,7 +91,7 @@ napi_value AudioRendererInfoNapi::Construct(napi_env env, napi_callback_info inf
             obj->env_ = env;
             obj->audioRendererInfo_ = move(sAudioRendererInfo_);
             status = napi_wrap(env, jsThis, static_cast<void *>(obj.get()),
-                               AudioRendererInfoNapi::Destructor, nullptr, &(obj->wrapper_));
+                               AudioRendererInfoNapi::Destructor, nullptr, nullptr);
             if (status == napi_ok) {
                 obj.release();
                 return jsThis;

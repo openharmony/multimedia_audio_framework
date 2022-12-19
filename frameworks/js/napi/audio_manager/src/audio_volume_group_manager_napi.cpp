@@ -246,7 +246,7 @@ napi_value AudioVolumeGroupManagerNapi::Construct(napi_env env, napi_callback_in
                 AudioVolumeGroupManagerNapi::isConstructSuccess_ = NAPI_ERR_SYSTEM;
             }
             status = napi_wrap(env, jsThis, static_cast<void*>(groupmanagerNapi.get()),
-                AudioVolumeGroupManagerNapi::Destructor, nullptr, &(groupmanagerNapi->wrapper_));
+                AudioVolumeGroupManagerNapi::Destructor, nullptr, nullptr);
             if (status == napi_ok) {
                 groupmanagerNapi.release();
                 return jsThis;

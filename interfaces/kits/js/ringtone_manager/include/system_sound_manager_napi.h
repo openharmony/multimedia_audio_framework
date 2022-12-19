@@ -58,7 +58,6 @@ private:
     static napi_ref sConstructor_;
 
     napi_env env_;
-    napi_ref wrapper_;
 
     std::shared_ptr<IRingtoneSoundManager> sysSoundMgrClient_ = nullptr;
 };
