@@ -209,7 +209,10 @@ uint64_t AudioServer::GetTransactionId(DeviceType deviceType, DeviceRole deviceR
 {
     uint64_t transactionId = 0;
     AUDIO_INFO_LOG("GetTransactionId in: device type: %{public}d, device role: %{public}d", deviceType, deviceRole);
-
+    if (deviceRole != INPUT_DEVICE && deviceRole != OUTPUT_DEVICE) {
+        AUDIO_ERR_LOG("GetTransactionId: error device role");
+        return ERR_INVALID_PARAM;
+    }
     if (deviceRole == OUTPUT_DEVICE) {
         struct RendererSinkAdapter *sinkAdapter;
         int32_t ret = SUCCESS;

@@ -75,24 +75,31 @@ AudioRendererSink *AudioRendererSink::GetInstance()
 void AudioRendererSink::SetAudioParameter(const AudioParamKey key, const std::string& condition,
     const std::string& value)
 {
-    AUDIO_INFO_LOG("AudioRendererSink::SetAudioParameter:key %{public}d, condition: %{public}s, value: %{public}s", key,
+    AUDIO_INFO_LOG("SetAudioParameter:key %{public}d, condition: %{public}s, value: %{public}s", key,
         condition.c_str(), value.c_str());
     AudioExtParamKey hdiKey = AudioExtParamKey(key);
+    if (audioAdapter_ == nullptr) {
+        AUDIO_ERR_LOG("SetAudioParameter failed, audioAdapter_ is null");
+        return;
+    }
     int32_t ret = audioAdapter_->SetExtraParams(audioAdapter_, hdiKey, condition.c_str(), value.c_str());
     if (ret != SUCCESS) {
-        AUDIO_ERR_LOG("AudioRendererSink::SetAudioParameter failed, error code: %d", ret);
+        AUDIO_ERR_LOG("SetAudioParameter failed, error code: %d", ret);
     }
 }
 
 std::string AudioRendererSink::GetAudioParameter(const AudioParamKey key, const std::string& condition)
 {
-    AUDIO_INFO_LOG("AudioRendererSink::GetAudioParameter: key %{public}d, condition: %{public}s", key,
-        condition.c_str());
+    AUDIO_INFO_LOG("GetAudioParameter: key %{public}d, condition: %{public}s", key, condition.c_str());
     AudioExtParamKey hdiKey = AudioExtParamKey(key);
     char value[PARAM_VALUE_LENTH];
+    if (audioAdapter_ == nullptr) {
+        AUDIO_ERR_LOG("GetAudioParameter failed, audioAdapter_ is null");
+        return "";
+    }
     int32_t ret = audioAdapter_->GetExtraParams(audioAdapter_, hdiKey, condition.c_str(), value, PARAM_VALUE_LENTH);
     if (ret != SUCCESS) {
-        AUDIO_ERR_LOG("AudioRendererSink::GetAudioParameter failed, error code: %d", ret);
+        AUDIO_ERR_LOG("GetAudioParameter failed, error code: %d", ret);
         return "";
     }
     return value;
@@ -489,10 +496,10 @@ int32_t AudioRendererSink::GetVolume(float &left, float &right)
 int32_t AudioRendererSink::SetVoiceVolume(float volume)
 {
     if (audioAdapter_ == nullptr) {
-        AUDIO_ERR_LOG("AudioRendererSink: SetVoiceVolume failed audio adapter null");
+        AUDIO_ERR_LOG("SetVoiceVolume failed, audioAdapter_ is null");
         return ERR_INVALID_HANDLE;
     }
-    AUDIO_DEBUG_LOG("AudioRendererSink: SetVoiceVolume %{public}f", volume);
+    AUDIO_DEBUG_LOG("SetVoiceVolume %{public}f", volume);
     return audioAdapter_->SetVoiceVolume(audioAdapter_, volume);
 }
 
@@ -608,9 +615,13 @@ int32_t AudioRendererSink::SetOutputRoute(DeviceType outputDevice, AudioPortPin 
         .sinks = &sink,
     };
 
+    if (audioAdapter_ == nullptr) {
+        AUDIO_ERR_LOG("SetOutputRoute failed, audioAdapter_ is null");
+        return ERR_INVALID_PARAM;
+    }
     ret = audioAdapter_->UpdateAudioRoute(audioAdapter_, &route, &routeHandle_);
     if (ret != 0) {
-        AUDIO_ERR_LOG("AudioRendererSink: UpdateAudioRoute failed");
+        AUDIO_ERR_LOG("UpdateAudioRoute failed");
         return ERR_OPERATION_FAILED;
     }
 
