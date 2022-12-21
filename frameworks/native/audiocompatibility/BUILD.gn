@@ -1,0 +1,115 @@
+# Copyright (c) 2022-2022 Huawei Device Co., Ltd.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+import("//build/ohos.gni")
+import("//drivers/hdf_core/adapter/uhdf2/uhdf.gni")
+import("//foundation/multimedia/audio_framework/config.gni")
+
+import("//foundation/multimedia/audio_framework/audio_ohcore.gni")
+
+ohos_shared_library("audio_capturer_gateway") {
+  install_enable = true
+
+  cflags = [ "-fPIC" ]
+  cflags += [ "-Wall" ]
+  if ("${product_name}" == "m40") {
+    cflags += [ "-DPRODUCT_M40" ]
+  }
+  cflags_cc = cflags
+
+  include_dirs = [
+    "//foundation/multimedia/audio_framework/interfaces/inner_api/native/audiocommon/include",
+    "//foundation/multimedia/audio_framework/interfaces/inner_api/native/audiocapturer/include",
+    "//base/hiviewdfx/hilog/interfaces/native/innerkits/include",
+    "//drivers/peripheral/audio/interfaces/include",
+    "//utils/native/base/include",
+  ]
+
+  include_dirs += audio_gateway_include_dirs
+
+  sources = audio_capturer_gateway_sources
+
+  deps = [
+    "//foundation/multimedia/audio_framework/services/audio_policy:audio_policy_client",
+    "//foundation/multimedia/audio_framework/services/audio_service:audio_client",
+  ]
+
+  deps += [ "//base/hiviewdfx/hilog/interfaces/native/innerkits:libhilog" ]
+
+  if ("${product_name}" == "m40") {
+    deps += [ "//drivers/peripheral/adapter/audio/interfaces:hdi_audio_client" ]
+  } else {
+    deps +=
+        [ "//drivers/peripheral/audio/hal/hdi_binder/proxy:hdi_audio_client" ]
+  }
+
+  external_deps = [
+    "access_token:libaccesstoken_sdk",
+    "c_utils:utils",
+    "hiviewdfx_hilog_native:libhilog",
+    "ipc:ipc_core",
+    "safwk:system_ability_fwk",
+    "samgr:samgr_proxy",
+  ]
+
+  part_name = "multimedia_audio_framework"
+  subsystem_name = "multimedia"
+}
+
+ohos_shared_library("audio_renderer_gateway") {
+  install_enable = true
+
+  cflags = [ "-fPIC" ]
+  if ("${product_name}" == "m40") {
+    cflags += [ "-DPRODUCT_M40" ]
+  }
+  cflags_cc = cflags
+
+  include_dirs = [
+    "//foundation/multimedia/audio_framework/interfaces/inner_api/native/audiocommon/include",
+    "//foundation/multimedia/audio_framework/interfaces/inner_api/native/audiorenderer/include",
+    "//base/hiviewdfx/hilog/interfaces/native/innerkits/include",
+    "//drivers/peripheral/audio/interfaces/include",
+    "//utils/native/base/include",
+  ]
+
+  include_dirs += audio_gateway_include_dirs
+
+  sources = audio_renderer_gateway_sources
+
+  deps = [
+    "//foundation/multimedia/audio_framework/services/audio_policy:audio_policy_client",
+    "//foundation/multimedia/audio_framework/services/audio_service:audio_client",
+  ]
+
+  deps += [ "//base/hiviewdfx/hilog/interfaces/native/innerkits:libhilog" ]
+
+  if ("${product_name}" == "m40") {
+    deps += [ "//drivers/peripheral/adapter/audio/interfaces:hdi_audio_client" ]
+  } else {
+    deps +=
+        [ "//drivers/peripheral/audio/hal/hdi_binder/proxy:hdi_audio_client" ]
+  }
+
+  external_deps = [
+    "access_token:libaccesstoken_sdk",
+    "c_utils:utils",
+    "hiviewdfx_hilog_native:libhilog",
+    "ipc:ipc_core",
+    "safwk:system_ability_fwk",
+    "samgr:samgr_proxy",
+  ]
+
+  part_name = "multimedia_audio_framework"
+  subsystem_name = "multimedia"
+}

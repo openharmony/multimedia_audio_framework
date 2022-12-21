@@ -1,0 +1,41 @@
+# Copyright (c) 2022 Huawei Device Co., Ltd.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+if ("${product_name}" == "ohcore") {
+  audio_gateway_path = "//foundation/multimedia/audio_framework"
+  audio_gateway_include_dirs =
+      [ "${audio_gateway_path}/frameworks/native/audiocompatibility/include" ]
+  audio_renderer_gateway_sources = [
+    "${audio_gateway_path}/frameworks/native/audiocompatibility/src/audio_container_base.cpp",
+    "${audio_gateway_path}/frameworks/native/audiocompatibility/src/audio_container_client_base.cpp",
+    "${audio_gateway_path}/frameworks/native/audiocompatibility/src/audio_container_stream_base.cpp",
+    "${audio_gateway_path}/frameworks/native/audiocompatibility/src/audio_renderer_gateway.cpp",
+    "${audio_gateway_path}/frameworks/native/audiocompatibility/src/audio_renderer_write_callback_stub.cpp",
+  ]
+  audio_renderer_gateway_deps = [ "${audio_gateway_path}/frameworks/native/audiocompatibility:audio_renderer_gateway" ]
+
+  audio_capturer_gateway_sources = [
+    "${audio_gateway_path}/frameworks/native/audiocompatibility/src/audio_capturer_gateway.cpp",
+    "${audio_gateway_path}/frameworks/native/audiocompatibility/src/audio_container_base.cpp",
+    "${audio_gateway_path}/frameworks/native/audiocompatibility/src/audio_container_client_base.cpp",
+    "${audio_gateway_path}/frameworks/native/audiocompatibility/src/audio_container_stream_base.cpp",
+    "${audio_gateway_path}/frameworks/native/audiocompatibility/src/audio_renderer_write_callback_stub.cpp",
+  ]
+  audio_capturer_gateway_deps = [ "${audio_gateway_path}/frameworks/native/audiocompatibility:audio_capturer_gateway" ]
+} else {
+  audio_gateway_include_dirs = []
+  audio_renderer_gateway_sources = []
+  audio_renderer_gateway_deps = []
+
+  audio_capturer_gateway_sources = []
+  audio_capturer_gateway_deps = []
+}
