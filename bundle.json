@@ -51,7 +51,9 @@
             ],
             "fwk_group": [
               "//foundation/multimedia/audio_framework/frameworks/js/napi:audio",
-              "//foundation/multimedia/audio_framework/frameworks/native/opensles:opensles"
+              "//foundation/multimedia/audio_framework/frameworks/native/opensles:opensles",
+              "//foundation/multimedia/audio_framework/frameworks/native/audiocompatibility:audio_renderer_gateway",
+              "//foundation/multimedia/audio_framework/frameworks/native/audiocompatibility:audio_capturer_gateway"
             ],
             "service_group": [
               "//foundation/multimedia/audio_framework/sa_profile:audio_service_sa_profile",
