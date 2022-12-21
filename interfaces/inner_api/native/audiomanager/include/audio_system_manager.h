@@ -26,6 +26,7 @@
 #include "audio_info.h"
 #include "audio_interrupt_callback.h"
 #include "audio_group_manager.h"
+#include "audio_manager_base.h"
 
 namespace OHOS {
 namespace AudioStandard {
@@ -269,6 +270,7 @@ public:
     DeviceType GetTypeValueFromPin(AudioPin pin) const;
     std::vector<sptr<VolumeGroupInfo>> GetVolumeGroups(std::string networkId);
     std::shared_ptr<AudioGroupManager> GetGroupManager(int32_t groupId);
+    std::vector<sptr<AudioDeviceDescriptor>> GetActiveOutputDeviceDescriptors();
 private:
     static constexpr int32_t MAX_VOLUME_LEVEL = 15;
     static constexpr int32_t MIN_VOLUME_LEVEL = 0;
@@ -276,7 +278,8 @@ private:
 
     AudioSystemManager();
     virtual ~AudioSystemManager();
-    bool CheckProxy();
+
+    const sptr<IStandardAudioService> GetAudioSystemManagerProxy();
     uint32_t GetCallingPid();
     void AudioServerDied(pid_t pid);
 

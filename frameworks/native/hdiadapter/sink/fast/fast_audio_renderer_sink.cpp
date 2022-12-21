@@ -64,7 +64,7 @@ FastAudioRendererSink::FastAudioRendererSink()
 
 FastAudioRendererSink::~FastAudioRendererSink()
 {
-    DeInit();
+    FastAudioRendererSink::DeInit();
 }
 
 FastAudioRendererSink *FastAudioRendererSink::GetInstance()
@@ -244,6 +244,10 @@ int32_t FastAudioRendererSink::PrepareMmapBuffer()
     bufferTotalFrameSize_ = desc.totalBufferFrames; // 1440 ~ 3840
     eachReadFrameSize_ = desc.transferFrameSize; // 240
 
+    if (frameSizeInByte_ > ULLONG_MAX / bufferTotalFrameSize_) {
+        AUDIO_ERR_LOG("BufferSize will overflow!");
+        return ERR_OPERATION_FAILED;
+    }
     bufferSize_ = bufferTotalFrameSize_ * frameSizeInByte_;
     bufferAddresss_ = (char *)mmap(nullptr, bufferSize_, PROT_READ | PROT_WRITE, MAP_SHARED, bufferFd_, 0);
     if (bufferAddresss_ == nullptr) {
@@ -255,7 +259,7 @@ int32_t FastAudioRendererSink::PrepareMmapBuffer()
 
 
 
-int32_t FastAudioRendererSink::CreateRender(struct AudioPort &renderPort)
+int32_t FastAudioRendererSink::CreateRender(const struct AudioPort &renderPort)
 {
     int32_t ret;
     struct AudioSampleAttributes param;
@@ -349,6 +353,10 @@ void FastAudioRendererSink::PreparePosition()
     int64_t timeNanoSec = 0;
     GetMmapHandlePosition(frames, timeSec, timeNanoSec); // get first start position
     int32_t periodByteSize = eachReadFrameSize_ * frameSizeInByte_;
+    if (periodByteSize * writeAheadPeriod_ > ULLONG_MAX - curReadPos_) {
+        AUDIO_ERR_LOG("TempPos will overflow!");
+        return;
+    }
     size_t tempPos = curReadPos_ + periodByteSize * writeAheadPeriod_; // 1 period ahead
     curWritePos_ = (tempPos < bufferSize_ ? tempPos : tempPos - bufferSize_);
     AUDIO_INFO_LOG("First render frame start with curReadPos_[%{public}d] curWritePos_[%{public}d]", curReadPos_,

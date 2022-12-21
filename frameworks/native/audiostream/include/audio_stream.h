@@ -17,11 +17,11 @@
 
 #include <mutex>
 #include <condition_variable>
+#include "timestamp.h"
 #include "event_handler.h"
 #include "event_runner.h"
 #include "audio_info.h"
-#include "audio_session.h"
-#include "timestamp.h"
+#include "audio_service_client.h"
 #include "audio_stream_tracker.h"
 
 namespace OHOS {
@@ -29,7 +29,7 @@ namespace AudioStandard {
 static constexpr int32_t MAX_WRITECB_NUM_BUFFERS = 1;
 static constexpr int32_t MAX_READCB_NUM_BUFFERS = 3;
 
-class AudioStream : public AppExecFwk::EventHandler, public AudioSession {
+class AudioStream : public AudioServiceClient {
 public:
     AudioStream(AudioStreamType eStreamType, AudioMode eMode, int32_t appUid);
     virtual ~AudioStream();
@@ -69,8 +69,6 @@ public:
     int32_t Enqueue(const BufferDesc &bufDesc);
     int32_t Clear();
     void SubmitAllFreeBuffers();
-    void SendWriteBufferRequestEvent();
-    void HandleWriteRequestEvent();
 
     int32_t SetLowPowerVolume(float volume);
     float GetLowPowerVolume();
@@ -81,10 +79,10 @@ public:
     std::vector<AudioSamplingRate> GetSupportedSamplingRates() const;
 
     // Common APIs
-    bool StartAudioStream();
-    bool PauseAudioStream();
+    bool StartAudioStream(StateChangeCmdType cmdType = CMD_FROM_CLIENT);
+    bool PauseAudioStream(StateChangeCmdType cmdType = CMD_FROM_CLIENT);
     bool StopAudioStream();
-    bool ReleaseAudioStream();
+    bool ReleaseAudioStream(bool releaseRunner = true);
     bool FlushAudioStream();
 
     // Playback related APIs
@@ -93,12 +91,8 @@ public:
 
     // Recording related APIs
     int32_t Read(uint8_t &buffer, size_t userSize, bool isBlockingRead);
-protected:
-    virtual void ProcessEvent(const AppExecFwk::InnerEvent::Pointer &event) override;
+
 private:
-    enum {
-        WRITE_BUFFER_REQUEST = 0,
-    };
     AudioStreamType eStreamType_;
     AudioMode eMode_;
     State state_;
@@ -131,7 +125,6 @@ private:
 
     std::mutex bufferQueueLock_;
     std::condition_variable bufferQueueCV_;
-    std::shared_ptr<AudioRendererWriteCallback> writeCallback_;
 };
 } // namespace AudioStandard
 } // namespace OHOS

@@ -133,7 +133,7 @@ std::vector<int32_t> AudioPolicyProxy::GetSupportedTones()
     if (error != ERR_NONE) {
         AUDIO_ERR_LOG("get ringermode failed, error: %d", error);
     }
-    lListSize=reply.ReadInt32();
+    lListSize = reply.ReadInt32();
     for (int i = 0; i < lListSize; i++) {
         lSupportedToneList.push_back(reply.ReadInt32());
     }
@@ -160,9 +160,9 @@ std::shared_ptr<ToneInfo> AudioPolicyProxy::GetToneConfig(int32_t ltonetype)
         AUDIO_ERR_LOG("get toneinfo failed, error: %d", error);
     }
 
-    spToneInfo->segmentCnt=reply.ReadUint32();
-    spToneInfo->repeatCnt=reply.ReadUint32();
-    spToneInfo->repeatSegment=reply.ReadUint32();
+    spToneInfo->segmentCnt = reply.ReadUint32();
+    spToneInfo->repeatCnt = reply.ReadUint32();
+    spToneInfo->repeatSegment = reply.ReadUint32();
     AUDIO_INFO_LOG("segmentCnt: %{public}d, repeatCnt: %{public}d, repeatSegment: %{public}d",
         spToneInfo->segmentCnt, spToneInfo->repeatCnt, spToneInfo->repeatSegment);
     for (uint32_t i = 0; i<spToneInfo->segmentCnt; i++) {
@@ -443,6 +443,31 @@ std::vector<sptr<AudioDeviceDescriptor>> AudioPolicyProxy::GetDevices(DeviceFlag
     int32_t error = Remote()->SendRequest(GET_DEVICES, data, reply, option);
     if (error != ERR_NONE) {
         AUDIO_ERR_LOG("Get devices failed, error: %d", error);
+        return deviceInfo;
+    }
+
+    int32_t size = reply.ReadInt32();
+    for (int32_t i = 0; i < size; i++) {
+        deviceInfo.push_back(AudioDeviceDescriptor::Unmarshalling(reply));
+    }
+
+    return deviceInfo;
+}
+
+std::vector<sptr<AudioDeviceDescriptor>> AudioPolicyProxy::GetActiveOutputDeviceDescriptors()
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+    std::vector<sptr<AudioDeviceDescriptor>> deviceInfo;
+
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        AUDIO_ERR_LOG("AudioPolicyProxy: WriteInterfaceToken failed");
+        return deviceInfo;
+    }
+    int32_t error = Remote()->SendRequest(GET_ACTIVE_OUTPUT_DEVICE_DESCRIPTORS, data, reply, option);
+    if (error != ERR_NONE) {
+        AUDIO_ERR_LOG("Get out devices failed, error: %d", error);
         return deviceInfo;
     }
 

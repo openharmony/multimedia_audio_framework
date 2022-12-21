@@ -33,12 +33,12 @@ public:
     int32_t GetParams(AudioRendererParams &params) const override;
     int32_t GetRendererInfo(AudioRendererInfo &rendererInfo) const override;
     int32_t GetStreamInfo(AudioStreamInfo &streamInfo) const override;
-    bool Start() const override;
+    bool Start(StateChangeCmdType cmdType = CMD_FROM_CLIENT) const override;
     int32_t Write(uint8_t *buffer, size_t bufferSize) override;
     RendererState GetStatus() const override;
     bool GetAudioTime(Timestamp &timestamp, Timestamp::Timestampbase base) const override;
     bool Drain() const override;
-    bool Pause() const override;
+    bool Pause(StateChangeCmdType cmdType = CMD_FROM_CLIENT) const override;
     bool Stop() const override;
     bool Flush() const override;
     bool Release() const override;
@@ -77,7 +77,8 @@ public:
     ~AudioRendererPrivate();
 
 private:
-    void InitSharedInterrupt();
+    int32_t InitAudioInterruptCallback();
+    int32_t InitSharedInterrupt();
     static std::map<pid_t, std::map<AudioStreamType, AudioInterrupt>> sharedInterrupts_;
     std::shared_ptr<AudioStream> audioStream_;
     std::shared_ptr<AudioInterruptCallback> audioInterruptCallback_ = nullptr;
@@ -85,7 +86,7 @@ private:
     AppInfo appInfo_ = {};
     AudioInterrupt audioInterrupt_ =
         {STREAM_USAGE_UNKNOWN, CONTENT_TYPE_UNKNOWN, AudioStreamType::STREAM_DEFAULT, 0};
-     AudioInterrupt sharedInterrupt_ =
+    AudioInterrupt sharedInterrupt_ =
         {STREAM_USAGE_UNKNOWN, CONTENT_TYPE_UNKNOWN, AudioStreamType::STREAM_DEFAULT, 0};
     uint32_t sessionID_ = INVALID_SESSION_ID;
     AudioStandard::InterruptMode mode_ = AudioStandard::InterruptMode::SHARE_MODE;
@@ -118,7 +119,7 @@ class AudioStreamCallbackRenderer : public AudioStreamCallback {
 public:
     virtual ~AudioStreamCallbackRenderer() = default;
 
-    void OnStateChange(const State state) override;
+    void OnStateChange(const State state, const StateChangeCmdType cmdType = CMD_FROM_CLIENT) override;
     void SaveCallback(const std::weak_ptr<AudioRendererCallback> &callback);
 private:
     std::weak_ptr<AudioRendererCallback> callback_;

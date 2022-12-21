@@ -92,7 +92,7 @@ private:
 
     void PreparePosition();
 
-    int32_t CreateRender(struct AudioPort &renderPort);
+    int32_t CreateRender(const struct AudioPort &renderPort);
     int32_t InitAudioManager();
 #ifdef DUMPFILE
     FILE *pfd;

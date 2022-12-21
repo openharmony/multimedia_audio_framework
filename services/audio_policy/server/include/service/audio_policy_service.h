@@ -20,8 +20,10 @@
 #include <list>
 #include <string>
 #include <unordered_map>
+#include <mutex>
 #include "audio_group_handle.h"
 #include "audio_info.h"
+#include "audio_manager_base.h"
 #include "audio_policy_manager_factory.h"
 #include "audio_stream_collector.h"
 #include "audio_tone_parser.h"
@@ -48,7 +50,9 @@ public:
     void InitKVStore();
     bool ConnectServiceAdapter();
 
-    int32_t SetStreamVolume(AudioStreamType streamType, float volume) const;
+    const sptr<IStandardAudioService> GetAudioPolicyServiceProxy();
+
+    int32_t SetStreamVolume(AudioStreamType streamType, float volume);
 
     float GetStreamVolume(AudioStreamType streamType) const;
 
@@ -99,7 +103,7 @@ public:
 	
     int32_t SetMicrophoneMute(bool isMute);
 
-    bool IsMicrophoneMute() const;
+    bool IsMicrophoneMute();
 
     int32_t SetAudioScene(AudioScene audioScene);
 
@@ -193,6 +197,8 @@ public:
 
     void SubscribeAccessibilityConfigObserver();
 
+    std::vector<sptr<AudioDeviceDescriptor>> GetActiveOutputDeviceDescriptors();
+
 private:
     AudioPolicyService()
         : audioPolicyManager_(AudioPolicyManagerFactory::GetAudioPolicyManager()),
@@ -285,9 +291,11 @@ private:
     bool isBtListenerRegistered = false;
     const int32_t G_UNKNOWN_PID = -1;
     int32_t dAudioClientUid = 3055;
+    int32_t switchVolumeDelay_ = 500000; // us
     uint64_t audioLatencyInMsec_ = 50;
     uint32_t sinkLatencyInMsec_ {0};
     std::bitset<MIN_SERVICE_COUNT> serviceFlag_;
+    std::mutex serviceFlagMutex_;
     DeviceType currentActiveDevice_ = DEVICE_TYPE_NONE;
     DeviceType activeInputDevice_ = DEVICE_TYPE_NONE;
     std::unordered_map<int32_t, std::pair<std::string, int32_t>> routerMap_;

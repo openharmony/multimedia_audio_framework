@@ -168,6 +168,12 @@ void AudioCapturerStateCallbackNapi::OnJsCallbackCapturerState(std::unique_ptr<A
     int ret = uv_queue_work(loop, work, [] (uv_work_t *work) {}, [] (uv_work_t *work, int status) {
         // Js Thread
         AudioCapturerStateJsCallback *event = reinterpret_cast<AudioCapturerStateJsCallback *>(work->data);
+        if (event == nullptr || event->callback == nullptr) {
+            AUDIO_ERR_LOG("AudioCapturerStateCallbackNapi: OnJsCallbackCapturerState: data or callback is null.");
+            delete event;
+            delete work;
+            return;
+        }
         napi_env env = event->callback->env_;
         napi_ref callback = event->callback->cb_;
 

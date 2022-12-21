@@ -68,7 +68,7 @@ map<pair<ContentType, StreamUsage>, AudioStreamType> AudioStream::CreateStreamMa
     streamMap[make_pair(CONTENT_TYPE_SONIFICATION, STREAM_USAGE_MEDIA)] = STREAM_NOTIFICATION;
     streamMap[make_pair(CONTENT_TYPE_SONIFICATION, STREAM_USAGE_VOICE_COMMUNICATION)] = STREAM_MUSIC;
     streamMap[make_pair(CONTENT_TYPE_SONIFICATION, STREAM_USAGE_VOICE_ASSISTANT)] = STREAM_MUSIC;
-    streamMap[make_pair(CONTENT_TYPE_SONIFICATION, STREAM_USAGE_NOTIFICATION_RINGTONE)] = STREAM_MUSIC;
+    streamMap[make_pair(CONTENT_TYPE_SONIFICATION, STREAM_USAGE_NOTIFICATION_RINGTONE)] = STREAM_RING;
 
     streamMap[make_pair(CONTENT_TYPE_RINGTONE, STREAM_USAGE_UNKNOWN)] = STREAM_RING;
     streamMap[make_pair(CONTENT_TYPE_RINGTONE, STREAM_USAGE_MEDIA)] = STREAM_RING;
@@ -80,8 +80,7 @@ map<pair<ContentType, StreamUsage>, AudioStreamType> AudioStream::CreateStreamMa
 }
 
 AudioStream::AudioStream(AudioStreamType eStreamType, AudioMode eMode, int32_t appUid)
-    : AppExecFwk::EventHandler(AppExecFwk::EventRunner::Create("AudioStreamRunner")),
-      eStreamType_(eStreamType),
+    : eStreamType_(eStreamType),
       eMode_(eMode),
       state_(NEW),
       isReadInProgress_(false),
@@ -114,7 +113,7 @@ AudioStream::~AudioStream()
     }
 
     if (state_ != RELEASED && state_ != NEW) {
-        ReleaseAudioStream();
+        ReleaseAudioStream(false);
     }
 
     if (audioStreamTracker_) {
@@ -302,9 +301,9 @@ int32_t AudioStream::SetAudioStreamInfo(const AudioStreamParams info,
         return ERR_NOT_SUPPORTED;
     }
     if (state_ != NEW) {
-        AUDIO_DEBUG_LOG("AudioStream: State is not new, release existing stream");
+        AUDIO_INFO_LOG("AudioStream: State is not new, release existing stream");
         StopAudioStream();
-        ReleaseAudioStream();
+        ReleaseAudioStream(false);
     }
     int32_t ret = 0;
     switch (eMode_) {
@@ -347,14 +346,14 @@ int32_t AudioStream::SetAudioStreamInfo(const AudioStreamParams info,
     return SUCCESS;
 }
 
-bool AudioStream::StartAudioStream()
+bool AudioStream::StartAudioStream(StateChangeCmdType cmdType)
 {
     if ((state_ != PREPARED) && (state_ != STOPPED) && (state_ != PAUSED)) {
         AUDIO_ERR_LOG("StartAudioStream Illegal state:%{public}u", state_);
         return false;
     }
 
-    int32_t ret = StartStream();
+    int32_t ret = StartStream(cmdType);
     if (ret != SUCCESS) {
         AUDIO_ERR_LOG("StartStream Start failed:%{public}d", ret);
         return false;
@@ -366,6 +365,10 @@ bool AudioStream::StartAudioStream()
         AUDIO_ERR_LOG("AudioStream::StartAudioStream get system elapsed time failed: %d", retCode);
     }
 
+    isFirstRead_ = true;
+    isFirstWrite_ = true;
+    state_ = RUNNING;
+
     if (renderMode_ == RENDER_MODE_CALLBACK) {
         isReadyToWrite_ = true;
         writeThread_ = std::make_unique<std::thread>(&AudioStream::WriteCbTheadLoop, this);
@@ -374,9 +377,6 @@ bool AudioStream::StartAudioStream()
         readThread_ = std::make_unique<std::thread>(&AudioStream::ReadCbThreadLoop, this);
     }
 
-    isFirstRead_ = true;
-    isFirstWrite_ = true;
-    state_ = RUNNING;
     AUDIO_INFO_LOG("StartAudioStream SUCCESS");
 
     if (audioStreamTracker_) {
@@ -458,7 +458,7 @@ size_t AudioStream::Write(uint8_t *buffer, size_t buffer_size)
     return bytesWritten;
 }
 
-bool AudioStream::PauseAudioStream()
+bool AudioStream::PauseAudioStream(StateChangeCmdType cmdType)
 {
     if (state_ != RUNNING) {
         AUDIO_ERR_LOG("PauseAudioStream: State is not RUNNING. Illegal state:%{public}u", state_);
@@ -491,7 +491,7 @@ bool AudioStream::PauseAudioStream()
     
     AUDIO_DEBUG_LOG("AudioStream::PauseAudioStream:renderMode_ : %{public}d state_: %{public}d", renderMode_, state_);
 
-    int32_t ret = PauseStream();
+    int32_t ret = PauseStream(cmdType);
     if (ret != SUCCESS) {
         AUDIO_DEBUG_LOG("StreamPause fail,ret:%{public}d", ret);
         state_ = oldState;
@@ -499,6 +499,9 @@ bool AudioStream::PauseAudioStream()
     }
 
     AUDIO_INFO_LOG("PauseAudioStream SUCCESS");
+
+    // flush stream after stream paused
+    FlushAudioStream();
 
     if (audioStreamTracker_) {
         AUDIO_DEBUG_LOG("AudioStream:Calling Update tracker for Pause");
@@ -509,7 +512,7 @@ bool AudioStream::PauseAudioStream()
 
 bool AudioStream::StopAudioStream()
 {
-    AUDIO_INFO_LOG("AudioStream: StopAudioStream begin");
+    AUDIO_INFO_LOG("AudioStream: begin StopAudioStream for sessionId %{public}d", sessionId_);
     if (state_ == PAUSED) {
         state_ = STOPPED;
         AUDIO_INFO_LOG("StopAudioStream SUCCESS");
@@ -591,7 +594,7 @@ bool AudioStream::DrainAudioStream()
     return true;
 }
 
-bool AudioStream::ReleaseAudioStream()
+bool AudioStream::ReleaseAudioStream(bool releaseRunner)
 {
     if (state_ == RELEASED || state_ == NEW) {
         AUDIO_ERR_LOG("Illegal state: state = %{public}u", state_);
@@ -602,7 +605,7 @@ bool AudioStream::ReleaseAudioStream()
         StopAudioStream();
     }
 
-    ReleaseStream();
+    ReleaseStream(releaseRunner);
     state_ = RELEASED;
     AUDIO_INFO_LOG("ReleaseAudiostream SUCCESS");
 
@@ -749,9 +752,7 @@ int32_t AudioStream::SetRendererWriteCallback(const std::shared_ptr<AudioRendere
         AUDIO_ERR_LOG("SetRendererWriteCallback callback is nullptr");
         return ERR_INVALID_PARAM;
     }
-    writeCallback_ = callback;
-
-    return SUCCESS;
+    return AudioServiceClient::SetRendererWriteCallback(callback);
 }
 
 int32_t AudioStream::SetCapturerReadCallback(const std::shared_ptr<AudioCapturerReadCallback> &callback)
@@ -979,35 +980,6 @@ void AudioStream::SubmitAllFreeBuffers()
     lock_guard<mutex> lock(bufferQueueLock_);
     for (size_t i = 0; i < freeBufferQ_.size(); ++i) {
         SendWriteBufferRequestEvent();
-    }
-}
-
-void AudioStream::SendWriteBufferRequestEvent()
-{
-    // send write event to handler
-    SendEvent(AppExecFwk::InnerEvent::Get(WRITE_BUFFER_REQUEST));
-}
-
-void AudioStream::HandleWriteRequestEvent()
-{
-    // do callback to application
-    if (writeCallback_) {
-        size_t requestSize;
-        GetMinimumBufferSize(requestSize);
-        writeCallback_->OnWriteData(requestSize);
-    }
-}
-
-void AudioStream::ProcessEvent(const AppExecFwk::InnerEvent::Pointer &event)
-{
-    uint32_t eventId = event->GetInnerEventId();
-    switch (eventId) {
-        case WRITE_BUFFER_REQUEST: {
-            HandleWriteRequestEvent();
-            break;
-        }
-        default:
-            break;
     }
 }
 } // namespace AudioStandard

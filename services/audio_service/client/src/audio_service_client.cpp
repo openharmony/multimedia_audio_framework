@@ -25,6 +25,7 @@
 #include "securec.h"
 #include "system_ability_definition.h"
 #include "unistd.h"
+#include "audio_errors.h"
 
 using namespace std;
 
@@ -155,8 +156,9 @@ void AudioServiceClient::PAStreamStartSuccessCb(pa_stream *stream, int32_t succe
     asClient->WriteStateChangedSysEvents();
     std::shared_ptr<AudioStreamCallback> streamCb = asClient->streamCallback_.lock();
     if (streamCb != nullptr) {
-        streamCb->OnStateChange(asClient->state_);
+        streamCb->OnStateChange(asClient->state_, asClient->stateChangeCmdType_);
     }
+    asClient->stateChangeCmdType_ = CMD_FROM_CLIENT;
     asClient->streamCmdStatus = success;
     pa_threaded_mainloop_signal(mainLoop, 0);
 }
@@ -195,8 +197,9 @@ void AudioServiceClient::PAStreamPauseSuccessCb(pa_stream *stream, int32_t succe
     asClient->WriteStateChangedSysEvents();
     std::shared_ptr<AudioStreamCallback> streamCb = asClient->streamCallback_.lock();
     if (streamCb != nullptr) {
-        streamCb->OnStateChange(asClient->state_);
+        streamCb->OnStateChange(asClient->state_, asClient->stateChangeCmdType_);
     }
+    asClient->stateChangeCmdType_ = CMD_FROM_CLIENT;
     asClient->streamCmdStatus = success;
     pa_threaded_mainloop_signal(mainLoop, 0);
 }
@@ -238,11 +241,8 @@ void AudioServiceClient::PAStreamSetBufAttrSuccessCb(pa_stream *stream, int32_t 
     pa_threaded_mainloop *mainLoop = (pa_threaded_mainloop *)asClient->mainLoop;
 
     AUDIO_DEBUG_LOG("AAudioServiceClient::PAStreamSetBufAttrSuccessCb is called");
-    if (!success) {
-        AUDIO_ERR_LOG("AAudioServiceClient::PAStreamSetBufAttrSuccessCb SetBufAttr failed");
-    } else {
-        AUDIO_ERR_LOG("AAudioServiceClient::PAStreamSetBufAttrSuccessCb SetBufAttr success");
-    }
+    AUDIO_ERR_LOG("AAudioServiceClient::PAStreamSetBufAttrSuccessCb SetBufAttr %s", success ? "success" : "faild");
+
     pa_threaded_mainloop_signal(mainLoop, 0);
 }
 
@@ -295,17 +295,6 @@ int32_t AudioServiceClient::SetAudioCaptureMode(AudioCaptureMode captureMode)
 AudioCaptureMode AudioServiceClient::GetAudioCaptureMode()
 {
     return captureMode_;
-}
-
-int32_t AudioServiceClient::SaveWriteCallback(const std::weak_ptr<AudioRendererWriteCallback> &callback)
-{
-    if (callback.lock() == nullptr) {
-        AUDIO_ERR_LOG("AudioServiceClient::SaveWriteCallback callback == nullptr");
-        return AUDIO_CLIENT_INIT_ERR;
-    }
-    writeCallback_ = callback;
-
-    return AUDIO_CLIENT_SUCCESS;
 }
 
 int32_t AudioServiceClient::SaveReadCallback(const std::weak_ptr<AudioCapturerReadCallback> &callback)
@@ -447,6 +436,7 @@ void AudioServiceClient::PAContextStateCb(pa_context *context, void *userdata)
 }
 
 AudioServiceClient::AudioServiceClient()
+    : AppExecFwk::EventHandler(AppExecFwk::EventRunner::Create("AudioServiceClientRunner"))
 {
     isMainLoopStarted = false;
     isContextConnected = false;
@@ -515,6 +505,7 @@ AudioServiceClient::AudioServiceClient()
 
 void AudioServiceClient::ResetPAAudioClient()
 {
+    AUDIO_INFO_LOG("Enter ResetPAAudioClient");
     lock_guard<mutex> lock(ctrlMutex);
     if (mainLoop && (isMainLoopStarted == true))
         pa_threaded_mainloop_stop(mainLoop);
@@ -593,6 +584,8 @@ void AudioServiceClient::ResetPAAudioClient()
 
 AudioServiceClient::~AudioServiceClient()
 {
+    lock_guard<mutex> lockdata(dataMutex);
+    AUDIO_INFO_LOG("start ~AudioServiceClient");
     ResetPAAudioClient();
 }
 
@@ -649,6 +642,7 @@ bool AudioServiceClient::getUsingPemissionFromPrivacy(const std::string &permiss
 
 int32_t AudioServiceClient::Initialize(ASClientType eClientType)
 {
+    AUDIO_INFO_LOG("Enter AudioServiceClient::Initialize");
     int error = PA_ERR_INTERNAL;
     eAudioClientType = eClientType;
 
@@ -661,11 +655,10 @@ int32_t AudioServiceClient::Initialize(ASClientType eClientType)
     SetEnv();
 
     mAudioSystemMgr = AudioSystemManager::GetInstance();
-
+    lock_guard<mutex> lockdata(dataMutex);
     mainLoop = pa_threaded_mainloop_new();
     if (mainLoop == nullptr)
         return AUDIO_CLIENT_INIT_ERR;
-
     api = pa_threaded_mainloop_get_api(mainLoop);
     if (api == nullptr) {
         ResetPAAudioClient();
@@ -793,6 +786,7 @@ const std::string AudioServiceClient::GetStreamName(AudioStreamType audioType)
 
 int32_t AudioServiceClient::ConnectStreamToPA()
 {
+    AUDIO_INFO_LOG("Enter AudioServiceClient::ConnectStreamToPA");
     int error, result;
 
     if (CheckReturnIfinvalid(mainLoop && context && paStream, AUDIO_CLIENT_ERR) < 0) {
@@ -827,10 +821,12 @@ int32_t AudioServiceClient::ConnectStreamToPA()
         preBuf_ = make_unique<uint8_t[]>(bufferAttr.maxlength);
         if (preBuf_ == nullptr) {
             AUDIO_ERR_LOG("Allocate memory for buffer failed.");
+            pa_threaded_mainloop_unlock(mainLoop);
             return AUDIO_CLIENT_INIT_ERR;
         }
         if (memset_s(preBuf_.get(), bufferAttr.maxlength, 0, bufferAttr.maxlength) != 0) {
             AUDIO_ERR_LOG("memset_s for buffer failed.");
+            pa_threaded_mainloop_unlock(mainLoop);
             return AUDIO_CLIENT_INIT_ERR;
         }
     } else {
@@ -898,7 +894,9 @@ int32_t AudioServiceClient::InitializeAudioCache()
 
 int32_t AudioServiceClient::CreateStream(AudioStreamParams audioParams, AudioStreamType audioType)
 {
+    AUDIO_INFO_LOG("Enter AudioServiceClient::CreateStream");
     int error;
+    lock_guard<mutex> lockdata(dataMutex);
     if (CheckReturnIfinvalid(mainLoop && context, AUDIO_CLIENT_ERR) < 0) {
         return AUDIO_CLIENT_ERR;
     }
@@ -906,7 +904,6 @@ int32_t AudioServiceClient::CreateStream(AudioStreamParams audioParams, AudioStr
     if (eAudioClientType == AUDIO_SERVICE_CLIENT_CONTROLLER) {
         return AUDIO_CLIENT_INVALID_PARAMS_ERR;
     }
-
     pa_threaded_mainloop_lock(mainLoop);
     mStreamType = audioType;
     const std::string streamName = GetStreamName(audioType);
@@ -921,6 +918,7 @@ int32_t AudioServiceClient::CreateStream(AudioStreamParams audioParams, AudioStr
     if (propList == nullptr) {
         AUDIO_ERR_LOG("pa_proplist_new failed");
         ResetPAAudioClient();
+        pa_threaded_mainloop_unlock(mainLoop);
         return AUDIO_CLIENT_CREATE_STREAM_ERR;
     }
 
@@ -942,6 +940,7 @@ int32_t AudioServiceClient::CreateStream(AudioStreamParams audioParams, AudioStr
         switch (audioParams.channels) {
             case CHANNEL_8:
                 map.map[CHANNEL8_IDX] = PA_CHANNEL_POSITION_AUX1;
+                [[fallthrough]];
             case CHANNEL_7:
                 map.map[CHANNEL1_IDX] = PA_CHANNEL_POSITION_FRONT_LEFT;
                 map.map[CHANNEL2_IDX] = PA_CHANNEL_POSITION_FRONT_LEFT_OF_CENTER;
@@ -953,6 +952,7 @@ int32_t AudioServiceClient::CreateStream(AudioStreamParams audioParams, AudioStr
                 break;
             default:
                 AUDIO_ERR_LOG("Invalid channel count");
+                pa_threaded_mainloop_unlock(mainLoop);
                 return AUDIO_CLIENT_CREATE_STREAM_ERR;
         }
 
@@ -1033,14 +1033,14 @@ int32_t AudioServiceClient::GetSessionID(uint32_t &sessionID) const
     return AUDIO_CLIENT_SUCCESS;
 }
 
-int32_t AudioServiceClient::StartStream()
+int32_t AudioServiceClient::StartStream(StateChangeCmdType cmdType)
 {
+    AUDIO_INFO_LOG("Enter AudioServiceClient::StartStream");
     int error;
-
+    lock_guard<mutex> lockdata(dataMutex);
     if (CheckPaStatusIfinvalid(mainLoop, context, paStream, AUDIO_CLIENT_PA_ERR) < 0) {
         return AUDIO_CLIENT_PA_ERR;
     }
-
     pa_operation *operation = nullptr;
 
     pa_threaded_mainloop_lock(mainLoop);
@@ -1055,6 +1055,7 @@ int32_t AudioServiceClient::StartStream()
     }
 
     streamCmdStatus = 0;
+    stateChangeCmdType_ = cmdType;
     operation = pa_stream_cork(paStream, 0, PAStreamStartSuccessCb, (void *)this);
 
     while (pa_operation_get_state(operation) == PA_OPERATION_RUNNING) {
@@ -1073,10 +1074,13 @@ int32_t AudioServiceClient::StartStream()
     }
 }
 
-int32_t AudioServiceClient::PauseStream()
+int32_t AudioServiceClient::PauseStream(StateChangeCmdType cmdType)
 {
-    lock_guard<mutex> lock(ctrlMutex);
+    lock_guard<mutex> lockdata(dataMutex);
+    lock_guard<mutex> lockctrl(ctrlMutex);
     PAStreamCorkSuccessCb = PAStreamPauseSuccessCb;
+    stateChangeCmdType_ = cmdType;
+
     int32_t ret = CorkStream();
     if (ret) {
         return ret;
@@ -1093,7 +1097,8 @@ int32_t AudioServiceClient::PauseStream()
 
 int32_t AudioServiceClient::StopStream()
 {
-    lock_guard<mutex> lock(ctrlMutex);
+    lock_guard<mutex> lockdata(dataMutex);
+    lock_guard<mutex> lockctrl(ctrlMutex);
     PAStreamCorkSuccessCb = PAStreamStopSuccessCb;
     int32_t ret = CorkStream();
     if (ret) {
@@ -1146,13 +1151,12 @@ int32_t AudioServiceClient::CorkStream()
 
 int32_t AudioServiceClient::FlushStream()
 {
+    lock_guard<mutex> lock(dataMutex);
     if (CheckPaStatusIfinvalid(mainLoop, context, paStream, AUDIO_CLIENT_PA_ERR) < 0) {
         return AUDIO_CLIENT_PA_ERR;
     }
 
     pa_operation *operation = nullptr;
-
-    lock_guard<mutex> lock(dataMutex);
     pa_threaded_mainloop_lock(mainLoop);
 
     pa_stream_state_t state = pa_stream_get_state(paStream);
@@ -1209,9 +1213,6 @@ int32_t AudioServiceClient::DrainStream()
         return AUDIO_CLIENT_PA_ERR;
     }
 
-    if (CheckPaStatusIfinvalid(mainLoop, context, paStream, AUDIO_CLIENT_PA_ERR) < 0) {
-        return AUDIO_CLIENT_PA_ERR;
-    }
     pa_operation *operation = nullptr;
 
     pa_threaded_mainloop_lock(mainLoop);
@@ -1302,13 +1303,12 @@ void AudioServiceClient::HandleRenderPositionCallbacks(size_t bytesWritten)
 
     {
         std::lock_guard<std::mutex> lock(rendererMarkReachedMutex_);
-        if (!mMarkReached && mRenderPositionCb) {
+        if (!mMarkReached) {
             AUDIO_DEBUG_LOG("frame mark position: %{public}" PRIu64 ", Total frames written: %{public}" PRIu64,
                 static_cast<uint64_t>(mFrameMarkPosition), static_cast<uint64_t>(writtenFrameNumber));
             if (writtenFrameNumber >= mFrameMarkPosition) {
                 AUDIO_DEBUG_LOG("audio service client OnMarkReached");
-                mPositionCBThreads.emplace_back(std::make_unique<std::thread>(&RendererPositionCallback::OnMarkReached,
-                                                mRenderPositionCb, mFrameMarkPosition));
+                SendRenderMarkReachedRequestEvent(mFrameMarkPosition);
                 mMarkReached = true;
             }
         }
@@ -1316,17 +1316,14 @@ void AudioServiceClient::HandleRenderPositionCallbacks(size_t bytesWritten)
 
     {
         std::lock_guard<std::mutex> lock(rendererPeriodReachedMutex_);
-        if (mRenderPeriodPositionCb) {
-            mFramePeriodWritten += (bytesWritten / mFrameSize);
-            AUDIO_DEBUG_LOG("frame period number: %{public}" PRIu64 ", Total frames written: %{public}" PRIu64,
-                static_cast<uint64_t>(mFramePeriodNumber), static_cast<uint64_t>(writtenFrameNumber));
-            if (mFramePeriodWritten >= mFramePeriodNumber) {
-                mFramePeriodWritten %= mFramePeriodNumber;
-                AUDIO_DEBUG_LOG("OnPeriodReached, remaining frames: %{public}" PRIu64,
-                    static_cast<uint64_t>(mFramePeriodWritten));
-                mPeriodPositionCBThreads.emplace_back(std::make_unique<std::thread>(
-                    &RendererPeriodPositionCallback::OnPeriodReached, mRenderPeriodPositionCb, mFramePeriodNumber));
-            }
+        mFramePeriodWritten += (bytesWritten / mFrameSize);
+        AUDIO_DEBUG_LOG("frame period number: %{public}" PRIu64 ", Total frames written: %{public}" PRIu64,
+            static_cast<uint64_t>(mFramePeriodNumber), static_cast<uint64_t>(writtenFrameNumber));
+        if (mFramePeriodWritten >= mFramePeriodNumber) {
+            mFramePeriodWritten %= mFramePeriodNumber;
+            AUDIO_DEBUG_LOG("OnPeriodReached, remaining frames: %{public}" PRIu64,
+                static_cast<uint64_t>(mFramePeriodWritten));
+            SendRenderPeriodReachedRequestEvent(mFramePeriodNumber);
         }
     }
 }
@@ -1342,6 +1339,7 @@ int32_t AudioServiceClient::DrainAudioCache()
     int32_t error = 0;
     if (acache.buffer == nullptr) {
         AUDIO_ERR_LOG("Drain cache failed");
+        pa_threaded_mainloop_unlock(mainLoop);
         return AUDIO_CLIENT_ERR;
     }
 
@@ -1431,6 +1429,7 @@ size_t AudioServiceClient::WriteStream(const StreamBuffer &stream, int32_t &pErr
 
     if (acache.buffer == nullptr) {
         AUDIO_ERR_LOG("Buffer is null");
+        pa_threaded_mainloop_unlock(mainLoop);
         pError = AUDIO_CLIENT_WRITE_STREAM_ERR;
         return cachedLen;
     }
@@ -1449,6 +1448,7 @@ size_t AudioServiceClient::WriteStream(const StreamBuffer &stream, int32_t &pErr
         if (size > 0) {
             if (memcpy_s(cacheBuffer, acache.totalCacheSize, cacheBuffer + offset, size)) {
                 AUDIO_ERR_LOG("Update cache failed");
+                pa_threaded_mainloop_unlock(mainLoop);
                 pError = AUDIO_CLIENT_WRITE_STREAM_ERR;
                 return cachedLen;
             }
@@ -1569,13 +1569,12 @@ void AudioServiceClient::HandleCapturePositionCallbacks(size_t bytesRead)
     AUDIO_DEBUG_LOG("frame size: %{public}d", mFrameSize);
     {
         std::lock_guard<std::mutex> lock(capturerMarkReachedMutex_);
-        if (!mMarkReached && mCapturePositionCb) {
+        if (!mMarkReached) {
             AUDIO_DEBUG_LOG("frame mark position: %{public}" PRIu64 ", Total frames read: %{public}" PRIu64,
                 static_cast<uint64_t>(mFrameMarkPosition), static_cast<uint64_t>(readFrameNumber));
             if (readFrameNumber >= mFrameMarkPosition) {
                 AUDIO_DEBUG_LOG("audio service client capturer OnMarkReached");
-                mPositionCBThreads.emplace_back(std::make_unique<std::thread>(&CapturerPositionCallback::OnMarkReached,
-                                                mCapturePositionCb, mFrameMarkPosition));
+                SendCapturerMarkReachedRequestEvent(mFrameMarkPosition);
                 mMarkReached = true;
             }
         }
@@ -1583,17 +1582,14 @@ void AudioServiceClient::HandleCapturePositionCallbacks(size_t bytesRead)
 
     {
         std::lock_guard<std::mutex> lock(capturerPeriodReachedMutex_);
-        if (mCapturePeriodPositionCb) {
-            mFramePeriodRead += (bytesRead / mFrameSize);
-            AUDIO_DEBUG_LOG("frame period number: %{public}" PRIu64 ", Total frames read: %{public}" PRIu64,
-                static_cast<uint64_t>(mFramePeriodNumber), static_cast<uint64_t>(readFrameNumber));
-            if (mFramePeriodRead >= mFramePeriodNumber) {
-                mFramePeriodRead %= mFramePeriodNumber;
-                AUDIO_DEBUG_LOG("audio service client OnPeriodReached, remaining frames: %{public}" PRIu64,
-                    static_cast<uint64_t>(mFramePeriodRead));
-                mPeriodPositionCBThreads.emplace_back(std::make_unique<std::thread>(
-                    &CapturerPeriodPositionCallback::OnPeriodReached, mCapturePeriodPositionCb, mFramePeriodNumber));
-            }
+        mFramePeriodRead += (bytesRead / mFrameSize);
+        AUDIO_DEBUG_LOG("frame period number: %{public}" PRIu64 ", Total frames read: %{public}" PRIu64,
+            static_cast<uint64_t>(mFramePeriodNumber), static_cast<uint64_t>(readFrameNumber));
+        if (mFramePeriodRead >= mFramePeriodNumber) {
+            mFramePeriodRead %= mFramePeriodNumber;
+            AUDIO_DEBUG_LOG("audio service client OnPeriodReached, remaining frames: %{public}" PRIu64,
+                static_cast<uint64_t>(mFramePeriodRead));
+            SendCapturerPeriodReachedRequestEvent(mFramePeriodNumber);
         }
     }
 }
@@ -1603,11 +1599,11 @@ int32_t AudioServiceClient::ReadStream(StreamBuffer &stream, bool isBlocking)
     uint8_t *buffer = stream.buffer;
     size_t length = stream.bufferLen;
     size_t readSize = 0;
+    lock_guard<mutex> lock(dataMutex);
     if (CheckPaStatusIfinvalid(mainLoop, context, paStream, AUDIO_CLIENT_PA_ERR) < 0) {
         return AUDIO_CLIENT_PA_ERR;
     }
 
-    lock_guard<mutex> lock(dataMutex);
     pa_threaded_mainloop_lock(mainLoop);
     while (length > 0) {
         while (!internalReadBuffer) {
@@ -1658,15 +1654,25 @@ int32_t AudioServiceClient::ReadStream(StreamBuffer &stream, bool isBlocking)
     return readSize;
 }
 
-int32_t AudioServiceClient::ReleaseStream()
+int32_t AudioServiceClient::ReleaseStream(bool releaseRunner)
 {
     state_ = RELEASED;
+    lock_guard<mutex> lockdata(dataMutex);
     WriteStateChangedSysEvents();
     ResetPAAudioClient();
 
     std::shared_ptr<AudioStreamCallback> streamCb = streamCallback_.lock();
     if (streamCb != nullptr) {
         streamCb->OnStateChange(state_);
+    }
+
+    {
+        lock_guard<mutex> runnerlock(runnerMutex_);
+        if (releaseRunner) {
+            AUDIO_INFO_LOG("runner remove");
+            SetEventRunner(nullptr);
+            runnerReleased_ = true;
+        }
     }
 
     return AUDIO_CLIENT_SUCCESS;
@@ -1792,11 +1798,10 @@ uint32_t AudioServiceClient::GetStreamVolume(uint32_t sessionID)
 
 int32_t AudioServiceClient::GetCurrentTimeStamp(uint64_t &timeStamp)
 {
+    lock_guard<mutex> lock(dataMutex);
     if (CheckPaStatusIfinvalid(mainLoop, context, paStream, AUDIO_CLIENT_PA_ERR) < 0) {
         return AUDIO_CLIENT_PA_ERR;
     }
-
-    lock_guard<mutex> lock(dataMutex);
     pa_threaded_mainloop_lock(mainLoop);
 
     if (eAudioClientType == AUDIO_SERVICE_CLIENT_PLAYBACK) {
@@ -1814,6 +1819,7 @@ int32_t AudioServiceClient::GetCurrentTimeStamp(uint64_t &timeStamp)
     const pa_timing_info *info = pa_stream_get_timing_info(paStream);
     if (info == nullptr) {
         AUDIO_ERR_LOG("pa_stream_get_timing_info failed");
+        pa_threaded_mainloop_unlock(mainLoop);
         return AUDIO_CLIENT_ERR;
     }
 
@@ -1822,6 +1828,7 @@ int32_t AudioServiceClient::GetCurrentTimeStamp(uint64_t &timeStamp)
     } else if (eAudioClientType == AUDIO_SERVICE_CLIENT_RECORD) {
         if (pa_stream_get_time(paStream, &timeStamp)) {
             AUDIO_ERR_LOG("AudioServiceClient::GetCurrentTimeStamp failed for AUDIO_SERVICE_CLIENT_RECORD");
+            pa_threaded_mainloop_unlock(mainLoop);
             return AUDIO_CLIENT_ERR;
         }
         int32_t uid = static_cast<int32_t>(getuid());
@@ -1840,10 +1847,10 @@ int32_t AudioServiceClient::GetCurrentTimeStamp(uint64_t &timeStamp)
 
 int32_t AudioServiceClient::GetAudioLatency(uint64_t &latency)
 {
+    lock_guard<mutex> lock(dataMutex);
     if (CheckPaStatusIfinvalid(mainLoop, context, paStream, AUDIO_CLIENT_PA_ERR) < 0) {
         return AUDIO_CLIENT_PA_ERR;
     }
-    lock_guard<mutex> lock(dataMutex);
     pa_usec_t paLatency {0};
     pa_usec_t cacheLatency {0};
     int negative {0};
@@ -1911,10 +1918,10 @@ void AudioServiceClient::RegisterAudioCapturerCallbacks(const AudioCapturerCallb
 void AudioServiceClient::SetRendererPositionCallback(int64_t markPosition,
     const std::shared_ptr<RendererPositionCallback> &callback)
 {
-    AUDIO_INFO_LOG("Registering render frame position callback");
-    AUDIO_INFO_LOG("mark position: %{public}" PRIu64, markPosition);
+    std::lock_guard<std::mutex> lock(rendererMarkReachedMutex_);
+    AUDIO_INFO_LOG("Registering render frame position callback mark position: %{public}" PRIu64, markPosition);
     mFrameMarkPosition = markPosition;
-    mRenderPositionCb = callback;
+    SendSetRenderMarkReachedRequestEvent(callback);
     mMarkReached = false;
 }
 
@@ -1922,7 +1929,7 @@ void AudioServiceClient::UnsetRendererPositionCallback()
 {
     AUDIO_INFO_LOG("Unregistering render frame position callback");
     std::lock_guard<std::mutex> lock(rendererMarkReachedMutex_);
-    mRenderPositionCb = nullptr;
+    SendUnsetRenderMarkReachedRequestEvent();
     mMarkReached = false;
     mFrameMarkPosition = 0;
 }
@@ -1930,6 +1937,7 @@ void AudioServiceClient::UnsetRendererPositionCallback()
 void AudioServiceClient::SetRendererPeriodPositionCallback(int64_t periodPosition,
     const std::shared_ptr<RendererPeriodPositionCallback> &callback)
 {
+    std::lock_guard<std::mutex> lock(rendererPeriodReachedMutex_);
     AUDIO_INFO_LOG("Registering render period position callback");
     mFramePeriodNumber = periodPosition;
     if ((mFrameSize != 0) && (mFramePeriodNumber != 0)) {
@@ -1938,14 +1946,14 @@ void AudioServiceClient::SetRendererPeriodPositionCallback(int64_t periodPositio
         AUDIO_ERR_LOG("AudioServiceClient::SetRendererPeriodPositionCallback failed");
         return;
     }
-    mRenderPeriodPositionCb = callback;
+    SendSetRenderPeriodReachedRequestEvent(callback);
 }
 
 void AudioServiceClient::UnsetRendererPeriodPositionCallback()
 {
     AUDIO_INFO_LOG("Unregistering render period position callback");
     std::lock_guard<std::mutex> lock(rendererPeriodReachedMutex_);
-    mRenderPeriodPositionCb = nullptr;
+    SendUnsetRenderPeriodReachedRequestEvent();
     mFramePeriodWritten = 0;
     mFramePeriodNumber = 0;
 }
@@ -1953,10 +1961,10 @@ void AudioServiceClient::UnsetRendererPeriodPositionCallback()
 void AudioServiceClient::SetCapturerPositionCallback(int64_t markPosition,
     const std::shared_ptr<CapturerPositionCallback> &callback)
 {
-    AUDIO_INFO_LOG("Registering capture frame position callback");
-    AUDIO_INFO_LOG("mark position: %{public}" PRIu64, markPosition);
+    std::lock_guard<std::mutex> lock(capturerMarkReachedMutex_);
+    AUDIO_INFO_LOG("Registering capture frame position callback, mark position: %{public}" PRIu64, markPosition);
     mFrameMarkPosition = markPosition;
-    mCapturePositionCb = callback;
+    SendSetCapturerMarkReachedRequestEvent(callback);
     mMarkReached = false;
 }
 
@@ -1964,7 +1972,7 @@ void AudioServiceClient::UnsetCapturerPositionCallback()
 {
     AUDIO_INFO_LOG("Unregistering capture frame position callback");
     std::lock_guard<std::mutex> lock(capturerMarkReachedMutex_);
-    mCapturePositionCb = nullptr;
+    SendUnsetCapturerMarkReachedRequestEvent();
     mMarkReached = false;
     mFrameMarkPosition = 0;
 }
@@ -1972,6 +1980,7 @@ void AudioServiceClient::UnsetCapturerPositionCallback()
 void AudioServiceClient::SetCapturerPeriodPositionCallback(int64_t periodPosition,
     const std::shared_ptr<CapturerPeriodPositionCallback> &callback)
 {
+    std::lock_guard<std::mutex> lock(capturerPeriodReachedMutex_);
     AUDIO_INFO_LOG("Registering period position callback");
     mFramePeriodNumber = periodPosition;
     if ((mFrameSize != 0) && (mFramePeriodNumber) != 0) {
@@ -1980,14 +1989,14 @@ void AudioServiceClient::SetCapturerPeriodPositionCallback(int64_t periodPositio
         AUDIO_INFO_LOG("AudioServiceClient::SetCapturerPeriodPositionCallback failed");
         return;
     }
-    mCapturePeriodPositionCb = callback;
+    SendSetCapturerPeriodReachedRequestEvent(callback);
 }
 
 void AudioServiceClient::UnsetCapturerPeriodPositionCallback()
 {
     AUDIO_INFO_LOG("Unregistering period position callback");
     std::lock_guard<std::mutex> lock(capturerPeriodReachedMutex_);
-    mCapturePeriodPositionCb = nullptr;
+    SendUnsetCapturerPeriodReachedRequestEvent();
     mFramePeriodRead = 0;
     mFramePeriodNumber = 0;
 }
@@ -2179,7 +2188,6 @@ void AudioServiceClient::SetPaVolume(const AudioServiceClient &client)
 int32_t AudioServiceClient::SetStreamRenderRate(AudioRendererRate audioRendererRate)
 {
     AUDIO_INFO_LOG("SetStreamRenderRate in");
-    renderRate = audioRendererRate;
     if (!paStream) {
         return AUDIO_CLIENT_SUCCESS;
     }
@@ -2197,6 +2205,7 @@ int32_t AudioServiceClient::SetStreamRenderRate(AudioRendererRate audioRendererR
         default:
             return AUDIO_CLIENT_INVALID_PARAMS_ERR;
     }
+    renderRate = audioRendererRate;
 
     pa_threaded_mainloop_lock(mainLoop);
     pa_operation *operation = pa_stream_update_sample_rate(paStream, rate, nullptr, nullptr);
@@ -2341,5 +2350,316 @@ float AudioServiceClient::GetSingleStreamVol()
 
     return vol;
 }
+
+// OnRenderMarkReach by eventHandler
+void AudioServiceClient::SendRenderMarkReachedRequestEvent(uint64_t mFrameMarkPosition)
+{
+    lock_guard<mutex> runnerlock(runnerMutex_);
+    if (runnerReleased_) {
+        AUDIO_WARNING_LOG("AudioServiceClient::SendRenderMarkReachedRequestEvent runner released");
+        return;
+    }
+    SendEvent(AppExecFwk::InnerEvent::Get(RENDERER_MARK_REACHED_REQUEST, mFrameMarkPosition));
+}
+
+void AudioServiceClient::HandleRenderMarkReachedEvent(uint64_t mFrameMarkPosition)
+{
+    if (mRenderPositionCb) {
+        mRenderPositionCb->OnMarkReached(mFrameMarkPosition);
+    }
+}
+
+// SetRenderMarkReached by eventHandler
+void AudioServiceClient::SendSetRenderMarkReachedRequestEvent(
+    const std::shared_ptr<RendererPositionCallback> &callback)
+{
+    lock_guard<mutex> runnerlock(runnerMutex_);
+    if (runnerReleased_) {
+        AUDIO_WARNING_LOG("AudioServiceClient::SendSetRenderMarkReachedRequestEvent runner released");
+        return;
+    }
+    SendSyncEvent(AppExecFwk::InnerEvent::Get(SET_RENDERER_MARK_REACHED_REQUEST, callback));
+}
+
+void AudioServiceClient::HandleSetRenderMarkReachedEvent(const std::shared_ptr<RendererPositionCallback> &callback)
+{
+    mRenderPositionCb = callback;
+}
+
+// UnsetRenderMarkReach by eventHandler
+void AudioServiceClient::SendUnsetRenderMarkReachedRequestEvent()
+{
+    lock_guard<mutex> runnerlock(runnerMutex_);
+    if (runnerReleased_) {
+        AUDIO_WARNING_LOG("AudioServiceClient::SendUnsetRenderMarkReachedRequestEvent runner released");
+        return;
+    }
+    SendSyncEvent(AppExecFwk::InnerEvent::Get(UNSET_RENDERER_MARK_REACHED_REQUEST));
+}
+
+void AudioServiceClient::HandleUnsetRenderMarkReachedEvent()
+{
+    mRenderPositionCb = nullptr;
+}
+
+// OnRenderPeriodReach by eventHandler
+void AudioServiceClient::SendRenderPeriodReachedRequestEvent(uint64_t mFramePeriodNumber)
+{
+    lock_guard<mutex> runnerlock(runnerMutex_);
+    if (runnerReleased_) {
+        AUDIO_WARNING_LOG("AudioServiceClient::SendRenderPeriodReachedRequestEvent runner released");
+        return;
+    }
+    SendEvent(AppExecFwk::InnerEvent::Get(RENDERER_PERIOD_REACHED_REQUEST, mFramePeriodNumber));
+}
+
+void AudioServiceClient::HandleRenderPeriodReachedEvent(uint64_t mFramePeriodNumber)
+{
+    if (mRenderPeriodPositionCb) {
+        mRenderPeriodPositionCb->OnPeriodReached(mFramePeriodNumber);
+    }
+}
+
+// SetRenderPeriodReach by eventHandler
+void AudioServiceClient::SendSetRenderPeriodReachedRequestEvent(
+    const std::shared_ptr<RendererPeriodPositionCallback> &callback)
+{
+    lock_guard<mutex> runnerlock(runnerMutex_);
+    if (runnerReleased_) {
+        AUDIO_WARNING_LOG("AudioServiceClient::SendSetRenderPeriodReachedRequestEvent runner released");
+        return;
+    }
+    SendSyncEvent(AppExecFwk::InnerEvent::Get(SET_RENDERER_PERIOD_REACHED_REQUEST, callback));
+}
+
+void AudioServiceClient::HandleSetRenderPeriodReachedEvent(
+    const std::shared_ptr<RendererPeriodPositionCallback> &callback)
+{
+    if (callback) {
+        mRenderPeriodPositionCb = callback;
+    }
+}
+
+// UnsetRenderPeriodReach by eventHandler
+void AudioServiceClient::SendUnsetRenderPeriodReachedRequestEvent()
+{
+    lock_guard<mutex> runnerlock(runnerMutex_);
+    if (runnerReleased_) {
+        AUDIO_WARNING_LOG("AudioServiceClient::SendUnsetRenderPeriodReachedRequestEvent runner released");
+        return;
+    }
+    SendSyncEvent(AppExecFwk::InnerEvent::Get(UNSET_RENDERER_PERIOD_REACHED_REQUEST));
+}
+
+void AudioServiceClient::HandleUnsetRenderPeriodReachedEvent()
+{
+    mRenderPeriodPositionCb = nullptr;
+}
+
+// OnCapturerMarkReach by eventHandler
+void AudioServiceClient::SendCapturerMarkReachedRequestEvent(uint64_t mFrameMarkPosition)
+{
+    lock_guard<mutex> runnerlock(runnerMutex_);
+    if (runnerReleased_) {
+        AUDIO_WARNING_LOG("AudioServiceClient::SendCapturerMarkReachedRequestEvent runner released");
+        return;
+    }
+    SendEvent(AppExecFwk::InnerEvent::Get(CAPTURER_MARK_REACHED_REQUEST, mFrameMarkPosition));
+}
+
+void AudioServiceClient::HandleCapturerMarkReachedEvent(uint64_t mFrameMarkPosition)
+{
+    if (mCapturePositionCb) {
+        mCapturePositionCb->OnMarkReached(mFrameMarkPosition);
+    }
+}
+
+// SetCapturerMarkReach by eventHandler
+void AudioServiceClient::SendSetCapturerMarkReachedRequestEvent(
+    const std::shared_ptr<CapturerPositionCallback> &callback)
+{
+    lock_guard<mutex> runnerlock(runnerMutex_);
+    if (runnerReleased_) {
+        AUDIO_WARNING_LOG("AudioServiceClient::SendSetCapturerMarkReachedRequestEvent runner released");
+        return;
+    }
+    SendSyncEvent(AppExecFwk::InnerEvent::Get(SET_CAPTURER_MARK_REACHED_REQUEST, callback));
+}
+
+void AudioServiceClient::HandleSetCapturerMarkReachedEvent(const std::shared_ptr<CapturerPositionCallback> &callback)
+{
+    mCapturePositionCb = callback;
+}
+
+// UnsetCapturerMarkReach by eventHandler
+void AudioServiceClient::SendUnsetCapturerMarkReachedRequestEvent()
+{
+    lock_guard<mutex> runnerlock(runnerMutex_);
+    if (runnerReleased_) {
+        AUDIO_WARNING_LOG("AudioServiceClient::SendUnsetCapturerMarkReachedRequestEvent runner released");
+        return;
+    }
+    SendSyncEvent(AppExecFwk::InnerEvent::Get(UNSET_CAPTURER_MARK_REACHED_REQUEST));
+}
+
+void AudioServiceClient::HandleUnsetCapturerMarkReachedEvent()
+{
+    mCapturePositionCb = nullptr;
+}
+
+// OnCapturerPeriodReach by eventHandler
+void AudioServiceClient::SendCapturerPeriodReachedRequestEvent(uint64_t mFramePeriodNumber)
+{
+    lock_guard<mutex> runnerlock(runnerMutex_);
+    if (runnerReleased_) {
+        AUDIO_WARNING_LOG("AudioServiceClient::SendCapturerPeriodReachedRequestEvent runner released");
+        return;
+    }
+    SendEvent(AppExecFwk::InnerEvent::Get(CAPTURER_PERIOD_REACHED_REQUEST, mFramePeriodNumber));
+}
+
+void AudioServiceClient::HandleCapturerPeriodReachedEvent(uint64_t mFramePeriodNumber)
+{
+    if (mCapturePeriodPositionCb) {
+        mCapturePeriodPositionCb->OnPeriodReached(mFramePeriodNumber);
+    }
+}
+
+// SetCapturerPeriodReach by eventHandler
+void AudioServiceClient::SendSetCapturerPeriodReachedRequestEvent(
+    const std::shared_ptr<CapturerPeriodPositionCallback> &callback)
+{
+    lock_guard<mutex> runnerlock(runnerMutex_);
+    if (runnerReleased_) {
+        AUDIO_WARNING_LOG("AudioServiceClient::SendSetCapturerPeriodReachedRequestEvent runner released");
+        return;
+    }
+    SendSyncEvent(AppExecFwk::InnerEvent::Get(SET_CAPTURER_PERIOD_REACHED_REQUEST, callback));
+}
+
+void AudioServiceClient::HandleSetCapturerPeriodReachedEvent(
+    const std::shared_ptr<CapturerPeriodPositionCallback> &callback)
+{
+    mCapturePeriodPositionCb = callback;
+}
+
+// UnsetCapturerPeriodReach by eventHandler
+void AudioServiceClient::SendUnsetCapturerPeriodReachedRequestEvent()
+{
+    lock_guard<mutex> runnerlock(runnerMutex_);
+    if (runnerReleased_) {
+        AUDIO_WARNING_LOG("AudioServiceClient::SendUnsetCapturerPeriodReachedRequestEvent runner released");
+        return;
+    }
+    SendSyncEvent(AppExecFwk::InnerEvent::Get(UNSET_CAPTURER_PERIOD_REACHED_REQUEST));
+}
+
+void AudioServiceClient::HandleUnsetCapturerPeriodReachedEvent()
+{
+    mCapturePeriodPositionCb = nullptr;
+}
+
+int32_t AudioServiceClient::SetRendererWriteCallback(const std::shared_ptr<AudioRendererWriteCallback> &callback)
+{
+    if (!callback) {
+        AUDIO_ERR_LOG("AudioServiceClient::SetRendererWriteCallback callback is nullptr");
+        return ERR_INVALID_PARAM;
+    }
+    writeCallback_ = callback;
+    return SUCCESS;
+}
+void AudioServiceClient::SendWriteBufferRequestEvent()
+{
+    // send write event to handler
+    lock_guard<mutex> runnerlock(runnerMutex_);
+    if (runnerReleased_) {
+        AUDIO_WARNING_LOG("AudioServiceClient::SendWriteBufferRequestEvent runner released");
+        return;
+    }
+    SendEvent(AppExecFwk::InnerEvent::Get(WRITE_BUFFER_REQUEST));
+}
+
+void AudioServiceClient::HandleWriteRequestEvent()
+{
+    // do callback to application
+    if (writeCallback_) {
+        size_t requestSize;
+        GetMinimumBufferSize(requestSize);
+        writeCallback_->OnWriteData(requestSize);
+    }
+}
+
+void AudioServiceClient::ProcessEvent(const AppExecFwk::InnerEvent::Pointer &event)
+{
+    uint32_t eventId = event->GetInnerEventId();
+    uint64_t mFrameMarkPosition;
+    uint64_t mFramePeriodNumber;
+    std::shared_ptr<RendererPositionCallback> renderPositionCb;
+    std::shared_ptr<RendererPeriodPositionCallback> renderPeriodPositionCb;
+    std::shared_ptr<CapturerPositionCallback> capturePositionCb;
+    std::shared_ptr<CapturerPeriodPositionCallback> capturePeriodPositionCb;
+
+    switch (eventId) {
+        case WRITE_BUFFER_REQUEST:
+            HandleWriteRequestEvent();
+            break;
+
+        // RenderMarkReach
+        case RENDERER_MARK_REACHED_REQUEST:
+            mFrameMarkPosition = event->GetParam();
+            HandleRenderMarkReachedEvent(mFrameMarkPosition);
+            break;
+        case SET_RENDERER_MARK_REACHED_REQUEST:
+            renderPositionCb = event->GetSharedObject<RendererPositionCallback>();
+            HandleSetRenderMarkReachedEvent(renderPositionCb);
+            break;
+        case UNSET_RENDERER_MARK_REACHED_REQUEST:
+            HandleUnsetRenderMarkReachedEvent();
+            break;
+
+        // RenderPeriodReach
+        case RENDERER_PERIOD_REACHED_REQUEST:
+            mFramePeriodNumber = event->GetParam();
+            HandleRenderPeriodReachedEvent(mFramePeriodNumber);
+            break;
+        case SET_RENDERER_PERIOD_REACHED_REQUEST:
+            renderPeriodPositionCb = event->GetSharedObject<RendererPeriodPositionCallback>();
+            HandleSetRenderPeriodReachedEvent(renderPeriodPositionCb);
+            break;
+        case UNSET_RENDERER_PERIOD_REACHED_REQUEST:
+            HandleUnsetRenderPeriodReachedEvent();
+            break;
+
+        // CapturerMarkReach
+        case CAPTURER_MARK_REACHED_REQUEST:
+            mFrameMarkPosition = event->GetParam();
+            HandleCapturerMarkReachedEvent(mFrameMarkPosition);
+            break;
+        case SET_CAPTURER_MARK_REACHED_REQUEST:
+            capturePositionCb = event->GetSharedObject<CapturerPositionCallback>();
+            HandleSetCapturerMarkReachedEvent(capturePositionCb);
+            break;
+        case UNSET_CAPTURER_MARK_REACHED_REQUEST:
+            HandleUnsetCapturerMarkReachedEvent();
+            break;
+
+        // CapturerPeriodReach
+        case CAPTURER_PERIOD_REACHED_REQUEST:
+            mFramePeriodNumber = event->GetParam();
+            HandleCapturerPeriodReachedEvent(mFramePeriodNumber);
+            break;
+        case SET_CAPTURER_PERIOD_REACHED_REQUEST:
+            capturePeriodPositionCb = event->GetSharedObject<CapturerPeriodPositionCallback>();
+            HandleSetCapturerPeriodReachedEvent(capturePeriodPositionCb);
+            break;
+        case UNSET_CAPTURER_PERIOD_REACHED_REQUEST:
+            HandleUnsetCapturerPeriodReachedEvent();
+            break;
+
+        default:
+            break;
+    }
+}
+
 } // namespace AudioStandard
 } // namespace OHOS

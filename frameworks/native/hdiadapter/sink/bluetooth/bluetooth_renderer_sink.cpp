@@ -65,7 +65,7 @@ BluetoothRendererSink::BluetoothRendererSink()
 
 BluetoothRendererSink::~BluetoothRendererSink()
 {
-    DeInit();
+    BluetoothRendererSink::DeInit();
 }
 
 BluetoothRendererSink *BluetoothRendererSink::GetInstance()

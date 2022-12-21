@@ -34,7 +34,7 @@ public:
 
     int32_t TestPlayback();
     void OnInterrupt(const InterruptEvent &interruptEvent) override;
-    void OnStateChange(const RendererState state) override;
+    void OnStateChange(const RendererState state, const StateChangeCmdType __attribute__((unused)) cmdType) override;
     void SaveStreamInfo(ContentType contentType, StreamUsage streamUsage);
     FILE *wavFile_ = nullptr;
 private:

@@ -140,7 +140,8 @@ void AudioRendererCallbackNapi::OnJsCallbackInterrupt(std::unique_ptr<AudioRende
     }
 }
 
-void AudioRendererCallbackNapi::OnStateChange(const RendererState state)
+void AudioRendererCallbackNapi::OnStateChange(const RendererState state,
+    const StateChangeCmdType __attribute__((unused)) cmdType)
 {
     std::lock_guard<std::mutex> lock(mutex_);
     AUDIO_DEBUG_LOG("AudioRendererCallbackNapi: OnStateChange is called");

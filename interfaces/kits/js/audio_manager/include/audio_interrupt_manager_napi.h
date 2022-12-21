@@ -42,7 +42,6 @@ private:
     AudioSystemManager *audioSystemMngr_;
 
     napi_env env_;
-    napi_ref wrapper_;
 };
 } // namespace AudioStandard
 } // namespace OHOS

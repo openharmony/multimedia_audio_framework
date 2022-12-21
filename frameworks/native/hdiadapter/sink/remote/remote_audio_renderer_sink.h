@@ -55,7 +55,7 @@ public:
     int32_t GetVolume(float &left, float &right);
     int32_t GetLatency(uint32_t *latency);
     int32_t SetAudioScene(AudioScene audioScene);
-    int32_t OpenOutput(DeviceType deviceType);
+    int32_t OpenOutput(DeviceType outputDevice);
     static RemoteAudioRendererSink *GetInstance(const char *deviceNetworkId);
     bool rendererInited_;
     void RegisterParameterCallback(AudioSinkCallback* callback);
@@ -67,7 +67,7 @@ public:
     AudioSinkCallback* GetParamCallback();
 private:
     static std::map<std::string, RemoteAudioRendererSink *> allsinks;
-    explicit RemoteAudioRendererSink(std::string deviceNetworkId);
+    explicit RemoteAudioRendererSink(const std::string deviceNetworkId);
     ~RemoteAudioRendererSink();
     RemoteAudioSinkAttr attr_;
     std::string deviceNetworkId_;
@@ -87,7 +87,7 @@ private:
     bool paramCallbackRegistered_ = false;
 
     int32_t GetTargetAdapterPort(struct AudioAdapterDescriptor *descs, int32_t size, const char *networkId);
-    int32_t CreateRender(struct AudioPort &renderPort);
+    int32_t CreateRender(const struct AudioPort &renderPort);
     struct AudioManager *GetAudioManager();
 #ifdef DEBUG_DUMP_FILE
     FILE *pfd;

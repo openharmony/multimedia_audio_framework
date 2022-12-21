@@ -47,7 +47,6 @@ private:
     float volume_;
     bool loop_;
     napi_env env_;
-    napi_ref wrapper_;
 };
 } // namespace AudioStandard
 } // namespace OHOS

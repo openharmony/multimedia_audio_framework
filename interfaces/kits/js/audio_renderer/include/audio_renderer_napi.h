@@ -67,7 +67,7 @@ private:
         size_t bufferLen;
         size_t bufferSize;
         int32_t volType;
-        int32_t volLevel;
+        double volLevel;
         uint32_t audioStreamId;
         size_t totalBytesWritten;
         void *data;
@@ -165,7 +165,6 @@ private:
     DeviceType deviceType_;
     int32_t rendererFlags_;
     napi_env env_;
-    napi_ref wrapper_;
     std::queue<napi_async_work> writeRequestQ_;
     std::atomic<bool> scheduleFromApiCall_;
     std::atomic<bool> doNotScheduleWrite_;
@@ -174,7 +173,8 @@ private:
     std::shared_ptr<RendererPositionCallback> positionCBNapi_ = nullptr;
     std::shared_ptr<RendererPeriodPositionCallback> periodPositionCBNapi_ = nullptr;
     std::shared_ptr<AudioRendererWriteCallback> dataRequestCBNapi_ = nullptr;
-    AudioSystemManager *audioMngr_;
+    static constexpr double MIN_VOLUME_IN_DOUBLE = 0.0;
+    static constexpr double MAX_VOLUME_IN_DOUBLE = 1.0;
 };
 
 static const std::map<std::string, InterruptType> interruptEventTypeMap = {

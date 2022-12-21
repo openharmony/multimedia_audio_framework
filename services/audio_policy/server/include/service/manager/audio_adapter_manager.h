@@ -152,9 +152,9 @@ private:
 
 class PolicyCallbackImpl : public AudioServiceAdapterCallback {
 public:
-    explicit PolicyCallbackImpl(std::unique_ptr<AudioAdapterManager> &audioAdapterManager)
+    explicit PolicyCallbackImpl(std::shared_ptr<AudioAdapterManager> audioAdapterManager)
     {
-        audioAdapterManager_ = std::move(audioAdapterManager);
+        audioAdapterManager_ = audioAdapterManager;
     }
 
     ~PolicyCallbackImpl()
@@ -189,7 +189,7 @@ public:
         }
     }
 private:
-    std::unique_ptr<AudioAdapterManager> audioAdapterManager_;
+    std::shared_ptr<AudioAdapterManager> audioAdapterManager_;
 };
 } // namespace AudioStandard
 } // namespace OHOS

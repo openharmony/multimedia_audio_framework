@@ -31,6 +31,7 @@ ohos_unittest("audio_manager_unit_test") {
   sources = [ "src/audio_manager_unit_test.cpp" ]
 
   deps = [
+    "//foundation/multimedia/audio_framework/frameworks/native/audiocapturer:audio_capturer",
     "//foundation/multimedia/audio_framework/frameworks/native/audiorenderer:audio_renderer",
     "//foundation/multimedia/audio_framework/services/audio_service:audio_client",
   ]

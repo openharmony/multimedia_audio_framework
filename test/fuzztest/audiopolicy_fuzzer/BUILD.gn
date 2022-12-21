@@ -35,7 +35,6 @@ ohos_fuzztest("AudioPolicyFuzzTest") {
   deps = [
     "$hdf_uhdf_path/hdi:libhdi",
     "//foundation/barrierfree/accessibility/interfaces/innerkits/acfwk:accessibilityconfig",
-    "//foundation/multimedia/audio_framework/services/audio_policy:audio_policy_client",
     "//foundation/multimedia/audio_framework/services/audio_policy:audio_policy_service",
   ]
   external_deps = [

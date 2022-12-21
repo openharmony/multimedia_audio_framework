@@ -47,6 +47,7 @@ private:
     static napi_value SelectInputDeviceByFilter(napi_env env, napi_callback_info info);
     static napi_value SetCommunicationDevice(napi_env env, napi_callback_info info);
     static napi_value IsCommunicationDeviceActive(napi_env env, napi_callback_info info);
+    static napi_value GetActiveOutputDeviceDescriptors(napi_env env, napi_callback_info info);
 
     static void RegisterDeviceChangeCallback(napi_env env, napi_value* args, const std::string& cbName, int32_t flag,
         AudioRoutingManagerNapi* routingMgrNapi);
@@ -63,7 +64,6 @@ private:
     std::shared_ptr<AudioManagerMicStateChangeCallback> micStateChangeCallbackNapi_ = nullptr;
 
     napi_env env_;
-    napi_ref wrapper_;
 };
 } // namespace AudioStandard
 } // namespace OHOS

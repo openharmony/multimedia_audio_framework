@@ -21,7 +21,6 @@ config("audio_toneplayer_config") {
     "//foundation/multimedia/audio_framework/interfaces/inner_api/native/toneplayer/include",
     "//foundation/multimedia/audio_framework/frameworks/native/audiorenderer/include",
     "//foundation/multimedia/audio_framework/frameworks/native/toneplayer/include",
-    "//foundation/multimedia/audio_framework/frameworks/native/audiosession/include",
     "//foundation/multimedia/audio_framework/frameworks/native/audiostream/include",
     "//foundation/multimedia/audio_framework/interfaces/inner_api/native/audiocommon/include",
     "//foundation/multimedia/audio_framework/interfaces/inner_api/native/audiomanager/include",

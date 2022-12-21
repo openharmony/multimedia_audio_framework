@@ -58,6 +58,7 @@ void AudioServiceDump::ResetPAAudioDump()
     if (context) {
         pa_context_set_state_callback(context, nullptr, nullptr);
         if (isContextConnected == true) {
+            AUDIO_INFO_LOG("[AudioServiceDump] disconnect context!");
             pa_context_disconnect(context);
         }
         pa_context_unref(context);

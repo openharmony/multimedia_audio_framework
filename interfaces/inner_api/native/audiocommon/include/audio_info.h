@@ -438,7 +438,7 @@ enum StreamUsage {
     STREAM_USAGE_UNKNOWN = 0,
     STREAM_USAGE_MEDIA = 1,
     STREAM_USAGE_VOICE_COMMUNICATION = 2,
-    STREAM_USAGE_VOICE_ASSISTANT = 4,
+    STREAM_USAGE_VOICE_ASSISTANT = 3,
     STREAM_USAGE_NOTIFICATION_RINGTONE = 6
 };
 
@@ -878,6 +878,11 @@ struct AudioRendererDataInfo {
 enum AudioPermissionState {
     AUDIO_PERMISSION_START = 0,
     AUDIO_PERMISSION_STOP = 1,
+};
+
+enum StateChangeCmdType {
+    CMD_FROM_CLIENT = 0,
+    CMD_FROM_SYSTEM = 1
 };
 } // namespace AudioStandard
 } // namespace OHOS
