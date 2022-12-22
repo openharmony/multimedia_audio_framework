@@ -107,7 +107,7 @@ void RemoteAudioRendererSink::RegisterParameterCallback(AudioSinkCallback* callb
         AUDIO_ERR_LOG("RemoteAudioRendererSink::RegisterParameterCallback audioAdapter_ is null");
         return;
     }
-    
+
     int32_t ret = audioAdapter_->RegExtraParamObserver(audioAdapter_, adapterCallback, this);
     if (ret != SUCCESS) {
         AUDIO_ERR_LOG("RemoteAudioRendererSink::RegisterParameterCallback failed, error code: %d", ret);
@@ -596,10 +596,14 @@ int32_t RemoteAudioRendererSink::OpenOutput(DeviceType outputDevice)
         .sinks = &sink,
     };
 
+    if (audioAdapter_ == nullptr) {
+        AUDIO_ERR_LOG("OpenOutput failed, audioAdapter_ is null");
+        return ERR_INVALID_PARAM;
+    }
     ret = audioAdapter_->UpdateAudioRoute(audioAdapter_, &route, &routeHandle_);
-    AUDIO_DEBUG_LOG("RemoteAudioRendererSink: UpdateAudioRoute returns: %{public}d", ret);
+    AUDIO_DEBUG_LOG("UpdateAudioRoute returns: %{public}d", ret);
     if (ret != 0) {
-        AUDIO_ERR_LOG("RemoteAudioRendererSink: UpdateAudioRoute failed");
+        AUDIO_ERR_LOG("UpdateAudioRoute failed");
         return ERR_OPERATION_FAILED;
     }
 

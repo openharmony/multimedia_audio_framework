@@ -411,10 +411,14 @@ int32_t RemoteAudioCapturerSource::SetInputRoute(DeviceType inputDevice)
         .sinks = &sink,
     };
 
+    if (audioAdapter_ == nullptr) {
+        AUDIO_ERR_LOG("SetInputRoute failed, audioAdapter_ is null");
+        return ERR_INVALID_PARAM;
+    }
     ret = audioAdapter_->UpdateAudioRoute(audioAdapter_, &route, &routeHandle_);
-    AUDIO_DEBUG_LOG("AudioCapturerSource: UpdateAudioRoute returns: %{public}d", ret);
+    AUDIO_DEBUG_LOG("UpdateAudioRoute returns: %{public}d", ret);
     if (ret != 0) {
-        AUDIO_ERR_LOG("AudioCapturerSource: UpdateAudioRoute failed");
+        AUDIO_ERR_LOG("UpdateAudioRoute failed");
         return ERR_OPERATION_FAILED;
     }
     return SUCCESS;

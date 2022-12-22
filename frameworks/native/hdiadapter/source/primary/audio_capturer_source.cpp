@@ -440,9 +440,13 @@ int32_t AudioCapturerSource::SetInputRoute(DeviceType inputDevice, AudioPortPin 
         .sinks = &sink,
     };
 
+    if (audioAdapter_ == nullptr) {
+        AUDIO_ERR_LOG("SetInputRoute failed, audioAdapter_ is null");
+        return ERR_INVALID_PARAM;
+    }
     ret = audioAdapter_->UpdateAudioRoute(audioAdapter_, &route, &routeHandle_);
     if (ret != 0) {
-        AUDIO_ERR_LOG("AudioCapturerSource: UpdateAudioRoute failed");
+        AUDIO_ERR_LOG("UpdateAudioRoute failed");
         return ERR_OPERATION_FAILED;
     }
 
