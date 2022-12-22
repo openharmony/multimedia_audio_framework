@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -335,7 +335,7 @@ int32_t AudioContainerClientBase::SaveWriteCallbackGa(const std::weak_ptr<AudioR
         return AUDIO_CLIENT_INIT_ERR;
     }
     writeCallback_ = callback;
-    // construct writecallback stub remote
+    // construct writecallback stub for remote
     sptr<AudioRendererWriteCallbackStub> writeCallbackStub = new(std::nothrow) AudioRendererWriteCallbackStub();
     if (writeCallbackStub == nullptr) {
         AUDIO_ERR_LOG("AudioContainerClientBase: SaveWriteCallbackGa writeCallbackStub == nullpt");
@@ -477,8 +477,8 @@ void AudioContainerClientBase::HandleCapturePositionCallbacksGa(size_t bytesRead
     uint64_t readFrameNumber = mTotalBytesRead / mFrameSize;
     if (!mMarkReached && mCapturePositionCb) {
         if (readFrameNumber >= mFrameMarkPosition) {
-            mPositionCBThreads.emplace_back(std::make_unique<std::thread>(&RCapturerPositionCallback::OnMarkReached,
-                mCapturePositionCb, mFrameMarkPosition);
+            mPositionCBThreads.emplace_back(std::make_unique<std::thread>(&CapturerPositionCallback::OnMarkReached,
+                mCapturePositionCb, mFrameMarkPosition));
             mMarkReached = true;
         }
     }
@@ -488,7 +488,7 @@ void AudioContainerClientBase::HandleCapturePositionCallbacksGa(size_t bytesRead
         if (mFramePeriodRead >= mFramePeriodNumber) {
             mFramePeriodRead %= mFramePeriodNumber;
             mPeriodPositionCBThreads.emplace_back(std::make_unique<std::thread>(
-                &CapturerPeriodPositionCallback::OnperiodReached, mCapturePeriodPositionCb, mFramePeriodNumber));
+                &CapturerPeriodPositionCallback::OnPeriodReached, mCapturePeriodPositionCb, mFramePeriodNumber));
         }
     }
 }
@@ -877,7 +877,7 @@ AudioCaptureMode AudioContainerClientBase::GetAudioCaptureMode()
 
 void AudioContainerClientBase::SetAppCachePath(const std::string cachePath)
 {
-    AUDIO_INFO_LOG("AudioContainerClientBase::SetAppCachePath cachePath %{public}s", cachePath.str());
+    AUDIO_INFO_LOG("AudioContainerClientBase::SetAppCachePath cachePath %{public}s", cachePath.c_str());
 }
 } // namespace AudioStandard
 } // namespace OHOS

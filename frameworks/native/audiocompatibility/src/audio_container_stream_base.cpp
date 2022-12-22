@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -707,7 +707,7 @@ int32_t AudioContainerStreamBase::GetBufferDesc(BufferDesc &bufDesc)
     }
 
     AUDIO_DEBUG_LOG("freeBufferQ_ count %{public}zu", freeBufferQ_.size());
-    AUDIO_DEBUG_LOG("filledBufferQ_ count %{public}zu", filledBufferQ_.size())
+    AUDIO_DEBUG_LOG("filledBufferQ_ count %{public}zu", filledBufferQ_.size());
 
     lock_guard<mutex> lock(mBufferQueueLock);
     if (renderMode_ == RENDER_MODE_CALLBACK) {
@@ -836,7 +836,7 @@ void AudioContainerStreamBase::WriteBuffers()
                 size_t callback_size = 60 * format_ * channelCount_ / 1000;
                 callback_->OnWriteData(callback_size);
             } else {
-                pthread_cond_wait(&writeCondition_, &writeLock);
+                pthread_cond_wait(&writeCondition_, &writeLock_);
             }
         }
         std::this_thread::sleep_for(std::chrono::microseconds(CB_WRITE_BUFFERS_WAIT_IN_US));
@@ -981,7 +981,7 @@ int32_t AudioContainerCaptureStream::GetBufferDesc(BufferDesc & bufDesc)
     }
 
     AUDIO_DEBUG_LOG("AudioContainerStreamBase::freeBufferQ_ count %{public}zu", freeBufferQ_.size());
-    AUDIO_DEBUG_LOG("AudioContainerStreamBase::filledBufferQ_ count %{public}zu", filledBufferQ_.size())
+    AUDIO_DEBUG_LOG("AudioContainerStreamBase::filledBufferQ_ count %{public}zu", filledBufferQ_.size());
 
     if (renderMode_ == RENDER_MODE_CALLBACK) {
         if (!freeBufferQ_.empty()) {
@@ -1166,7 +1166,7 @@ int32_t AudioContainerRenderStream::GetBufferDesc(BufferDesc &bufDesc)
     }
 
     AUDIO_DEBUG_LOG("AudioContainerStreamBase::freeBufferQ_ count %{public}zu", freeBufferQ_.size());
-    AUDIO_DEBUG_LOG("AudioContainerStreamBase::filledBufferQ_ count %{public}zu", filledBufferQ_.size())
+    AUDIO_DEBUG_LOG("AudioContainerStreamBase::filledBufferQ_ count %{public}zu", filledBufferQ_.size());
 
     lock_guard<mutex> lock(mBufferQueueLock);
     if (renderMode_ == RENDER_MODE_CALLBACK) {
