@@ -101,7 +101,7 @@ ohos_shared_library("module-hdi-source") {
     "$pulseaudio_build_path/src/pulse:pulse",
     "$pulseaudio_build_path/src/pulsecore:pulsecore",
     "//foundation/multimedia/audio_framework/frameworks/native/hdiadapter/source:capturer_source_adapter",
-    "//third_party/bounds_checking_function:libsec_static",
+    "//third_party/bounds_checking_function:libsec_shared",
   ]
 
   external_deps = [ "hiviewdfx_hilog_native:libhilog" ]
