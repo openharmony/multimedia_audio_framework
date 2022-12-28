@@ -404,7 +404,7 @@ void AudioStreamCollector::RegisteredTrackerClientDied(int32_t uid)
         sessionID = audioRendererChangeInfo->sessionId;
         audioRendererChangeInfo->rendererState = RENDERER_RELEASED;
         mDispatcherService.SendRendererInfoEventToDispatcher(AudioMode::AUDIO_MODE_PLAYBACK,
-            audioRendererChangeInfos_);   
+            audioRendererChangeInfos_);
         rendererStatequeue_.erase(make_pair(audioRendererChangeInfo->clientUID,
             audioRendererChangeInfo->sessionId));
         vector<std::unique_ptr<AudioRendererChangeInfo>>::iterator temp = audioRendererBegin;
