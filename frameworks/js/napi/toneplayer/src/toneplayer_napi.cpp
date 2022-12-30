@@ -327,12 +327,13 @@ napi_value TonePlayerNapi::Construct(napi_env env, napi_callback_info info)
     rendererInfo.streamUsage = sRendererInfo_->streamUsage;
     rendererInfo.rendererFlags = sRendererInfo_->rendererFlags;
     std::shared_ptr<AbilityRuntime::Context> abilityContext = GetAbilityContext(env);
+    std::string cacheDir = "";
     if (abilityContext != nullptr) {
-        std::string cacheDir = abilityContext->GetCacheDir();
-        tonePlayerNapi->tonePlayer_ = TonePlayer::Create(cacheDir, rendererInfo);
+        cacheDir = abilityContext->GetCacheDir();
     } else {
-        tonePlayerNapi->tonePlayer_ = TonePlayer::Create(rendererInfo);
+        cacheDir = "/data/storage/el2/base/haps/entry/files";
     }
+    tonePlayerNapi->tonePlayer_ = TonePlayer::Create(cacheDir, rendererInfo);
 
     CHECK_AND_RETURN_RET_LOG(tonePlayerNapi->tonePlayer_ != nullptr, result, "Toneplayer Create failed");
 
