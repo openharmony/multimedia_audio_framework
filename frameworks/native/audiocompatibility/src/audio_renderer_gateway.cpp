@@ -219,6 +219,12 @@ bool AudioRendererGateway::Start(StateChangeCmdType cmdType) const
         return false;
     }
 
+    int32_t ret = AudioPolicyManager::GetInstance().ActivateAudioInterrupt(audioInterrupt);
+    if (ret != 0) {
+        AUDIO_ERR_LOG("AudioRendererGateway::ActivateAudioInterrupt Failed");
+        return false;
+    }
+
     return audioStream_->StartAudioStream();
 }
 
