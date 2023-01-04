@@ -245,6 +245,7 @@ napi_value AudioVolumeGroupManagerNapi::Construct(napi_env env, napi_callback_in
                 HiLog::Error(LABEL, "Failed in AudioVolumeGroupManagerNapi::Construct()!");
                 AudioVolumeGroupManagerNapi::isConstructSuccess_ = NAPI_ERR_SYSTEM;
             }
+            groupmanagerNapi->cachedClientId_ = getpid();
             status = napi_wrap(env, jsThis, static_cast<void*>(groupmanagerNapi.get()),
                 AudioVolumeGroupManagerNapi::Destructor, nullptr, nullptr);
             if (status == napi_ok) {
