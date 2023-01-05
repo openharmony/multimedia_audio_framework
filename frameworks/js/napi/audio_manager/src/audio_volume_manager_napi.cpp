@@ -90,6 +90,7 @@ napi_value AudioVolumeManagerNapi::Construct(napi_env env, napi_callback_info in
 
     audioVolumeManagerNapi->audioSystemMngr_ = AudioSystemManager::GetInstance();
     audioVolumeManagerNapi->env_ = env;
+    audioVolumeManagerNapi->cachedClientId_ = getpid();
 
     status = napi_wrap(env, thisVar, static_cast<void*>(audioVolumeManagerNapi.get()),
         AudioVolumeManagerNapi::Destructor, nullptr, nullptr);
