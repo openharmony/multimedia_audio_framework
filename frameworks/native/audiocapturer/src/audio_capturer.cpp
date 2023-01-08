@@ -37,7 +37,7 @@ std::unique_ptr<AudioCapturer> AudioCapturer::Create(AudioStreamType audioStream
 std::unique_ptr<AudioCapturer> AudioCapturer::Create(AudioStreamType audioStreamType, const AppInfo &appInfo)
 {
 #ifdef OHCORE
-    return std::make_unique<AudioCapturerGateway>(audioStreamType);
+    return std::make_unique<AudioCapturerGateway>(audioStreamType, appInfo);
 #else
     return std::make_unique<AudioCapturerPrivate>(audioStreamType, appInfo);
 #endif
@@ -85,7 +85,7 @@ std::unique_ptr<AudioCapturer> AudioCapturer::Create(const AudioCapturerOptions 
     }
     params.audioEncoding = capturerOptions.streamInfo.encoding;
 #ifdef OHCORE
-    auto capturer = std::make_unique<AudioCapturerGateway>(audioStreamType);
+    auto capturer = std::make_unique<AudioCapturerGateway>(audioStreamType, appInfo);
 #else
     auto capturer = std::make_unique<AudioCapturerPrivate>(audioStreamType, appInfo);
 #endif

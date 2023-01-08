@@ -33,10 +33,106 @@ AudioRendererGateway::~AudioRendererGateway()
     }
 }
 
-AudioRendererGateway::AudioRendererGateway(AudioStreamType audioStreamType)
+AudioRendererGateway::AudioRendererGateway(AudioStreamType audioStreamType, const AppInfo &appInfo)
 {
-    audioStream_ = std::make_shared<AudioContainerRenderStream>(audioStreamType, AUDIO_MODE_PLAYBACK);
+    appInfo_ = appInfo;
+    if (!(appInfo_.appPid)) {
+        appInfo_.appPid = getpid();
+    }
+
+    if (appInfo_.appUid < 0) {
+        appInfo_.appUid = static_cast<int32_t>(getuid());
+    }
+
+    audioStream_ = std::make_shared<AudioStream>(audioStreamType, AUDIO_MODE_PLAYBACK, appInfo_.appUid);
+    if (audioStream_) {
+        AUDIO_DEBUG_LOG("AudioRendererGateway::Audio stream created");
+        // Initializing with default values
+        rendererInfo_.contentType = CONTENT_TYPE_MUSIC;
+        rendererInfo_.streamUsage = STREAM_USAGE_MEDIA;
+    }
+
     audioInterrupt_.streamType = audioStreamType;
+    sharedInterrupt_.streamType = audioStreamType;
+}
+
+int32_t AudioRendererGateway::InitAudioInterruptCallback()
+{
+    AUDIO_INFO_LOG("AudioRendererGateway::InitAudioInterruptCallback in");
+    AudioInterrupt interrupt;
+    switch (mode_) {
+        case InterruptMode::SHARE_MODE:
+            if (InitSharedInterrupt() != 0) {
+                AUDIO_ERR_LOG("InitAudioInterruptCallback::GetAudioSessionID failed for SHARE_MODE");
+                return ERR_INVALID_INDEX;
+            }
+            interrupt = sharedInterrupt_;
+            break;
+        case InterruptMode::INDEPENDENT_MODE:
+            if (audioStream_->GetAudioSessionID(audioInterrupt_.sessionID) != 0) {
+                AUDIO_ERR_LOG("InitAudioInterruptCallback::GetAudioSessionID failed for INDEPENDENT_MODE");
+                return ERR_INVALID_INDEX;
+            }
+            interrupt = audioInterrupt_;
+            break;
+        default:
+            AUDIO_ERR_LOG("InitAudioInterruptCallback::Invalid interrupt mode!");
+            return ERR_INVALID_PARAM;
+    }
+    sessionID_ = interrupt.sessionID;
+
+    AUDIO_INFO_LOG("InitAudioInterruptCallback::interruptMode %{public}d, streamType %{public}d, sessionID %{public}d",
+        mode_, interrupt.streamType, interrupt.sessionID);
+
+    if (audioInterruptCallback_ == nullptr) {
+        audioInterruptCallback_ = std::make_shared<AudioInterruptCallbackGateway>(audioStream_, interrupt);
+        if (audioInterruptCallback_ == nullptr) {
+            AUDIO_ERR_LOG("InitAudioInterruptCallback::Failed to allocate memory for audioInterruptCallback_");
+            return ERROR;
+        }
+    }
+    return AudioPolicyManager::GetInstance().SetAudioInterruptCallback(sessionID_, audioInterruptCallback_);
+}
+
+int32_t AudioRendererGateway::InitSharedInterrupt()
+{
+    if (AudioRendererGateway::sharedInterrupts_.find(appInfo_.appPid) ==
+        AudioRendererGateway::sharedInterrupts_.end()) {
+        AUDIO_INFO_LOG("InitSharedInterrupt: appInfo_.appPid %{public}d create new sharedInterrupt", appInfo_.appPid);
+        std::map<AudioStreamType, AudioInterrupt> interrupts;
+        std::vector<AudioStreamType> types;
+        types.push_back(AudioStreamType::STREAM_DEFAULT);
+        types.push_back(AudioStreamType::STREAM_VOICE_CALL);
+        types.push_back(AudioStreamType::STREAM_MUSIC);
+        types.push_back(AudioStreamType::STREAM_RING);
+        types.push_back(AudioStreamType::STREAM_MEDIA);
+        types.push_back(AudioStreamType::STREAM_VOICE_ASSISTANT);
+        types.push_back(AudioStreamType::STREAM_SYSTEM);
+        types.push_back(AudioStreamType::STREAM_ALARM);
+        types.push_back(AudioStreamType::STREAM_NOTIFICATION);
+        types.push_back(AudioStreamType::STREAM_BLUETOOTH_SCO);
+        types.push_back(AudioStreamType::STREAM_ENFORCED_AUDIBLE);
+        types.push_back(AudioStreamType::STREAM_DTMF);
+        types.push_back(AudioStreamType::STREAM_TTS);
+        types.push_back(AudioStreamType::STREAM_ACCESSIBILITY);
+        for (auto type : types) {
+            uint32_t interruptId;
+            if (audioStream_->GetAudioSessionID(interruptId) != 0) {
+                AUDIO_ERR_LOG("AudioRendererGateway::GetAudioSessionID interruptId Failed");
+                return ERR_INVALID_INDEX;
+            }
+            AudioInterrupt interrupt = {STREAM_USAGE_UNKNOWN, CONTENT_TYPE_UNKNOWN, sharedInterrupt_.streamType,
+                interruptId};
+            interrupts.insert(std::make_pair(type, interrupt));
+        }
+        AudioRendererGateway::sharedInterrupts_.insert(std::make_pair(appInfo_.appPid, interrupts));
+    } else {
+        AUDIO_INFO_LOG("InitSharedInterrupt: sharedInterrupt of appInfo_.appPid %{public}d existed", appInfo_.appPid);
+    }
+
+    sharedInterrupt_ = AudioRendererGateway::sharedInterrupts_.find(appInfo_.appPid)
+        ->second.find(sharedInterrupt_.streamType)->second;
+    return SUCCESS;
 }
 
 int32_t AudioRendererGateway::GetFrameCount(uint32_t &frameCount) const
@@ -57,29 +153,16 @@ int32_t AudioRendererGateway::SetParams(const AudioRendererParams params)
     audioStreamParams.channels = params.channelCount;
     audioStreamParams.encoding = params.encodingType;
 
-    int32_t ret = audioStream_->SetAudioStreamInfo(audioStreamParams);
+    audioStream_->SetClientID(appInfo_appPid, appInfo_appUid);
 
-    AUDIO_INFO_LOG("AudioRendererGateway::SetParams SetAudioStreamInfo Success");
+    int32_t ret = audioStream_->SetAudioStreamInfo(audioStreamParams);
     if (ret) {
         AUDIO_ERR_LOG("AudioRendererGateway::SetParams SetAudioStreamInfo Failed");
         return ret;
     }
-    
-    if (audioStream_->GetAudioSessionID(sessionID_) != 0) {
-        AUDIO_ERR_LOG("AudioRendererGateway::SetParams GetAudioSessionID Failed");
-        return ERR_INVALID_INDEX;
-    }
-    audioInterrupt_.sessionID = sessionID_;
+    AUDIO_INFO_LOG("AudioRendererGateway::SetParams SetAudioStreamInfo Success");
 
-    if (audioInterruptCallback_ == nullptr) {
-        audioInterruptCallback_ = std::make_shared<AudioInterruptCallbackGateway>(audioStream_, audioInterrupt_);
-        if (audioInterruptCallback_ == nullptr) {
-            AUDIO_ERR_LOG("AudioRendererGateway::Failed to allocate memory for audioInterruptCallback_");
-            return ERROR;
-        }
-    }
-
-    return AudioPolicyManager::GetInstance().SetAudioInterruptCallback(sessionID_, audioInterruptCallback_);
+    return InitAudioInterruptCallback();
 }
 
 int32_t AudioRendererGateway::GetParams(AudioRendererParams &params) const
@@ -215,7 +298,10 @@ bool AudioRendererGateway::Start(StateChangeCmdType cmdType) const
             break;
     }
 
-    if (audioInterrupt_.streamType == STREAM_DEFAULT || audioInterrupt_.sessionID == INVALID_SESSION) {
+    AUDIO_INFO_LOG("AudioRenderer::Start::interruptMode: %{public}d, streamType: %{public}d, sessionID: %{public}d",
+        mode_, audioInterrupt.streamType, audioInterrupt.sessionID);
+
+    if (audioInterrupt.streamType == STREAM_DEFAULT || audioInterrupt.sessionID == INVALID_SESSION_ID) {
         return false;
     }
 

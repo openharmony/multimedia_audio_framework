@@ -149,12 +149,6 @@ int32_t AudioContainerClientBase::CreateStreamGa(AudioStreamParams audioParams, 
         return AUDIO_CLIENT_INVALID_PARAMS_ERR;
     }
 
-    mStreamType = audioType;
-    const std::string streamName = GetStreamNameGa(audioType);
-
-    auto timenow = chrono::system_clock::to_time_t(chrono::system_clock::now());
-    const std::string streamStartTime = ctime(&timenow);
-
     MessageParcel data;
     MessageParcel reply;
     MessageOption option;
@@ -387,7 +381,6 @@ int32_t AudioContainerClientBase::WriteStreamInnerGa(const uint8_t *buffer, size
         return AUDIO_CLIENT_ERR;
     }
     HandleRenderPositionCallbacksGa(length);
-    AUDIO_INFO_LOG("AudioContainerClientBase: WriteStreamInnerGa SUCCESS");
     return AUDIO_CLIENT_SUCCESS;
 }
 
@@ -395,7 +388,6 @@ void AudioContainerClientBase::HandleRenderPositionCallbacksGa(size_t bytesWritt
 {
     mTotalBytesWritten += bytesWritten;
     if (mFrameSize == 0) {
-        AUDIO_ERR_LOG("AudioContainerClientBase: HandleRenderPositionCallbackGa capturerPeriodPositionCb not set");
         return;
     }
 
@@ -448,7 +440,7 @@ size_t AudioContainerClientBase::WriteStreamGa(const StreamBuffer &stream, int32
 int32_t AudioContainerClientBase::UpdateReadBufferGa(uint8_t *buffer, size_t &length, size_t &readSize)
 {
     size_t l = (internalRdBufLen < length) ? internalRdBufLen : length;
-    if (memcpy_s(buffer, length, (const uint8_t*)internalReadBuffer + internalRdBufIndex, l)) {
+    if (memcpy_s(buffer, length, static_cast<const uint8_t*>(internalReadBuffer) + internalRdBufIndex, l)) {
         return AUDIO_CLIENT_READ_STREAM_ERR;
     }
 
