@@ -583,6 +583,14 @@ float AudioContainerStreamBase::GetVolume()
 
 int32_t AudioContainerStreamBase::SetRenderRate(AudioRendererRate renderRate)
 {
+    switch (renderRate) {
+        case RENDER_RATE_NORMAL:
+        case RENDER_RATE_DOUBLE:
+        case RENDER_RATE_HALF:
+            break;
+        default:
+            return AUDIO_CLIENT_INVALID_PARAMS_ERR;
+    }
     renderRate_ = renderRate;
     return SetStreamRenderRate(renderRate, trackId_);
 }
