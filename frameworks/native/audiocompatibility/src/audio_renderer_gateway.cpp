@@ -153,7 +153,7 @@ int32_t AudioRendererGateway::SetParams(const AudioRendererParams params)
     audioStreamParams.channels = params.channelCount;
     audioStreamParams.encoding = params.encodingType;
 
-    audioStream_->SetClientID(appInfo_appPid, appInfo_appUid);
+    audioStream_->SetClientID(appInfo_.appPid, appInfo_.appUid);
 
     int32_t ret = audioStream_->SetAudioStreamInfo(audioStreamParams);
     if (ret) {
@@ -301,7 +301,7 @@ bool AudioRendererGateway::Start(StateChangeCmdType cmdType) const
     AUDIO_INFO_LOG("AudioRenderer::Start::interruptMode: %{public}d, streamType: %{public}d, sessionID: %{public}d",
         mode_, audioInterrupt.streamType, audioInterrupt.sessionID);
 
-    if (audioInterrupt.streamType == STREAM_DEFAULT || audioInterrupt.sessionID == INVALID_SESSION_ID) {
+    if (audioInterrupt.streamType == STREAM_DEFAULT || audioInterrupt.sessionID == INVALID_SESSION) {
         return false;
     }
 
