@@ -892,6 +892,7 @@ void AudioContainerStreamBase::SetApplicationCachePath(const std::string cachePa
 void AudioContainerStreamBase::SetClientID(int32_t clientPid, int32_t clientUid)
 {
     AUDIO_DEBUG_LOG("Set client PID: %{public}d, UID: %{public}d", clientPid, clientUid);
+}
 
 AudioContainerCaptureStream::AudioContainerCaptureStream(AudioStreamType eStreamType, AudioMode eMode, int32_t appUid)
     : AudioContainerStreamBase(eStreamType, eMode, appUid)

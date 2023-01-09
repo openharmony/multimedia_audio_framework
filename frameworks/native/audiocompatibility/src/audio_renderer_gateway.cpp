@@ -44,7 +44,7 @@ AudioRendererGateway::AudioRendererGateway(AudioStreamType audioStreamType, cons
         appInfo_.appUid = static_cast<int32_t>(getuid());
     }
 
-    audioStream_ = std::make_shared<AudioStream>(audioStreamType, AUDIO_MODE_PLAYBACK, appInfo_.appUid);
+    audioStream_ = std::make_shared<AudioContainerRenderStream>(audioStreamType, AUDIO_MODE_PLAYBACK, appInfo_.appUid);
     if (audioStream_) {
         AUDIO_DEBUG_LOG("AudioRendererGateway::Audio stream created");
         // Initializing with default values
