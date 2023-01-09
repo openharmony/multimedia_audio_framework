@@ -166,22 +166,16 @@ void AudioSystemManager::AudioServerDied(pid_t pid)
 
 int32_t AudioSystemManager::SetRingerMode(AudioRingerMode ringMode)
 {
-    std::shared_ptr<AudioGroupManager> groupManager = GetGroupManager(DEFAULT_VOLUME_GROUP_ID);
-    if (groupManager == nullptr) {
-        AUDIO_ERR_LOG("SetRingerMode failed, groupManager is null");
-        return ERR_INVALID_PARAM;
+    ringModeBackup_ = ringMode;
+    if (ringerModeCallback_ != nullptr) {
+        ringerModeCallback_->OnRingerModeUpdated(ringModeBackup_);
     }
-    return groupManager->SetRingerMode(ringMode);
+    return SUCCESS;
 }
 
 AudioRingerMode AudioSystemManager::GetRingerMode()
 {
-    std::shared_ptr<AudioGroupManager> groupManager = GetGroupManager(DEFAULT_VOLUME_GROUP_ID);
-    if (groupManager == nullptr) {
-        AUDIO_ERR_LOG("GetRingerMode failed, groupManager is null");
-        return AudioRingerMode::RINGER_MODE_NORMAL;
-    }
-    return groupManager->GetRingerMode();
+    return ringModeBackup_;
 }
 
 int32_t AudioSystemManager::SetAudioScene(const AudioScene &scene)
@@ -513,8 +507,9 @@ int32_t AudioSystemManager::SetRingerModeCallback(const int32_t clientId,
     }
 
     cbClientId_ = clientId;
+    ringerModeCallback_ = callback;
 
-    return AudioPolicyManager::GetInstance().SetRingerModeCallback(clientId, callback);
+    return SUCCESS;
 }
 
 int32_t AudioSystemManager::UnsetRingerModeCallback(const int32_t clientId) const
