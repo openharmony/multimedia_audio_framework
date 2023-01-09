@@ -25,7 +25,7 @@ static constexpr int32_t MAX_LEN_BUFFERS = 3;
 
 class AudioContainerStreamBase : public AudioContainerBase {
 public:
-    AudioContainerStreamBase(AudioStreamType eStreamType, AudioMode eMode);
+    AudioContainerStreamBase(AudioStreamType eStreamType, AudioMode eMode, int32_t appUid);
     virtual ~AudioContainerStreamBase();
 
     int32_t SetAudioStreamInfo(const AudioStreamParams info);
@@ -56,6 +56,7 @@ public:
     virtual int32_t GetBufQueueState(BufferQueueState &bufState);
     virtual int32_t Enqueue(const BufferDesc &bufDesc);
     virtual int32_t Clear();
+    void SetClientID(int32_t clientPid, int32_t clientUid);
 
     std::vector<AudioSampleFormat> GetSupportedFormats() const;
     std::vector<AudioEncodingType> GetSupportedEncodingTypes() const;
@@ -113,7 +114,7 @@ public:
 
 class AudioContainerCaptureStream : public AudioContainerStreamBase {
 public:
-    AudioContainerCaptureStream(AudioStreamType eStreamType, AudioMode eMode);
+    AudioContainerCaptureStream(AudioStreamType eStreamType, AudioMode eMode, int32_t appUid);
     virtual ~AudioContainerCaptureStream();
     bool StartAudioStream() override;
     bool StopAudioStream() override;
@@ -125,7 +126,7 @@ public:
 
 class AudioContainerRenderStream : public AudioContainerStreamBase {
 public:
-    AudioContainerRenderStream(AudioStreamType eStreamType, AudioMode eMode);
+    AudioContainerRenderStream(AudioStreamType eStreamType, AudioMode eMode, int32_t appUid);
     virtual ~AudioContainerRenderStream();
     bool StartAudioStream() override;
     bool StopAudioStream() override;

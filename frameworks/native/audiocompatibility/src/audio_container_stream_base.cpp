@@ -85,7 +85,7 @@ map<pair<ContentType, StreamUsage>, AudioStreamType> AudioContainerStreamBase::C
     return streamMap;
 }
 
-AudioContainerStreamBase::AudioContainerStreamBase(AudioStreamType eStreamType, AudioMode eMode)
+AudioContainerStreamBase::AudioContainerStreamBase(AudioStreamType eStreamType, AudioMode eMode, int32_t appUid)
     : eStreamType_(eStreamType),
       eMode_(eMode),
       state_(NEW),
@@ -583,6 +583,14 @@ float AudioContainerStreamBase::GetVolume()
 
 int32_t AudioContainerStreamBase::SetRenderRate(AudioRendererRate renderRate)
 {
+    switch (renderRate) {
+        case RENDER_RATE_NORMAL:
+        case RENDER_RATE_DOUBLE:
+        case RENDER_RATE_HALF:
+            break;
+        default:
+            return AUDIO_CLIENT_INVALID_PARAMS_ERR;
+    }
     renderRate_ = renderRate;
     return SetStreamRenderRate(renderRate, trackId_);
 }
@@ -807,11 +815,6 @@ void AudioContainerStreamBase::WriteBuffers()
     int32_t writeError;
     int rate = 1;
     while (isReadyToWrite_) {
-        if (renderRate_ == RENDER_RATE_DOUBLE) {
-            rate = 1;
-        } else {
-            rate = 1;
-        }
         while (!filledBufferQ_.empty()) {
             if (state_ != RUNNING) {
                 AUDIO_ERR_LOG("Write: Illegal state:%{public}u", state_);
@@ -886,8 +889,13 @@ void AudioContainerStreamBase::SetApplicationCachePath(const std::string cachePa
     SetAppCachePath(cachePath);
 }
 
-AudioContainerCaptureStream::AudioContainerCaptureStream(AudioStreamType eStreamType, AudioMode eMode)
-    : AudioContainerStreamBase(eStreamType, eMode)
+void AudioContainerStreamBase::SetClientID(int32_t clientPid, int32_t clientUid)
+{
+    AUDIO_DEBUG_LOG("Set client PID: %{public}d, UID: %{public}d", clientPid, clientUid);
+}
+
+AudioContainerCaptureStream::AudioContainerCaptureStream(AudioStreamType eStreamType, AudioMode eMode, int32_t appUid)
+    : AudioContainerStreamBase(eStreamType, eMode, appUid)
 {
     AUDIO_INFO_LOG("AudioContainerCaptureStream::AudioContainerCaptureStream");
 }
@@ -1069,8 +1077,8 @@ int32_t AudioContainerCaptureStream::Clear()
     return SUCCESS;
 }
 
-AudioContainerRenderStream::AudioContainerRenderStream(AudioStreamType eStreamType, AudioMode eMode)
-    : AudioContainerStreamBase(eStreamType, eMode)
+AudioContainerRenderStream::AudioContainerRenderStream(AudioStreamType eStreamType, AudioMode eMode, int32_t appUid)
+    : AudioContainerStreamBase(eStreamType, eMode, appUid)
 {
     AUDIO_INFO_LOG("AudioContainerRenderStream::AudioContainerRenderStream");
 }

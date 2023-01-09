@@ -25,7 +25,7 @@ constexpr uint32_t INVALID_SESSION = static_cast<uint32_t>(-1);
 
 class AudioRendererGateway : public AudioRenderer {
 public:
-    explicit AudioRendererGateway(AudioStreamType audioStreamType);
+    explicit AudioRendererGateway(AudioStreamType audioStreamType, const AppInfo &appInfo);
     ~AudioRendererGateway();
     int32_t GetFrameCount(uint32_t &frameCount) const override;
     int32_t GetLatency(uint64_t &latency) const override;
@@ -73,14 +73,17 @@ public:
     AudioRendererInfo rendererInfo_ = {};
 
 private:
+    int32_t InitAudioInterruptCallback();
+    int32_t InitSharedInterrupt();
     static std::map<pid_t, std::map<AudioStreamType, AudioInterrupt>> sharedInterrupts_;
     std::shared_ptr<AudioContainerRenderStream> audioStream_;
     std::shared_ptr<AudioInterruptCallback> audioInterruptCallback_ = nullptr;
     std::shared_ptr<AudioStreamCallback> audioStreamCallback_ = nullptr;
+    AppInfo appInfo_ = {};
     AudioInterrupt audioInterrupt_ = {
-        STREAM_USAGE_UNKNOWN, CONTENT_TYPE_UNKNOWN, AudioStreamType::STREAM_DEFAULT, 0, false};
+        STREAM_USAGE_UNKNOWN, CONTENT_TYPE_UNKNOWN, AudioStreamType::STREAM_DEFAULT, 0};
     AudioInterrupt sharedInterrupt_ = {
-        STREAM_USAGE_UNKNOWN, CONTENT_TYPE_UNKNOWN, AudioStreamType::STREAM_DEFAULT, 0, false};
+        STREAM_USAGE_UNKNOWN, CONTENT_TYPE_UNKNOWN, AudioStreamType::STREAM_DEFAULT, 0};
     uint32_t sessionID_ = INVALID_SESSION;
     AudioStandard::InterruptMode mode_ = AudioStandard::InterruptMode::SHARE_MODE;
 };

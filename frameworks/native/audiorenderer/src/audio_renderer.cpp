@@ -46,7 +46,7 @@ std::unique_ptr<AudioRenderer> AudioRenderer::Create(AudioStreamType audioStream
 std::unique_ptr<AudioRenderer> AudioRenderer::Create(AudioStreamType audioStreamType, const AppInfo &appInfo)
 {
 #ifdef OHCORE
-    return std::make_unique<AudioRendererGateway>(audioStreamType);
+    return std::make_unique<AudioRendererGateway>(audioStreamType, appInfo);
 #else
     return std::make_unique<AudioRendererPrivate>(audioStreamType, appInfo);
 #endif
@@ -84,7 +84,7 @@ std::unique_ptr<AudioRenderer> AudioRenderer::Create(const std::string cachePath
 
     AudioStreamType audioStreamType = AudioStream::GetStreamType(contentType, streamUsage);
 #ifdef OHCORE
-    auto audioRenderer = std::make_unique<AudioRendererGateway>(audioStreamType);
+    auto audioRenderer = std::make_unique<AudioRendererGateway>(audioStreamType, appInfo);
 #else
     auto audioRenderer = std::make_unique<AudioRendererPrivate>(audioStreamType, appInfo);
 #endif

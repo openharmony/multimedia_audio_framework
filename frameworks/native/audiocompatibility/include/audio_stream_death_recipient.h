@@ -19,8 +19,8 @@
  * @brief audio renderer death recipient.
  */
 
-#ifndef AUDIO_Stream_DEATH_RECIPIENT_H
-#define AUDIO_Stream_DEATH_RECIPIENT_H
+#ifndef AUDIO_STREAM_DEATH_RECIPIENT_H
+#define AUDIO_STREAM_DEATH_RECIPIENT_H
 
 #include "iremote_object.h"
 #include "nocopyable.h"
@@ -56,4 +56,4 @@ private:
 }
 }
 
-#endif // AUDIO_Stream_DEATH_RECIPIENT_H
+#endif // AUDIO_STREAM_DEATH_RECIPIENT_H

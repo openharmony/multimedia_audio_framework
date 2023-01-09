@@ -32,9 +32,18 @@ AudioCapturerGateway::~AudioCapturerGateway()
     }
 }
 
-AudioCapturerGateway::AudioCapturerGateway(AudioStreamType audioStreamType)
+AudioCapturerGateway::AudioCapturerGateway(AudioStreamType audioStreamType, const AppInfo &appInfo)
 {
-    audioStream_ = std::make_shared<AudioContainerCaptureStream>(audioStreamType, AUDIO_MODE_RECORD);
+    appInfo_ = appInfo;
+    if (!(appInfo_.appPid)) {
+        appInfo_.appPid = getpid();
+    }
+
+    if (appInfo_.appUid < 0) {
+        appInfo_.appUid = static_cast<int32_t>(getuid());
+    }
+
+    audioStream_ = std::make_shared<AudioContainerCaptureStream>(audioStreamType, AUDIO_MODE_RECORD, appInfo.appUid);
     if (audioStream_) {
     AUDIO_DEBUG_LOG("AudioCapturerGateway::Audio stream created");
     }
