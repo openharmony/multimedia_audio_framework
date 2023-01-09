@@ -650,8 +650,23 @@ int32_t AudioRendererGateway::SetRendererWriteCallback(const std::shared_ptr<Aud
 
 void AudioRendererGateway::SetInterruptMode(InterruptMode mode)
 {
-    AUDIO_INFO_LOG("AudioRendererGateway: SetInterruptMode: InterruptMode %{pubilc}d", mode);
+    AUDIO_INFO_LOG("AudioRendererGateway::SetInterruptMode: InterruptMode %{pubilc}d", mode);
+    if (mode_ == mode) {
+        return;
+    } else if (mode != SHARE_MODE && mode != INDEPENDENT_MODE) {
+        AUDIO_ERR_LOG("AudioRendererGateway::SetInterruptMode: Invalid interrupt mode!");
+        return;
+    }
     mode_ = mode;
+
+    if (AudioPolicyManager::GetInstance().UnsetAudioInterruptCallback(sessionID_) != 0) {
+        AUDIO_ERR_LOG("AudioRendererGateway::SetInterruptMode: UnsetAudioInterruptCallback failed!");
+        return;
+    }
+    if (InitAudioInterruptCallback() != 0) {
+        AUDIO_ERR_LOG("AudioRendererGateway::SetInterruptMode: InitAudioInterruptCallback failed!");
+        return;
+    }
 }
 
 int32_t AudioRendererGateway::SetLowPowerVolume(float volume) const
