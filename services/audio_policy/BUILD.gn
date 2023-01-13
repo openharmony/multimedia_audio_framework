@@ -98,7 +98,7 @@ ohos_shared_library("audio_dump") {
 
   deps = [
     "$pulseaudio_build_path/src/pulse:pulse",
-    "//third_party/bounds_checking_function:libsec_static",
+    "//third_party/bounds_checking_function:libsec_shared",
   ]
 
   external_deps = [
@@ -277,7 +277,7 @@ ohos_executable("audio_policy_test") {
   deps = [
     "//foundation/multimedia/audio_framework/services/audio_policy:audio_policy_client",
     "//foundation/multimedia/audio_framework/services/audio_service:audio_client",
-    "//third_party/bounds_checking_function:libsec_static",
+    "//third_party/bounds_checking_function:libsec_shared",
   ]
 
   external_deps = [
