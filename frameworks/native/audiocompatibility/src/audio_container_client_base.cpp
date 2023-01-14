@@ -502,11 +502,10 @@ int32_t AudioContainerClientBase::ReadStreamGa(StreamBuffer &stream, bool isBloc
         AUDIO_ERR_LOG("AudioContainerClientBase: ReadStreamGa() failed, error: %{public}d", error);
         return AUDIO_CLIENT_ERR;
     }
-    reply.ReadUint32(stream.bufferLen);
-    size_t readSize = static_cast<size_t>(stream.bufferLen);
+    size_t readSize = static_cast<size_t>(reply.ReadUint32());
 
     const uint8_t *buffer = reply.ReadBuffer(readSize);
-    memcpy_s(stream.buffer, readSize, buffer, readSize);
+    memcpy_s(stream.buffer, stream.bufferLen, buffer, readSize);
     return readSize;
 }
 
