@@ -199,6 +199,11 @@ int32_t AudioContainerClientBase::StartStreamGa(const int32_t &trackId)
         AUDIO_ERR_LOG("AudioContainerClientBase: StartStreamGa() failed, error: %{public}d", error);
         return AUDIO_CLIENT_START_STREAM_ERR;
     }
+    state_ = RUNNING;
+    std::shared_ptr<AudioStreamCallback> streamCb = streamCallback_.lock();
+    if (streamCb != nullptr) {
+        streamCb->OnStateChange(state_);
+    }
     AUDIO_INFO_LOG("AudioContainerClientBase: Start Stream SUCCESS");
     return AUDIO_CLIENT_SUCCESS;
 }
@@ -219,7 +224,11 @@ int32_t AudioContainerClientBase::PauseStreamGa(const int32_t &trackId)
         AUDIO_ERR_LOG("AudioContainerClientBase: PauseStreamGa() failed, error: %{public}d", error);
         return AUDIO_CLIENT_ERR;
     }
-
+    state_ = PAUSED;
+    std::shared_ptr<AudioStreamCallback> streamCb = streamCallback_.lock();
+    if (streamCb != nullptr) {
+        streamCb->OnStateChange(state_);
+    }
     return AUDIO_CLIENT_SUCCESS;
 }
 
@@ -239,7 +248,11 @@ int32_t AudioContainerClientBase::StopStreamGa(const int32_t &trackId)
         AUDIO_ERR_LOG("AudioContainerClientBase: StopStreamGa() failed, error: %{public}d", error);
         return AUDIO_CLIENT_ERR;
     }
-
+    state_ = STOPPED;
+    std::shared_ptr<AudioStreamCallback> streamCb = streamCallback_.lock();
+    if (streamCb != nullptr) {
+        streamCb->OnStateChange(state_);
+    }
     return AUDIO_CLIENT_SUCCESS;
 }
 
