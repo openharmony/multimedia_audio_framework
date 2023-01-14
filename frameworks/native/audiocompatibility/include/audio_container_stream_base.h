@@ -28,6 +28,8 @@ public:
     AudioContainerStreamBase(AudioStreamType eStreamType, AudioMode eMode, int32_t appUid);
     virtual ~AudioContainerStreamBase();
 
+    void SetRendererInfo(const AudioRendererInfo &rendererInfo);
+    void SetCapturerInfo(const AudioCapturerInfo &capturerInfo);
     int32_t SetAudioStreamInfo(const AudioStreamParams info);
     int32_t GetAudioStreamInfo(AudioStreamParams &info);
     bool VerifyClientPermission(const std::string &permissionName, uint32_t appTokenId, int32_t appUid,
@@ -98,6 +100,8 @@ public:
     bool isReadyToRead_;
     void WriteBuffers();
     void ReadBuffers();
+    AudioRendererInfo rendererInfo_;
+    AudioCapturerInfo capturerInfo_;
 
     static const std::map<std::pair<ContentType, StreamUsage>, AudioStreamType> streamTypeMap_;
     static std::map<std::pair<ContentType, StreamUsage>, AudioStreamType> CreateStreamMap();

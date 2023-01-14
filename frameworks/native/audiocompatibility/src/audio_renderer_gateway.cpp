@@ -147,6 +147,7 @@ int32_t AudioRendererGateway::GetLatency(uint64_t &latency) const
 
 int32_t AudioRendererGateway::SetParams(const AudioRendererParams params)
 {
+    audioStream_->SetRendererInfo(rendererInfo_);
     AudioStreamParams audioStreamParams;
     audioStreamParams.format = params.sampleFormat;
     audioStreamParams.samplingRate = params.sampleRate;

@@ -119,6 +119,15 @@ AudioContainerStreamBase::~AudioContainerStreamBase()
         ReleaseAudioStream();
     }
 }
+void AudioContainerStreamBase::SetRendererInfo(const AudioRendererInfo &rendererInfo)
+{
+    rendererInfo_ = rendererInfo;
+}
+
+void AudioContainerStreamBase::SetCapturerInfo(const AudioCapturerInfo &capturerInfo)
+{
+    capturerInfo_ = capturerInfo;
+}
 
 State AudioContainerStreamBase::GetState()
 {
@@ -166,11 +175,7 @@ int32_t AudioContainerStreamBase::GetBufferSize(size_t &bufferSize) const
     if (GetMinimumBufferSize(bufferSize, trackId_) != 0) {
         return ERR_OPERATION_FAILED;
     }
-    int rate = 1;
-    if (renderRate_ == RENDER_RATE_DOUBLE) {
-        rate = 1;
-    }
-    bufferSize = bufferSize * rate;
+    bufferSize = bufferSize;
     return SUCCESS;
 }
 
@@ -813,7 +818,6 @@ void AudioContainerStreamBase::WriteBuffers()
     StreamBuffer stream;
     size_t bytesWritten;
     int32_t writeError;
-    int rate = 1;
     while (isReadyToWrite_) {
         while (!filledBufferQ_.empty()) {
             if (state_ != RUNNING) {
@@ -822,7 +826,7 @@ void AudioContainerStreamBase::WriteBuffers()
                 return;
             }
             stream.buffer = filledBufferQ_.front().buffer;
-            stream.bufferLen = filledBufferQ_.front().dataLength * rate;
+            stream.bufferLen = filledBufferQ_.front().bufLength;
             if (stream.buffer == nullptr) {
                 AUDIO_ERR_LOG("WriteBuffers stream.buffer == nullptr return");
                 return;
@@ -995,6 +999,7 @@ int32_t AudioContainerCaptureStream::GetBufferDesc(BufferDesc & bufDesc)
         if (!freeBufferQ_.empty()) {
             bufDesc.buffer = freeBufferQ_.front().buffer;
             bufDesc.bufLength = freeBufferQ_.front().bufLength;
+            bufDesc.dataLength = freeBufferQ_.front().dataLength;
             freeBufferQ_.pop();
         } else {
             bufDesc.buffer = nullptr;
