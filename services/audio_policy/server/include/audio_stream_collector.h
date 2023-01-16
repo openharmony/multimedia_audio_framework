@@ -49,6 +49,7 @@ public:
     int32_t SetLowPowerVolume(int32_t streamId, float volume);
     float GetLowPowerVolume(int32_t streamId);
     float GetSingleStreamVolume(int32_t streamId);
+    bool GetAndCompareStreamType(AudioStreamType requiredType, AudioRendererInfo rendererInfo);
 private:
     AudioStreamEventDispatcher &mDispatcherService;
     std::mutex streamsInfoMutex_;
@@ -57,6 +58,8 @@ private:
     std::vector<std::unique_ptr<AudioRendererChangeInfo>> audioRendererChangeInfos_;
     std::vector<std::unique_ptr<AudioCapturerChangeInfo>> audioCapturerChangeInfos_;
     std::unordered_map<int32_t, std::shared_ptr<AudioClientTracker>> clientTracker_;
+    static const std::map<std::pair<ContentType, StreamUsage>, AudioStreamType> streamTypeMap_;
+    static std::map<std::pair<ContentType, StreamUsage>, AudioStreamType> CreateStreamMap();
     int32_t AddRendererStream(AudioStreamChangeInfo &streamChangeInfo);
     int32_t AddCapturerStream(AudioStreamChangeInfo &streamChangeInfo);
     int32_t UpdateRendererStream(AudioStreamChangeInfo &streamChangeInfo);
