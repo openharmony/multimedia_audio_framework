@@ -161,7 +161,6 @@ int32_t AudioContainerClientBase::CreateStreamGa(AudioStreamParams audioParams, 
     data.WriteInt32(static_cast<int32_t>(audioParams.format));
     data.WriteInt32(static_cast<int32_t>(audioParams.channels));
     data.WriteInt32(static_cast<int32_t>(audioType));
-
     error = Remote()->SendRequest(CMD_CREATE_AUDIOSTREAM, data, reply, option);
     if (error != ERR_NONE) {
         AUDIO_ERR_LOG("AudioContainerClientBase::CreateRemoteAudioRenderer() failed, error: %{public}d", error);
