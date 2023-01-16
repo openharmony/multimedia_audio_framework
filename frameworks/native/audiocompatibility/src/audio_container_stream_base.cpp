@@ -175,7 +175,6 @@ int32_t AudioContainerStreamBase::GetBufferSize(size_t &bufferSize) const
     if (GetMinimumBufferSize(bufferSize, trackId_) != 0) {
         return ERR_OPERATION_FAILED;
     }
-    bufferSize = bufferSize;
     return SUCCESS;
 }
 
