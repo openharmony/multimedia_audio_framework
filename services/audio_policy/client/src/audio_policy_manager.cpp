@@ -148,14 +148,14 @@ int32_t AudioPolicyManager::SetMicrophoneMuteAudioConfig(bool isMute)
     return gsp->SetMicrophoneMuteAudioConfig(isMute);
 }
 
-bool AudioPolicyManager::IsMicrophoneMute()
+bool AudioPolicyManager::IsMicrophoneMute(API_VERSION api_v)
 {
     const sptr<IAudioPolicy> gsp = GetAudioPolicyManagerProxy();
     if (gsp == nullptr) {
         AUDIO_ERR_LOG("IsMicrophoneMute: audio policy manager proxy is NULL.");
         return -1;
     }
-    return gsp->IsMicrophoneMute();
+    return gsp->IsMicrophoneMute(api_v);
 }
 
 AudioScene AudioPolicyManager::GetAudioScene()

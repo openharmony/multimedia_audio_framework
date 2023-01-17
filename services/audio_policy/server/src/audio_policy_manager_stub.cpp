@@ -144,9 +144,10 @@ void AudioPolicyManagerStub::SetMicrophoneMuteAudioConfigInternal(MessageParcel 
     reply.WriteInt32(result);
 }
 
-void AudioPolicyManagerStub::IsMicrophoneMuteInternal(MessageParcel &reply)
+void AudioPolicyManagerStub::IsMicrophoneMuteInternal(MessageParcel &data, MessageParcel &reply)
 {
-    int32_t result = IsMicrophoneMute();
+    API_VERSION api_v = static_cast<API_VERSION>(data.ReadInt32());
+    int32_t result = IsMicrophoneMute(api_v);
     reply.WriteBool(result);
 }
 
@@ -762,7 +763,7 @@ int AudioPolicyManagerStub::OnRemoteRequest(
             break;
 
         case IS_MICROPHONE_MUTE:
-            IsMicrophoneMuteInternal(reply);
+            IsMicrophoneMuteInternal(data, reply);
             break;
 
         case GET_STREAM_VOLUME:

@@ -279,6 +279,12 @@ enum FocusType {
     FOCUS_TYPE_RECORDING = 0,
 };
 
+enum API_VERSION {
+    API_7 = 7,
+    API_8 = 8,
+    API_9 = 9
+};
+
 enum AudioErrors {
     /**
      * Common errors.

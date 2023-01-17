@@ -220,7 +220,7 @@ int32_t AudioPolicyProxy::SetMicrophoneMuteAudioConfig(bool isMute)
     return reply.ReadInt32();
 }
 
-bool AudioPolicyProxy::IsMicrophoneMute()
+bool AudioPolicyProxy::IsMicrophoneMute(API_VERSION api_v)
 {
     MessageParcel data;
     MessageParcel reply;
@@ -230,6 +230,7 @@ bool AudioPolicyProxy::IsMicrophoneMute()
         AUDIO_ERR_LOG("AudioPolicyProxy: WriteInterfaceToken failed");
         return -1;
     }
+    data.WriteInt32(static_cast<int32_t>(api_v));
     int32_t error = Remote()->SendRequest(IS_MICROPHONE_MUTE, data, reply, option);
     if (error != ERR_NONE) {
         AUDIO_ERR_LOG("set microphoneMute failed, error: %d", error);
