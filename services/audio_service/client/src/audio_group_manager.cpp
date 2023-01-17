@@ -360,14 +360,14 @@ int32_t AudioGroupManager::SetMicrophoneMute(bool isMute)
     return AudioPolicyManager::GetInstance().SetMicrophoneMuteAudioConfig(isMute);
 }
 
-bool AudioGroupManager::IsMicrophoneMute()
+bool AudioGroupManager::IsMicrophoneMute(API_VERSION api_v)
 {
     /* Call Audio Policy GetRingerMode */
     if (netWorkId_ != LOCAL_NETWORK_ID) {
         AUDIO_ERR_LOG("AudioGroupManager::SetRingerMode is not supported for local device.");
         return false;
     }
-    return AudioPolicyManager::GetInstance().IsMicrophoneMute();
+    return AudioPolicyManager::GetInstance().IsMicrophoneMute(api_v);
 }
 
 int32_t AudioGroupManager::SetMicStateChangeCallback(

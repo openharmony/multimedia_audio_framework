@@ -77,7 +77,7 @@ public:
     int32_t SetRingerMode(AudioRingerMode ringMode) const;
     AudioRingerMode GetRingerMode() const;
     int32_t SetMicrophoneMute(bool isMute);
-    bool IsMicrophoneMute(void);
+    bool IsMicrophoneMute(API_VERSION api_v = API_9);
     int32_t SetMicStateChangeCallback(const std::shared_ptr<AudioManagerMicStateChangeCallback> &callback);
 private:
     int32_t groupId_;

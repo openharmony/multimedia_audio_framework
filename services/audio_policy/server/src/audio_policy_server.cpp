@@ -460,10 +460,10 @@ std::vector<int32_t> AudioPolicyServer::GetSupportedTones()
 }
 
 
-int32_t AudioPolicyServer::SetMicrophoneMuteCommon(bool isMute)
+int32_t AudioPolicyServer::SetMicrophoneMuteCommon(bool isMute, API_VERSION api_v)
 {
     AUDIO_INFO_LOG("Entered %{public}s", __func__);
-    bool isMicrophoneMute = IsMicrophoneMute();
+    bool isMicrophoneMute = IsMicrophoneMute(api_v);
     int32_t ret = mPolicyService.SetMicrophoneMute(isMute);
     if (ret == SUCCESS && isMicrophoneMute != isMute) {
         for (auto it = micStateChangeListenerCbsMap_.begin(); it != micStateChangeListenerCbsMap_.end(); ++it) {
@@ -489,7 +489,7 @@ int32_t AudioPolicyServer::SetMicrophoneMute(bool isMute)
         AUDIO_ERR_LOG("SetMicrophoneMute: MICROPHONE permission denied");
         return ERR_PERMISSION_DENIED;
     }
-    return SetMicrophoneMuteCommon(isMute);
+    return SetMicrophoneMuteCommon(isMute, API_7);
 }
 
 int32_t AudioPolicyServer::SetMicrophoneMuteAudioConfig(bool isMute)
@@ -499,13 +499,13 @@ int32_t AudioPolicyServer::SetMicrophoneMuteAudioConfig(bool isMute)
         AUDIO_ERR_LOG("SetMicrophoneMuteAudioConfig: MANAGE_AUDIO_CONFIG permission denied");
         return ERR_PERMISSION_DENIED;
     }
-    return SetMicrophoneMuteCommon(isMute);
+    return SetMicrophoneMuteCommon(isMute, API_9);
 }
 
-bool AudioPolicyServer::IsMicrophoneMute()
+bool AudioPolicyServer::IsMicrophoneMute(API_VERSION api_v)
 {
     AUDIO_INFO_LOG("Entered %{public}s", __func__);
-    if (!VerifyClientPermission(MICROPHONE_PERMISSION)) {
+    if (api_v == API_7 && !VerifyClientPermission(MICROPHONE_PERMISSION)) {
         AUDIO_ERR_LOG("IsMicrophoneMute: MICROPHONE permission denied");
         return ERR_PERMISSION_DENIED;
     }

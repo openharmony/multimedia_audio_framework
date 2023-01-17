@@ -216,7 +216,7 @@ public:
     int32_t SetMute(AudioVolumeType volumeType, bool mute) const;
     bool IsStreamMute(AudioVolumeType volumeType) const;
     int32_t SetMicrophoneMute(bool isMute);
-    bool IsMicrophoneMute(void);
+    bool IsMicrophoneMute(API_VERSION api_v = API_7);
     int32_t SelectOutputDevice(std::vector<sptr<AudioDeviceDescriptor>> audioDeviceDescriptors) const;
     int32_t SelectInputDevice(std::vector<sptr<AudioDeviceDescriptor>> audioDeviceDescriptors) const;
     std::string GetSelectedDeviceInfo(int32_t uid, int32_t pid, AudioStreamType streamType) const;

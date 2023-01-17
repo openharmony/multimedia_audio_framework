@@ -97,7 +97,7 @@ public:
 
     int32_t SetMicrophoneMuteAudioConfig(bool isMute);
 
-    bool IsMicrophoneMute(void);
+    bool IsMicrophoneMute(API_VERSION api_v = API_9);
 
     AudioScene GetAudioScene();
 

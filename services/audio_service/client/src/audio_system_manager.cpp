@@ -522,14 +522,14 @@ int32_t AudioSystemManager::SetMicrophoneMute(bool isMute)
     return AudioPolicyManager::GetInstance().SetMicrophoneMute(isMute);
 }
 
-bool AudioSystemManager::IsMicrophoneMute()
+bool AudioSystemManager::IsMicrophoneMute(API_VERSION api_v)
 {
     std::shared_ptr<AudioGroupManager> groupManager = GetGroupManager(DEFAULT_VOLUME_GROUP_ID);
     if (groupManager == nullptr) {
         AUDIO_ERR_LOG("IsMicrophoneMute failed, groupManager is null");
         return false;
     }
-    return groupManager->IsMicrophoneMute();
+    return groupManager->IsMicrophoneMute(api_v);
 }
 
 int32_t AudioSystemManager::SelectOutputDevice(std::vector<sptr<AudioDeviceDescriptor>> audioDeviceDescriptors) const
