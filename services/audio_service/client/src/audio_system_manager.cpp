@@ -514,7 +514,11 @@ int32_t AudioSystemManager::SetRingerModeCallback(const int32_t clientId,
 
 int32_t AudioSystemManager::UnsetRingerModeCallback(const int32_t clientId) const
 {
-    return AudioPolicyManager::GetInstance().UnsetRingerModeCallback(clientId);
+    if (clientId != cbClientId_) {
+        return ERR_INVALID_OPERATION;
+    }
+
+    return SUCCESS;
 }
 
 int32_t AudioSystemManager::SetMicrophoneMute(bool isMute)
