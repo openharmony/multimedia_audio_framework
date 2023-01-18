@@ -260,8 +260,8 @@ void AudioInterruptTest::SaveStreamInfo(ContentType contentType, StreamUsage str
     contentType_ = contentType;
     streamUsage_ = streamUsage;
 }
-} // AudioStandard
-} // OHOS
+} // namespace AudioStandard
+} // namespace OHOS
 
 using namespace OHOS;
 using namespace OHOS::AudioStandard;

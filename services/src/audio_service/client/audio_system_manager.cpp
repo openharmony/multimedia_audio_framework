@@ -345,7 +345,7 @@ bool AudioSystemManager::IsStreamMute(AudioSystemManager::AudioVolumeType volume
 
 int32_t AudioSystemManager::SetDeviceChangeCallback(const std::shared_ptr<AudioManagerDeviceChangeCallback> &callback)
 {
-    MEDIA_ERR_LOG("Entered AudioSystemManager::%{public}s", __func__);
+    MEDIA_INFO_LOG("Entered AudioSystemManager::%{public}s", __func__);
     if (callback == nullptr) {
         MEDIA_ERR_LOG("SetDeviceChangeCallback: callback is nullptr");
         return ERR_INVALID_PARAM;

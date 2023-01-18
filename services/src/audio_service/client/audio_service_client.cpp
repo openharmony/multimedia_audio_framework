@@ -129,9 +129,7 @@ pa_sample_spec AudioServiceClient::ConvertToPAAudioParams(AudioStreamParams audi
 
 static size_t AlignToAudioFrameSize(size_t l, const pa_sample_spec &ss)
 {
-    size_t fs;
-
-    fs = pa_frame_size(&ss);
+    size_t fs = pa_frame_size(&ss);
     if (fs == 0) {
         MEDIA_ERR_LOG(" Error: pa_frame_size returned  0");
         return 0;
@@ -142,10 +140,11 @@ static size_t AlignToAudioFrameSize(size_t l, const pa_sample_spec &ss)
 
 void AudioServiceClient::PAStreamStartSuccessCb(pa_stream *stream, int32_t success, void *userdata)
 {
-    if (userdata == nullptr) {
-        MEDIA_ERR_LOG(" Error: userData is null!");
+    if (!userdata) {
+        MEDIA_ERR_LOG("AudioServiceClient::PAStreamStartSuccessCb: userdata is null");
         return;
     }
+
     AudioServiceClient *asClient = static_cast<AudioServiceClient *>(userdata);
     pa_threaded_mainloop *mainLoop = static_cast<pa_threaded_mainloop *>(asClient->mainLoop);
 
@@ -160,6 +159,11 @@ void AudioServiceClient::PAStreamStartSuccessCb(pa_stream *stream, int32_t succe
 
 void AudioServiceClient::PAStreamStopSuccessCb(pa_stream *stream, int32_t success, void *userdata)
 {
+    if (!userdata) {
+        MEDIA_ERR_LOG("AudioServiceClient::PAStreamStopSuccessCb: userdata is null");
+        return;
+    }
+
     AudioServiceClient *asClient = static_cast<AudioServiceClient *>(userdata);
     pa_threaded_mainloop *mainLoop = static_cast<pa_threaded_mainloop *>(asClient->mainLoop);
 
@@ -174,6 +178,11 @@ void AudioServiceClient::PAStreamStopSuccessCb(pa_stream *stream, int32_t succes
 
 void AudioServiceClient::PAStreamPauseSuccessCb(pa_stream *stream, int32_t success, void *userdata)
 {
+    if (!userdata) {
+        MEDIA_ERR_LOG("AudioServiceClient::PAStreamPauseSuccessCb: userdata is null");
+        return;
+    }
+
     AudioServiceClient *asClient = static_cast<AudioServiceClient *>(userdata);
     pa_threaded_mainloop *mainLoop = static_cast<pa_threaded_mainloop *>(asClient->mainLoop);
 
@@ -188,6 +197,11 @@ void AudioServiceClient::PAStreamPauseSuccessCb(pa_stream *stream, int32_t succe
 
 void AudioServiceClient::PAStreamDrainSuccessCb(pa_stream *stream, int32_t success, void *userdata)
 {
+    if (!userdata) {
+        MEDIA_ERR_LOG("AudioServiceClient::PAStreamDrainSuccessCb: userdata is null");
+        return;
+    }
+
     AudioServiceClient *asClient = (AudioServiceClient *)userdata;
     pa_threaded_mainloop *mainLoop = (pa_threaded_mainloop *)asClient->mainLoop;
 
@@ -197,6 +211,10 @@ void AudioServiceClient::PAStreamDrainSuccessCb(pa_stream *stream, int32_t succe
 
 void AudioServiceClient::PAStreamFlushSuccessCb(pa_stream *stream, int32_t success, void *userdata)
 {
+    if (!userdata) {
+        MEDIA_ERR_LOG("AudioServiceClient::PAStreamFlushSuccessCb: userdata is null");
+        return;
+    }
     AudioServiceClient *asClient = (AudioServiceClient *)userdata;
     pa_threaded_mainloop *mainLoop = (pa_threaded_mainloop *)asClient->mainLoop;
 
@@ -212,6 +230,10 @@ void AudioServiceClient::PAStreamReadCb(pa_stream *stream, size_t length, void *
 
 void AudioServiceClient::PAStreamSetBufAttrSuccessCb(pa_stream *stream, int32_t success, void *userdata)
 {
+    if (!userdata) {
+        MEDIA_ERR_LOG("AudioServiceClient::PAStreamSetBufAttrSuccessCb: userdata is null");
+        return;
+    }
     AudioServiceClient *asClient = (AudioServiceClient *)userdata;
     pa_threaded_mainloop *mainLoop = (pa_threaded_mainloop *)asClient->mainLoop;
 
@@ -273,6 +295,11 @@ int32_t AudioServiceClient::SaveWriteCallback(const std::weak_ptr<AudioRendererW
 void AudioServiceClient::PAStreamWriteCb(pa_stream *stream, size_t length, void *userdata)
 {
     MEDIA_INFO_LOG("AudioServiceClient::Inside PA write callback");
+    if (!userdata) {
+        MEDIA_ERR_LOG("AudioServiceClient::PAStreamWriteCb: userdata is null");
+        return;
+    }
+
     auto asClient = static_cast<AudioServiceClient *>(userdata);
     auto mainLoop = static_cast<pa_threaded_mainloop *>(asClient->mainLoop);
     pa_threaded_mainloop_signal(mainLoop, 0);
@@ -295,6 +322,11 @@ void AudioServiceClient::PAStreamWriteCb(pa_stream *stream, size_t length, void 
 
 void AudioServiceClient::PAStreamUnderFlowCb(pa_stream *stream, void *userdata)
 {
+    if (!userdata) {
+        MEDIA_ERR_LOG("AudioServiceClient::PAStreamUnderFlowCb: userdata is null");
+        return;
+    }
+
     AudioServiceClient *asClient = (AudioServiceClient *)userdata;
     asClient->underFlowCount++;
 }
@@ -307,6 +339,11 @@ void AudioServiceClient::PAStreamLatencyUpdateCb(pa_stream *stream, void *userda
 
 void AudioServiceClient::PAStreamStateCb(pa_stream *stream, void *userdata)
 {
+    if (!userdata) {
+        MEDIA_ERR_LOG("AudioServiceClient::PAStreamStateCb: userdata is null");
+        return;
+    }
+
     AudioServiceClient *asClient = (AudioServiceClient *)userdata;
     pa_threaded_mainloop *mainLoop = (pa_threaded_mainloop *)asClient->mainLoop;
 

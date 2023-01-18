@@ -50,6 +50,6 @@ private:
     ContentType contentType_ = ContentType::CONTENT_TYPE_MUSIC;
     StreamUsage streamUsage_ = StreamUsage::STREAM_USAGE_MEDIA;
 };
-} // AudioStandard
-} // OHOS
+} // namespace AudioStandard
+} // namespace OHOS
 #endif // AUDIO_INTERRUPT_TEST_H

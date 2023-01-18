@@ -237,6 +237,7 @@ static int SinkProcessMsg(pa_msgobject *o, int code, void *data, int64_t offset,
                           pa_memchunk *chunk)
 {
     struct Userdata *u = PA_SINK(o)->userdata;
+    pa_assert(u);
     switch (code) {
         case PA_SINK_MESSAGE_GET_LATENCY: {
             uint64_t latency;
@@ -345,7 +346,7 @@ static int32_t PrepareDevice(struct Userdata *u)
     enum AudioFormat format = ConvertToHDIAudioFormat(u->ss.format);
     sample_attrs.format = format;
     sample_attrs.sampleFmt = format;
-    MEDIA_ERR_LOG("audiorenderer format: %d", sample_attrs.format);
+    MEDIA_INFO_LOG("audiorenderer format: %d", sample_attrs.format);
 
     sample_attrs.sampleRate = u->ss.rate;
     sample_attrs.channel = u->ss.channels;
@@ -423,6 +424,7 @@ pa_sink *PaHdiSinkNew(pa_module *m, pa_modargs *ma, const char *driver)
     pa_assert(ma);
 
     u = pa_xnew0(struct Userdata, 1);
+    pa_assert(u);
     u->core = m->core;
     u->module = m;
 

@@ -26,7 +26,7 @@ namespace OHOS {
 namespace AudioStandard {
 class PulseAudioServiceAdapterImpl : public AudioServiceAdapter {
 public:
-    PulseAudioServiceAdapterImpl(std::unique_ptr<AudioServiceAdapterCallback> &cb);
+    explicit PulseAudioServiceAdapterImpl(std::unique_ptr<AudioServiceAdapterCallback> &cb);
     ~PulseAudioServiceAdapterImpl();
 
     bool Connect() override;

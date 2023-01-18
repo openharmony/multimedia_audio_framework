@@ -286,8 +286,8 @@ int32_t InterruptMultiRendererTest::TestPlayback(int argc, char *argv[]) const
 
     return 0;
 }
-} // AudioStandard
-} // OHOS
+} // namespace AudioStandard
+} // namespace OHOS
 
 using namespace OHOS;
 using namespace OHOS::AudioStandard;

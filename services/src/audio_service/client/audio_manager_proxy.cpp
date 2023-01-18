@@ -65,7 +65,7 @@ int32_t AudioManagerProxy::GetMinVolume(AudioSystemManager::AudioVolumeType volu
         return error;
     }
 
-    float volume = reply.ReadInt32();
+    int32_t volume = reply.ReadInt32();
     return volume;
 }
 

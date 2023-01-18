@@ -23,7 +23,7 @@ namespace OHOS {
 namespace AudioStandard {
 class AudioServerDeathRecipient : public IRemoteObject::DeathRecipient {
 public:
-    explicit AudioServerDeathRecipient(pid_t pid) : pid_(pid) {};
+    explicit AudioServerDeathRecipient(pid_t pid) : pid_(pid) {}
     virtual ~AudioServerDeathRecipient() = default;
     DISALLOW_COPY_AND_MOVE(AudioServerDeathRecipient);
     void OnRemoteDied(const wptr<IRemoteObject> &remote)

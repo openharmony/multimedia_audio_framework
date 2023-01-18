@@ -162,7 +162,7 @@ int32_t AudioPolicyManager::UnsetRingerModeCallback(const int32_t clientId)
 int32_t AudioPolicyManager::SetDeviceChangeCallback(const int32_t clientId,
     const std::shared_ptr<AudioManagerDeviceChangeCallback> &callback)
 {
-    MEDIA_ERR_LOG("Entered %{public}s", __func__);
+    MEDIA_INFO_LOG("Entered %{public}s", __func__);
     if (callback == nullptr) {
         MEDIA_ERR_LOG("AudioPolicyManager: callback is nullptr");
         return ERR_INVALID_PARAM;

@@ -35,7 +35,7 @@ template <typename...Args>
 void AppendFormat(std::string& out, const char* fmt, Args&& ... args)
 {
     char buf[STRING_BUFFER_SIZE] = {0};
-    int len = ::snprintf_s(buf, sizeof(buf), sizeof(buf)-1, fmt, args...);
+    int len = ::sprintf_s(buf, sizeof(buf), fmt, args...);
     if (len <= 0) {
         MEDIA_ERR_LOG("snprintf_s error : buffer allocation fails");
         return;
@@ -103,14 +103,14 @@ private:
     pa_mainloop_api *api;
     pa_context *context;
     std::mutex ctrlMutex;
-    
+
     bool isMainLoopStarted;
     bool isContextConnected;
     AudioData audioData_;
- 
+
     int32_t ConnectStreamToPA();
     void ResetPAAudioDump();
-    
+
     void PlaybackStreamDump(std::string &dumpString);
     void RecordStreamDump(std::string &dumpString);
     void HDFModulesDump(std::string &dumpString);
@@ -126,7 +126,7 @@ private:
     static const std::string GetDeviceTypeName(DeviceType deviceType);
     static bool IsEndWith(const std::string &mainStr, const std::string &toMatch);
     static bool IsValidModule (const std::string moduleName);
-    
+
     // Callbacks
     static void PAContextStateCb(pa_context *context, void *userdata);
     static void PASinkInfoCallback(pa_context *c, const pa_sink_info *i, int eol, void *userdata);

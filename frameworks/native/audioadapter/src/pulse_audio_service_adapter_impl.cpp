@@ -90,14 +90,6 @@ bool PulseAudioServiceAdapterImpl::Connect()
 
 bool PulseAudioServiceAdapterImpl::ConnectToPulseAudio()
 {
-    unique_ptr<UserData> userData = make_unique<UserData>();
-    if (userData == nullptr) {
-        MEDIA_ERR_LOG("[PulseAudioServiceAdapterImpl] UserData memory alloc failed");
-        return false;
-    }
-
-    userData->thiz = this;
-
     if (mContext != nullptr) {
         pa_context_disconnect(mContext);
         pa_context_set_state_callback(mContext, nullptr, nullptr);
@@ -568,7 +560,7 @@ void PulseAudioServiceAdapterImpl::PaGetSinkInputInfoVolumeCb(pa_context *c, con
     UserData *userData = reinterpret_cast<UserData*>(userdata);
     PulseAudioServiceAdapterImpl *thiz = userData->thiz;
 
-    MEDIA_ERR_LOG("[PulseAudioServiceAdapterImpl] GetSinkInputInfoVolumeCb");
+    MEDIA_INFO_LOG("[PulseAudioServiceAdapterImpl] GetSinkInputInfoVolumeCb");
     if (eol < 0) {
         delete userData;
         MEDIA_ERR_LOG("[PulseAudioServiceAdapterImpl] Failed to get sink input information: %{public}s",

@@ -721,5 +721,5 @@ void AudioServiceDump::PASourceOutputInfoCallback(pa_context *c, const pa_source
     }
     asDump->audioData_.streamData.sourceOutputs.push_back(sourceOutputInfo);
 }
-} // namespace AudoStandard
+} // namespace AudioStandard
 } // namespace OHOS

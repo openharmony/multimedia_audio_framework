@@ -116,6 +116,6 @@ public:
      */
     virtual int32_t Release() = 0;
 };
-} // AudioStandard
-} // OHOS
+} // namespace AudioStandard
+} // namespace OHOS
 #endif // IRINGTONE_PLAYER_H

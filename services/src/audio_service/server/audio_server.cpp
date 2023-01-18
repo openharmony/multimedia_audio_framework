@@ -99,8 +99,7 @@ const std::string AudioServer::GetAudioParameter(const std::string &key)
     if (AudioServer::audioParameters.count(key)) {
         return AudioServer::audioParameters[key];
     } else {
-        const std::string value = "";
-        return value;
+        return "";
     }
 }
 
@@ -109,19 +108,25 @@ const char *AudioServer::RetrieveCookie(int32_t &size)
     char *cookieInfo = nullptr;
     size = 0;
     std::ifstream cookieFile(DEFAULT_COOKIE_PATH, std::ifstream::binary);
-    if (cookieFile) {
-        cookieFile.seekg (0, cookieFile.end);
-        size = cookieFile.tellg();
-        cookieFile.seekg (0, cookieFile.beg);
-
-        if ((size > 0) && (size < PATH_MAX)) {
-            cookieInfo = (char *)malloc(size * sizeof(char));
-            MEDIA_DEBUG_LOG("Reading: %{public}d characters...", size);
-            cookieFile.read(cookieInfo, size);
-        }
-        cookieFile.close();
+    if (!cookieFile) {
+        return cookieInfo;
     }
 
+    cookieFile.seekg (0, cookieFile.end);
+    size = cookieFile.tellg();
+    cookieFile.seekg (0, cookieFile.beg);
+
+    if ((size > 0) && (size < PATH_MAX)) {
+        cookieInfo = (char *)malloc(size * sizeof(char));
+        if (cookieInfo == nullptr) {
+            MEDIA_ERR_LOG("AudioServer::RetrieveCookie: No memory");
+            cookieFile.close();
+            return cookieInfo;
+        }
+        MEDIA_DEBUG_LOG("Reading: %{public}d characters...", size);
+        cookieFile.read(cookieInfo, size);
+    }
+    cookieFile.close();
     return cookieInfo;
 }
 

@@ -39,6 +39,6 @@ private:
                      const std::shared_ptr<AudioRendererCallbackTestImpl> &cb) const;
     int32_t ValidateFile(char *filePath, char path[]) const;
 };
-} // AudioStandard
-} // OHOS
+} // namespace AudioStandard
+} // namespace OHOS
 #endif // INTERRUPT_MULTI_RENDERER_TEST_H

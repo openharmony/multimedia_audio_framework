@@ -121,7 +121,7 @@ static void NativeVolumeEventToJsObj(const napi_env& env, napi_value& jsObj,
 
 void AudioVolumeKeyEventNapi::OnJsCallbackVolumeEvent(std::unique_ptr<AudioVolumeKeyEventJsCallback> &jsCb)
 {
-    MEDIA_ERR_LOG("AudioVolumeKeyEventNapi:OnJsCallbackVolumeEvent");
+    MEDIA_INFO_LOG("AudioVolumeKeyEventNapi:OnJsCallbackVolumeEvent");
     uv_loop_s *loop = nullptr;
     napi_get_uv_event_loop(env_, &loop);
     if (loop == nullptr) {

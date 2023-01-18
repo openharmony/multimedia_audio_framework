@@ -62,7 +62,7 @@ public:
     // TearDown: Called after each test cases
     void TearDown(void) override;
 };
-}
-}
-}
+} // namespace V1_0
+} // namespace AudioStandard
+} // namespace OHOS
 #endif  // AUDIO_POLICY_TEST_H
