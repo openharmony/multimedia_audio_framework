@@ -68,7 +68,10 @@ void AudioContainerBase::AudioStreamDied(pid_t pid)
 
 int32_t AudioContainerBase::Initialize(ASClientType eClientType, int serviceId)
 {
-    InitAudioStreamManagerGa(serviceId);
+    if (g_sProxy == nullptr) {
+        InitAudioStreamManagerGa(serviceId);
+    }
+
     return g_sProxy->InitializeGa(eClientType);
 }
 
