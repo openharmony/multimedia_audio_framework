@@ -449,12 +449,6 @@ bool AudioContainerStreamBase::PauseAudioStream()
         state_ = oldState;
         return false;
     }
-
-    // Ends the WriteBuffers thread
-    if (renderMode_ == RENDER_MODE_CALLBACK) {
-        isReadyToWrite_ = false;
-    }
-
     AUDIO_DEBUG_LOG("PauseAudioStream SUCCESS");
 
     return true;
@@ -543,7 +537,7 @@ bool AudioContainerStreamBase::ReleaseAudioStream()
         return false;
     }
     // If state_ is RUNNING try to Stop it first and Release
-    if (state_ == RUNNING) {
+    if (state_ == RUNNING || state_ == PAUSED) {
         StopAudioStream();
     }
 
@@ -821,24 +815,23 @@ void AudioContainerStreamBase::WriteBuffers()
         while (!filledBufferQ_.empty()) {
             if (state_ != RUNNING) {
                 AUDIO_ERR_LOG("Write: Illegal state:%{public}u", state_);
-                isReadyToWrite_ = false;
-                return;
-            }
-            stream.buffer = filledBufferQ_.front().buffer;
-            stream.bufferLen = filledBufferQ_.front().bufLength;
-            if (stream.buffer == nullptr) {
-                AUDIO_ERR_LOG("WriteBuffers stream.buffer == nullptr return");
-                return;
-            }
-            bytesWritten = WriteStreamInCb(stream, writeError, trackId_);
-            if (writeError != 0) {
-                AUDIO_ERR_LOG("WriteStreamInCb fail, writeError:%{public}d", writeError);
-            } else {
-                AUDIO_INFO_LOG("WriteBuffers WriteStream, bytesWritten:%{public}zu", bytesWritten);
-                freeBufferQ_.emplace(filledBufferQ_.front());
-                filledBufferQ_.pop();
+                break;
             }
             if ((state_ != STOPPED) && (state_ != PAUSED)) {
+                stream.buffer = filledBufferQ_.front().buffer;
+                stream.bufferLen = filledBufferQ_.front().bufLength;
+                if (stream.buffer == nullptr) {
+                    AUDIO_ERR_LOG("WriteBuffers stream.buffer == nullptr return");
+                    return;
+                }
+                bytesWritten = WriteStreamInCb(stream, writeError, trackId_);
+                if (writeError != 0) {
+                    AUDIO_ERR_LOG("WriteStreamInCb fail, writeError:%{public}d", writeError);
+                } else {
+                    AUDIO_INFO_LOG("WriteBuffers WriteStream, bytesWritten:%{public}zu", bytesWritten);
+                    freeBufferQ_.emplace(filledBufferQ_.front());
+                    filledBufferQ_.pop();
+                }
                 size_t callback_size = 60 * format_ * channelCount_ / 1000;
                 callback_->OnWriteData(callback_size);
             } else {
@@ -962,6 +955,7 @@ bool AudioContainerCaptureStream::StopAudioStream()
         if (readThread_ && readThread_->joinable()) {
             readThread_->join();
         }
+        readThread_ = nullptr;
     }
     while (isReadInProgress_ || isWriteInProgress_) {
         std::this_thread::sleep_for(std::chrono::microseconds(READ_WRITE_WAIT_TIME_IN_US));
@@ -1130,13 +1124,7 @@ bool AudioContainerRenderStream::StartAudioStream()
 
 bool AudioContainerRenderStream::StopAudioStream()
 {
-    if (state_ == PAUSED) {
-        state_ = STOPPED;
-        AUDIO_INFO_LOG("AudioContainerRenderStream::StopAudioStream SUCCESS");
-        return true;
-    }
-
-    if (state_ != RUNNING) {
+    if (state_ != RUNNING && state_ != PAUSED) {
         AUDIO_ERR_LOG("StopAudioStream: State is not RUNNING. Illegal state:%{public}u", state_);
         return false;
     }
@@ -1163,6 +1151,10 @@ bool AudioContainerRenderStream::StopAudioStream()
     if (renderMode_ == RENDER_MODE_CALLBACK) {
         isReadyToWrite_ = false;
         pthread_cond_signal(&writeCondition_);
+        if (writeThread_ && writeThread_->joinable()) {
+            writeThread_->join();
+        }
+        writeThread_ = nullptr;
     }
 
     AUDIO_DEBUG_LOG("AudioContainerRenderStream::StopAudioStream SUCCESS");
