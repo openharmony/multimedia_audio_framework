@@ -263,8 +263,8 @@ int32_t AudioServiceClient::SetAudioRenderMode(AudioRenderMode renderMode)
     pa_buffer_attr bufferAttr;
     bufferAttr.fragsize = static_cast<uint32_t>(-1);
     bufferAttr.prebuf = AlignToAudioFrameSize(pa_usec_to_bytes(MIN_BUF_DURATION_IN_USEC, &sampleSpec), sampleSpec);
-    bufferAttr.maxlength = static_cast<uint32_t>(-1);
-    bufferAttr.tlength = static_cast<uint32_t>(-1);
+    bufferAttr.maxlength = bufferAttr.prebuf * MAX_LENGTH_FACTOR;
+    bufferAttr.tlength = bufferAttr.prebuf * T_LENGTH_FACTOR;
     bufferAttr.minreq = bufferAttr.prebuf;
     pa_operation *operation = pa_stream_set_buffer_attr(paStream, &bufferAttr,
         PAStreamSetBufAttrSuccessCb, (void *)this);
