@@ -524,6 +524,7 @@ int32_t AudioContainerClientBase::ReadStreamGa(StreamBuffer &stream, bool isBloc
 
     const uint8_t *buffer = reply.ReadBuffer(readSize);
     memcpy_s(stream.buffer, stream.bufferLen, buffer, readSize);
+    HandleCapturePositionCallbacksGa(readSize);
     return readSize;
 }
 
