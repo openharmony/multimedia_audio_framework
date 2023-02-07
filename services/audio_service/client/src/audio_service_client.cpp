@@ -787,7 +787,8 @@ const std::string AudioServiceClient::GetStreamName(AudioStreamType audioType)
 int32_t AudioServiceClient::ConnectStreamToPA()
 {
     AUDIO_INFO_LOG("Enter AudioServiceClient::ConnectStreamToPA");
-    int error, result;
+    int error;
+    int result;
 
     if (CheckReturnIfinvalid(mainLoop && context && paStream, AUDIO_CLIENT_ERR) < 0) {
         return AUDIO_CLIENT_ERR;

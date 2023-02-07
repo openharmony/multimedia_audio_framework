@@ -88,7 +88,8 @@ static int32_t PrepareDevice(struct Userdata *u, const char* filePath);
 
 static ssize_t RenderWrite(struct Userdata *u, pa_memchunk *pchunk)
 {
-    size_t index, length;
+    size_t index;
+    size_t length;
     ssize_t count = 0;
     void *p = NULL;
 
@@ -132,7 +133,8 @@ static ssize_t RenderWrite(struct Userdata *u, pa_memchunk *pchunk)
 
 static ssize_t TestModeRenderWrite(struct Userdata *u, pa_memchunk *pchunk)
 {
-    size_t index, length;
+    size_t index;
+    size_t length;
     ssize_t count = 0;
     void *p = NULL;
 
