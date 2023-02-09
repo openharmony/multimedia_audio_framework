@@ -70,8 +70,6 @@ ohos_shared_library("audio_client") {
     "client/src/audio_manager_listener_stub.cpp",
     "client/src/audio_manager_proxy.cpp",
     "client/src/audio_routing_manager.cpp",
-    "client/src/audio_service_client.cpp",
-    "client/src/audio_stream.cpp",
     "client/src/audio_stream_manager.cpp",
     "client/src/audio_stream_tracker.cpp",
     "client/src/audio_system_manager.cpp",
@@ -80,10 +78,20 @@ ohos_shared_library("audio_client") {
   public_configs = [ ":audio_client_public_config" ]
 
   deps = [
-    "$pulseaudio_build_path/src/pulse:pulse",
     "//foundation/multimedia/audio_framework/frameworks/native/audioutils:audio_utils",
     "//foundation/multimedia/audio_framework/services/audio_policy:audio_policy_client",
   ]
+
+  if ("${product_name}" != "ohcore") {
+    sources += [
+         "client/src/audio_service_client.cpp",
+         "client/src/audio_stream.cpp",
+    ]
+    deps += [
+        "$pulseaudio_build_path/src/pulse:pulse",
+    ]
+  }
+
 
   external_deps = [
     "c_utils:utils",
