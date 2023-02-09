@@ -517,20 +517,29 @@ void AudioServiceClient::ResetPAAudioClient()
         pa_stream_set_latency_update_callback(paStream, nullptr, nullptr);
         pa_stream_set_underflow_callback(paStream, nullptr, nullptr);
 
-        if (isStreamConnected == true)
+        if (isStreamConnected == true) {
             pa_stream_disconnect(paStream);
-        pa_stream_unref(paStream);
+            pa_stream_unref(paStream);
+            isStreamConnected  = false;
+            paStream = nullptr;
+        }
     }
 
     if (context) {
         pa_context_set_state_callback(context, nullptr, nullptr);
-        if (isContextConnected == true)
+        if (isContextConnected == true) {
             pa_context_disconnect(context);
-        pa_context_unref(context);
+            pa_context_unref(context);
+            isContextConnected = false;
+            context = nullptr;
+        }
     }
 
-    if (mainLoop)
+    if (mainLoop) {
         pa_threaded_mainloop_free(mainLoop);
+        isMainLoopStarted  = false;
+        mainLoop = nullptr;
+    }
 
     for (auto &thread : mPositionCBThreads) {
         if (thread && thread->joinable()) {
@@ -549,10 +558,6 @@ void AudioServiceClient::ResetPAAudioClient()
         appCookiePath = "";
     }
 
-    isMainLoopStarted  = false;
-    isContextConnected = false;
-    isStreamConnected  = false;
-
     sinkDevices.clear();
     sourceDevices.clear();
     sinkInputs.clear();
@@ -563,9 +568,6 @@ void AudioServiceClient::ResetPAAudioClient()
     mAudioCapturerCallbacks = nullptr;
     internalReadBuffer      = nullptr;
 
-    mainLoop = nullptr;
-    paStream = nullptr;
-    context  = nullptr;
     api      = nullptr;
 
     internalRdBufIndex = 0;
