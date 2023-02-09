@@ -16,8 +16,10 @@
 #define AUDIO_CONTAINER_STREAM_BASE_H
 
 #include "audio_container_base.h"
+#include "audio_stream_manager.h"
 #include "audio_renderer.h"
 #include "timestamp.h"
+#include "audio_stream_tracker.h"
 
 namespace OHOS {
 namespace AudioStandard {
@@ -100,8 +102,10 @@ public:
     bool isReadyToRead_;
     void WriteBuffers();
     void ReadBuffers();
+    std::unique_ptr<AudioStreamTracker> audioStreamTracker_;
     AudioRendererInfo rendererInfo_;
     AudioCapturerInfo capturerInfo_;
+    uint32_t sessionId_;
 
     static const std::map<std::pair<ContentType, StreamUsage>, AudioStreamType> streamTypeMap_;
     static std::map<std::pair<ContentType, StreamUsage>, AudioStreamType> CreateStreamMap();

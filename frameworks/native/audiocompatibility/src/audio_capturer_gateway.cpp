@@ -56,11 +56,15 @@ int32_t AudioCapturerGateway::GetFrameCount(uint32_t &frameCount) const
 
 int32_t AudioCapturerGateway::SetParams(const AudioCapturerParams params)
 {
+    audioStream_->SetCapturerInfo(capturerInfo_);
+
     AudioStreamParams audioStreamParams;
     audioStreamParams.format = params.audioSampleFormat;
     audioStreamParams.samplingRate = params.samplingRate;
     audioStreamParams.channels = params.audioChannel;
     audioStreamParams.encoding = params.audioEncoding;
+
+    audioStream_->SetClientID(appInfo_.appPid, appInfo_.appUid);
     AUDIO_INFO_LOG("AudioCapturerGateway::SetParams SetAudioStreamInfo");
     return audioStream_->SetAudioStreamInfo(audioStreamParams);
 }
