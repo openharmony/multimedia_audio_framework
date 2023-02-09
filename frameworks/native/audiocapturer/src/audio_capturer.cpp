@@ -15,18 +15,22 @@
 
 #include "audio_capturer.h"
 
-#include "audio_capturer_private.h"
 #include "audio_errors.h"
 #ifdef OHCORE
 #include "audio_capturer_gateway.h"
-#endif
+#else
+#include "audio_capturer_private.h"
 #include "audio_stream.h"
+#endif
 #include "audio_log.h"
 
 namespace OHOS {
 namespace AudioStandard {
 AudioCapturer::~AudioCapturer() = default;
+
+#ifndef OHCORE
 AudioCapturerPrivate::~AudioCapturerPrivate() = default;
+#endif
 
 std::unique_ptr<AudioCapturer> AudioCapturer::Create(AudioStreamType audioStreamType)
 {
@@ -109,6 +113,7 @@ std::unique_ptr<AudioCapturer> AudioCapturer::Create(const AudioCapturerOptions 
     return capturer;
 }
 
+#ifndef OHCORE
 AudioCapturerPrivate::AudioCapturerPrivate(AudioStreamType audioStreamType, const AppInfo &appInfo)
 {
     appInfo_ = appInfo;
@@ -414,5 +419,7 @@ int32_t AudioCapturerPrivate::GetBufQueueState(BufferQueueState &bufState) const
 {
     return audioStream_->GetBufQueueState(bufState);
 }
+#endif
+
 }  // namespace AudioStandard
 }  // namespace OHOS

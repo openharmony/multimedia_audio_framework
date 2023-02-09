@@ -99,6 +99,7 @@ AudioContainerStreamBase::AudioContainerStreamBase(AudioStreamType eStreamType, 
       isReadyToRead_(false),
       isFirstRead_(false)
 {
+    audioStreamTracker_ =  std::make_unique<AudioStreamTracker>(eMode, appUid);
     AUDIO_DEBUG_LOG("AudioContainerStreamBase::AudioContainerStreamBase");
 }
 
@@ -117,6 +118,13 @@ AudioContainerStreamBase::~AudioContainerStreamBase()
 
     if (state_ != RELEASED && state_ != NEW) {
         ReleaseAudioStream();
+    }
+    if (audioStreamTracker_) {
+        AUDIO_DEBUG_LOG("AudioContainerStreamBase:~AudioContainerStreamBase:Calling update tracker");
+        AudioRendererInfo rendererInfo = {};
+        AudioCapturerInfo capturerInfo = {};
+        state_ = RELEASED;
+        audioStreamTracker_->UpdateTracker(sessionId_, state_, rendererInfo, capturerInfo);
     }
 }
 void AudioContainerStreamBase::SetRendererInfo(const AudioRendererInfo &rendererInfo)
@@ -322,6 +330,11 @@ int32_t AudioContainerStreamBase::SetAudioStreamInfo(const AudioStreamParams inf
     }
 
     state_ = PREPARED;
+    if (audioStreamTracker_) {
+        (void)GetAudioSessionID(sessionId_);
+        AUDIO_DEBUG_LOG("AudioContainerStreamBase:Calling register tracker, sessionid = %{public}d", sessionId_);
+        audioStreamTracker_->RegisterTracker(sessionId_, state_, rendererInfo_, capturerInfo_, nullptr);
+    }
     AUDIO_INFO_LOG("AudioContainerStreamBase: CreateStream trackId_ %{public}d", trackId_);
     return SUCCESS;
 }
@@ -359,6 +372,10 @@ bool AudioContainerStreamBase::StartAudioStream()
     state_ = RUNNING;
     pthread_cond_signal(&writeCondition_);
     AUDIO_INFO_LOG("AudioContainerStreamBase::StartAudioStream SUCCESS trackId_ %{public}d", trackId_);
+    if (audioStreamTracker_) {
+        AUDIO_DEBUG_LOG("AudioContainerStreamBase:Calling Update tracker for Running");
+        audioStreamTracker_->UpdateTracker(sessionId_, state_, rendererInfo_, capturerInfo_);
+    }
     return true;
 }
 
@@ -451,6 +468,10 @@ bool AudioContainerStreamBase::PauseAudioStream()
     }
     AUDIO_DEBUG_LOG("PauseAudioStream SUCCESS");
 
+    if (audioStreamTracker_) {
+        AUDIO_DEBUG_LOG("AudioContainerStreamBase:Calling Update tracker for Pause");
+        audioStreamTracker_->UpdateTracker(sessionId_, state_, rendererInfo_, capturerInfo_);
+    }
     return true;
 }
 
@@ -493,6 +514,10 @@ bool AudioContainerStreamBase::StopAudioStream()
 
     AUDIO_DEBUG_LOG("StopAudioStream SUCCESS");
 
+    if (audioStreamTracker_) {
+        AUDIO_DEBUG_LOG("AudioContainerStreamBase:Calling Update tracker for stop");
+        audioStreamTracker_->UpdateTracker(sessionId_, state_, rendererInfo_, capturerInfo_);
+    }
     return true;
 }
 
@@ -546,6 +571,10 @@ bool AudioContainerStreamBase::ReleaseAudioStream()
     AUDIO_DEBUG_LOG("ReleaseAudiostream SUCCESS");
     pthread_cond_signal(&writeCondition_);
 
+    if (audioStreamTracker_) {
+        AUDIO_DEBUG_LOG("AudioContainerStreamBase:Calling Update tracker for release");
+        audioStreamTracker_->UpdateTracker(sessionId_, state_, rendererInfo_, capturerInfo_);
+    }
     return true;
 }
 
@@ -898,6 +927,13 @@ AudioContainerCaptureStream::AudioContainerCaptureStream(AudioStreamType eStream
 
 AudioContainerCaptureStream::~AudioContainerCaptureStream()
 {
+    if (audioStreamTracker_) {
+        AUDIO_DEBUG_LOG("AudioContainerCaptureStream:~AudioContainerCaptureStream:Calling update tracker");
+        AudioRendererInfo rendererInfo = {};
+        AudioCapturerInfo capturerInfo = {};
+        state_ = RELEASED;
+        audioStreamTracker_->UpdateTracker(sessionId_, state_, rendererInfo, capturerInfo);
+    }
 }
 
 bool AudioContainerCaptureStream::StartAudioStream()
@@ -933,6 +969,10 @@ bool AudioContainerCaptureStream::StartAudioStream()
     isFirstRead_ = true;
     state_ = RUNNING;
     AUDIO_INFO_LOG("AudioContainerCaptureStream::StartAudioStream SUCCESS trackId_ %{public}d", trackId_);
+    if (audioStreamTracker_) {
+        AUDIO_DEBUG_LOG("AudioContainerCaptureStream:Calling Update tracker for Running");
+        audioStreamTracker_->UpdateTracker(sessionId_, state_, rendererInfo_, capturerInfo_);
+    }
     return true;
 }
 
@@ -973,6 +1013,10 @@ bool AudioContainerCaptureStream::StopAudioStream()
         isReadyToWrite_ = false;
     }
 
+    if (audioStreamTracker_) {
+        AUDIO_DEBUG_LOG("AudioContainerCaptureStream:Calling Update tracker for stop");
+        audioStreamTracker_->UpdateTracker(sessionId_, state_, rendererInfo_, capturerInfo_);
+    }
     AUDIO_DEBUG_LOG("StopAudioStream SUCCESS");
 
     return true;
@@ -1083,6 +1127,13 @@ AudioContainerRenderStream::AudioContainerRenderStream(AudioStreamType eStreamTy
 
 AudioContainerRenderStream::~AudioContainerRenderStream()
 {
+    if (audioStreamTracker_) {
+        AUDIO_DEBUG_LOG("AudioContainerRenderStream:~AudioContainerRenderStream:Calling update tracker");
+        AudioRendererInfo rendererInfo = {};
+        AudioCapturerInfo capturerInfo = {};
+        state_ = RELEASED;
+        audioStreamTracker_->UpdateTracker(sessionId_, state_, rendererInfo, capturerInfo);
+    }
 }
 
 bool AudioContainerRenderStream::StartAudioStream()
@@ -1119,6 +1170,10 @@ bool AudioContainerRenderStream::StartAudioStream()
     state_ = RUNNING;
     pthread_cond_signal(&writeCondition_);
     AUDIO_INFO_LOG("AudioContainerRenderStream::StartAudioStream SUCCESS trackId_ %{public}d", trackId_);
+    if (audioStreamTracker_) {
+        AUDIO_DEBUG_LOG("AudioContainerRenderStream:Calling Update tracker for Running");
+        audioStreamTracker_->UpdateTracker(sessionId_, state_, rendererInfo_, capturerInfo_);
+    }
     return true;
 }
 
@@ -1158,6 +1213,10 @@ bool AudioContainerRenderStream::StopAudioStream()
     }
 
     AUDIO_DEBUG_LOG("AudioContainerRenderStream::StopAudioStream SUCCESS");
+    if (audioStreamTracker_) {
+        AUDIO_DEBUG_LOG("AudioContainerRenderStream:Calling Update tracker for stop");
+        audioStreamTracker_->UpdateTracker(sessionId_, state_, rendererInfo_, capturerInfo_);
+    }
 
     return true;
 }

@@ -18,17 +18,23 @@
 #include "audio_log.h"
 #include "audio_errors.h"
 #include "audio_policy_manager.h"
-#include "audio_stream.h"
 #ifdef OHCORE
 #include "audio_renderer_gateway.h"
-#endif
+#include "audio_container_stream_base.h"
+#else
+#include "audio_stream.h"
 #include "audio_renderer_private.h"
+#endif
 
 namespace OHOS {
 namespace AudioStandard {
+#ifndef OHCORE
 std::map<pid_t, std::map<AudioStreamType, AudioInterrupt>> AudioRendererPrivate::sharedInterrupts_;
+#endif
 
 AudioRenderer::~AudioRenderer() = default;
+
+#ifndef OHCORE
 AudioRendererPrivate::~AudioRendererPrivate()
 {
     RendererState state = GetStatus();
@@ -36,6 +42,7 @@ AudioRendererPrivate::~AudioRendererPrivate()
         Release();
     }
 }
+#endif
 
 std::unique_ptr<AudioRenderer> AudioRenderer::Create(AudioStreamType audioStreamType)
 {
@@ -82,10 +89,12 @@ std::unique_ptr<AudioRenderer> AudioRenderer::Create(const std::string cachePath
     CHECK_AND_RETURN_RET_LOG(streamUsage >= STREAM_USAGE_UNKNOWN && streamUsage <= STREAM_USAGE_NOTIFICATION_RINGTONE,
                              nullptr, "Invalid stream usage");
 
-    AudioStreamType audioStreamType = AudioStream::GetStreamType(contentType, streamUsage);
+    AudioStreamType audioStreamType;
 #ifdef OHCORE
+    audioStreamType = AudioContainerRenderStream::GetStreamType(contentType, streamUsage);
     auto audioRenderer = std::make_unique<AudioRendererGateway>(audioStreamType, appInfo);
 #else
+    audioStreamType = AudioStream::GetStreamType(contentType, streamUsage);
     auto audioRenderer = std::make_unique<AudioRendererPrivate>(audioStreamType, appInfo);
 #endif
     CHECK_AND_RETURN_RET_LOG(audioRenderer != nullptr, nullptr, "Failed to create renderer object");
@@ -113,6 +122,7 @@ std::unique_ptr<AudioRenderer> AudioRenderer::Create(const std::string cachePath
     return audioRenderer;
 }
 
+#ifndef OHCORE
 AudioRendererPrivate::AudioRendererPrivate(AudioStreamType audioStreamType, const AppInfo &appInfo)
 {
     appInfo_ = appInfo;
@@ -790,5 +800,7 @@ float AudioRendererPrivate::GetSingleStreamVolume() const
 {
     return audioStream_->GetSingleStreamVolume();
 }
+#endif
+
 }  // namespace AudioStandard
 }  // namespace OHOS
