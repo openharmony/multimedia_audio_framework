@@ -273,8 +273,12 @@ static void BuqqerQueueCallback (SLOHBufferQueueItf bufferQueueItf, void *pConte
         SLuint8 *buffer = nullptr;
         SLuint32 pSize = 0;
         (*bufferQueueItf)->GetBuffer(bufferQueueItf, &buffer, pSize);
-        fread(buffer, 1, size, wavFile);
-        (*bufferQueueItf)->Enqueue(bufferQueueItf, buffer, size);
+        if (buffer != nullptr) {
+            fread(buffer, 1, size, wavFile);
+            (*bufferQueueItf)->Enqueue(bufferQueueItf, buffer, size);
+        } else{
+            AUDIO_ERR_LOG("BuqqerQueueCallback, get buffer is null.");
+        }
     }
     return;
 }
@@ -283,13 +287,6 @@ static void PlayerStart (SLPlayItf playItf, SLOHBufferQueueItf bufferQueueItf, F
 {
     AUDIO_INFO_LOG("PlayerStart");
     (*playItf)->SetPlayState(playItf, SL_PLAYSTATE_PLAYING);
-    if (!feof(wavFile)) {
-        SLuint8* buffer = nullptr;
-        SLuint32 pSize = 0;
-        (*bufferQueueItf)->GetBuffer(bufferQueueItf, &buffer, pSize);
-        fread(buffer, 1, pSize, wavFile);
-        (*bufferQueueItf)->Enqueue(bufferQueueItf, buffer, pSize);
-    }
     return;
 }
 
