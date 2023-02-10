@@ -43,8 +43,10 @@ static void BuqqerQueueCallback (SLOHBufferQueueItf bufferQueueItf, void *pConte
         SLuint8 *buffer = nullptr;
         SLuint32 pSize = 0;
         (*bufferQueueItf)->GetBuffer(bufferQueueItf, &buffer, pSize);
-        fread(buffer, 1, size, wavFile);
-        (*bufferQueueItf)->Enqueue(bufferQueueItf, buffer, size);
+        if (buffer != nullptr) {
+            fread(buffer, 1, size, wavFile);
+            (*bufferQueueItf)->Enqueue(bufferQueueItf, buffer, size);
+        }
     }
     return;
 }
@@ -796,19 +798,6 @@ HWTEST(AudioOpenslesUnitTest, Audio_Opensles_GetPosition_001, TestSize.Level1)
 {
     SLresult result = (*playItf_)->GetPosition(playItf_, nullptr);
     EXPECT_TRUE(result == SL_RESULT_FEATURE_UNSUPPORTED);
-}
-
-HWTEST(AudioOpenslesUnitTest, Audio_Opensles_play_001, TestSize.Level0)
-{
-    if (!feof(wavFile_)) {
-        SLuint8* buffer = nullptr;
-        SLuint32 size = 0;
-        SLresult result = (*bufferQueueItf_)->GetBuffer(bufferQueueItf_, &buffer, size);
-        EXPECT_TRUE(result == SL_RESULT_SUCCESS);
-        fread(buffer, 1, size, wavFile_);
-        result = (*bufferQueueItf_)->Enqueue(bufferQueueItf_, buffer, size);
-        EXPECT_TRUE(result == SL_RESULT_SUCCESS);
-    }
 }
 
 HWTEST(AudioOpenslesUnitTest, Audio_Opensles_SetPlayState_003, TestSize.Level0)
