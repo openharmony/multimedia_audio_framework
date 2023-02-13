@@ -276,7 +276,7 @@ static void BuqqerQueueCallback (SLOHBufferQueueItf bufferQueueItf, void *pConte
         if (buffer != nullptr) {
             fread(buffer, 1, size, wavFile);
             (*bufferQueueItf)->Enqueue(bufferQueueItf, buffer, size);
-        } else{
+        } else {
             AUDIO_ERR_LOG("BuqqerQueueCallback, get buffer is null.");
         }
     }
