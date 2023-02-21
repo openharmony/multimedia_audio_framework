@@ -79,7 +79,7 @@ static void ReceviceDistributedInfo(struct ServiceStatus* serviceStatus, std::st
     }
 }
 
-static void OnDeviceStatusChange(const std::string info, DeviceStatusListener *devListener)
+static void OnDeviceStatusChange(const std::string &info, DeviceStatusListener *devListener)
 {
     CHECK_AND_RETURN_LOG(!info.empty(), "OnDeviceStatusChange invalid info");
     AudioDeviceType hdiDeviceType = HDF_AUDIO_DEVICE_UNKOWN;

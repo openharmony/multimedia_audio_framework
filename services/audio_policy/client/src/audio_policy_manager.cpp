@@ -668,7 +668,7 @@ int32_t AudioPolicyManager::RegisterAudioRendererEventListener(const int32_t cli
 
     std::unique_lock<std::mutex> lock(stateChangelistenerStubMutex_);
     rendererStateChangelistenerStub_ = new(std::nothrow) AudioRendererStateChangeListenerStub();
-    if (rendererStateChangelistenerStub_ == nullptr || gsp == nullptr) {
+    if (rendererStateChangelistenerStub_ == nullptr) {
         AUDIO_ERR_LOG("RegisterAudioRendererEventListener: object null");
         return ERROR;
     }
