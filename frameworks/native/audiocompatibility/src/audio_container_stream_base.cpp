@@ -662,7 +662,7 @@ int32_t AudioContainerStreamBase::SetRenderMode(AudioRenderMode renderMode)
         BufferDesc bufDesc {};
         bufDesc.buffer = bufferPool_[i].get();
         bufDesc.bufLength = length;
-        freeBufferQ_.emplace(bufDesc);
+        filledBufferQ_.emplace(bufDesc);
     }
 
     return SUCCESS;
@@ -861,7 +861,8 @@ void AudioContainerStreamBase::WriteBuffers()
                     freeBufferQ_.emplace(filledBufferQ_.front());
                     filledBufferQ_.pop();
                 }
-                size_t callback_size = 60 * format_ * channelCount_ / 1000;
+                size_t callback_size;
+                GetMinimumBufferSize(callback_size, trackId_);
                 callback_->OnWriteData(callback_size);
             } else {
                 pthread_cond_wait(&writeCondition_, &writeLock_);
