@@ -841,6 +841,11 @@ void AudioContainerStreamBase::WriteBuffers()
     size_t bytesWritten;
     int32_t writeError;
     while (isReadyToWrite_) {
+        size_t callback_size;
+        GetMinimumBufferSize(callback_size, trackId_);
+        for (size_t i = 0; i < freeBufferQ_.size(); ++i) {
+            callback_->OnWriteData(callback_size);
+        }
         while (!filledBufferQ_.empty()) {
             if (state_ != RUNNING) {
                 AUDIO_ERR_LOG("Write: Illegal state:%{public}u", state_);
@@ -861,7 +866,6 @@ void AudioContainerStreamBase::WriteBuffers()
                     freeBufferQ_.emplace(filledBufferQ_.front());
                     filledBufferQ_.pop();
                 }
-                size_t callback_size = 60 * format_ * channelCount_ / 1000;
                 callback_->OnWriteData(callback_size);
             } else {
                 pthread_cond_wait(&writeCondition_, &writeLock_);
