@@ -840,7 +840,7 @@ void AudioContainerStreamBase::WriteBuffers()
     StreamBuffer stream;
     size_t bytesWritten;
     int32_t writeError;
-    if (isReadyToWrite_) {
+    while (isReadyToWrite_) {
         size_t callback_size;
         GetMinimumBufferSize(callback_size, trackId_);
         for (size_t i = 0; i < freeBufferQ_.size(); ++i) {
@@ -882,7 +882,7 @@ void AudioContainerStreamBase::ReadBuffers()
     int32_t readLen;
     bool isBlockingRead = true;
 
-    if (isReadyToRead_) {
+    while (isReadyToRead_) {
         while (!freeBufferQ_.empty()) {
             if (state_ != RUNNING) {
                 AUDIO_ERR_LOG("ReadBuffers Read: Illegal state:%{public}u", state_);
