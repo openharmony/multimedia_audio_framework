@@ -662,7 +662,7 @@ int32_t AudioContainerStreamBase::SetRenderMode(AudioRenderMode renderMode)
         BufferDesc bufDesc {};
         bufDesc.buffer = bufferPool_[i].get();
         bufDesc.bufLength = length;
-        filledBufferQ_.emplace(bufDesc);
+        freeBufferQ_.emplace(bufDesc);
     }
 
     return SUCCESS;
@@ -840,7 +840,12 @@ void AudioContainerStreamBase::WriteBuffers()
     StreamBuffer stream;
     size_t bytesWritten;
     int32_t writeError;
-    while (isReadyToWrite_) {
+    if (isReadyToWrite_) {
+        size_t callback_size;
+        GetMinimumBufferSize(callback_size, trackId_);
+        for (size_t i = 0; i < freeBufferQ_.size(); ++i) {
+            callback_->OnWriteData(callback_size);
+        }
         while (!filledBufferQ_.empty()) {
             if (state_ != RUNNING) {
                 AUDIO_ERR_LOG("Write: Illegal state:%{public}u", state_);
@@ -861,8 +866,6 @@ void AudioContainerStreamBase::WriteBuffers()
                     freeBufferQ_.emplace(filledBufferQ_.front());
                     filledBufferQ_.pop();
                 }
-                size_t callback_size;
-                GetMinimumBufferSize(callback_size, trackId_);
                 callback_->OnWriteData(callback_size);
             } else {
                 pthread_cond_wait(&writeCondition_, &writeLock_);
@@ -879,7 +882,7 @@ void AudioContainerStreamBase::ReadBuffers()
     int32_t readLen;
     bool isBlockingRead = true;
 
-    while (isReadyToRead_) {
+    if (isReadyToRead_) {
         while (!freeBufferQ_.empty()) {
             if (state_ != RUNNING) {
                 AUDIO_ERR_LOG("ReadBuffers Read: Illegal state:%{public}u", state_);
