@@ -528,8 +528,10 @@ void AudioServiceClient::ResetPAAudioClient()
     if (context) {
         pa_context_set_state_callback(context, nullptr, nullptr);
         if (isContextConnected == true) {
+            pa_threaded_mainloop_lock(mainLoop);
             pa_context_disconnect(context);
             pa_context_unref(context);
+            pa_threaded_mainloop_unlock(mainLoop);
             isContextConnected = false;
             context = nullptr;
         }
