@@ -2004,10 +2004,11 @@ std::vector<sptr<AudioDeviceDescriptor>> AudioPolicyService::DeviceFilterByFlag(
     const std::vector<sptr<AudioDeviceDescriptor>>& desc)
 {
     std::vector<sptr<AudioDeviceDescriptor>> descRet;
+    DeviceRole role = DEVICE_ROLE_NONE;
     switch (flag) {
         case DeviceFlag::ALL_DEVICES_FLAG:
             for (sptr<AudioDeviceDescriptor> var : desc) {
-            if (var->networkId_ == LOCAL_NETWORK_ID) {
+                if (var->networkId_ == LOCAL_NETWORK_ID) {
                     descRet.insert(descRet.end(), var);
                 }
             }
@@ -2021,6 +2022,24 @@ std::vector<sptr<AudioDeviceDescriptor>> AudioPolicyService::DeviceFilterByFlag(
             break;
         case DeviceFlag::ALL_L_D_DEVICES_FLAG:
             descRet = desc;
+            break;
+        case DeviceFlag::OUTPUT_DEVICES_FLAG:
+        case DeviceFlag::INPUT_DEVICES_FLAG:
+            role = flag == INPUT_DEVICES_FLAG ? INPUT_DEVICE : OUTPUT_DEVICE;
+            for (sptr<AudioDeviceDescriptor> var : desc) {
+                if (var->networkId_ == LOCAL_NETWORK_ID && var->deviceRole_ == role) {
+                    descRet.insert(descRet.end(), var);
+                }
+            }
+            break;
+        case DeviceFlag::DISTRIBUTED_OUTPUT_DEVICES_FLAG:
+        case DeviceFlag::DISTRIBUTED_INPUT_DEVICES_FLAG:
+            role = flag == DISTRIBUTED_INPUT_DEVICES_FLAG ? INPUT_DEVICE : OUTPUT_DEVICE;
+            for (sptr<AudioDeviceDescriptor> var : desc) {
+                if (var->networkId_ != LOCAL_NETWORK_ID && var->deviceRole_ == role) {
+                    descRet.insert(descRet.end(), var);
+                }
+            }
             break;
         default:
             AUDIO_INFO_LOG("AudioPolicyService::%{public}s:deviceFlag type are not supported", __func__);
