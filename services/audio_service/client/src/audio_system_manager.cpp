@@ -839,7 +839,12 @@ AudioManagerInterruptCallbackImpl::~AudioManagerInterruptCallbackImpl()
 
 void AudioManagerInterruptCallbackImpl::SaveCallback(const std::weak_ptr<AudioManagerCallback> &callback)
 {
-    callback_ = callback;
+    auto wp = callback.lock();
+    if (wp != nullptr) {
+        callback_ = callback;
+    } else {
+        AUDIO_ERR_LOG("AudioManagerInterruptCallbackImpl::SaveCallback: callback is nullptr");
+    }
 }
 
 void AudioManagerInterruptCallbackImpl::OnInterrupt(const InterruptEventInternal &interruptEvent)
