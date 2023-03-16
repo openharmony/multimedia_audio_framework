@@ -775,14 +775,9 @@ DeviceType AudioPolicyService::FetchHighPriorityDevice(bool isOutputDevice = tru
     DeviceType priorityDevice = isOutputDevice ? DEVICE_TYPE_SPEAKER : DEVICE_TYPE_MIC;
     std::vector<DeviceType> priorityList = isOutputDevice ? outputPriorityList_ : inputPriorityList_;
     for (const auto &device : priorityList) {
-        auto isPresent = [&device, this] (const sptr<AudioDeviceDescriptor> &desc) {
+        auto isPresent = [&device] (const sptr<AudioDeviceDescriptor> &desc) {
             CHECK_AND_RETURN_RET_LOG(desc != nullptr, false, "Invalid device descriptor");
-            if (((audioScene_ != AUDIO_SCENE_DEFAULT) && (desc->deviceType_ == DEVICE_TYPE_BLUETOOTH_A2DP)) ||
-                ((audioScene_ == AUDIO_SCENE_DEFAULT) && (desc->deviceType_ == DEVICE_TYPE_BLUETOOTH_SCO))) {
-                return false;
-            } else {
-                return desc->deviceType_ == device;
-            }
+            return desc->deviceType_ == device;
         };
 
         auto itr = std::find_if(connectedDevices_.begin(), connectedDevices_.end(), isPresent);
