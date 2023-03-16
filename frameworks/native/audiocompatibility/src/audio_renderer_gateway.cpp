@@ -236,8 +236,7 @@ int32_t AudioRendererGateway::SetRendererCallback(const std::shared_ptr<AudioRen
     std::shared_ptr<AudioStreamRenderCallback> cbStream =
         std::static_pointer_cast<AudioStreamRenderCallback>(audioStreamCallback_);
     cbStream->SaveCallback(callback);
-    AUDIO_INFO_LOG("AudioRendererGateway::SetRendererCallback callback %p audioStreamCallback_ %p", callback.get(),
-        audioStreamCallback_.get());
+    AUDIO_INFO_LOG("AudioRendererGateway::SetRendererCallback callback audioStreamCallback_");
     (void)audioStream_->SetStreamCallback(audioStreamCallback_);
 
     return SUCCESS;
@@ -594,7 +593,7 @@ void AudioInterruptCallbackGateway::OnInterrupt(const InterruptEventInternal &in
 void AudioStreamRenderCallback::SaveCallback(const std::weak_ptr<AudioRendererCallback> &callback)
 {
     std::shared_ptr<AudioRendererCallback> cb = callback.lock();
-    AUDIO_ERR_LOG("AudioStreamRenderCallback::SaveCallback cb %p", cb.get());
+    AUDIO_ERR_LOG("AudioStreamRenderCallback::SaveCallback cb");
     callback_ = callback;
 }
 
@@ -605,7 +604,7 @@ void AudioStreamRenderCallback::OnStateChange(const State state, StateChangeCmdT
         AUDIO_ERR_LOG("AudioStreamRenderCallback::OnStateChange cb == nullptr.");
         return;
     }
-    AUDIO_ERR_LOG("AudioStreamRenderCallback::OnStateChange cb %p", cb.get());
+    AUDIO_ERR_LOG("AudioStreamRenderCallback::OnStateChange cb");
     cb->OnStateChange(static_cast<RendererState>(state));
 }
 
