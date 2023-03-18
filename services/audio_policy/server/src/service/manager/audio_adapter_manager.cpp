@@ -101,6 +101,13 @@ int32_t AudioAdapterManager::SetAudioSessionCallback(AudioSessionCallback *callb
 
 int32_t AudioAdapterManager::SetStreamVolume(AudioStreamType streamType, float volume)
 {
+    if (FLOAT_COMPARE_EQ(volume, 0.0f) &&
+        (streamType == STREAM_VOICE_ASSISTANT || streamType == STREAM_VOICE_CALL)) {
+        // these types can not set to mute, but don't return error
+        AUDIO_ERR_LOG("SetStreamVolume this type can not set mute");
+        return SUCCESS;
+    }
+
     if (!mAudioServiceAdapter) {
         AUDIO_ERR_LOG("[AudioAdapterManager] audio adapter null");
         return ERR_OPERATION_FAILED;
@@ -144,6 +151,13 @@ float AudioAdapterManager::GetStreamVolume(AudioStreamType streamType)
 
 int32_t AudioAdapterManager::SetStreamMute(AudioStreamType streamType, bool mute)
 {
+    if (mute &&
+        (streamType == STREAM_VOICE_ASSISTANT || streamType == STREAM_VOICE_CALL)) {
+        // these types can not set to mute, but don't return error
+        AUDIO_ERR_LOG("SetStreamMute: this type can not set mute");
+        return SUCCESS;
+    }
+
     if (!mAudioServiceAdapter) {
         AUDIO_ERR_LOG("[AudioAdapterManager] audio adapter null");
         return ERR_OPERATION_FAILED;
