@@ -1856,11 +1856,9 @@ napi_value AudioRendererNapi::RegisterPeriodPositionCallback(napi_env env, napi_
             cb->SaveCallbackReference(cbName, argv[PARAM2]);
         } else {
             AUDIO_DEBUG_LOG("AudioRendererNapi: periodReach already subscribed.");
-            THROW_ERROR_ASSERT(env, false, NAPI_ERR_ILLEGAL_STATE);
         }
     } else {
         AUDIO_ERR_LOG("AudioRendererNapi: frameCount value not supported!!");
-        THROW_ERROR_ASSERT(env, false, NAPI_ERR_INPUT_INVALID);
     }
 
     napi_value result = nullptr;
