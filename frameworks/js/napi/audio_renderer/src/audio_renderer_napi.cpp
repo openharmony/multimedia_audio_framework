@@ -516,6 +516,9 @@ napi_value AudioRendererNapi::CreateAudioRenderer(napi_env env, napi_callback_in
         env, nullptr, resource,
         [](napi_env env, void *data) {
             auto context = static_cast<AudioRendererAsyncContext *>(data);
+            if (!CheckContextStatus(context)) {
+                    return;
+            }
             context->status = SUCCESS;
         },
         GetRendererAsyncCallbackComplete, static_cast<void *>(asyncContext.get()), &asyncContext->work);
@@ -1003,6 +1006,9 @@ napi_value AudioRendererNapi::SetRenderRate(napi_env env, napi_callback_info inf
             env, nullptr, resource,
             [](napi_env env, void *data) {
                 auto context = static_cast<AudioRendererAsyncContext *>(data);
+                if (!CheckContextStatus(context)) {
+                    return;
+                }
                 if (context->status == SUCCESS) {
                     AudioRendererRate audioRenderRate = static_cast<AudioRendererRate>(context->audioRendererRate);
                     int32_t audioClientInvalidParamsErr = -2;
@@ -1064,6 +1070,9 @@ napi_value AudioRendererNapi::GetRenderRate(napi_env env, napi_callback_info inf
             env, nullptr, resource,
             [](napi_env env, void *data) {
                 auto context = static_cast<AudioRendererAsyncContext *>(data);
+                if (!CheckContextStatus(context)) {
+                    return;
+                }
                 context->intValue = context->objectInfo->audioRenderer_->GetRenderRate();
                 context->status = SUCCESS;
             },
@@ -1116,6 +1125,9 @@ napi_value AudioRendererNapi::Start(napi_env env, napi_callback_info info)
             env, nullptr, resource,
             [](napi_env env, void *data) {
                 auto context = static_cast<AudioRendererAsyncContext *>(data);
+                if (!CheckContextStatus(context)) {
+                    return;
+                }
                 context->isTrue = context->objectInfo->audioRenderer_->Start();
                 context->status = context->isTrue ? SUCCESS : NAPI_ERR_SYSTEM;
             },
@@ -1178,6 +1190,9 @@ napi_value AudioRendererNapi::Write(napi_env env, napi_callback_info info)
             env, nullptr, resource,
             [](napi_env env, void *data) {
                 auto context = static_cast<AudioRendererAsyncContext *>(data);
+                if (!CheckContextStatus(context)) {
+                    return;
+                }
                 if (context->status == SUCCESS) {
                     context->status = NAPI_ERR_SYSTEM;
                     size_t bufferLen = context->bufferLen;
@@ -1262,6 +1277,9 @@ napi_value AudioRendererNapi::GetAudioTime(napi_env env, napi_callback_info info
             env, nullptr, resource,
             [](napi_env env, void *data) {
                 auto context = static_cast<AudioRendererAsyncContext *>(data);
+                if (!CheckContextStatus(context)) {
+                    return;
+                }
                 Timestamp timestamp;
                 if (context->objectInfo->audioRenderer_->GetAudioTime(timestamp, Timestamp::Timestampbase::MONOTONIC)) {
                     const uint64_t secToNanosecond = 1000000000;
@@ -1320,6 +1338,9 @@ napi_value AudioRendererNapi::Drain(napi_env env, napi_callback_info info)
             env, nullptr, resource,
             [](napi_env env, void *data) {
                 auto context = static_cast<AudioRendererAsyncContext *>(data);
+                if (!CheckContextStatus(context)) {
+                    return;
+                }
                 context->isTrue = context->objectInfo->audioRenderer_->Drain();
                 context->status = context->isTrue ? SUCCESS : NAPI_ERR_SYSTEM;
             },
@@ -1380,6 +1401,9 @@ napi_value AudioRendererNapi::Pause(napi_env env, napi_callback_info info)
             env, nullptr, resource,
             [](napi_env env, void *data) {
                 auto context = static_cast<AudioRendererAsyncContext *>(data);
+                if (!CheckContextStatus(context)) {
+                    return;
+                }
                 context->isTrue = context->objectInfo->audioRenderer_->Pause();
                 context->status = context->isTrue ? SUCCESS : NAPI_ERR_SYSTEM;
             },
@@ -1433,6 +1457,9 @@ napi_value AudioRendererNapi::Stop(napi_env env, napi_callback_info info)
             env, nullptr, resource,
             [](napi_env env, void *data) {
                 auto context = static_cast<AudioRendererAsyncContext *>(data);
+                if (!CheckContextStatus(context)) {
+                    return;
+                }
                 context->isTrue = context->objectInfo->audioRenderer_->Stop();
                 context->status = context->isTrue ? SUCCESS : NAPI_ERR_SYSTEM;
             },
@@ -1485,6 +1512,9 @@ napi_value AudioRendererNapi::Release(napi_env env, napi_callback_info info)
             env, nullptr, resource,
             [](napi_env env, void *data) {
                 auto context = static_cast<AudioRendererAsyncContext *>(data);
+                if (!CheckContextStatus(context)) {
+                    return;
+                }
                 context->isTrue = context->objectInfo->audioRenderer_->Release();
                 if (context->isTrue) {
                     context->status = SUCCESS;
@@ -1541,6 +1571,9 @@ napi_value AudioRendererNapi::GetBufferSize(napi_env env, napi_callback_info inf
             env, nullptr, resource,
             [](napi_env env, void *data) {
                 auto context = static_cast<AudioRendererAsyncContext *>(data);
+                if (!CheckContextStatus(context)) {
+                    return;
+                }
                 size_t bufferSize;
                 context->status = context->objectInfo->audioRenderer_->GetBufferSize(bufferSize);
                 if (context->status == SUCCESS) {
@@ -1596,6 +1629,9 @@ napi_value AudioRendererNapi::GetAudioStreamId(napi_env env, napi_callback_info 
             env, nullptr, resource,
             [](napi_env env, void *data) {
                 auto context = static_cast<AudioRendererAsyncContext *>(data);
+                if (!CheckContextStatus(context)) {
+                    return;
+                }
                 int32_t streamIdStatus;
                 streamIdStatus = context->objectInfo->audioRenderer_->
                     GetAudioStreamId(context->audioStreamId);
@@ -1666,6 +1702,9 @@ napi_value AudioRendererNapi::SetVolume(napi_env env, napi_callback_info info)
             env, nullptr, resource,
             [](napi_env env, void *data) {
                 auto context = static_cast<AudioRendererAsyncContext*>(data);
+                if (!CheckContextStatus(context)) {
+                    return;
+                }
                 if (context->status == SUCCESS) {
                     if (context->volLevel < MIN_VOLUME_IN_DOUBLE || context->volLevel > MAX_VOLUME_IN_DOUBLE) {
                         context->status = NAPI_ERR_UNSUPPORTED;
@@ -1726,6 +1765,9 @@ napi_value AudioRendererNapi::GetRendererInfo(napi_env env, napi_callback_info i
             env, nullptr, resource,
             [](napi_env env, void *data) {
                 auto context = static_cast<AudioRendererAsyncContext *>(data);
+                if (!CheckContextStatus(context)) {
+                    return;
+                }
                 AudioRendererInfo rendererInfo = {};
                 context->status = context->objectInfo->audioRenderer_->GetRendererInfo(rendererInfo);
                 if (context->status == SUCCESS) {
@@ -1783,6 +1825,9 @@ napi_value AudioRendererNapi::GetStreamInfo(napi_env env, napi_callback_info inf
             env, nullptr, resource,
             [](napi_env env, void *data) {
                 auto context = static_cast<AudioRendererAsyncContext *>(data);
+                if (!CheckContextStatus(context)) {
+                    return;
+                }
                 AudioStreamInfo streamInfo;
                 context->status = context->objectInfo->audioRenderer_->GetStreamInfo(streamInfo);
                 if (context->status == SUCCESS) {
@@ -2104,6 +2149,20 @@ bool AudioRendererNapi::ParseStreamInfo(napi_env env, napi_value root, AudioStre
     return true;
 }
 
+bool AudioRendererNapi::CheckContextStatus(AudioRendererAsyncContext *context)
+{
+    if (context == nullptr) {
+        AUDIO_ERR_LOG("context object is nullptr.");
+        return false;
+    }
+    if (context->objectInfo == nullptr || context->objectInfo->audioRenderer_ == nullptr) {
+        context->status = NAPI_ERR_SYSTEM;
+        AUDIO_ERR_LOG("context object state is error.");
+        return false;
+    }
+    return true;
+}
+
 napi_value AudioRendererNapi::CreateAudioRendererWrapper(napi_env env, unique_ptr<AudioRendererOptions> &renderOptions)
 {
     lock_guard<mutex> lock(createMutex_);
@@ -2173,6 +2232,9 @@ napi_value AudioRendererNapi::SetInterruptMode(napi_env env, napi_callback_info 
             env, nullptr, resource,
             [](napi_env env, void *data) {
                 auto context = static_cast<AudioRendererAsyncContext*>(data);
+                if (!CheckContextStatus(context)) {
+                    return;
+                }
                 if (context->status == SUCCESS) {
                     AudioStandard::InterruptMode interruptMode_ = GetNativeInterruptMode(context->interruptMode);
                     context->objectInfo->audioRenderer_->SetInterruptMode(interruptMode_);
