@@ -95,6 +95,7 @@ static const std::map<std::string, DeviceType> deviceTypeMap = {
 static const std::map<std::string, SourceType> sourceTypeMap = {
     {"SOURCE_TYPE_INVALID", SOURCE_TYPE_INVALID},
     {"SOURCE_TYPE_MIC", SOURCE_TYPE_MIC},
+    {"SOURCE_TYPE_VOICE_RECOGNITION", SOURCE_TYPE_VOICE_RECOGNITION},
     {"SOURCE_TYPE_VOICE_COMMUNICATION", SOURCE_TYPE_VOICE_COMMUNICATION}
 };
 
