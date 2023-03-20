@@ -249,6 +249,9 @@ int32_t AudioServer::GetMaxVolume(AudioVolumeType volumeType)
 int32_t AudioServer::GetMinVolume(AudioVolumeType volumeType)
 {
     AUDIO_DEBUG_LOG("GetMinVolume server");
+    if (volumeType == STREAM_VOICE_ASSISTANT || volumeType == STREAM_VOICE_CALL) {
+        return (MIN_VOLUME + 1);
+    }
     return MIN_VOLUME;
 }
 
