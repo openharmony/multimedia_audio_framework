@@ -1236,7 +1236,7 @@ HWTEST(AudioCapturerUnitTest, Audio_Capturer_Read_001, TestSize.Level1)
 
     while (numBuffersToCapture) {
         bytesRead = audioCapturer->Read(*buffer, bufferLen, isBlockingRead);
-        if (bytesRead < 0) {
+        if (bytesRead <= 0) {
             break;
         } else if (bytesRead > 0) {
             fwrite(buffer, size, bytesRead, capFile);
@@ -1285,7 +1285,7 @@ HWTEST(AudioCapturerUnitTest, Audio_Capturer_Read_002, TestSize.Level1)
 
     while (numBuffersToCapture) {
         bytesRead = audioCapturer->Read(*buffer, bufferLen, isBlockingRead);
-        if (bytesRead < 0) {
+        if (bytesRead <= 0) {
             break;
         } else if (bytesRead > 0) {
             fwrite(buffer, size, bytesRead, capFile);
