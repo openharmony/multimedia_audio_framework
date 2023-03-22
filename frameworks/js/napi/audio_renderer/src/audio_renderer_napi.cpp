@@ -516,9 +516,6 @@ napi_value AudioRendererNapi::CreateAudioRenderer(napi_env env, napi_callback_in
         env, nullptr, resource,
         [](napi_env env, void *data) {
             auto context = static_cast<AudioRendererAsyncContext *>(data);
-            if (!CheckContextStatus(context)) {
-                    return;
-            }
             context->status = SUCCESS;
         },
         GetRendererAsyncCallbackComplete, static_cast<void *>(asyncContext.get()), &asyncContext->work);
