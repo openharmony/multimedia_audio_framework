@@ -739,6 +739,10 @@ int32_t AudioSystemManager::SetAudioManagerInterruptCallback(const std::shared_p
 
     std::shared_ptr<AudioManagerInterruptCallbackImpl> cbInterrupt =
         std::static_pointer_cast<AudioManagerInterruptCallbackImpl>(audioInterruptCallback_);
+    if (cbInterrupt == nullptr) {
+        AUDIO_ERR_LOG("AudioSystemManager::cbInterrupt is nullptr");
+        return ERROR;
+    }
     cbInterrupt->SaveCallback(callback);
 
     return SUCCESS;
