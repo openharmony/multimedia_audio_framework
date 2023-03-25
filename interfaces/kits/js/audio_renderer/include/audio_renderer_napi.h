@@ -109,6 +109,7 @@ private:
     static bool ParseRendererOptions(napi_env env, napi_value root, AudioRendererOptions *opts);
     static bool ParseRendererInfo(napi_env env, napi_value root, AudioRendererInfo *rendererInfo);
     static bool ParseStreamInfo(napi_env env, napi_value root, AudioStreamInfo* streamInfo);
+    static bool CheckContextStatus(AudioRendererAsyncContext *context);
 
     static void CommonCallbackRoutine(napi_env env, AudioRendererAsyncContext* &asyncContext,
                                       const napi_value &valueParam);
