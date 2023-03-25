@@ -88,6 +88,7 @@ private:
     pa_threaded_mainloop *mMainLoop = NULL;
     static std::unordered_map<uint32_t, uint32_t> sinkIndexSessionIDMap;
     std::mutex mMutex;
+    bool isSetDefaultSink_ = false;
 };
 }  // namespace AudioStandard
 }  // namespace OHOS
