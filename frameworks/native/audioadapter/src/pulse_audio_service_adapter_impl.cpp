@@ -203,6 +203,7 @@ int32_t PulseAudioServiceAdapterImpl::SetDefaultSink(string name)
         pa_threaded_mainloop_unlock(mMainLoop);
         return ERR_OPERATION_FAILED;
     }
+    isSetDefaultSink_ = true;
     pa_operation_unref(operation);
     pa_threaded_mainloop_unlock(mMainLoop);
 
@@ -498,7 +499,10 @@ int32_t PulseAudioServiceAdapterImpl::SetMute(AudioStreamType streamType, bool m
 bool PulseAudioServiceAdapterImpl::IsMute(AudioStreamType streamType)
 {
     lock_guard<mutex> lock(mMutex);
-
+    if (!isSetDefaultSink_) {
+        AUDIO_ERR_LOG("[PulseAudioServiceAdapterImpl] IsMute not SetDefaultSink first");
+        return false;
+    }
     unique_ptr<UserData> userData = make_unique<UserData>();
     userData->thiz = this;
     userData->streamType = streamType;
@@ -532,7 +536,10 @@ bool PulseAudioServiceAdapterImpl::IsMute(AudioStreamType streamType)
 bool PulseAudioServiceAdapterImpl::IsStreamActive(AudioStreamType streamType)
 {
     lock_guard<mutex> lock(mMutex);
-
+    if (!isSetDefaultSink_) {
+        AUDIO_ERR_LOG("[PulseAudioServiceAdapterImpl] IsStreamActive not SetDefaultSink first");
+        return false;
+    }
     unique_ptr<UserData> userData = make_unique<UserData>();
     userData->thiz = this;
     userData->streamType = streamType;
