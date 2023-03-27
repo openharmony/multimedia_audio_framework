@@ -67,7 +67,7 @@ public:
     AudioSinkCallback* GetParamCallback();
 private:
     static std::map<std::string, RemoteAudioRendererSink *> allsinks;
-    explicit RemoteAudioRendererSink(const std::string deviceNetworkId);
+    explicit RemoteAudioRendererSink(const std::string& deviceNetworkId);
     ~RemoteAudioRendererSink();
     RemoteAudioSinkAttr attr_;
     std::string deviceNetworkId_;

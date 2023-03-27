@@ -545,7 +545,7 @@ int32_t AudioPolicyManager::SetAudioManagerInterruptCallback(const uint32_t clie
 
     std::unique_lock<std::mutex> lock(listenerStubMutex_);
     sptr<AudioPolicyManagerListenerStub> interruptListenerStub = new(std::nothrow) AudioPolicyManagerListenerStub();
-    if (interruptListenerStub == nullptr || gsp == nullptr) {
+    if (interruptListenerStub == nullptr) {
         AUDIO_ERR_LOG("SetAudioManagerInterruptCallback: object null");
         return ERROR;
     }

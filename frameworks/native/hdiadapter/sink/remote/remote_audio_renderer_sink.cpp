@@ -50,7 +50,7 @@ const uint32_t PARAM_VALUE_LENTH = 20;
 
 std::map<std::string, RemoteAudioRendererSink *> RemoteAudioRendererSink::allsinks;
 
-RemoteAudioRendererSink::RemoteAudioRendererSink(const std::string deviceNetworkId)
+RemoteAudioRendererSink::RemoteAudioRendererSink(const std::string& deviceNetworkId)
     : rendererInited_(false), started_(false), paused_(false), leftVolume_(DEFAULT_VOLUME_LEVEL),
     rightVolume_(DEFAULT_VOLUME_LEVEL), openSpeaker_(-1), audioAdapter_(nullptr),
     audioRender_(nullptr), callback_(nullptr)
