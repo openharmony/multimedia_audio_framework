@@ -91,7 +91,10 @@ void BluetoothRendererSink::DeInit()
     audioAdapter_ = nullptr;
     audioManager_ = nullptr;
 
-    dlclose(handle_);
+    if (handle_ != nullptr) {
+        dlclose(handle_);
+        handle_ = nullptr;
+    }
 
 #ifdef BT_DUMPFILE
     if (pfd) {
