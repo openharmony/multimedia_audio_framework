@@ -106,6 +106,11 @@ private:
     static napi_value CreateAudioRendererWrapper(napi_env env, std::unique_ptr<AudioRendererOptions> &renderOptions);
     static napi_value SetInterruptMode(napi_env env, napi_callback_info info);
 
+    static void JudgeFuncDrain(napi_env &env, napi_value &result,
+        std::unique_ptr<AudioRendererAsyncContext> &asyncContext);
+    static void JudgeFuncGetAudioStreamId(napi_env &env, napi_value &result,
+        std::unique_ptr<AudioRendererAsyncContext> &asyncContext);
+
     static bool ParseRendererOptions(napi_env env, napi_value root, AudioRendererOptions *opts);
     static bool ParseRendererInfo(napi_env env, napi_value root, AudioRendererInfo *rendererInfo);
     static bool ParseStreamInfo(napi_env env, napi_value root, AudioStreamInfo* streamInfo);

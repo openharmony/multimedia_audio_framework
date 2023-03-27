@@ -1327,42 +1327,47 @@ napi_value AudioRendererNapi::Drain(napi_env env, napi_callback_info info)
         } else {
             napi_get_undefined(env, &result);
         }
-
-        napi_value resource = nullptr;
-        napi_create_string_utf8(env, "Drain", NAPI_AUTO_LENGTH, &resource);
-
-        status = napi_create_async_work(
-            env, nullptr, resource,
-            [](napi_env env, void *data) {
-                auto context = static_cast<AudioRendererAsyncContext *>(data);
-                if (!CheckContextStatus(context)) {
-                    return;
-                }
-                context->isTrue = context->objectInfo->audioRenderer_->Drain();
-                context->status = context->isTrue ? SUCCESS : NAPI_ERR_SYSTEM;
-            },
-            VoidAsyncCallbackComplete, static_cast<void*>(asyncContext.get()), &asyncContext->work);
-        if (status != napi_ok) {
-            result = nullptr;
-        } else {
-            if (!asyncContext->objectInfo->doNotScheduleWrite_) {
-                asyncContext->objectInfo->isDrainWriteQInProgress_ = true;
-                while (!asyncContext->objectInfo->writeRequestQ_.empty()) {
-                    napi_queue_async_work(env, asyncContext->objectInfo->writeRequestQ_.front());
-                    asyncContext->objectInfo->writeRequestQ_.pop();
-                }
-                asyncContext->objectInfo->isDrainWriteQInProgress_ = false;
-            }
-            status = napi_queue_async_work(env, asyncContext->work);
-            if (status == napi_ok) {
-                asyncContext.release();
-            } else {
-                result = nullptr;
-            }
-        }
+        JudgeFuncDrain(env, result, asyncContext);
     }
 
     return result;
+}
+
+void AudioRendererNapi::JudgeFuncDrain(napi_env &env, napi_value &result,
+    unique_ptr<AudioRendererAsyncContext> &asyncContext)
+{
+    napi_status status;
+    napi_value resource = nullptr;
+    napi_create_string_utf8(env, "Drain", NAPI_AUTO_LENGTH, &resource);
+    status = napi_create_async_work(
+        env, nullptr, resource,
+        [](napi_env env, void *data) {
+            auto context = static_cast<AudioRendererAsyncContext *>(data);
+            if (!CheckContextStatus(context)) {
+                return;
+            }
+            context->isTrue = context->objectInfo->audioRenderer_->Drain();
+            context->status = context->isTrue ? SUCCESS : NAPI_ERR_SYSTEM;
+        },
+        VoidAsyncCallbackComplete, static_cast<void*>(asyncContext.get()), &asyncContext->work);
+    if (status != napi_ok) {
+        result = nullptr;
+    } else {
+        if (!asyncContext->objectInfo->doNotScheduleWrite_) {
+            asyncContext->objectInfo->isDrainWriteQInProgress_ = true;
+            while (!asyncContext->objectInfo->writeRequestQ_.empty()) {
+                napi_queue_async_work(env, asyncContext->objectInfo->writeRequestQ_.front());
+                asyncContext->objectInfo->writeRequestQ_.pop();
+            }
+            asyncContext->objectInfo->isDrainWriteQInProgress_ = false;
+        }
+        status = napi_queue_async_work(env, asyncContext->work);
+        if (status == napi_ok) {
+            asyncContext.release();
+        } else {
+            result = nullptr;
+        }
+    }
 }
 
 napi_value AudioRendererNapi::Pause(napi_env env, napi_callback_info info)
@@ -1618,42 +1623,48 @@ napi_value AudioRendererNapi::GetAudioStreamId(napi_env env, napi_callback_info 
         } else {
             napi_get_undefined(env, &result);
         }
-
-        napi_value resource = nullptr;
-        napi_create_string_utf8(env, "GetAudioStreamId", NAPI_AUTO_LENGTH, &resource);
-
-        status = napi_create_async_work(
-            env, nullptr, resource,
-            [](napi_env env, void *data) {
-                auto context = static_cast<AudioRendererAsyncContext *>(data);
-                if (!CheckContextStatus(context)) {
-                    return;
-                }
-                int32_t streamIdStatus;
-                streamIdStatus = context->objectInfo->audioRenderer_->
-                    GetAudioStreamId(context->audioStreamId);
-                if (streamIdStatus == ERR_ILLEGAL_STATE) {
-                    context->status = NAPI_ERR_ILLEGAL_STATE;
-                } else if (streamIdStatus == ERR_INVALID_INDEX) {
-                    context->status = NAPI_ERR_SYSTEM;
-                } else {
-                    context->status = SUCCESS;
-                }
-            },
-            GetAudioStreamIdCallbackComplete, static_cast<void*>(asyncContext.get()), &asyncContext->work);
-        if (status != napi_ok) {
-            result = nullptr;
-        } else {
-            status = napi_queue_async_work(env, asyncContext->work);
-            if (status == napi_ok) {
-                asyncContext.release();
-            } else {
-                result = nullptr;
-            }
-        }
+        JudgeFuncGetAudioStreamId(env, result, asyncContext);
     }
 
     return result;
+}
+
+void AudioRendererNapi::JudgeFuncGetAudioStreamId(napi_env &env, napi_value &result,
+    unique_ptr<AudioRendererAsyncContext> &asyncContext)
+{
+    napi_status status;
+    napi_value resource = nullptr;
+    napi_create_string_utf8(env, "GetAudioStreamId", NAPI_AUTO_LENGTH, &resource);
+
+    status = napi_create_async_work(
+        env, nullptr, resource,
+        [](napi_env env, void *data) {
+            auto context = static_cast<AudioRendererAsyncContext *>(data);
+            if (!CheckContextStatus(context)) {
+                return;
+            }
+            int32_t streamIdStatus;
+            streamIdStatus = context->objectInfo->audioRenderer_->
+                GetAudioStreamId(context->audioStreamId);
+            if (streamIdStatus == ERR_ILLEGAL_STATE) {
+                context->status = NAPI_ERR_ILLEGAL_STATE;
+            } else if (streamIdStatus == ERR_INVALID_INDEX) {
+                context->status = NAPI_ERR_SYSTEM;
+            } else {
+                context->status = SUCCESS;
+            }
+        },
+        GetAudioStreamIdCallbackComplete, static_cast<void*>(asyncContext.get()), &asyncContext->work);
+    if (status != napi_ok) {
+        result = nullptr;
+    } else {
+        status = napi_queue_async_work(env, asyncContext->work);
+        if (status == napi_ok) {
+            asyncContext.release();
+        } else {
+            result = nullptr;
+        }
+    }
 }
 
 napi_value AudioRendererNapi::SetVolume(napi_env env, napi_callback_info info)

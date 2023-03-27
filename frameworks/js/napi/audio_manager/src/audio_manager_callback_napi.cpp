@@ -57,7 +57,7 @@ static void SetValueInt32(const napi_env& env, const std::string& fieldStr, cons
     napi_set_named_property(env, result, fieldStr.c_str(), value);
 }
 
-static void SetValueString(const napi_env &env, const std::string &fieldStr, const std::string stringValue,
+static void SetValueString(const napi_env &env, const std::string &fieldStr, const std::string &stringValue,
     napi_value &result)
 {
     napi_value value = nullptr;
