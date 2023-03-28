@@ -246,7 +246,7 @@ updateUi : 是否需要显示变化详细信息。（如果音量被增大/减�
     ```
 
 #### 音频场景<a name="section645572311287_003"></a>
-11. 使用 **SetAudioscene** 和 **getAudioScene** 接口去更改和检查音频策略。
+11. 使用 **SetAudioScene** 和 **getAudioScene** 接口去更改和检查音频策略。
     ```
     int32_t result = audioSystemMgr->SetAudioScene(AUDIO_SCENE_PHONE_CALL);
     AudioScene audioScene = audioSystemMgr->GetAudioScene();
