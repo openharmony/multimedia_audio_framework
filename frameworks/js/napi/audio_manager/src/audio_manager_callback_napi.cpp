@@ -57,12 +57,21 @@ static void SetValueInt32(const napi_env& env, const std::string& fieldStr, cons
     napi_set_named_property(env, result, fieldStr.c_str(), value);
 }
 
+static void SetValueString(const napi_env &env, const std::string &fieldStr, const std::string stringValue,
+    napi_value &result)
+{
+    napi_value value = nullptr;
+    napi_create_string_utf8(env, stringValue.c_str(), NAPI_AUTO_LENGTH, &value);
+    napi_set_named_property(env, result, fieldStr.c_str(), value);
+}
+
 static void NativeDeviceChangeActionToJsObj(const napi_env& env, napi_value& jsObj, const DeviceChangeAction &action)
 {
     napi_create_object(env, &jsObj);
     SetValueInt32(env, "type", static_cast<int32_t>(action.type), jsObj);
 
     napi_value value = nullptr;
+    napi_value subValue = nullptr;
     napi_value jsArray;
     size_t size = action.deviceDescriptors.size();
     napi_create_array_with_length(env, size, &jsArray);
@@ -72,6 +81,28 @@ static void NativeDeviceChangeActionToJsObj(const napi_env& env, napi_value& jsO
             (void)napi_create_object(env, &value);
             SetValueInt32(env, "deviceRole", static_cast<int32_t>(action.deviceDescriptors[i]->deviceRole_), value);
             SetValueInt32(env, "deviceType", static_cast<int32_t>(action.deviceDescriptors[i]->deviceType_), value);
+            SetValueInt32(env, "id", static_cast<int32_t>(action.deviceDescriptors[i]->deviceId_), value);
+            SetValueString(env, "name", action.deviceDescriptors[i]->deviceName_, value);
+            SetValueString(env, "address", action.deviceDescriptors[i]->macAddress_, value);
+
+            napi_value sampleRates;
+            napi_create_array_with_length(env, 1, &sampleRates);
+            napi_create_int32(env, action.deviceDescriptors[i]->audioStreamInfo_.samplingRate, &subValue);
+            napi_set_element(env, sampleRates, 0, subValue);
+            napi_set_named_property(env, value, "sampleRates", sampleRates);
+
+            napi_value channelCounts;
+            napi_create_array_with_length(env, 1, &channelCounts);
+            napi_create_int32(env, action.deviceDescriptors[i]->audioStreamInfo_.channels, &subValue);
+            napi_set_element(env, channelCounts, 0, subValue);
+            napi_set_named_property(env, value, "channelCounts", channelCounts);
+
+            napi_value channelMasks;
+            napi_create_array_with_length(env, 1, &channelMasks);
+            napi_create_int32(env, action.deviceDescriptors[i]->channelMasks_, &subValue);
+            napi_set_element(env, channelMasks, 0, subValue);
+            napi_set_named_property(env, value, "channelMasks", channelMasks);
+
             napi_set_element(env, jsArray, i, value);
         }
     }
