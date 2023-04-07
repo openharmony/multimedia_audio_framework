@@ -19,6 +19,7 @@
 #include "audio_info.h"
 #include "audio_manager.h"
 #include "i_audio_capturer_source.h"
+#include "running_lock.h"
 
 #include <cstdio>
 #include <list>
@@ -84,6 +85,7 @@ private:
     struct AudioAdapter *audioAdapter_;
     struct AudioCapture *audioCapture_;
     struct AudioPort audioPort;
+    std::shared_ptr<PowerMgr::RunningLock> mKeepRunningLock;
 
     int32_t CreateCapture(struct AudioPort &capturePort);
     int32_t InitAudioManager();
