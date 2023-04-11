@@ -37,7 +37,10 @@ ohos_shared_library("audio_capturer_source") {
   deps = [ "//foundation/multimedia/audio_framework/frameworks/native/audioutils:audio_utils" ]
   deps += [ multimedia_audio_framework_hdi_audio_client ]
 
-  external_deps = [ "hiviewdfx_hilog_native:libhilog" ]
+  external_deps = [ 
+    "hiviewdfx_hilog_native:libhilog",
+    "power_manager:powermgr_client",
+  ]
 
   part_name = "multimedia_audio_framework"
   subsystem_name = "multimedia"
@@ -70,7 +73,10 @@ ohos_shared_library("remote_audio_capturer_source") {
     deps = [ multimedia_audio_framework_hdi_audio_client ]
   }
 
-  external_deps = [ "hiviewdfx_hilog_native:libhilog" ]
+  external_deps = [ 
+    "hiviewdfx_hilog_native:libhilog",
+    "power_manager:powermgr_client",
+  ]
 
   part_name = "multimedia_audio_framework"
   subsystem_name = "multimedia"
@@ -97,7 +103,10 @@ ohos_shared_library("audio_capturer_file_source") {
     "//drivers/peripheral/audio/interfaces/include",
   ]
 
-  external_deps = [ "hiviewdfx_hilog_native:libhilog" ]
+  external_deps = [ 
+    "hiviewdfx_hilog_native:libhilog",
+    "power_manager:powermgr_client",
+  ]
 
   part_name = "multimedia_audio_framework"
   subsystem_name = "multimedia"
@@ -136,7 +145,10 @@ ohos_shared_library("capturer_source_adapter") {
     ":remote_audio_capturer_source",
   ]
 
-  external_deps = [ "hiviewdfx_hilog_native:libhilog" ]
+  external_deps = [ 
+    "hiviewdfx_hilog_native:libhilog",
+    "power_manager:powermgr_client",
+  ]
 
   part_name = "multimedia_audio_framework"
   subsystem_name = "multimedia"
