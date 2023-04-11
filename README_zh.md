@@ -163,7 +163,7 @@ PCM（Pulse Code Modulation），即脉冲编码调制，是一种将模拟信�
     bytesRead = audioCapturer->Read(*buffer, bufferLen, isBlocking);
     while (numBuffersToCapture) {
         bytesRead = audioCapturer->Read(*buffer, bufferLen, isBlockingRead);
-            if (bytesRead < 0) {
+            if (bytesRead <= 0) {
                 break;
             } else if (bytesRead > 0) {
             fwrite(buffer, size, bytesRead, recFile); // example shows writes the recorded data into a file
