@@ -26,7 +26,7 @@ group("audio_unit_test") {
     "unittest/stream_manager_test:audio_stream_manager_unit_test",
     "unittest/stream_test:audio_stream_unit_test",
     "unittest/volume_change_test:audio_volume_change_unit_test",
-    "//foundation/multimedia/audio_framework/services/audio_service/test/unittest:audio_balance_test",
+    "../services/audio_service/test/unittest:audio_balance_unit_test",
   ]
 }
 

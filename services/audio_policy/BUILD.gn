@@ -13,6 +13,7 @@
 
 import("//build/ohos.gni")
 import("//drivers/hdf_core/adapter/uhdf2/uhdf.gni")
+import("//foundation/multimedia/audio_framework/accessibility.gni")
 import("//foundation/multimedia/audio_framework/bluetooth_part.gni")
 
 pulseaudio_build_path = "//third_party/pulseaudio/ohosbuild"
@@ -78,6 +79,10 @@ config("audio_policy_public_config") {
     cflags += [ "-DBINDER_IPC_32BIT" ]
   }
 
+  if (accessibility_enable == true) {
+    cflags += [ "-DACCESSIBILITY_ENABLE" ]
+  }
+
   if (bluetooth_part_enable == true) {
     cflags += [ "-DBLUETOOTH_ENABLE" ]
   }
@@ -136,7 +141,6 @@ ohos_shared_library("audio_policy_service") {
     "server/src/service/config/audio_focus_parser.cpp",
     "server/src/service/config/audio_tone_parser.cpp",
     "server/src/service/config/xml_parser.cpp",
-    "server/src/service/listener/accessibility_config_listener.cpp",
     "server/src/service/listener/device_status_listener.cpp",
     "server/src/service/manager/audio_adapter_manager.cpp",
   ]
@@ -145,7 +149,6 @@ ohos_shared_library("audio_policy_service") {
 
   deps = [
     "$hdf_uhdf_path/hdi:libhdi",
-    "//foundation/barrierfree/accessibility/interfaces/innerkits/acfwk:accessibilityconfig",
     "//foundation/distributeddatamgr/kv_store/interfaces/innerkits/distributeddata:distributeddata_inner",
     "//foundation/multimedia/audio_framework/frameworks/native/audioadapter:pulse_audio_service_adapter",
     "//foundation/multimedia/audio_framework/services/audio_policy:audio_config.para",
@@ -171,6 +174,12 @@ ohos_shared_library("audio_policy_service") {
     "safwk:system_ability_fwk",
     "samgr:samgr_proxy",
   ]
+
+  if (accessibility_enable == true) {
+    sources +=
+        [ "server/src/service/listener/accessibility_config_listener.cpp" ]
+    external_deps += [ "accessibility:accessibilityconfig" ]
+  }
 
   if (bluetooth_part_enable == true) {
     deps += [ "//foundation/multimedia/audio_framework/frameworks/native/bluetoothclient:audio_bluetooth_client" ]
