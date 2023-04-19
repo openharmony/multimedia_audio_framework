@@ -14,6 +14,7 @@
 import("//build/config/features.gni")
 import("//build/test.gni")
 import("//drivers/hdf_core/adapter/uhdf2/uhdf.gni")
+import("//foundation/multimedia/audio_framework/accessibility.gni")
 
 ohos_fuzztest("AudioPolicyFuzzTest") {
   module_out_path = "multimedia_audio_framework/audiopolicy"
@@ -34,7 +35,6 @@ ohos_fuzztest("AudioPolicyFuzzTest") {
 
   deps = [
     "$hdf_uhdf_path/hdi:libhdi",
-    "//foundation/barrierfree/accessibility/interfaces/innerkits/acfwk:accessibilityconfig",
     "//foundation/multimedia/audio_framework/services/audio_policy:audio_policy_service",
   ]
   external_deps = [
@@ -48,6 +48,9 @@ ohos_fuzztest("AudioPolicyFuzzTest") {
     "ipc:ipc_core",
     "safwk:system_ability_fwk",
   ]
+  if (accessibility_enable == true) {
+    external_deps += [ "accessibility:accessibilityconfig" ]
+  }
 }
 
 group("fuzztest") {

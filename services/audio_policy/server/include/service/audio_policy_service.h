@@ -28,7 +28,12 @@
 #include "audio_stream_collector.h"
 #include "audio_tone_parser.h"
 
+#ifdef ACCESSIBILITY_ENABLE
 #include "accessibility_config_listener.h"
+#else
+#include "iaudio_accessibility_config_observer.h"
+#endif
+
 #include "device_status_listener.h"
 #include "iaudio_policy_interface.h"
 #include "iport_observer.h"
@@ -205,7 +210,9 @@ private:
           configParser_(ParserFactory::GetInstance().CreateParser(*this)),
           streamCollector_(AudioStreamCollector::GetAudioStreamCollector())
     {
+#ifdef ACCESSIBILITY_ENABLE
         accessibilityConfigListener_ = std::make_shared<AccessibilityConfigListener>(*this);
+#endif
         deviceStatusListener_ = std::make_unique<DeviceStatusListener>(*this);
     }
 
@@ -303,7 +310,9 @@ private:
     Parser& configParser_;
     std::unordered_map<int32_t, std::shared_ptr<ToneInfo>> toneDescriptorMap;
     AudioStreamCollector& streamCollector_;
+#ifdef ACCESSIBILITY_ENABLE
     std::shared_ptr<AccessibilityConfigListener> accessibilityConfigListener_;
+#endif
     std::unique_ptr<DeviceStatusListener> deviceStatusListener_;
     std::vector<sptr<AudioDeviceDescriptor>> connectedDevices_;
     std::unordered_map<std::string, AudioStreamInfo> connectedA2dpDeviceMap_;

@@ -24,10 +24,10 @@ config("module_private_config") {
   ]
 }
 
-ohos_unittest("audio_balance_test") {
+ohos_unittest("audio_balance_unit_test") {
   module_out_path = module_output_path
 
-  sources = [ "audio_balance_test.cpp" ]
+  sources = [ "audio_balance_unit_test.cpp" ]
 
   configs = [ ":module_private_config" ]
 
