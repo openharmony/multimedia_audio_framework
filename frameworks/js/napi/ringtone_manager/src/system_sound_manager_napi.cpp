@@ -522,10 +522,8 @@ napi_value SystemSoundManagerNapi::GetSystemRingtonePlayer(napi_env env, napi_ca
             [](napi_env env, void* data) {
                 SystemSoundManagerAsyncContext *context
                     = static_cast<SystemSoundManagerAsyncContext *>(data);
-                std::shared_ptr<IRingtonePlayer> ringtonePlayer
-                    = context->objectInfo->sysSoundMgrClient_->
-                          GetRingtonePlayer(context->abilityContext_,
-                                            static_cast<RingtoneType>(context->ringtoneType));
+                std::shared_ptr<IRingtonePlayer> ringtonePlayer = context->objectInfo->sysSoundMgrClient_->
+                    GetRingtonePlayer(context->abilityContext_, static_cast<RingtoneType>(context->ringtoneType));
                 if (ringtonePlayer != nullptr) {
                     context->ringtonePlayer = ringtonePlayer;
                     context->status = SUCCESS;
