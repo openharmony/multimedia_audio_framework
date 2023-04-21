@@ -26,12 +26,6 @@ AudioPolicyManagerListenerStub::AudioPolicyManagerListenerStub()
 
 AudioPolicyManagerListenerStub::~AudioPolicyManagerListenerStub()
 {
-    AUDIO_DEBUG_LOG("AudioPolicyManagerListenerStub Instance start");
-    for (auto &thread : interruptThreads_) {
-        if (thread && thread->joinable()) {
-            thread->join();
-        }
-    }
     AUDIO_DEBUG_LOG("AudioPolicyManagerListenerStub Instance complete");
 }
 
@@ -71,8 +65,7 @@ int AudioPolicyManagerListenerStub::OnRemoteRequest(
             InterruptEventInternal interruptEvent = {};
             ReadInterruptEventParams(data, interruptEvent);
             // To be modified by enqueuing the interrupt action scheduler
-            interruptThreads_.emplace_back(
-                std::make_unique<std::thread>(&AudioPolicyManagerListenerStub::OnInterrupt, this, interruptEvent));
+            OnInterrupt(interruptEvent);
             return AUDIO_OK;
         }
         case ON_DEVICE_CHANGED: {
