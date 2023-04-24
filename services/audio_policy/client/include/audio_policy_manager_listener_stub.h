@@ -43,7 +43,6 @@ private:
 
     std::weak_ptr<AudioInterruptCallback> callback_;
     std::weak_ptr<AudioManagerDeviceChangeCallback> deviceChangeCallback_;
-    std::vector<std::unique_ptr<std::thread>> interruptThreads_;
 };
 } // namespace AudioStandard
 } // namespace OHOS
