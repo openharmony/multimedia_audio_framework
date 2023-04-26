@@ -70,7 +70,7 @@ public:
         return isTimedOut;
     }
 
-    virtual void OnTimeOut() = 0;
+    virtual void OnTimeOut() {};
 
     volatile std::atomic<bool> isTimedOut;
 
