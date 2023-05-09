@@ -34,7 +34,7 @@ void AudioRingerModeUpdateListenerProxy::OnRingerModeUpdated(const AudioRingerMo
 {
     MessageParcel data;
     MessageParcel reply;
-    MessageOption option;
+    MessageOption option(MessageOption::TF_ASYNC);
 
     if (!data.WriteInterfaceToken(GetDescriptor())) {
         AUDIO_ERR_LOG("AudioRingerModeListenerCallback: WriteInterfaceToken failed");

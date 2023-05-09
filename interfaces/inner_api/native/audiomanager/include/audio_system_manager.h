@@ -293,6 +293,7 @@ private:
     std::shared_ptr<AudioInterruptCallback> audioInterruptCallback_ = nullptr;
     std::shared_ptr<AudioRingerModeCallback> ringerModeCallback_ = nullptr;
     std::vector<std::shared_ptr<AudioGroupManager>> groupManagerMap_;
+    std::mutex ringerModeCallbackMutex_;
 };
 } // namespace AudioStandard
 } // namespace OHOS

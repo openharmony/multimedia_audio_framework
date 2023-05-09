@@ -368,7 +368,7 @@ int32_t AudioPolicyManager::SetRingerModeCallback(const int32_t clientId,
         AUDIO_ERR_LOG("SetRingerModeCallback: callback is nullptr");
         return ERR_INVALID_PARAM;
     }
-
+    std::lock_guard<std::mutex> lockSet(ringerModelistenerStubMutex_);
     ringerModelistenerStub_ = new(std::nothrow) AudioRingerModeUpdateListenerStub();
     if (ringerModelistenerStub_ == nullptr) {
         AUDIO_ERR_LOG("SetRingerModeCallback: object null");
