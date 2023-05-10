@@ -578,6 +578,7 @@ bool AudioAdapterManager::InitAudioPolicyKvStore(bool& isFirstBoot)
     AppId appId;
     appId.appId = "audio_policy_manager";
 
+    options.securityLevel = S1;
     options.createIfMissing = true;
     options.encrypt = false;
     options.autoSync = false;
