@@ -305,32 +305,31 @@ int32_t AudioStream::SetAudioStreamInfo(const AudioStreamParams info,
         StopAudioStream();
         ReleaseAudioStream(false);
     }
-    int32_t ret = 0;
-    switch (eMode_) {
-        case AUDIO_MODE_PLAYBACK:
+    {
+        int32_t ret = 0;
+        static std::mutex connectServerMutex;
+        std::lock_guard<std::mutex> lockConnect(connectServerMutex);
+        if (eMode_ == AUDIO_MODE_PLAYBACK) {
             AUDIO_DEBUG_LOG("AudioStream: Initialize playback");
             if (!IsRendererChannelValid(info.channels)) {
                 AUDIO_ERR_LOG("AudioStream: Invalid sink channel %{public}d", info.channels);
                 return ERR_NOT_SUPPORTED;
             }
             ret = Initialize(AUDIO_SERVICE_CLIENT_PLAYBACK);
-            break;
-        case AUDIO_MODE_RECORD:
+        } else if (eMode_ == AUDIO_MODE_RECORD) {
             AUDIO_DEBUG_LOG("AudioStream: Initialize recording");
             if (!IsCapturerChannelValid(info.channels)) {
                 AUDIO_ERR_LOG("AudioStream: Invalid source channel %{public}d", info.channels);
                 return ERR_NOT_SUPPORTED;
             }
             ret = Initialize(AUDIO_SERVICE_CLIENT_RECORD);
-            break;
-        default:
+        } else {
+            AUDIO_ERR_LOG("AudioStream: error eMode.");
             return ERR_INVALID_OPERATION;
+        }
+        CHECK_AND_RETURN_RET_LOG(ret == 0, ret, "AudioStream: Error initializing!");
     }
 
-    if (ret) {
-        AUDIO_DEBUG_LOG("AudioStream: Error initializing!");
-        return ret;
-    }
     if (CreateStream(info, eStreamType_) != SUCCESS) {
         AUDIO_ERR_LOG("AudioStream:Create stream failed");
         return ERROR;
