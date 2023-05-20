@@ -1640,11 +1640,11 @@ void AudioPolicyService::OnDeviceStatusUpdated(DStatusInfo statusInfo)
                 return;
             }
         }
-        UpdateConnectedDevicesWhenConnecting(deviceDesc, deviceChangeDescriptor);
 
         int32_t ret = ActivateNewDevice(statusInfo.networkId, devType,
             statusInfo.connectType == ConnectType::CONNECT_TYPE_DISTRIBUTED);
         CHECK_AND_RETURN_LOG(ret == SUCCESS, "DEVICE online but open audio device failed.");
+        UpdateConnectedDevicesWhenConnecting(deviceDesc, deviceChangeDescriptor);
 
         const sptr<IStandardAudioService> gsp = GetAudioPolicyServiceProxy();
         if (gsp != nullptr && statusInfo.connectType == ConnectType::CONNECT_TYPE_DISTRIBUTED) {
