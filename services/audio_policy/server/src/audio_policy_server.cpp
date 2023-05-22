@@ -697,10 +697,10 @@ int32_t AudioPolicyServer::SetDeviceChangeCallback(const int32_t /* clientId */,
     return mPolicyService.SetDeviceChangeCallback(clientPid, flag, object);
 }
 
-int32_t AudioPolicyServer::UnsetDeviceChangeCallback(const int32_t /* clientId */)
+int32_t AudioPolicyServer::UnsetDeviceChangeCallback(const int32_t /* clientId */, DeviceFlag flag)
 {
     int32_t clientPid = IPCSkeleton::GetCallingPid();
-    return mPolicyService.UnsetDeviceChangeCallback(clientPid);
+    return mPolicyService.UnsetDeviceChangeCallback(clientPid, flag);
 }
 
 int32_t AudioPolicyServer::SetPreferOutputDeviceChangeCallback(const int32_t /* clientId */,

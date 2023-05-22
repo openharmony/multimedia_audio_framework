@@ -90,7 +90,7 @@ void AudioDeviceFuzzTest(const uint8_t *rawData, size_t size)
 
     DeviceFlag flag = *reinterpret_cast<const DeviceFlag *>(rawData);
     AudioPolicyServerPtr->SetDeviceChangeCallback(clientId, flag, object);
-    AudioPolicyServerPtr->UnsetDeviceChangeCallback(clientId);
+    AudioPolicyServerPtr->UnsetDeviceChangeCallback(clientId, flag);
 }
 
 void AudioInterruptFuzzTest(const uint8_t *rawData, size_t size)

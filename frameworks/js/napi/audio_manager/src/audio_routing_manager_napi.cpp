@@ -1029,7 +1029,7 @@ void AudioRoutingManagerNapi::RegisterDeviceChangeCallback(napi_env env, size_t 
     napi_typeof(env, args[PARAM1], &valueType);
     if (valueType == napi_number) {
         napi_get_value_int32(env, args[PARAM1], &flag);
-        AUDIO_INFO_LOG("AudioRoutingMgrNapi:On deviceFlag: %{public}d", flag);
+        AUDIO_INFO_LOG("RegisterDeviceChangeCallback:On deviceFlag: %{public}d", flag);
         if (!AudioCommonNapi::IsLegalInputArgumentDeviceFlag(flag)) {
             AudioCommonNapi::throwError(env, NAPI_ERR_INVALID_PARAM);
         }
@@ -1042,27 +1042,24 @@ void AudioRoutingManagerNapi::RegisterDeviceChangeCallback(napi_env env, size_t 
     if (handler != napi_function) {
         AudioCommonNapi::throwError(env, NAPI_ERR_INPUT_INVALID);
     }
+    DeviceFlag deviceFlag = DeviceFlag(flag);
     if (!routingMgrNapi->deviceChangeCallbackNapi_) {
         routingMgrNapi->deviceChangeCallbackNapi_= std::make_shared<AudioManagerCallbackNapi>(env);
-        if (!routingMgrNapi->deviceChangeCallbackNapi_) {
-            AUDIO_ERR_LOG("AudioStreamMgrNapi: Memory Allocation Failed !!");
-            return;
-        }
-        DeviceFlag deviceFlag = DeviceFlag(flag);
-        int32_t ret = routingMgrNapi->audioMngr_->SetDeviceChangeCallback(deviceFlag,
-            routingMgrNapi->deviceChangeCallbackNapi_);
-        if (ret) {
-            AUDIO_ERR_LOG("AudioRoutingMgrNapi: Registering Device Change Callback Failed %{public}d", ret);
-            AudioCommonNapi::throwError(env, ret);
-            return;
-        }
+    }
+    CHECK_AND_RETURN_LOG(routingMgrNapi->deviceChangeCallbackNapi_,
+        "RegisterDeviceChangeCallback: Memory Allocation Failed !");
+
+    int32_t ret = routingMgrNapi->audioMngr_->SetDeviceChangeCallback(deviceFlag,
+        routingMgrNapi->deviceChangeCallbackNapi_);
+    if (ret) {
+        AUDIO_ERR_LOG("RegisterDeviceChangeCallback: Registering Device Change Callback Failed %{public}d", ret);
+        AudioCommonNapi::throwError(env, ret);
+        return;
     }
 
     std::shared_ptr<AudioManagerCallbackNapi> cb =
         std::static_pointer_cast<AudioManagerCallbackNapi>(routingMgrNapi->deviceChangeCallbackNapi_);
-    cb->SaveCallbackReference(cbName, args[PARAM2]);
-
-    AUDIO_INFO_LOG("AudioRoutingManager::On SetDeviceChangeCallback is successful");
+    cb->SaveRoutingManagerDeviceChangeCbRef(deviceFlag, args[PARAM2]);
 }
 
 void AudioRoutingManagerNapi::RegisterPreferOutputDeviceChangeCallback(napi_env env, size_t argc, napi_value* args,
@@ -1158,6 +1155,29 @@ napi_value AudioRoutingManagerNapi::On(napi_env env, napi_callback_info info)
     return undefinedResult;
 }
 
+void AudioRoutingManagerNapi::UnregisterDeviceChangeCallback(napi_env env, napi_value callback,
+    AudioRoutingManagerNapi* routingMgrNapi)
+{
+    if (routingMgrNapi->deviceChangeCallbackNapi_ != nullptr) {
+        std::shared_ptr<AudioManagerCallbackNapi> cb =
+            std::static_pointer_cast<AudioManagerCallbackNapi>(
+            routingMgrNapi->deviceChangeCallbackNapi_);
+        if (callback != nullptr) {
+            cb->RemoveRoutingManagerDeviceChangeCbRef(env, callback);
+        }
+        if (callback == nullptr || cb->GetRoutingManagerDeviceChangeCbListSize() == 0) {
+            int32_t ret = routingMgrNapi->audioMngr_->UnsetDeviceChangeCallback(DeviceFlag::ALL_L_D_DEVICES_FLAG);
+            CHECK_AND_RETURN_LOG(ret == SUCCESS, "UnsetDeviceChangeCallback Failed");
+            routingMgrNapi->deviceChangeCallbackNapi_.reset();
+            routingMgrNapi->deviceChangeCallbackNapi_ = nullptr;
+
+            cb->RemoveAllRoutingManagerDeviceChangeCb();
+        }
+    } else {
+        AUDIO_ERR_LOG("UnregisterDeviceChangeCallback: deviceChangeCallbackNapi_ is null");
+    }
+}
+
 void AudioRoutingManagerNapi::UnegisterPreferOutputDeviceChangeCallback(napi_env env, napi_value callback,
     AudioRoutingManagerNapi* routingMgrNapi)
 {
@@ -1191,16 +1211,7 @@ napi_value AudioRoutingManagerNapi::UnregisterCallback(napi_env env, napi_value 
     NAPI_ASSERT(env, routingMgrNapi->audioMngr_ != nullptr, "audio system mgr instance is null.");
 
     if (!callbackName.compare(DEVICE_CHANGE_CALLBACK_NAME)) {
-        int32_t ret = routingMgrNapi->audioMngr_->UnsetDeviceChangeCallback();
-        if (ret) {
-            AUDIO_ERR_LOG("AudioManagerNapi::Off UnsetDeviceChangeCallback Failed");
-            return undefinedResult;
-        }
-        if (routingMgrNapi->deviceChangeCallbackNapi_ != nullptr) {
-            routingMgrNapi->deviceChangeCallbackNapi_.reset();
-            routingMgrNapi->deviceChangeCallbackNapi_ = nullptr;
-        }
-        AUDIO_INFO_LOG("AudioManagerNapi::Off UnsetDeviceChangeCallback Success");
+        UnregisterDeviceChangeCallback(env, callback, routingMgrNapi);
     } else if (!callbackName.compare(PREFER_OUTPUT_DEVICE_CALLBACK_NAME)) {
         UnegisterPreferOutputDeviceChangeCallback(env, callback, routingMgrNapi);
     } else {

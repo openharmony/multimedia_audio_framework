@@ -116,19 +116,147 @@ static void NativeDeviceChangeActionToJsObj(const napi_env& env, napi_value& jsO
     napi_set_named_property(env, jsObj, "deviceDescriptors", jsArray);
 }
 
+void AudioManagerCallbackNapi::SaveAudioManagerDeviceChangeCbRef(DeviceFlag deviceFlag, napi_value callback)
+{
+    std::lock_guard<std::mutex> lock(mutex_);
+    napi_ref callbackRef = nullptr;
+    const int32_t refCount = 1;
+
+    bool isSameCallback = true;
+    for (auto it = audioManagerDeviceChangeCbList_.begin(); it != audioManagerDeviceChangeCbList_.end(); ++it) {
+        isSameCallback = AudioCommonNapi::IsSameCallback(env_, callback, (*it).first->cb_);
+        CHECK_AND_RETURN_LOG(!isSameCallback, "SaveCallbackReference: audio manager has same callback, nothing to do");
+    }
+
+    napi_status status = napi_create_reference(env_, callback, refCount, &callbackRef);
+    CHECK_AND_RETURN_LOG(status == napi_ok && callback != nullptr,
+        "SaveCallbackReference: creating reference for callback fail");
+    std::shared_ptr<AutoRef> cb = std::make_shared<AutoRef>(env_, callbackRef);
+    audioManagerDeviceChangeCbList_.push_back({cb, deviceFlag});
+    AUDIO_INFO_LOG("Save manager device change callback ref success, deviceFlag [%{public}d], list size [%{public}d]",
+        deviceFlag, audioManagerDeviceChangeCbList_.size());
+}
+
+void AudioManagerCallbackNapi::RemoveAudioManagerDeviceChangeCbRef(napi_env env, napi_value callback)
+{
+    std::lock_guard<std::mutex> lock(mutex_);
+    bool isEquals = false;
+    napi_value copyValue = nullptr;
+
+    for (auto it = audioManagerDeviceChangeCbList_.begin(); it != audioManagerDeviceChangeCbList_.end(); ++it) {
+        bool isSameCallback = AudioCommonNapi::IsSameCallback(env_, callback, (*it).first->cb_);
+        if (isSameCallback) {
+            AUDIO_INFO_LOG("RemoveAudioManagerDeviceChangeCbRef: find js callback, delete it");
+            napi_delete_reference(env, (*it).first->cb_);
+            (*it).first->cb_ = nullptr;
+            audioManagerDeviceChangeCbList_.erase(it);
+            return;
+        }
+    }
+    AUDIO_INFO_LOG("RemoveCallbackReference: js callback no find");
+}
+
+void AudioManagerCallbackNapi::RemoveAllAudioManagerDeviceChangeCb()
+{
+    std::lock_guard<std::mutex> lock(mutex_);
+    for (auto it = audioManagerDeviceChangeCbList_.begin(); it != audioManagerDeviceChangeCbList_.end(); ++it) {
+        napi_delete_reference(env_, (*it).first->cb_);
+        (*it).first->cb_ = nullptr;
+    }
+    audioManagerDeviceChangeCbList_.clear();
+    AUDIO_INFO_LOG("RemoveAllCallbacks: remove all js callbacks success");
+}
+
+int32_t AudioManagerCallbackNapi::GetAudioManagerDeviceChangeCbListSize()
+{
+    std::lock_guard<std::mutex> lock(mutex_);
+    return audioManagerDeviceChangeCbList_.size();
+}
+
+void AudioManagerCallbackNapi::SaveRoutingManagerDeviceChangeCbRef(DeviceFlag deviceFlag, napi_value callback)
+{
+    std::lock_guard<std::mutex> lock(mutex_);
+    napi_ref callbackRef = nullptr;
+    const int32_t refCount = 1;
+
+    bool isSameCallback = true;
+    for (auto it = routingManagerDeviceChangeCbList_.begin(); it != routingManagerDeviceChangeCbList_.end(); ++it) {
+        isSameCallback = AudioCommonNapi::IsSameCallback(env_, callback, (*it).first->cb_);
+        CHECK_AND_RETURN_LOG(!isSameCallback, "SaveCallbackReference: has same callback, nothing to do");
+    }
+
+    napi_status status = napi_create_reference(env_, callback, refCount, &callbackRef);
+    CHECK_AND_RETURN_LOG(status == napi_ok && callback != nullptr,
+        "SaveCallbackReference: creating reference for callback fail");
+    std::shared_ptr<AutoRef> cb = std::make_shared<AutoRef>(env_, callbackRef);
+
+    routingManagerDeviceChangeCbList_.push_back({cb, deviceFlag});
+    AUDIO_INFO_LOG("Save routing device change callback ref success, deviceFlag [%{public}d], list size [%{public}d]",
+        deviceFlag, routingManagerDeviceChangeCbList_.size());
+}
+
+void AudioManagerCallbackNapi::RemoveRoutingManagerDeviceChangeCbRef(napi_env env, napi_value callback)
+{
+    std::lock_guard<std::mutex> lock(mutex_);
+    bool isEquals = false;
+    napi_value copyValue = nullptr;
+
+    for (auto it = routingManagerDeviceChangeCbList_.begin(); it != routingManagerDeviceChangeCbList_.end(); ++it) {
+        bool isSameCallback = AudioCommonNapi::IsSameCallback(env_, callback, (*it).first->cb_);
+        if (isSameCallback) {
+            AUDIO_INFO_LOG("RemoveRoutingManagerDeviceChangeCbRef: find js callback, delete it");
+            napi_delete_reference(env, (*it).first->cb_);
+            (*it).first->cb_ = nullptr;
+            routingManagerDeviceChangeCbList_.erase(it);
+            return;
+        }
+    }
+    AUDIO_INFO_LOG("RemoveRoutingManagerDeviceChangeCbRef: js callback no find");
+}
+
+void AudioManagerCallbackNapi::RemoveAllRoutingManagerDeviceChangeCb()
+{
+    std::lock_guard<std::mutex> lock(mutex_);
+    for (auto it = routingManagerDeviceChangeCbList_.begin(); it != routingManagerDeviceChangeCbList_.end(); ++it) {
+        napi_delete_reference(env_, (*it).first->cb_);
+        (*it).first->cb_ = nullptr;
+    }
+    routingManagerDeviceChangeCbList_.clear();
+    AUDIO_INFO_LOG("RemoveAllRoutingManagerDeviceChangeCb: remove all js callbacks success");
+}
+
+int32_t AudioManagerCallbackNapi::GetRoutingManagerDeviceChangeCbListSize()
+{
+    std::lock_guard<std::mutex> lock(mutex_);
+    return routingManagerDeviceChangeCbList_.size();
+}
+
 void AudioManagerCallbackNapi::OnDeviceChange(const DeviceChangeAction &deviceChangeAction)
 {
     std::lock_guard<std::mutex> lock(mutex_);
-    AUDIO_DEBUG_LOG("OnDeviceChange: type[%{public}d]", deviceChangeAction.type);
-    CHECK_AND_RETURN_LOG(deviceChangeCallback_ != nullptr, "callback not registered by JS client");
+    AUDIO_DEBUG_LOG("OnDeviceChange: type[%{public}d], flag [%{public}d]",
+        deviceChangeAction.type, deviceChangeAction.flag);
 
-    std::unique_ptr<AudioManagerJsCallback> cb = std::make_unique<AudioManagerJsCallback>();
-    CHECK_AND_RETURN_LOG(cb != nullptr, "No memory");
+    for (auto it = audioManagerDeviceChangeCbList_.begin(); it != audioManagerDeviceChangeCbList_.end(); it++) {
+        if (deviceChangeAction.flag == (*it).second) {
+            std::unique_ptr<AudioManagerJsCallback> cb = std::make_unique<AudioManagerJsCallback>();
+            cb->callback = (*it).first;
+            cb->callbackName = DEVICE_CHANGE_CALLBACK_NAME;
+            cb->deviceChangeAction = deviceChangeAction;
+            OnJsCallbackDeviceChange(cb);
+        }
+    }
 
-    cb->callback = deviceChangeCallback_;
-    cb->callbackName = DEVICE_CHANGE_CALLBACK_NAME;
-    cb->deviceChangeAction = deviceChangeAction;
-    return OnJsCallbackDeviceChange(cb);
+    for (auto it = routingManagerDeviceChangeCbList_.begin(); it != routingManagerDeviceChangeCbList_.end(); it++) {
+        if (deviceChangeAction.flag == (*it).second) {
+            std::unique_ptr<AudioManagerJsCallback> cb = std::make_unique<AudioManagerJsCallback>();
+            cb->callback = (*it).first;
+            cb->callbackName = DEVICE_CHANGE_CALLBACK_NAME;
+            cb->deviceChangeAction = deviceChangeAction;
+            OnJsCallbackDeviceChange(cb);
+        }
+    }
+    return;
 }
 
 void AudioManagerCallbackNapi::OnJsCallbackDeviceChange(std::unique_ptr<AudioManagerJsCallback> &jsCb)

@@ -36,6 +36,15 @@ public:
     void SaveCallbackReference(const std::string &callbackName, napi_value callback);
     void OnDeviceChange(const DeviceChangeAction &deviceChangeAction) override;
 
+    void SaveAudioManagerDeviceChangeCbRef(DeviceFlag deviceFlag, napi_value callback);
+    void RemoveAudioManagerDeviceChangeCbRef(napi_env env, napi_value callback);
+    void RemoveAllAudioManagerDeviceChangeCb();
+    int32_t GetAudioManagerDeviceChangeCbListSize();
+
+    void SaveRoutingManagerDeviceChangeCbRef(DeviceFlag deviceFlag, napi_value callback);
+    void RemoveRoutingManagerDeviceChangeCbRef(napi_env env, napi_value callback);
+    void RemoveAllRoutingManagerDeviceChangeCb();
+    int32_t GetRoutingManagerDeviceChangeCbListSize();
 private:
     struct AudioManagerJsCallback {
         std::shared_ptr<AutoRef> callback = nullptr;
@@ -48,6 +57,8 @@ private:
     std::mutex mutex_;
     napi_env env_ = nullptr;
     std::shared_ptr<AutoRef> deviceChangeCallback_ = nullptr;
+    std::list<std::pair<std::shared_ptr<AutoRef>, DeviceFlag>> audioManagerDeviceChangeCbList_;
+    std::list<std::pair<std::shared_ptr<AutoRef>, DeviceFlag>> routingManagerDeviceChangeCbList_;
 };
 }  // namespace AudioStandard
 }  // namespace OHOS

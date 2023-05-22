@@ -505,7 +505,7 @@ int32_t AudioPolicyManager::SetDeviceChangeCallback(const int32_t clientId, cons
     return gsp->SetDeviceChangeCallback(clientId, flag, object);
 }
 
-int32_t AudioPolicyManager::UnsetDeviceChangeCallback(const int32_t clientId)
+int32_t AudioPolicyManager::UnsetDeviceChangeCallback(const int32_t clientId, DeviceFlag flag)
 {
     AUDIO_INFO_LOG("Entered %{public}s", __func__);
     const sptr<IAudioPolicy> gsp = GetAudioPolicyManagerProxy();
@@ -513,7 +513,7 @@ int32_t AudioPolicyManager::UnsetDeviceChangeCallback(const int32_t clientId)
         AUDIO_ERR_LOG("UnsetDeviceChangeCallback: audio policy manager proxy is NULL.");
         return -1;
     }
-    return gsp->UnsetDeviceChangeCallback(clientId);
+    return gsp->UnsetDeviceChangeCallback(clientId, flag);
 }
 
 int32_t AudioPolicyManager::SetPreferOutputDeviceChangeCallback(const int32_t clientId,

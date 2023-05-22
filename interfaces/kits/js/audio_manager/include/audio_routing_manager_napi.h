@@ -59,6 +59,8 @@ private:
         const std::string& cbName, AudioRoutingManagerNapi* routingMgrNapi);
     static void RegisterCallback(napi_env env, napi_value jsThis, size_t argc, napi_value* args,
         const std::string& cbName);
+    static void UnregisterDeviceChangeCallback(napi_env env, napi_value callback,
+        AudioRoutingManagerNapi* routingMgrNapi);
     static void UnegisterPreferOutputDeviceChangeCallback(napi_env env, napi_value callback,
         AudioRoutingManagerNapi* routingMgrNapi);
     static napi_value UnregisterCallback(napi_env env, napi_value jsThis, const std::string& callbackName,

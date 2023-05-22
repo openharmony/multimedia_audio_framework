@@ -134,6 +134,7 @@ public:
  */
 struct DeviceChangeAction {
     DeviceChangeType type;
+    DeviceFlag flag;
     std::vector<sptr<AudioDeviceDescriptor>> deviceDescriptors;
 };
 
@@ -633,7 +634,7 @@ public:
      * defined in {@link audio_errors.h} otherwise.
      * @since 8
      */
-    int32_t UnsetDeviceChangeCallback();
+    int32_t UnsetDeviceChangeCallback(DeviceFlag flag = DeviceFlag::ALL_DEVICES_FLAG);
 
     /**
      * @brief Registers the ringerMode callback listener.

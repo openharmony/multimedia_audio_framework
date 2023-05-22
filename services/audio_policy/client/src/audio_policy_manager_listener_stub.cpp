@@ -43,6 +43,7 @@ void AudioPolicyManagerListenerStub::ReadAudioDeviceChangeData(MessageParcel &da
     std::vector<sptr<AudioDeviceDescriptor>> deviceChangeDesc = {};
 
     int32_t type = data.ReadInt32();
+    int32_t flag = data.ReadInt32();
     int32_t size = data.ReadInt32();
 
     for (int32_t i = 0; i < size; i++) {
@@ -50,6 +51,7 @@ void AudioPolicyManagerListenerStub::ReadAudioDeviceChangeData(MessageParcel &da
     }
 
     devChange.type = static_cast<DeviceChangeType>(type);
+    devChange.flag = static_cast<DeviceFlag>(flag);
     devChange.deviceDescriptors = deviceChangeDesc;
 }
 

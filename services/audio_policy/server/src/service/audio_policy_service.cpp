@@ -1841,22 +1841,45 @@ int32_t AudioPolicyService::SetDeviceChangeCallback(const int32_t clientId, cons
     AUDIO_INFO_LOG("Entered %{public}s", __func__);
 
     sptr<IStandardAudioPolicyManagerListener> callback = iface_cast<IStandardAudioPolicyManagerListener>(object);
-    if (callback != nullptr) {
-        deviceChangeCbsMap_[clientId] = std::make_pair(flag, callback);
-    }
 
+    if (callback != nullptr) {
+        deviceChangeCbsMap_[{clientId, flag}] = callback;
+    }
+    AUDIO_INFO_LOG("SetDeviceChangeCallback:: deviceChangeCbsMap_ size: %{public}d", deviceChangeCbsMap_.size());
     return SUCCESS;
 }
 
-int32_t AudioPolicyService::UnsetDeviceChangeCallback(const int32_t clientId)
+int32_t AudioPolicyService::UnsetDeviceChangeCallback(const int32_t clientId, DeviceFlag flag)
 {
     AUDIO_INFO_LOG("Entered %{public}s", __func__);
 
-    if (deviceChangeCbsMap_.erase(clientId) == 0) {
+    if (deviceChangeCbsMap_.erase({clientId, flag}) == 0) {
         AUDIO_ERR_LOG("client not present in %{public}s", __func__);
         return ERR_INVALID_OPERATION;
     }
+    // for audio manager napi remove all device change callback
+    if (flag == DeviceFlag::ALL_DEVICES_FLAG) {
+        for (auto it = deviceChangeCbsMap_.begin(); it != deviceChangeCbsMap_.end();) {
+            if ((*it).first.first == clientId && ((*it).first.second == DeviceFlag::INPUT_DEVICES_FLAG ||
+                (*it).first.second == DeviceFlag::OUTPUT_DEVICES_FLAG)) {
+                it = deviceChangeCbsMap_.erase(it);
+            } else {
+                it++;
+            }
+        }
+    }
+    // for routing manager napi remove all device change callback
+    if (flag == DeviceFlag::ALL_L_D_DEVICES_FLAG) {
+        for (auto it = deviceChangeCbsMap_.begin(); it != deviceChangeCbsMap_.end();) {
+            if ((*it).first.first == clientId) {
+                it = deviceChangeCbsMap_.erase(it);
+            } else {
+                it++;
+            }
+        }
+    }
 
+    AUDIO_INFO_LOG("UnsetDeviceChangeCallback:: deviceChangeCbsMap_ size: %{public}d", deviceChangeCbsMap_.size());
     return SUCCESS;
 }
 
@@ -2325,9 +2348,10 @@ void AudioPolicyService::TriggerDeviceChangedCallback(const vector<sptr<AudioDev
     WriteDeviceChangedSysEvents(desc, isConnected);
 
     for (auto it = deviceChangeCbsMap_.begin(); it != deviceChangeCbsMap_.end(); ++it) {
-        deviceChangeAction.deviceDescriptors = DeviceFilterByFlag(it->second.first, desc);
-        if (it->second.second && deviceChangeAction.deviceDescriptors.size() > 0) {
-            it->second.second->OnDeviceChange(deviceChangeAction);
+        deviceChangeAction.flag = it->first.second;
+        deviceChangeAction.deviceDescriptors = DeviceFilterByFlag(it->first.second, desc);
+        if (it->second && deviceChangeAction.deviceDescriptors.size() > 0) {
+            it->second->OnDeviceChange(deviceChangeAction);
         }
     }
 }

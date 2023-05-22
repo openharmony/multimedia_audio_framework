@@ -173,7 +173,7 @@ public:
 
     int32_t SetDeviceChangeCallback(const int32_t clientId, const DeviceFlag flag, const sptr<IRemoteObject> &object);
 
-    int32_t UnsetDeviceChangeCallback(const int32_t clientId);
+    int32_t UnsetDeviceChangeCallback(const int32_t clientId, DeviceFlag flag);
 
     int32_t SetPreferOutputDeviceChangeCallback(const int32_t clientId, const sptr<IRemoteObject> &object);
 
@@ -378,8 +378,7 @@ private:
     std::unordered_map<std::string, AudioStreamInfo> connectedA2dpDeviceMap_;
     std::string activeBTDevice_;
 
-    std::unordered_map<int32_t,
-        std::pair<DeviceFlag, sptr<IStandardAudioPolicyManagerListener>>> deviceChangeCbsMap_;
+    std::map<std::pair<int32_t, DeviceFlag>, sptr<IStandardAudioPolicyManagerListener>> deviceChangeCbsMap_;
     std::unordered_map<int32_t,
         sptr<IStandardAudioRoutingManagerListener>> activeOutputDeviceCbsMap_;
 

@@ -92,7 +92,7 @@ public:
     virtual int32_t SetDeviceChangeCallback(const int32_t clientId, const DeviceFlag flag,
         const sptr<IRemoteObject> &object) = 0;
 
-    virtual int32_t UnsetDeviceChangeCallback(const int32_t clientId) = 0;
+    virtual int32_t UnsetDeviceChangeCallback(const int32_t clientId, DeviceFlag flag) = 0;
 
     virtual int32_t SetAudioInterruptCallback(const uint32_t sessionID, const sptr<IRemoteObject> &object) = 0;
 
