@@ -462,6 +462,7 @@ std::vector<int32_t> AudioPolicyServer::GetSupportedTones()
 
 int32_t AudioPolicyServer::SetMicrophoneMuteCommon(bool isMute, API_VERSION api_v)
 {
+    std::lock_guard<std::mutex> lock(micStateChangeMutex_);
     AUDIO_INFO_LOG("Entered %{public}s", __func__);
     bool isMicrophoneMute = IsMicrophoneMute(api_v);
     int32_t ret = mPolicyService.SetMicrophoneMute(isMute);
