@@ -118,6 +118,7 @@ HWTEST(AudioOpenslesRecorderUnitTest, Audio_Opensles_Capture_CreateAudioRecorder
     SLresult result = (*engineEngine_)->CreateAudioRecorder(engineEngine_, &pcmCapturerObject_, &audioSource,
                                                             &audioSink, 0, nullptr, nullptr);
     EXPECT_TRUE(result == SL_RESULT_SUCCESS);
+    (*pcmCapturerObject_)->Destroy(pcmCapturerObject_);
 }
 
 HWTEST(AudioOpenslesRecorderUnitTest, Audio_Opensles_Capture_CreateAudioRecorder_002, TestSize.Level0)
@@ -430,6 +431,7 @@ HWTEST(AudioOpenslesRecorderUnitTest, Prf_Audio_Opensles_CreateAudioRecorder_001
                                               &audioSink, 0, nullptr, nullptr);
         clock_gettime(CLOCK_REALTIME, &tv2);
         totalTime += tv2.tv_sec * usecTimes + tv2.tv_nsec - (tv1.tv_sec * usecTimes + tv1.tv_nsec);
+        (*pcmCapturerObject_)->Destroy(pcmCapturerObject_);
     }
     int64_t expectTime = 1000000000;
     EXPECT_TRUE(totalTime <= expectTime * performanceTestTimes);
@@ -476,6 +478,7 @@ HWTEST(AudioOpenslesRecorderUnitTest, Audio_Opensles_Capture_SlToOhosChannel_001
     SLresult result = (*engineEngine_)->CreateAudioRecorder(engineEngine_, &pcmCapturerObject_, &audioSource,
         &audioSink, 0, nullptr, nullptr);
     EXPECT_TRUE(result == SL_RESULT_SUCCESS);
+    (*pcmCapturerObject_)->Destroy(pcmCapturerObject_);
 }
 
 HWTEST(AudioOpenslesRecorderUnitTest, Audio_Opensles_Capture_SlToOhosChannel_002, TestSize.Level1)
@@ -518,6 +521,7 @@ HWTEST(AudioOpenslesRecorderUnitTest, Audio_Opensles_Capture_SlToOhosChannel_002
     SLresult result = (*engineEngine_)->CreateAudioRecorder(engineEngine_, &pcmCapturerObject_, &audioSource,
         &audioSink, 0, nullptr, nullptr);
     EXPECT_TRUE(result == SL_RESULT_SUCCESS);
+    (*pcmCapturerObject_)->Destroy(pcmCapturerObject_);
 }
 
 HWTEST(AudioOpenslesRecorderUnitTest, Audio_Opensles_Capture_SlToOhosChannel_003, TestSize.Level1)
@@ -560,6 +564,7 @@ HWTEST(AudioOpenslesRecorderUnitTest, Audio_Opensles_Capture_SlToOhosChannel_003
     SLresult result = (*engineEngine_)->CreateAudioRecorder(engineEngine_, &pcmCapturerObject_, &audioSource,
         &audioSink, 0, nullptr, nullptr);
     EXPECT_TRUE(result == SL_RESULT_SUCCESS);
+    (*pcmCapturerObject_)->Destroy(pcmCapturerObject_);
 }
 
 HWTEST(AudioOpenslesRecorderUnitTest, Audio_Opensles_Capture_SlToOhosChannel_004, TestSize.Level1)
@@ -601,6 +606,7 @@ HWTEST(AudioOpenslesRecorderUnitTest, Audio_Opensles_Capture_SlToOhosChannel_004
     SLresult result = (*engineEngine_)->CreateAudioRecorder(engineEngine_, &pcmCapturerObject_, &audioSource,
         &audioSink, 0, nullptr, nullptr);
     EXPECT_TRUE(result == SL_RESULT_SUCCESS);
+    (*pcmCapturerObject_)->Destroy(pcmCapturerObject_);
 }
 
 HWTEST(AudioOpenslesRecorderUnitTest, Audio_Opensles_Capture_SlToOhosChannel_005, TestSize.Level1)
@@ -644,6 +650,7 @@ HWTEST(AudioOpenslesRecorderUnitTest, Audio_Opensles_Capture_SlToOhosChannel_005
     SLresult result = (*engineEngine_)->CreateAudioRecorder(engineEngine_, &pcmCapturerObject_, &audioSource,
         &audioSink, 0, nullptr, nullptr);
     EXPECT_TRUE(result == SL_RESULT_SUCCESS);
+    (*pcmCapturerObject_)->Destroy(pcmCapturerObject_);
 }
 
 HWTEST(AudioOpenslesRecorderUnitTest, Audio_Opensles_Capture_SlToOhosChannel_006, TestSize.Level1)
@@ -686,6 +693,7 @@ HWTEST(AudioOpenslesRecorderUnitTest, Audio_Opensles_Capture_SlToOhosChannel_006
     SLresult result = (*engineEngine_)->CreateAudioRecorder(engineEngine_, &pcmCapturerObject_, &audioSource,
         &audioSink, 0, nullptr, nullptr);
     EXPECT_TRUE(result == SL_RESULT_SUCCESS);
+    (*pcmCapturerObject_)->Destroy(pcmCapturerObject_);
 }
 
 HWTEST(AudioOpenslesRecorderUnitTest, Audio_Opensles_Capture_SlToOhosChannel_007, TestSize.Level1)
@@ -728,6 +736,7 @@ HWTEST(AudioOpenslesRecorderUnitTest, Audio_Opensles_Capture_SlToOhosChannel_007
     SLresult result = (*engineEngine_)->CreateAudioRecorder(engineEngine_, &pcmCapturerObject_, &audioSource,
         &audioSink, 0, nullptr, nullptr);
     EXPECT_TRUE(result == SL_RESULT_SUCCESS);
+    (*pcmCapturerObject_)->Destroy(pcmCapturerObject_);
 }
 
 HWTEST(AudioOpenslesRecorderUnitTest, Audio_Opensles_Capture_SlToOhosChannel_008, TestSize.Level1)
@@ -769,6 +778,7 @@ HWTEST(AudioOpenslesRecorderUnitTest, Audio_Opensles_Capture_SlToOhosChannel_008
     SLresult result = (*engineEngine_)->CreateAudioRecorder(engineEngine_, &pcmCapturerObject_, &audioSource,
         &audioSink, 0, nullptr, nullptr);
     EXPECT_TRUE(result == SL_RESULT_SUCCESS);
+    (*pcmCapturerObject_)->Destroy(pcmCapturerObject_);
 }
 
 HWTEST(AudioOpenslesRecorderUnitTest, Audio_Opensles_Capture_SlToOhosChannel_009, TestSize.Level1)
@@ -811,6 +821,7 @@ HWTEST(AudioOpenslesRecorderUnitTest, Audio_Opensles_Capture_SlToOhosChannel_009
     SLresult result = (*engineEngine_)->CreateAudioRecorder(engineEngine_, &pcmCapturerObject_, &audioSource,
         &audioSink, 0, nullptr, nullptr);
     EXPECT_TRUE(result == SL_RESULT_SUCCESS);
+    (*pcmCapturerObject_)->Destroy(pcmCapturerObject_);
 }
 
 HWTEST(AudioOpenslesRecorderUnitTest, Audio_Opensles_Capture_SlToOhosChannel_010, TestSize.Level1)
@@ -853,6 +864,7 @@ HWTEST(AudioOpenslesRecorderUnitTest, Audio_Opensles_Capture_SlToOhosChannel_010
     SLresult result = (*engineEngine_)->CreateAudioRecorder(engineEngine_, &pcmCapturerObject_, &audioSource,
         &audioSink, 0, nullptr, nullptr);
     EXPECT_TRUE(result == SL_RESULT_SUCCESS);
+    (*pcmCapturerObject_)->Destroy(pcmCapturerObject_);
 }
 
 HWTEST(AudioOpenslesRecorderUnitTest, Audio_Opensles_Capture_SlToOhosChannel_011, TestSize.Level1)
@@ -895,6 +907,7 @@ HWTEST(AudioOpenslesRecorderUnitTest, Audio_Opensles_Capture_SlToOhosChannel_011
     SLresult result = (*engineEngine_)->CreateAudioRecorder(engineEngine_, &pcmCapturerObject_, &audioSource,
         &audioSink, 0, nullptr, nullptr);
     EXPECT_TRUE(result == SL_RESULT_SUCCESS);
+    (*pcmCapturerObject_)->Destroy(pcmCapturerObject_);
 }
 
 HWTEST(AudioOpenslesRecorderUnitTest, Audio_Opensles_Capture_SlToOhosChannel_012, TestSize.Level1)
@@ -936,6 +949,7 @@ HWTEST(AudioOpenslesRecorderUnitTest, Audio_Opensles_Capture_SlToOhosChannel_012
     SLresult result = (*engineEngine_)->CreateAudioRecorder(engineEngine_, &pcmCapturerObject_, &audioSource,
         &audioSink, 0, nullptr, nullptr);
     EXPECT_TRUE(result == SL_RESULT_SUCCESS);
+    (*pcmCapturerObject_)->Destroy(pcmCapturerObject_);
 }
 } // namespace AudioStandard
 } // namespace OHOS

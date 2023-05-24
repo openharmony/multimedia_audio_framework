@@ -158,6 +158,7 @@ HWTEST(AudioOpenslesPlayerUnitTest, Audio_Opensles_CreateAudioPlayer_001, TestSi
     SLresult result = (*engineEngine_)->CreateAudioPlayer(engineEngine_, &pcmPlayerObject_,
         &slSource, &slSink, 0, nullptr, nullptr);
     EXPECT_TRUE(result == SL_RESULT_SUCCESS);
+    (*pcmPlayerObject_)->Destroy(pcmPlayerObject_);
 }
 
 HWTEST(AudioOpenslesPlayerUnitTest, Audio_Opensles_CreateAudioPlayerAdapter_001, TestSize.Level1)
@@ -190,6 +191,7 @@ HWTEST(AudioOpenslesPlayerUnitTest, Audio_Opensles_CreateAudioPlayerAdapter_001,
     SLresult result = (*engineEngine_)->CreateAudioPlayer(engineEngine_, &pcmPlayerObject_, &slSource,
         &slSink, 0, nullptr, nullptr);
     EXPECT_TRUE(result == SL_RESULT_SUCCESS);
+    (*pcmPlayerObject_)->Destroy(pcmPlayerObject_);
 }
 
 HWTEST(AudioOpenslesPlayerUnitTest, Audio_Opensles_CreateAudioPlayerAdapter_002, TestSize.Level1)
@@ -222,6 +224,7 @@ HWTEST(AudioOpenslesPlayerUnitTest, Audio_Opensles_CreateAudioPlayerAdapter_002,
     SLresult result = (*engineEngine_)->CreateAudioPlayer(engineEngine_, &pcmPlayerObject_, &slSource,
         &slSink, 0, nullptr, nullptr);
     EXPECT_TRUE(result == SL_RESULT_SUCCESS);
+    (*pcmPlayerObject_)->Destroy(pcmPlayerObject_);
 }
 
 HWTEST(AudioOpenslesPlayerUnitTest, Audio_Opensles_CreateAudioPlayerAdapter_003, TestSize.Level1)
@@ -253,6 +256,7 @@ HWTEST(AudioOpenslesPlayerUnitTest, Audio_Opensles_CreateAudioPlayerAdapter_003,
     SLresult result = (*engineEngine_)->CreateAudioPlayer(engineEngine_, &pcmPlayerObject_, &slSource,
         &slSink, 0, nullptr, nullptr);
     EXPECT_TRUE(result == SL_RESULT_SUCCESS);
+    (*pcmPlayerObject_)->Destroy(pcmPlayerObject_);
 }
 
 HWTEST(AudioOpenslesPlayerUnitTest, Audio_Opensles_CreateAudioPlayerAdapter_004, TestSize.Level1)
@@ -284,6 +288,7 @@ HWTEST(AudioOpenslesPlayerUnitTest, Audio_Opensles_CreateAudioPlayerAdapter_004,
     SLresult result = (*engineEngine_)->CreateAudioPlayer(engineEngine_, &pcmPlayerObject_, &slSource,
         &slSink, 0, nullptr, nullptr);
     EXPECT_TRUE(result == SL_RESULT_SUCCESS);
+    (*pcmPlayerObject_)->Destroy(pcmPlayerObject_);
 }
 
 HWTEST(AudioOpenslesPlayerUnitTest, Audio_Opensles_CreateAudioPlayerAdapter_005, TestSize.Level1)
@@ -314,6 +319,7 @@ HWTEST(AudioOpenslesPlayerUnitTest, Audio_Opensles_CreateAudioPlayerAdapter_005,
     SLresult result = (*engineEngine_)->CreateAudioPlayer(engineEngine_, &pcmPlayerObject_, &slSource,
         &slSink, 0, nullptr, nullptr);
     EXPECT_TRUE(result == SL_RESULT_SUCCESS);
+    (*pcmPlayerObject_)->Destroy(pcmPlayerObject_);
 }
 
 HWTEST(AudioOpenslesPlayerUnitTest, Audio_Opensles_CreateAudioPlayerAdapter_006, TestSize.Level1)
@@ -344,6 +350,7 @@ HWTEST(AudioOpenslesPlayerUnitTest, Audio_Opensles_CreateAudioPlayerAdapter_006,
     SLresult result = (*engineEngine_)->CreateAudioPlayer(engineEngine_, &pcmPlayerObject_, &slSource,
         &slSink, 0, nullptr, nullptr);
     EXPECT_TRUE(result == SL_RESULT_SUCCESS);
+    (*pcmPlayerObject_)->Destroy(pcmPlayerObject_);
 }
 
 HWTEST(AudioOpenslesPlayerUnitTest, Audio_Opensles_CreateAudioPlayerAdapter_007, TestSize.Level1)
@@ -374,6 +381,7 @@ HWTEST(AudioOpenslesPlayerUnitTest, Audio_Opensles_CreateAudioPlayerAdapter_007,
     SLresult result = (*engineEngine_)->CreateAudioPlayer(engineEngine_, &pcmPlayerObject_, &slSource,
         &slSink, 0, nullptr, nullptr);
     EXPECT_TRUE(result == SL_RESULT_SUCCESS);
+    (*pcmPlayerObject_)->Destroy(pcmPlayerObject_);
 }
 
 HWTEST(AudioOpenslesPlayerUnitTest, Audio_Opensles_CreateAudioPlayerAdapter_008, TestSize.Level1)
@@ -404,6 +412,7 @@ HWTEST(AudioOpenslesPlayerUnitTest, Audio_Opensles_CreateAudioPlayerAdapter_008,
     SLresult result = (*engineEngine_)->CreateAudioPlayer(engineEngine_, &pcmPlayerObject_, &slSource,
         &slSink, 0, nullptr, nullptr);
     EXPECT_TRUE(result == SL_RESULT_SUCCESS);
+    (*pcmPlayerObject_)->Destroy(pcmPlayerObject_);
 }
 
 HWTEST(AudioOpenslesPlayerUnitTest, Audio_Opensles_CreateAudioPlayerAdapter_009, TestSize.Level1)
@@ -434,6 +443,7 @@ HWTEST(AudioOpenslesPlayerUnitTest, Audio_Opensles_CreateAudioPlayerAdapter_009,
     SLresult result = (*engineEngine_)->CreateAudioPlayer(engineEngine_, &pcmPlayerObject_, &slSource,
         &slSink, 0, nullptr, nullptr);
     EXPECT_TRUE(result == SL_RESULT_SUCCESS);
+    (*pcmPlayerObject_)->Destroy(pcmPlayerObject_);
 }
 
 HWTEST(AudioOpenslesPlayerUnitTest, Audio_Opensles_CreateAudioPlayerAdapter_010, TestSize.Level1)
@@ -464,6 +474,7 @@ HWTEST(AudioOpenslesPlayerUnitTest, Audio_Opensles_CreateAudioPlayerAdapter_010,
     SLresult result = (*engineEngine_)->CreateAudioPlayer(engineEngine_, &pcmPlayerObject_, &slSource,
         &slSink, 0, nullptr, nullptr);
     EXPECT_TRUE(result == SL_RESULT_SUCCESS);
+    (*pcmPlayerObject_)->Destroy(pcmPlayerObject_);
 }
 
 HWTEST(AudioOpenslesPlayerUnitTest, Audio_Opensles_CreateAudioPlayerAdapter_011, TestSize.Level1)
@@ -494,6 +505,7 @@ HWTEST(AudioOpenslesPlayerUnitTest, Audio_Opensles_CreateAudioPlayerAdapter_011,
     SLresult result = (*engineEngine_)->CreateAudioPlayer(engineEngine_, &pcmPlayerObject_, &slSource,
         &slSink, 0, nullptr, nullptr);
     EXPECT_TRUE(result == SL_RESULT_SUCCESS);
+    (*pcmPlayerObject_)->Destroy(pcmPlayerObject_);
 }
 
 HWTEST(AudioOpenslesPlayerUnitTest, Audio_Opensles_SetPlayStateAdapter_014, TestSize.Level1)
@@ -592,6 +604,7 @@ HWTEST(AudioOpenslesPlayerUnitTest, Audio_Opensles_CreateAudioPlayer_004, TestSi
     SLresult result = (*engineEngine_)->CreateAudioPlayer(engineEngine_, nullptr,
         &slSource, &slSink, 0, nullptr, nullptr);
     EXPECT_TRUE(result == SL_RESULT_PARAMETER_INVALID);
+    (*pcmPlayerObject_)->Destroy(pcmPlayerObject_);
 }
 
 HWTEST(AudioOpenslesPlayerUnitTest, Audio_Opensles_GetInterface_003, TestSize.Level1)
@@ -1003,6 +1016,7 @@ HWTEST(AudioOpenslesPlayerUnitTest, Prf_Audio_Opensles_CreateAudioPlayer_001, Te
         (*engineEngine_)->CreateAudioPlayer(engineEngine_, &pcmPlayerObject_, &slSource, &slSink, 0, nullptr, nullptr);
         clock_gettime(CLOCK_REALTIME, &tv2);
         totalTime += tv2.tv_sec * USEC_TIMES + tv2.tv_nsec - (tv1.tv_sec * USEC_TIMES + tv1.tv_nsec);
+        (*pcmPlayerObject_)->Destroy(pcmPlayerObject_);
     }
     EXPECT_TRUE(totalTime <= EXPECT_TIME * PERFORMANCE_TEST_TIME);
 }
