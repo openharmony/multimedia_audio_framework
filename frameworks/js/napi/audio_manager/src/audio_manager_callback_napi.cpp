@@ -133,7 +133,7 @@ void AudioManagerCallbackNapi::SaveAudioManagerDeviceChangeCbRef(DeviceFlag devi
         "SaveCallbackReference: creating reference for callback fail");
     std::shared_ptr<AutoRef> cb = std::make_shared<AutoRef>(env_, callbackRef);
     audioManagerDeviceChangeCbList_.push_back({cb, deviceFlag});
-    AUDIO_INFO_LOG("Save manager device change callback ref success, deviceFlag [%{public}d], list size [%{public}d]",
+    AUDIO_INFO_LOG("Save manager device change callback ref success, deviceFlag [%{public}d], list size [%{public}zu]",
         deviceFlag, audioManagerDeviceChangeCbList_.size());
 }
 
@@ -191,7 +191,7 @@ void AudioManagerCallbackNapi::SaveRoutingManagerDeviceChangeCbRef(DeviceFlag de
     std::shared_ptr<AutoRef> cb = std::make_shared<AutoRef>(env_, callbackRef);
 
     routingManagerDeviceChangeCbList_.push_back({cb, deviceFlag});
-    AUDIO_INFO_LOG("Save routing device change callback ref success, deviceFlag [%{public}d], list size [%{public}d]",
+    AUDIO_INFO_LOG("Save routing device change callback ref success, deviceFlag [%{public}d], list size [%{public}zu]",
         deviceFlag, routingManagerDeviceChangeCbList_.size());
 }
 

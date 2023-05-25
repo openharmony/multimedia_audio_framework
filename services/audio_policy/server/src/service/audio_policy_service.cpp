@@ -1845,7 +1845,7 @@ int32_t AudioPolicyService::SetDeviceChangeCallback(const int32_t clientId, cons
     if (callback != nullptr) {
         deviceChangeCbsMap_[{clientId, flag}] = callback;
     }
-    AUDIO_INFO_LOG("SetDeviceChangeCallback:: deviceChangeCbsMap_ size: %{public}d", deviceChangeCbsMap_.size());
+    AUDIO_INFO_LOG("SetDeviceChangeCallback:: deviceChangeCbsMap_ size: %{public}zu", deviceChangeCbsMap_.size());
     return SUCCESS;
 }
 
@@ -1879,7 +1879,7 @@ int32_t AudioPolicyService::UnsetDeviceChangeCallback(const int32_t clientId, De
         }
     }
 
-    AUDIO_INFO_LOG("UnsetDeviceChangeCallback:: deviceChangeCbsMap_ size: %{public}d", deviceChangeCbsMap_.size());
+    AUDIO_INFO_LOG("UnsetDeviceChangeCallback:: deviceChangeCbsMap_ size: %{public}zu", deviceChangeCbsMap_.size());
     return SUCCESS;
 }
 

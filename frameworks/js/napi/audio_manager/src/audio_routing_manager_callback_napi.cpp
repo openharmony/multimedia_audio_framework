@@ -51,7 +51,7 @@ void AudioPreferOutputDeviceChangeCallbackNapi::SaveCallbackReference(AudioStrea
         "SaveCallbackReference: creating reference for callback fail");
     std::shared_ptr<AutoRef> cb = std::make_shared<AutoRef>(env_, callbackRef);
     preferOutputDeviceCbList_.push_back({cb, streamType});
-    AUDIO_INFO_LOG("Save callback reference success, prefer ouput device callback list size [%{public}d]",
+    AUDIO_INFO_LOG("Save callback reference success, prefer ouput device callback list size [%{public}zu]",
         preferOutputDeviceCbList_.size());
 }
 
@@ -151,7 +151,7 @@ void AudioPreferOutputDeviceChangeCallbackNapi::OnPreferOutputDeviceUpdated(
 {
     std::lock_guard<std::mutex> lock(mutex_);
     CHECK_AND_RETURN_LOG(preferOutputDeviceCbList_.size() > 0, "Cannot find the reference of prefer device callback");
-    AUDIO_DEBUG_LOG("OnPreferOutputDeviceUpdated: Cb list size [%{public}d]", preferOutputDeviceCbList_.size());
+    AUDIO_DEBUG_LOG("OnPreferOutputDeviceUpdated: Cb list size [%{public}zu]", preferOutputDeviceCbList_.size());
 
     for (auto it = preferOutputDeviceCbList_.begin(); it != preferOutputDeviceCbList_.end(); it++) {
         std::unique_ptr<AudioActiveOutputDeviceChangeJsCallback> cb =
