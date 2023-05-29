@@ -1854,8 +1854,7 @@ int32_t AudioPolicyService::UnsetDeviceChangeCallback(const int32_t clientId, De
     AUDIO_INFO_LOG("Entered %{public}s", __func__);
 
     if (deviceChangeCbsMap_.erase({clientId, flag}) == 0) {
-        AUDIO_ERR_LOG("client not present in %{public}s", __func__);
-        return ERR_INVALID_OPERATION;
+        AUDIO_INFO_LOG("client not present in %{public}s", __func__);
     }
     // for audio manager napi remove all device change callback
     if (flag == DeviceFlag::ALL_DEVICES_FLAG) {
