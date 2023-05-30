@@ -59,7 +59,12 @@ private:
         const std::string& cbName, AudioRoutingManagerNapi* routingMgrNapi);
     static void RegisterCallback(napi_env env, napi_value jsThis, size_t argc, napi_value* args,
         const std::string& cbName);
-    static napi_value UnregisterCallback(napi_env env, napi_value jsThis, const std::string& callbackName);
+    static void UnregisterDeviceChangeCallback(napi_env env, napi_value callback,
+        AudioRoutingManagerNapi* routingMgrNapi);
+    static void UnegisterPreferOutputDeviceChangeCallback(napi_env env, napi_value callback,
+        AudioRoutingManagerNapi* routingMgrNapi);
+    static napi_value UnregisterCallback(napi_env env, napi_value jsThis, const std::string& callbackName,
+        napi_value callback);
     static napi_value On(napi_env env, napi_callback_info info);
     static napi_value Off(napi_env env, napi_callback_info info);
 
@@ -70,7 +75,6 @@ private:
     std::shared_ptr<AudioManagerDeviceChangeCallback> deviceChangeCallbackNapi_ = nullptr;
     std::shared_ptr<AudioManagerMicStateChangeCallback> micStateChangeCallbackNapi_ = nullptr;
     std::shared_ptr<AudioPreferOutputDeviceChangeCallback> preferOutputDeviceCallbackNapi_ = nullptr;
-    std::shared_ptr<AudioPreferOutputDeviceChangeCallback> preferOutputDeviceByFilterCallbackNapi_ = nullptr;
 
     napi_env env_;
 };

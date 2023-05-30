@@ -21,6 +21,7 @@
 #include "audio_routing_manager.h"
 #include "napi/native_api.h"
 #include "napi/native_node_api.h"
+#include <algorithm>
 
 namespace {
     const std::string PREFER_OUTPUT_DEVICE_CALLBACK_NAME = "preferOutputDeviceChangeForRendererInfo";
@@ -33,8 +34,10 @@ class AudioPreferOutputDeviceChangeCallbackNapi : public AudioPreferOutputDevice
 public:
     explicit AudioPreferOutputDeviceChangeCallbackNapi(napi_env env);
     virtual ~AudioPreferOutputDeviceChangeCallbackNapi();
-    void SaveCallbackReference(const std::string &callbackName, napi_value callback);
+    void SaveCallbackReference(AudioStreamType streamType, napi_value callback);
     void OnPreferOutputDeviceUpdated(const std::vector<sptr<AudioDeviceDescriptor>> &desc) override;
+    void RemoveCallbackReference(napi_env env, napi_value args);
+    void RemoveAllCallbacks();
 
 private:
     struct AudioActiveOutputDeviceChangeJsCallback {
@@ -48,6 +51,7 @@ private:
     std::mutex mutex_;
     napi_env env_ = nullptr;
     std::shared_ptr<AutoRef> preferOutputDeviceCallback_ = nullptr;
+    std::list<std::pair<std::shared_ptr<AutoRef>, AudioStreamType>> preferOutputDeviceCbList_;
 };
 }  // namespace AudioStandard
 }  // namespace OHOS

@@ -525,11 +525,11 @@ int32_t AudioSystemManager::SetDeviceChangeCallback(const DeviceFlag flag,
     return AudioPolicyManager::GetInstance().SetDeviceChangeCallback(clientId, flag, callback);
 }
 
-int32_t AudioSystemManager::UnsetDeviceChangeCallback()
+int32_t AudioSystemManager::UnsetDeviceChangeCallback(DeviceFlag flag)
 {
     AUDIO_INFO_LOG("Entered AudioSystemManager::%{public}s", __func__);
     int32_t clientId = static_cast<int32_t>(GetCallingPid());
-    return AudioPolicyManager::GetInstance().UnsetDeviceChangeCallback(clientId);
+    return AudioPolicyManager::GetInstance().UnsetDeviceChangeCallback(clientId, flag);
 }
 
 int32_t AudioSystemManager::SetRingerModeCallback(const int32_t clientId,

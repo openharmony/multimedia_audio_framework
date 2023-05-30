@@ -813,7 +813,7 @@ int32_t AudioPolicyProxy::SetDeviceChangeCallback(const int32_t clientId, const 
     return reply.ReadInt32();
 }
 
-int32_t AudioPolicyProxy::UnsetDeviceChangeCallback(const int32_t clientId)
+int32_t AudioPolicyProxy::UnsetDeviceChangeCallback(const int32_t clientId, DeviceFlag flag)
 {
     MessageParcel data;
     MessageParcel reply;
@@ -824,6 +824,7 @@ int32_t AudioPolicyProxy::UnsetDeviceChangeCallback(const int32_t clientId)
         return -1;
     }
     data.WriteInt32(clientId);
+    data.WriteInt32(flag);
     int error = Remote()->SendRequest(UNSET_DEVICE_CHANGE_CALLBACK, data, reply, option);
     if (error != ERR_NONE) {
         AUDIO_ERR_LOG("AudioPolicyProxy: unset device change callback failed, error: %{public}d", error);

@@ -34,22 +34,60 @@ AudioPreferOutputDeviceChangeCallbackNapi::~AudioPreferOutputDeviceChangeCallbac
     AUDIO_DEBUG_LOG("AudioPreferOutputDeviceChangeCallbackNapi: instance destroy");
 }
 
-void AudioPreferOutputDeviceChangeCallbackNapi::SaveCallbackReference(const std::string &callbackName, napi_value args)
+void AudioPreferOutputDeviceChangeCallbackNapi::SaveCallbackReference(AudioStreamType streamType, napi_value callback)
 {
     std::lock_guard<std::mutex> lock(mutex_);
-    napi_ref callback = nullptr;
+    napi_ref callbackRef = nullptr;
     const int32_t refCount = 1;
-    napi_status status = napi_create_reference(env_, args, refCount, &callback);
-    CHECK_AND_RETURN_LOG(status == napi_ok && callback != nullptr,
-        "AudioPreferOutputDeviceChangeCallbackNapi: creating reference for callback fail");
 
-    std::shared_ptr<AutoRef> cb = std::make_shared<AutoRef>(env_, callback);
-    if (callbackName == PREFER_OUTPUT_DEVICE_CALLBACK_NAME) {
-        preferOutputDeviceCallback_ = cb;
-    } else {
-        AUDIO_ERR_LOG("AudioPreferOutputDeviceChangeCallbackNapi: Unknown callback type: %{public}s",
-            callbackName.c_str());
+    bool isSameCallback = true;
+    for (auto it = preferOutputDeviceCbList_.begin(); it != preferOutputDeviceCbList_.end(); ++it) {
+        isSameCallback = AudioCommonNapi::IsSameCallback(env_, callback, (*it).first->cb_);
+        CHECK_AND_RETURN_LOG(!isSameCallback, "SaveCallbackReference: has same callback, nothing to do");
     }
+
+    napi_status status = napi_create_reference(env_, callback, refCount, &callbackRef);
+    CHECK_AND_RETURN_LOG(status == napi_ok && callback != nullptr,
+        "SaveCallbackReference: creating reference for callback fail");
+    std::shared_ptr<AutoRef> cb = std::make_shared<AutoRef>(env_, callbackRef);
+    preferOutputDeviceCbList_.push_back({cb, streamType});
+    AUDIO_INFO_LOG("Save callback reference success, prefer ouput device callback list size [%{public}zu]",
+        preferOutputDeviceCbList_.size());
+}
+
+void AudioPreferOutputDeviceChangeCallbackNapi::RemoveCallbackReference(napi_env env, napi_value callback)
+{
+    std::lock_guard<std::mutex> lock(mutex_);
+    bool isEquals = false;
+    napi_value copyValue = nullptr;
+
+    if (callback == nullptr) {
+        AUDIO_INFO_LOG("RemoveCallbackReference: js callback is nullptr, remove all callback reference");
+        RemoveAllCallbacks();
+        return;
+    }
+    for (auto it = preferOutputDeviceCbList_.begin(); it != preferOutputDeviceCbList_.end(); ++it) {
+        bool isSameCallback = AudioCommonNapi::IsSameCallback(env_, callback, (*it).first->cb_);
+        if (isSameCallback) {
+            AUDIO_INFO_LOG("RemoveCallbackReference: find js callback, delete it");
+            napi_status status = napi_delete_reference(env, (*it).first->cb_);
+            (*it).first->cb_ = nullptr;
+            CHECK_AND_RETURN_LOG(status == napi_ok, "RemoveCallbackReference: delete reference for callback fail");
+            preferOutputDeviceCbList_.erase(it);
+            return;
+        }
+    }
+    AUDIO_INFO_LOG("RemoveCallbackReference: js callback no find");
+}
+
+void AudioPreferOutputDeviceChangeCallbackNapi::RemoveAllCallbacks()
+{
+    for (auto it = preferOutputDeviceCbList_.begin(); it != preferOutputDeviceCbList_.end(); ++it) {
+        napi_status ret = napi_delete_reference(env_, (*it).first->cb_);
+        (*it).first->cb_ = nullptr;
+    }
+    preferOutputDeviceCbList_.clear();
+    AUDIO_INFO_LOG("RemoveAllCallbacks: remove all js callbacks success");
 }
 
 static void SetValueInt32(const napi_env& env, const std::string& fieldStr, const int intValue, napi_value& result)
@@ -76,20 +114,14 @@ static void NativeDeviceDescToJsObj(const napi_env& env, napi_value& jsObj,
     napi_create_array_with_length(env, size, &jsObj);
     for (size_t i = 0; i < size; i++) {
         (void)napi_create_object(env, &valueParam);
-        SetValueInt32(env, "deviceRole", static_cast<int32_t>(
-            desc[i]->deviceRole_), valueParam);
-        SetValueInt32(env, "deviceType", static_cast<int32_t>(
-            desc[i]->deviceType_), valueParam);
-        SetValueInt32(env, "id", static_cast<int32_t>(
-            desc[i]->deviceId_), valueParam);
+        SetValueInt32(env, "deviceRole", static_cast<int32_t>(desc[i]->deviceRole_), valueParam);
+        SetValueInt32(env, "deviceType", static_cast<int32_t>(desc[i]->deviceType_), valueParam);
+        SetValueInt32(env, "id", static_cast<int32_t>(desc[i]->deviceId_), valueParam);
         SetValueString(env, "name", desc[i]->deviceName_, valueParam);
         SetValueString(env, "address", desc[i]->macAddress_, valueParam);
-        SetValueString(env, "networkId", static_cast<std::string>(
-            desc[i]->networkId_), valueParam);
-        SetValueInt32(env, "interruptGroupId", static_cast<int32_t>(
-            desc[i]->interruptGroupId_), valueParam);
-        SetValueInt32(env, "volumeGroupId", static_cast<int32_t>(
-            desc[i]->volumeGroupId_), valueParam);
+        SetValueString(env, "networkId", static_cast<std::string>(desc[i]->networkId_), valueParam);
+        SetValueInt32(env, "interruptGroupId", static_cast<int32_t>(desc[i]->interruptGroupId_), valueParam);
+        SetValueInt32(env, "volumeGroupId", static_cast<int32_t>(desc[i]->volumeGroupId_), valueParam);
 
         napi_value value = nullptr;
         napi_value sampleRates;
@@ -118,14 +150,20 @@ void AudioPreferOutputDeviceChangeCallbackNapi::OnPreferOutputDeviceUpdated(
     const std::vector<sptr<AudioDeviceDescriptor>> &desc)
 {
     std::lock_guard<std::mutex> lock(mutex_);
-    CHECK_AND_RETURN_LOG(preferOutputDeviceCallback_ != nullptr, "Cannot find the reference of ringer mode callback");
-    std::unique_ptr<AudioActiveOutputDeviceChangeJsCallback> cb =
-        std::make_unique<AudioActiveOutputDeviceChangeJsCallback>();
-    CHECK_AND_RETURN_LOG(cb != nullptr, "No memory");
-    cb->callback = preferOutputDeviceCallback_;
-    cb->callbackName = PREFER_OUTPUT_DEVICE_CALLBACK_NAME;
-    cb->desc = desc;
-    return OnJsCallbackActiveOutputDeviceChange(cb);
+    CHECK_AND_RETURN_LOG(preferOutputDeviceCbList_.size() > 0, "Cannot find the reference of prefer device callback");
+    AUDIO_DEBUG_LOG("OnPreferOutputDeviceUpdated: Cb list size [%{public}zu]", preferOutputDeviceCbList_.size());
+
+    for (auto it = preferOutputDeviceCbList_.begin(); it != preferOutputDeviceCbList_.end(); it++) {
+        std::unique_ptr<AudioActiveOutputDeviceChangeJsCallback> cb =
+            std::make_unique<AudioActiveOutputDeviceChangeJsCallback>();
+        CHECK_AND_RETURN_LOG(cb != nullptr, "No memory");
+        
+        cb->callback = (*it).first;
+        cb->callbackName = PREFER_OUTPUT_DEVICE_CALLBACK_NAME;
+        cb->desc = desc;
+        OnJsCallbackActiveOutputDeviceChange(cb);
+    }
+    return;
 }
 
 void AudioPreferOutputDeviceChangeCallbackNapi::OnJsCallbackActiveOutputDeviceChange(

@@ -478,7 +478,8 @@ void AudioPolicyManagerStub::SetDeviceChangeCallbackInternal(MessageParcel &data
 void AudioPolicyManagerStub::UnsetDeviceChangeCallbackInternal(MessageParcel &data, MessageParcel &reply)
 {
     int32_t clientId = data.ReadInt32();
-    int32_t result = UnsetDeviceChangeCallback(clientId);
+    DeviceFlag flag = static_cast<DeviceFlag>(data.ReadInt32());
+    int32_t result = UnsetDeviceChangeCallback(clientId, flag);
     reply.WriteInt32(result);
 }
 

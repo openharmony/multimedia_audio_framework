@@ -177,5 +177,18 @@ bool AudioCommonNapi::IsLegalInputArgumentRingMode(int32_t ringerMode)
     return result;
 }
 
+bool AudioCommonNapi::IsSameCallback(napi_env env, napi_value callback, napi_ref refCallback)
+{
+    bool isEquals = false;
+    napi_value copyValue = nullptr;
+
+    napi_get_reference_value(env, refCallback, &copyValue);
+    if (napi_strict_equals(env, copyValue, callback, &isEquals) != napi_ok) {
+        AUDIO_ERR_LOG("IsSameCallback: get napi_strict_equals failed");
+        return false;
+    }
+
+    return isEquals;
+}
 }  // namespace AudioStandard
 }  // namespace OHOS

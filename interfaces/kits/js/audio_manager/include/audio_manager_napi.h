@@ -105,6 +105,7 @@ private:
     static napi_value GetRoutingManager(napi_env env, napi_callback_info info);
     static napi_value GetVolumeManager(napi_env env, napi_callback_info info);
     static napi_value GetInterruptManager(napi_env env, napi_callback_info info);
+    static void UnregisterDeviceChangeCallback(napi_env env, napi_value callback, AudioManagerNapi* audioMgrNapi);
     static void AddPropName(std::string& propName, napi_status& status, napi_env env, napi_value& result);
 
     template<typename T> static napi_value CreatePropertyBase(napi_env env, T& t_map, napi_ref ref);
