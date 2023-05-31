@@ -45,7 +45,9 @@ public:
             isTimerStarted = !isTimerStarted;
             timerCtrl.notify_one();
         }
-        timerLoop.join();
+        if (timerLoop.joinable()) {
+            timerLoop.join();
+        }
     }
 
     void StartTimer(uint32_t duration)
