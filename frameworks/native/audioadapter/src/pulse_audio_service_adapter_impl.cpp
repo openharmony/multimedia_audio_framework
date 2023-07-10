@@ -135,6 +135,8 @@ Fail:
 
 uint32_t PulseAudioServiceAdapterImpl::OpenAudioPort(string audioPortName, string moduleArgs)
 {
+    lock_guard<mutex> lock(mMutex);
+
     unique_ptr<UserData> userData = make_unique<UserData>();
     userData->thiz = this;
 
@@ -170,6 +172,8 @@ uint32_t PulseAudioServiceAdapterImpl::OpenAudioPort(string audioPortName, strin
 
 int32_t PulseAudioServiceAdapterImpl::CloseAudioPort(int32_t audioHandleIndex)
 {
+    lock_guard<mutex> lock(mMutex);
+
     pa_threaded_mainloop_lock(mMainLoop);
     if (mContext == nullptr) {
         AUDIO_ERR_LOG("[CloseAudioPort] mContext is nullptr");
