@@ -69,7 +69,7 @@ public:
     AudioCapturerPrivate(AudioStreamType audioStreamType, const AppInfo &appInfo, bool createStream = true);
     virtual ~AudioCapturerPrivate();
     bool isChannelChange_ = false;
-    int32_t InitPlaybackCapturer(int32_t type, std::vector<CaptureFilterOptions> filterOptions);
+    int32_t InitPlaybackCapturer(int32_t type, const CaptureFilterOptions &filterOptions);
 
 private:
     std::shared_ptr<AudioStreamCallback> audioStreamCallback_ = nullptr;

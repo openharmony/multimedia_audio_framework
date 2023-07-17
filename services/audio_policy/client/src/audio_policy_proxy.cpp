@@ -2144,7 +2144,7 @@ int32_t AudioPolicyProxy::QueryEffectSceneMode(SupportedEffectConfig &supportedE
     return 0;
 }
 
-int32_t AudioPolicyProxy::SetPlaybackCapturerFilterInfos(std::vector<CaptureFilterOptions> filterOptions,
+int32_t AudioPolicyProxy::SetPlaybackCapturerFilterInfos(const CaptureFilterOptions &filterOptions,
     uint32_t appTokenId, int32_t appUid, bool privacyFlag, AudioPermissionState state)
 {
     MessageParcel data;
@@ -2155,10 +2155,10 @@ int32_t AudioPolicyProxy::SetPlaybackCapturerFilterInfos(std::vector<CaptureFilt
         AUDIO_ERR_LOG(" SetPlaybackCapturerFilterInfos WriteInterfaceToken failed");
         return ERROR;
     }
-    size_t ss = filterOptions.size();
+    size_t ss = filterOptions.usages.size();
     data.WriteInt32(ss);
     for (size_t i = 0; i < ss; i++) {
-        data.WriteInt32(filterOptions[i].usage);
+        data.WriteInt32(filterOptions.usages[i]);
     }
     data.WriteUint32(appTokenId);
     data.WriteInt32(appUid);

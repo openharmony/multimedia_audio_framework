@@ -733,11 +733,11 @@ enum AudioScene {
 };
 
 struct CaptureFilterOptions {
-    StreamUsage usage;
+    std::vector<StreamUsage> usages;
 };
 
 struct AudioPlaybackCaptureConfig {
-    std::vector<CaptureFilterOptions> filterOptions;
+    CaptureFilterOptions filterOptions;
 };
 
 struct AudioCapturerOptions {

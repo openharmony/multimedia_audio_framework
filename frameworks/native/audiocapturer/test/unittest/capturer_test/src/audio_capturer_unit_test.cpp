@@ -74,6 +74,17 @@ void AudioCapturerUnitTest::InitializeCapturerOptions(AudioCapturerOptions &capt
     return;
 }
 
+void AudioCapturerUnitTest::InitializePlaybackCapturerOptions(AudioCapturerOptions &capturerOptions)
+{
+    capturerOptions.streamInfo.samplingRate = AudioSamplingRate::SAMPLE_RATE_48000;
+    capturerOptions.streamInfo.encoding = AudioEncodingType::ENCODING_PCM;
+    capturerOptions.streamInfo.format = AudioSampleFormat::SAMPLE_S32LE;
+    capturerOptions.streamInfo.channels = AudioChannel::STEREO;
+    capturerOptions.capturerInfo.sourceType = SourceType::SOURCE_TYPE_PLAYBACK_CAPTURE;
+    capturerOptions.capturerInfo.capturerFlags = CAPTURER_FLAG;
+    return;
+}
+
 void StartCaptureThread(AudioCapturer *audioCapturer, const string filePath)
 {
     int32_t ret = -1;
@@ -563,19 +574,11 @@ HWTEST(AudioCapturerUnitTest, Audio_Capturer_Create_020, TestSize.Level0)
 HWTEST(AudioCapturerUnitTest, Audio_Capturer_Create_021, TestSize.Level0)
 {
     AudioCapturerOptions capturerOptions;
-    capturerOptions.streamInfo.samplingRate = AudioSamplingRate::SAMPLE_RATE_48000;
-    capturerOptions.streamInfo.encoding = AudioEncodingType::ENCODING_PCM;
-    capturerOptions.streamInfo.format = AudioSampleFormat::SAMPLE_S32LE;
-    capturerOptions.streamInfo.channels = AudioChannel::STEREO;
-    capturerOptions.capturerInfo.sourceType = SourceType::SOURCE_TYPE_PLAYBACK_CAPTURE;
-    capturerOptions.capturerInfo.capturerFlags = CAPTURER_FLAG;
+    AudioCapturerUnitTest::InitializePlaybackCapturerOptions(capturerOptions);
 
-    vector<CaptureFilterOptions> filterOptions = {};
-    CaptureFilterOptions filterOption;
-    filterOption.usage = StreamUsage::STREAM_USAGE_MEDIA;
-    filterOptions.push_back(filterOption);
-    filterOption.usage = StreamUsage::STREAM_USAGE_VOICE_COMMUNICATION;
-    filterOptions.push_back(filterOption);
+    CaptureFilterOptions filterOptions;
+    filterOptions.usages.emplace_back(StreamUsage::STREAM_USAGE_MEDIA);
+    filterOptions.usages.emplace_back(StreamUsage::STREAM_USAGE_ALARM);
     capturerOptions.playbackCaptureConfig.filterOptions = filterOptions;
 
     unique_ptr<AudioCapturer> audioCapturer = AudioCapturer::Create(capturerOptions);
@@ -1613,12 +1616,8 @@ HWTEST(AudioCapturerUnitTest, Audio_Capturer_Read_008, TestSize.Level1)
     int32_t ret = -1;
     bool isBlockingRead = true;
     AudioCapturerOptions capturerOptions;
-    capturerOptions.streamInfo.samplingRate = AudioSamplingRate::SAMPLE_RATE_48000;
-    capturerOptions.streamInfo.encoding = AudioEncodingType::ENCODING_PCM;
-    capturerOptions.streamInfo.format = AudioSampleFormat::SAMPLE_S32LE;
-    capturerOptions.streamInfo.channels = AudioChannel::STEREO;
-    capturerOptions.capturerInfo.sourceType = SourceType::SOURCE_TYPE_PLAYBACK_CAPTURE;
-    capturerOptions.capturerInfo.capturerFlags = CAPTURER_FLAG;
+    AudioCapturerUnitTest::InitializePlaybackCapturerOptions(capturerOptions);
+    capturerOptions.playbackCaptureConfig.filterOptions.usages.push_back(StreamUsage::STREAM_USAGE_MEDIA);
 
     unique_ptr<AudioCapturer> audioCapturer = AudioCapturer::Create(capturerOptions);
     ASSERT_NE(nullptr, audioCapturer);
@@ -2106,13 +2105,7 @@ HWTEST(AudioCapturerUnitTest, Audio_Capturer_Stop_006, TestSize.Level1)
     int32_t ret = -1;
     bool isBlockingRead = true;
     AudioCapturerOptions capturerOptions;
-    capturerOptions.streamInfo.samplingRate = AudioSamplingRate::SAMPLE_RATE_48000;
-    capturerOptions.streamInfo.encoding = AudioEncodingType::ENCODING_PCM;
-    capturerOptions.streamInfo.format = AudioSampleFormat::SAMPLE_S32LE;
-    capturerOptions.streamInfo.channels = AudioChannel::STEREO;
-    capturerOptions.capturerInfo.sourceType = SourceType::SOURCE_TYPE_PLAYBACK_CAPTURE;
-    capturerOptions.capturerInfo.capturerFlags = CAPTURER_FLAG;
-
+    AudioCapturerUnitTest::InitializePlaybackCapturerOptions(capturerOptions);
     unique_ptr<AudioCapturer> audioCapturer = AudioCapturer::Create(capturerOptions);
     ASSERT_NE(nullptr, audioCapturer);
 

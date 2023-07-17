@@ -1021,7 +1021,7 @@ void AudioPolicyManagerStub::QueryEffectSceneModeInternal(MessageParcel &data, M
 
 void AudioPolicyManagerStub::SetPlaybackCapturerFilterInfosInternal(MessageParcel &data, MessageParcel &reply)
 {
-    std::vector<CaptureFilterOptions> filterInfo;
+    CaptureFilterOptions filterInfo;
     int32_t ss = data.ReadInt32();
     int32_t tmp_usage;
     if (ss < 0 || ss >= INT32_MAX) {
@@ -1034,9 +1034,7 @@ void AudioPolicyManagerStub::SetPlaybackCapturerFilterInfosInternal(MessageParce
             AUDIO_SUPPORTED_STREAM_USAGES.end()) {
             continue;
         }
-        CaptureFilterOptions info;
-        info.usage = static_cast<StreamUsage>(tmp_usage);
-        filterInfo.push_back(info);
+        filterInfo.usages.push_back(static_cast<StreamUsage>(tmp_usage));
     }
     uint32_t appTokenId = data.ReadUint32();
     uint32_t appUid = data.ReadInt32();
