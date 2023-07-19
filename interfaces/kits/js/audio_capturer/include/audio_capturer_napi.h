@@ -109,8 +109,8 @@ private:
     static void CheckCapturerAsyncCallbackComplete(napi_env env, napi_status status, void *data);
     static napi_status CreateReadAsyncWork(const AudioCapturerAsyncContext &asyncContext);
     static napi_status AddNamedProperty(napi_env env, napi_value object, const std::string name, int32_t enumValue);
-    static bool ParseCaptureFilterOptionsVector(napi_env env, napi_value root, std::vector<CaptureFilterOptions> &filterOptions);
-    static bool ParsePlaybackCaptureConfig(napi_env env, napi_value root, AudioPlaybackCaptureConfig* captureConfig);
+    static bool ParseCaptureFilterOptionsVector(napi_env env, napi_value root, CaptureFilterOptions *filterOptions);
+    static bool ParsePlaybackCaptureConfig(napi_env env, napi_value root, AudioPlaybackCaptureConfig *captureConfig);
     static bool ParseCapturerOptions(napi_env env, napi_value root, AudioCapturerOptions *opts);
     static bool ParseCapturerInfo(napi_env env, napi_value root, AudioCapturerInfo *capturerInfo);
     static bool ParseStreamInfo(napi_env env, napi_value root, AudioStreamInfo* streamInfo);

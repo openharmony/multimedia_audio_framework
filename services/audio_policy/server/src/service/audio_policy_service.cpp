@@ -3459,7 +3459,7 @@ void AudioPolicyService::RegisterDataObserver()
     RegisterNameMonitorHelper();
 }
 
-int32_t AudioPolicyService::SetPlaybackCapturerFilterInfos(std::vector<CaptureFilterOptions> options)
+int32_t AudioPolicyService::SetPlaybackCapturerFilterInfos(const CaptureFilterOptions &options)
 {
     LoadLoopback();
     const sptr<IStandardAudioService> gsp = GetAudioServerProxy();
@@ -3468,15 +3468,15 @@ int32_t AudioPolicyService::SetPlaybackCapturerFilterInfos(std::vector<CaptureFi
         return ERR_OPERATION_FAILED;
     }
 
-    std::vector<int32_t> usages;
+    std::vector<int32_t> targetUsages;
     AUDIO_INFO_LOG("SetPlaybackCapturerFilterInfos");
-    for (size_t i = 0; i < options.size(); i++) {
-        if (count(usages.begin(), usages.end(), options[i].usage) == 0) {
-            usages.emplace_back(options[i].usage); // deduplicate
+    for (size_t i = 0; i < options.usages.size(); i++) {
+        if (count(targetUsages.begin(), targetUsages.end(), options.usages[i]) == 0) {
+            targetUsages.emplace_back(options.usages[i]); // deduplicate
         }
     }
 
-    return gsp->SetSupportStreamUsage(usages);
+    return gsp->SetSupportStreamUsage(targetUsages);
 }
 
 } // namespace AudioStandard

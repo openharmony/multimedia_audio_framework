@@ -280,7 +280,7 @@ public:
 
     void UpdateDescWhenNoBTPermission(vector<sptr<AudioDeviceDescriptor>> &desc);
 
-    int32_t SetPlaybackCapturerFilterInfos(std::vector<CaptureFilterOptions> options);
+    int32_t SetPlaybackCapturerFilterInfos(const CaptureFilterOptions &options);
 
     void UnloadLoopback();
 

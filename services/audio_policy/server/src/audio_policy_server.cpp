@@ -2251,11 +2251,11 @@ int32_t AudioPolicyServer::QueryEffectSceneMode(SupportedEffectConfig &supported
     return ret;
 }
 
-int32_t AudioPolicyServer::SetPlaybackCapturerFilterInfos(std::vector<CaptureFilterOptions> options,
+int32_t AudioPolicyServer::SetPlaybackCapturerFilterInfos(const CaptureFilterOptions &options,
     uint32_t appTokenId, int32_t appUid, bool privacyFlag, AudioPermissionState state)
 {
-    for (auto &op : options) {
-        if (op.usage != STREAM_USAGE_VOICE_COMMUNICATION) {
+    for (auto &usg : options.usages) {
+        if (usg != STREAM_USAGE_VOICE_COMMUNICATION) {
             continue;
         }
 

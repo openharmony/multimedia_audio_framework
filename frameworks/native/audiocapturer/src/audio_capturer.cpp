@@ -101,13 +101,13 @@ std::unique_ptr<AudioCapturer> AudioCapturer::Create(const AudioCapturerOptions 
         capturer->cachePath_ = cachePath;
     }
 
+    if (capturer->InitPlaybackCapturer(sourceType, capturerOptions.playbackCaptureConfig.filterOptions) != SUCCESS) {
+        return nullptr;
+    }
+
     capturer->capturerInfo_.sourceType = sourceType;
     capturer->capturerInfo_.capturerFlags = capturerOptions.capturerInfo.capturerFlags;
     if (capturer->SetParams(params) != SUCCESS) {
-        capturer = nullptr;
-    }
-
-    if (capturer->InitPlaybackCapturer(sourceType, capturerOptions.playbackCaptureConfig.filterOptions) != SUCCESS) {
         capturer = nullptr;
     }
 
@@ -149,12 +149,11 @@ AudioCapturerPrivate::AudioCapturerPrivate(AudioStreamType audioStreamType, cons
     }
 }
 
-int32_t AudioCapturerPrivate::InitPlaybackCapturer(int32_t type, std::vector<CaptureFilterOptions> filterOptions)
+int32_t AudioCapturerPrivate::InitPlaybackCapturer(int32_t type, const CaptureFilterOptions &filterOptions)
 {
     if (type != SOURCE_TYPE_PLAYBACK_CAPTURE) {
         return SUCCESS;
     }
-    audioStream_->SetInnerCapturerState(true);
     return AudioPolicyManager::GetInstance().SetPlaybackCapturerFilterInfos(
         filterOptions, appInfo_.appTokenId, appInfo_.appUid, false, AUDIO_PERMISSION_START);
 }
@@ -197,6 +196,10 @@ int32_t AudioCapturerPrivate::SetParams(const AudioCapturerParams params)
     audioStream_->SetCapturerInfo(capturerInfo_);
 
     audioStream_->SetClientID(appInfo_.appPid, appInfo_.appUid);
+
+    if (capturerInfo_.sourceType == SOURCE_TYPE_PLAYBACK_CAPTURE) {
+        audioStream_->SetInnerCapturerState(true);
+    }
 
     int32_t ret = audioStream_->SetAudioStreamInfo(audioStreamParams, capturerProxyObj_);
     if (ret) {

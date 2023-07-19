@@ -231,7 +231,7 @@ public:
     
     int32_t QueryEffectSceneMode(SupportedEffectConfig &supportedEffectConfig);
 
-    int32_t SetPlaybackCapturerFilterInfos(std::vector<CaptureFilterOptions> filterOptions,
+    int32_t SetPlaybackCapturerFilterInfos(const CaptureFilterOptions &filterOptions,
         uint32_t appTokenId, int32_t appUid, bool privacyFlag, AudioPermissionState state);
 
 private:

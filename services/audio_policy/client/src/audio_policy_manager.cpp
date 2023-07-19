@@ -1164,7 +1164,7 @@ int32_t AudioPolicyManager::QueryEffectSceneMode(SupportedEffectConfig &supporte
     return error;
 }
 
-int32_t AudioPolicyManager::SetPlaybackCapturerFilterInfos(std::vector<CaptureFilterOptions> filterOptions,
+int32_t AudioPolicyManager::SetPlaybackCapturerFilterInfos(const CaptureFilterOptions &filterOptions,
     uint32_t appTokenId, int32_t appUid, bool privacyFlag, AudioPermissionState state)
 {
     AUDIO_INFO_LOG("AudioPolicyManager::SetPlaybackCapturerFilterInfos");
