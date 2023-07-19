@@ -1365,10 +1365,8 @@ bool AudioCapturerNapi::ParseCaptureFilterOptionsVector(napi_env env, napi_value
                 filterOptions->usages.emplace_back(static_cast<StreamUsage>(val));
             }
         }
-        return true;
-    } else {
-        return false;
     }
+    return true;
 }
 
 bool AudioCapturerNapi::ParsePlaybackCaptureConfig(napi_env env, napi_value root,
@@ -1379,7 +1377,7 @@ bool AudioCapturerNapi::ParsePlaybackCaptureConfig(napi_env env, napi_value root
     if (napi_get_named_property(env, root, "filterOptions", &res) == napi_ok) {
         return ParseCaptureFilterOptionsVector(env, res, &(captureConfig->filterOptions));
     } else {
-        return false;
+        return true;
     }
 }
 
