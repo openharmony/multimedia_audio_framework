@@ -104,15 +104,15 @@ static void UpdateEffectInfoArray(SupportedEffectConfig &supportedEffectConfig,
     std::sort(audioSceneEffectInfo.mode.begin(), audioSceneEffectInfo.mode.end());
 }
 
-int32_t AudioStreamManager::GetEffectInfoArray(AudioSceneEffectInfo &audioSceneEffectInfo,
-    ContentType contentType, StreamUsage streamUsage)
+int32_t AudioStreamManager::GetEffectInfoArray(AudioSceneEffectInfo &audioSceneEffectInfo, StreamUsage streamUsage)
 {
-    AudioStreamType streamType =  IAudioStream::GetStreamType(contentType, streamUsage);
+    ContentType contentType = CONTENT_TYPE_UNKNOWN;
+    AudioStreamType streamType = IAudioStream::GetStreamType(contentType, streamUsage);
     std::string effectScene = IAudioStream::GetEffectSceneName(streamType);
     SupportedEffectConfig supportedEffectConfig;
     int32_t ret = AudioPolicyManager::GetInstance().QueryEffectSceneMode(supportedEffectConfig);
     int32_t streamNum = supportedEffectConfig.postProcessNew.stream.size();
-    if (streamNum > 0) {
+    if (streamNum >= 0) {
         int32_t sceneFlag = 0;
         for (int32_t i = 0; i < streamNum; i++) {
             if (effectScene == supportedEffectConfig.postProcessNew.stream[i].scene) {

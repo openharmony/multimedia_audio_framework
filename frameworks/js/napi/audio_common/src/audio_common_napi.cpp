@@ -192,26 +192,6 @@ bool AudioCommonNapi::IsSameCallback(napi_env env, napi_value callback, napi_ref
     return isEquals;
 }
 
-bool AudioCommonNapi::IsLegalInputArgumentContentType(int32_t contentType)
-{
-    bool result = false;
-    switch (contentType) {
-        case CONTENT_TYPE_UNKNOWN:
-        case CONTENT_TYPE_SPEECH:
-        case CONTENT_TYPE_MUSIC:
-        case CONTENT_TYPE_MOVIE:
-        case CONTENT_TYPE_SONIFICATION:
-        case CONTENT_TYPE_RINGTONE:
-        case CONTENT_TYPE_ULTRASONIC:
-            result = true;
-            break;
-        default:
-            result = false;
-            break;
-    }
-    return result;
-}
-
 bool AudioCommonNapi::IsLegalInputArgumentStreamUsage(int32_t streamUsage)
 {
     bool result = false;
@@ -221,10 +201,19 @@ bool AudioCommonNapi::IsLegalInputArgumentStreamUsage(int32_t streamUsage)
         case STREAM_USAGE_VOICE_COMMUNICATION:
         case STREAM_USAGE_VOICE_ASSISTANT:
         case STREAM_USAGE_ALARM:
+        case STREAM_USAGE_VOICE_MESSAGE:
         case STREAM_USAGE_NOTIFICATION_RINGTONE:
-        case STREAM_USAGE_RANGING:
+        case STREAM_USAGE_NOTIFICATION:
         case STREAM_USAGE_ACCESSIBILITY:
         case STREAM_USAGE_SYSTEM:
+        case STREAM_USAGE_MOVIE:
+        case STREAM_USAGE_GAME:
+        case STREAM_USAGE_AUDIOBOOK:
+        case STREAM_USAGE_NAVIGATION:
+        case STREAM_USAGE_DTMF:
+        case STREAM_USAGE_ENFORCED_TONE:
+        case STREAM_USAGE_ULTRASONIC:
+        case STREAM_USAGE_RANGING:
         case STREAM_USAGE_VOICE_MODEM_COMMUNICATION:
             result = true;
             break;
