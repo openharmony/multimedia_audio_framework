@@ -322,10 +322,10 @@ updateUi : 是否需要显示变化详细信息。（如果音量被增大/减�
     const AudioStreamInfo &audioStreamInfo;
     bool isLatencySupport = audioStreamMgr->IsAudioRendererLowLatencySupported(audioStreamInfo);
     ```
-7. 使用 **GetEffectInfoArray** 接口查询指定[**StreamUsage**](https://gitee.com/openharmony/multimedia_audio_framework/blob/master/interfaces/inner_api/native/audiocommon/include/audio_info.h)下可以支持的音效模式。
+7. 使用 **GetEffectInfoArray** 接口查询指定[**ContentType**](https://gitee.com/openharmony/multimedia_audio_framework/blob/master/interfaces/inner_api/native/audiocommon/include/audio_info.h)和[**StreamUsage**](https://gitee.com/openharmony/multimedia_audio_framework/blob/master/interfaces/inner_api/native/audiocommon/include/audio_info.h)下可以支持的音效模式。
     ```
     AudioSceneEffectInfo audioSceneEffectInfo;
-    int32_t status = audioStreamMgr->GetEffectInfoArray(audioSceneEffectInfo,streamUsage);
+    int32_t status = audioStreamMgr->GetEffectInfoArray(audioSceneEffectInfo, contentType, streamUsage);
     ```
     有关支持的音效模式，请参阅[**audio_effect.h**](https://gitee.com/openharmony/multimedia_audio_framework/blob/master/interfaces/inner_api/native/audiocommon/include/audio_effect.h)中的枚举**AudioEffectMode**。
 

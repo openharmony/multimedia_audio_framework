@@ -58,6 +58,7 @@ ohos_shared_library("audio_effect") {
   ]
 
   version_script = "../../../audio_framework.versionscript"
+  innerapi_tags = [ "platformsdk" ]
 
   part_name = "audio_framework"
   subsystem_name = "multimedia"
