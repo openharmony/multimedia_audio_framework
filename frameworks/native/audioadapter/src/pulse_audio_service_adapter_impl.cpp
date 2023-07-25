@@ -1094,9 +1094,19 @@ void PulseAudioServiceAdapterImpl::PaSubscribeCb(pa_context *c, pa_subscription_
                 pa_operation_unref(operation);
                 pa_threaded_mainloop_unlock(thiz->mMainLoop);
             } else if ((t & PA_SUBSCRIPTION_EVENT_TYPE_MASK) == PA_SUBSCRIPTION_EVENT_REMOVE) {
-                uint32_t sessionID = sinkIndexSessionIDMap[idx];
-                AUDIO_ERR_LOG("[PulseAudioServiceAdapterImpl] sessionID: %{public}d  removed", sessionID);
-                g_audioServiceAdapterCallback->OnSessionRemoved(sessionID);
+                const uint32_t *sessionID = new(std::nothrow) const uint32_t(sinkIndexSessionIDMap[idx]);
+                if (sessionID == nullptr) {
+                    AUDIO_ERR_LOG("PaSubscribeCb: No memory");
+                    return;
+                }
+                AUDIO_INFO_LOG("sessionID: %{public}d  removed", *sessionID);
+                pa_threaded_mainloop_once_unlocked(thiz->mMainLoop,
+                    []([[maybe_unused]] pa_threaded_mainloop *m, void *userdata) {
+                        const uint32_t *sessionID = static_cast<const uint32_t*>(userdata);
+                        g_audioServiceAdapterCallback->OnSessionRemoved(*sessionID);
+                        delete sessionID;
+                    },
+                    const_cast<uint32_t*>(sessionID));
             }
             break;
 
