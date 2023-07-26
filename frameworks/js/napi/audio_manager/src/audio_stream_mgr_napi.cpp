@@ -944,9 +944,11 @@ napi_value AudioStreamMgrNapi::GetEffectInfoArray(napi_env env, napi_callback_in
         return result;
     }
 
+    AUDIO_ERR_LOG("yjy: 01 argc %{public}zu", argc);
     if (argc < ARGS_ONE){
         asyncContext->status = NAPI_ERR_INPUT_INVALID;
     }
+    AUDIO_ERR_LOG("yjy: 02 %{public}d", (int)asyncContext->status);
     for (size_t i = PARAM0; i < argc; i++) {
         napi_valuetype valueType = napi_undefined;
         napi_typeof(env, argv[i], &valueType);
@@ -955,16 +957,19 @@ napi_value AudioStreamMgrNapi::GetEffectInfoArray(napi_env env, napi_callback_in
             if (!AudioCommonNapi::IsLegalInputArgumentStreamUsage(asyncContext->streamUsage)) {
                 asyncContext->status = (asyncContext->status ==
                     NAPI_ERR_INPUT_INVALID) ? NAPI_ERR_INPUT_INVALID : NAPI_ERR_INVALID_PARAM;
+                AUDIO_ERR_LOG("yjy: 03 %{public}d", (int)asyncContext->status);
             }
         } else if (i == PARAM1) {
             if (valueType == napi_function) {
                 napi_create_reference(env, argv[i], refCount, &asyncContext->callbackRef);
             } else {
                 asyncContext->status = NAPI_ERR_INPUT_INVALID;
+                AUDIO_ERR_LOG("yjy: 04 %{public}d", (int)asyncContext->status);
             }
             break;
         } else {
             asyncContext->status = NAPI_ERR_INPUT_INVALID;
+            AUDIO_ERR_LOG("yjy: 05 %{public}d", (int)asyncContext->status);
         }
     }
 
