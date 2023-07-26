@@ -1021,15 +1021,15 @@ void AudioPolicyManagerStub::QueryEffectSceneModeInternal(MessageParcel &data, M
 
 void AudioPolicyManagerStub::SetPlaybackCapturerFilterInfosInternal(MessageParcel &data, MessageParcel &reply)
 {
+    int32_t maxUsageNum = 30;
     CaptureFilterOptions filterInfo;
     int32_t ss = data.ReadInt32();
-    int32_t tmp_usage;
-    if (ss < 0 || ss >= INT32_MAX) {
+    if (ss < 0 || ss >= maxUsageNum) {
         reply.WriteInt32(ERROR);
         return;
     }
     for (int32_t i = 0; i < ss; i++) {
-        tmp_usage = data.ReadInt32();
+        int32_t tmp_usage = data.ReadInt32();
         if (std::find(AUDIO_SUPPORTED_STREAM_USAGES.begin(), AUDIO_SUPPORTED_STREAM_USAGES.end(), tmp_usage) ==
             AUDIO_SUPPORTED_STREAM_USAGES.end()) {
             continue;

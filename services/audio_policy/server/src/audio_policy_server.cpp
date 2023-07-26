@@ -621,7 +621,9 @@ bool AudioPolicyServer::SetWakeUpAudioCapturer(InternalAudioCapturerOptions opti
 bool AudioPolicyServer::CloseWakeUpAudioCapturer()
 {
     auto res = mPolicyService.CloseWakeUpAudioCapturer();
-    remoteWakeUpCallback_->WaitClose();
+    if (remoteWakeUpCallback_ != nullptr) {
+        remoteWakeUpCallback_->WaitClose();
+    }
     return res;
 }
 

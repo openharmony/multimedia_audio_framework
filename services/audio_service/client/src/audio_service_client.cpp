@@ -458,6 +458,7 @@ AudioServiceClient::AudioServiceClient()
     isMainLoopStarted = false;
     isContextConnected = false;
     isStreamConnected = false;
+    isInnerCapturerStream = false;
 
     sinkDevices.clear();
     sourceDevices.clear();
