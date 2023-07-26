@@ -213,8 +213,6 @@ bool AudioCommonNapi::IsLegalInputArgumentStreamUsage(int32_t streamUsage)
         case STREAM_USAGE_DTMF:
         case STREAM_USAGE_ENFORCED_TONE:
         case STREAM_USAGE_ULTRASONIC:
-        case STREAM_USAGE_RANGING:
-        case STREAM_USAGE_VOICE_MODEM_COMMUNICATION:
             result = true;
             break;
         default:
