@@ -136,7 +136,8 @@ void AudioAdapterManager::SaveMediaVolumeToLocal(AudioStreamType streamType, int
     }
 }
 
-int32_t AudioAdapterManager::SetSystemVolumeLevel(AudioStreamType streamType, int32_t volumeLevel, bool isFromVolumeKey)
+int32_t AudioAdapterManager::SetSystemVolumeLevel(AudioStreamType streamType, int32_t volumeLevel,
+    bool /* isFromVolumeKey */)
 {
     AUDIO_INFO_LOG("SetSystemVolumeLevel: streamType: %{public}d, deviceType: %{public}d, volumeLevel:%{public}d",
         streamType, currentActiveDevice_, volumeLevel);
@@ -158,13 +159,9 @@ int32_t AudioAdapterManager::SetSystemVolumeLevel(AudioStreamType streamType, in
         InitAudioPolicyKvStore(isFirstBoot);
     }
 
-    if (volumeLevel != 0 || isFromVolumeKey) {
-        // If volume == 0, we just need to set mute and don't need to wirte volume data to KVStore.
-        // If the value is from volume key, we must write volume data to KVStore.
-        AudioStreamType streamForVolumeMap = GetStreamForVolumeMap(streamType);
-        volumeLevelMap_[streamForVolumeMap] = volumeLevel;
-        WriteVolumeToKvStore(currentActiveDevice_, streamType, volumeLevel);
-    }
+    AudioStreamType streamForVolumeMap = GetStreamForVolumeMap(streamType);
+    volumeLevelMap_[streamForVolumeMap] = volumeLevel;
+    WriteVolumeToKvStore(currentActiveDevice_, streamType, volumeLevel);
 
     UpdateRingerModeForVolume(streamType, volumeLevel);
 
