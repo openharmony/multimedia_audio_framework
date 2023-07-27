@@ -347,11 +347,13 @@ private:
     void UpdateAudioScene(const AudioInterrupt &audioInterrupt, AudioInterruptChangeType changeType);
 
     // for audio volume and mute status
-    int32_t SetSystemVolumeLevelForKey(AudioStreamType streamType, int32_t volumeLevel, bool isUpdateUi);
+    int32_t SetSystemVolumeLevelInternal(AudioStreamType streamType, int32_t volumeLevel, bool isUpdateUi);
     int32_t SetSingleStreamVolume(AudioStreamType streamType, int32_t volumeLevel, bool isUpdateUi);
-    int32_t GetSystemVolumeLevelForKey(AudioStreamType streamType, bool isFromVolumeKey);
+    int32_t GetSystemVolumeLevelInternal(AudioStreamType streamType, bool isFromVolumeKey);
     float GetSystemVolumeDb(AudioStreamType streamType);
-    int32_t SetSingleStreamMute(AudioStreamType streamType, bool mute);
+    int32_t SetStreamMuteInternal(AudioStreamType streamType, bool mute, bool isUpdateUi);
+    int32_t SetSingleStreamMute(AudioStreamType streamType, bool mute, bool isUpdateUi);
+    bool GetStreamMuteInternal(AudioStreamType streamType);
     AudioVolumeType GetVolumeTypeFromStreamType(AudioStreamType streamType);
 
     // common
@@ -362,8 +364,8 @@ private:
         bool privacyFlag = false, AudioPermissionState state = AUDIO_PERMISSION_START);
 
     // externel function call
-    void VolumeKeyUpEvents(std::set<int32_t> &preKeys);
-    void VolumeKeyDownEvents(std::set<int32_t> &preKeys);
+    bool MaxOrMinVolumeOption(const int32_t &volLevel, const int32_t keyType, const AudioStreamType &streamInFocus);
+    void RegisterVolumeKeyEvents(const int32_t keyType);
     void SubscribeVolumeKeyEvents();
     void InitKVStore();
     void ConnectServiceAdapter();

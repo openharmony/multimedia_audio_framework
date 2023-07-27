@@ -793,6 +793,9 @@ int32_t AudioPolicyService::MoveToRemoteInputDevice(std::vector<uint32_t> source
 
 bool AudioPolicyService::IsStreamActive(AudioStreamType streamType) const
 {
+    if (streamType == STREAM_VOICE_CALL && audioScene_ == AUDIO_SCENE_PHONE_CALL) {
+        return true;
+    }
     return audioPolicyManager_.IsStreamActive(streamType);
 }
 
