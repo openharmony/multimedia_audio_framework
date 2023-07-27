@@ -93,22 +93,26 @@ const std::string IAudioStream::GetEffectSceneName(AudioStreamType audioType)
 {
     std::string name;
     switch (audioType) {
-        case STREAM_DEFAULT:
-            name = "SCENE_MUSIC";
-            break;
         case STREAM_MUSIC:
             name = "SCENE_MUSIC";
             break;
-        case STREAM_MEDIA:
+        case STREAM_GAME:
+            name = "SCENE_GAME";
+            break;
+        case STREAM_MOVIE:
             name = "SCENE_MOVIE";
             break;
-        case STREAM_TTS:
+        case STREAM_SPEECH:
+        case STREAM_VOICE_CALL:
+        case STREAM_VOICE_ASSISTANT:
             name = "SCENE_SPEECH";
             break;
         case STREAM_RING:
-            name = "SCENE_RING";
-            break;
         case STREAM_ALARM:
+        case STREAM_NOTIFICATION:
+        case STREAM_SYSTEM:
+        case STREAM_DTMF:
+        case STREAM_SYSTEM_ENFORCED:
             name = "SCENE_RING";
             break;
         default:

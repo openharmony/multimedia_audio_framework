@@ -174,8 +174,8 @@ public:
      * defined in {@link audio_errors.h} otherwise.
      * @since 9
      */
-    int32_t GetEffectInfoArray(AudioSceneEffectInfo &audioSceneEffectInfo,
-        ContentType contentType, StreamUsage streamUsage);
+    int32_t GetEffectInfoArray(AudioSceneEffectInfo &audioSceneEffectInfo, StreamUsage streamUsage);
+
 };
 
 static const std::map<std::string, AudioEffectMode> effectModeMap = {
