@@ -74,33 +74,6 @@ static const char * const VALID_MODARGS[] = {
     NULL
 };
 
-static void ProcessRender(struct userdata *u, pa_usec_t now)
-{
-    size_t ate = 0;
-    pa_assert(u);
-
-    /* This is the configured latency. Sink inputs connected to us
-    might not have a single frame more than the maxrequest value
-    queued. Hence: at maximum read this many bytes from the sink
-    inputs. */
-
-    /* Fill the buffer up the latency size */
-    while (u->timestamp < now + u->block_usec) {
-        pa_memchunk chunk;
-
-        pa_sink_render(u->sink, u->sink->thread_info.max_request, &chunk);
-        pa_memblock_unref(chunk.memblock);
-
-        u->timestamp += pa_bytes_to_usec(chunk.length, &u->sink->sample_spec);
-
-        ate += chunk.length;
-
-        if (ate >= u->sink->thread_info.max_request) {
-            break;
-        }
-    }
-}
-
 /* Called from I/O thread context */
 static int SinkPorcessMsg(pa_msgobject *o, int code, void *data, int64_t offset, pa_memchunk *chunk)
 {
@@ -373,58 +346,6 @@ static void SinkInputMovingCb(pa_sink_input *i, pa_sink *dest)
     }
 }
 
-static void ThreadFunc(void *userdata)
-{
-    struct userdata *u = userdata;
-
-    pa_assert(u);
-
-    AUDIO_DEBUG_LOG("Receiver sink thread starting up");
-
-    pa_thread_mq_install(&u->thread_mq);
-
-    u->timestamp = pa_rtclock_now();
-
-    for (;;) {
-        pa_usec_t now = 0;
-        int ret;
-
-        if (PA_SINK_IS_OPENED(u->sink->thread_info.state)) {
-            now = pa_rtclock_now();
-        }
-
-        /* Render some data and drop it immediately */
-        if (PA_SINK_IS_OPENED(u->sink->thread_info.state)) {
-            if (u->timestamp <= now) {
-                ProcessRender(u, now);
-            }
-
-            pa_rtpoll_set_timer_absolute(u->rtpoll, u->timestamp);
-        } else {
-            pa_rtpoll_set_timer_disabled(u->rtpoll);
-        }
-
-        /* Hmm, nothing to do. Let's sleep */
-        if ((ret = pa_rtpoll_run(u->rtpoll)) < 0) {
-            goto fail;
-        }
-
-        if (ret == 0) {
-            goto finish;
-        }
-    }
-
-fail:
-    /* If this was no regular exit from the loop we have to continue
-     * processing messages until we received PA_MESSAGE_SHUTDOWN */
-    pa_asyncmsgq_post(u->thread_mq.outq, PA_MSGOBJECT(u->core),
-        PA_CORE_MESSAGE_UNLOAD_MODULE, u->module, 0, NULL, NULL);
-    pa_asyncmsgq_wait_for(u->thread_mq.inq, PA_MESSAGE_SHUTDOWN);
-
-finish:
-    AUDIO_DEBUG_LOG("Thread shutting down");
-}
-
 int InitFail(pa_module *m, pa_modargs *ma)
 {
     AUDIO_ERR_LOG("Receiver sink init failed.");
@@ -589,9 +510,6 @@ int pa__init(pa_module *m)
     u->block_usec = pa_bytes_to_usec(u->buffer_size, &u->sink->sample_spec);
     pa_sink_set_latency_range(u->sink, 0, u->block_usec);
     pa_sink_set_max_request(u->sink, u->buffer_size);
-    if (!(u->thread = pa_thread_new("receiver-sink", ThreadFunc, u))) {
-        return InitFail(m, ma);
-    }
 
     /* Create sink input */
     if (CreateSinkInput(m, ma, master, u) < 0) {
