@@ -944,7 +944,7 @@ napi_value AudioStreamMgrNapi::GetEffectInfoArray(napi_env env, napi_callback_in
         return result;
     }
 
-    if (argc < ARGS_ONE){
+    if (argc < ARGS_ONE) {
         asyncContext->status = NAPI_ERR_INPUT_INVALID;
     }
     for (size_t i = PARAM0; i < argc; i++) {
