@@ -42,6 +42,7 @@
 #define DEFAULT_DEVICE_NETWORKID "LocalDevice"
 #define DEFAULT_BUFFER_SIZE 8192
 #define MAX_SINK_VOLUME_LEVEL 1.0
+#define DEFAULT_WRITE_TIME 1000
 
 const char *DEVICE_CLASS_A2DP = "a2dp";
 const char *DEVICE_CLASS_REMOTE = "remote";
@@ -84,6 +85,7 @@ struct Userdata {
     bool test_mode_on;
     uint32_t writeCount;
     uint32_t renderCount;
+    pa_usec_t writeTime;
 };
 
 static void UserdataFree(struct Userdata *u);
@@ -213,60 +215,45 @@ static void ThreadFuncRendererTimer(void *userdata)
     while (true) {
         pa_usec_t now = 0;
         int ret;
-
-        if (u->render_in_idle_state) {
-            if (PA_SINK_IS_OPENED(u->sink->thread_info.state)) {
-                now = pa_rtclock_now();
-            }
-        } else {
-            if (PA_SINK_IS_RUNNING(u->sink->thread_info.state)) {
-                now = pa_rtclock_now();
-            }
+        
+        bool flag = (u->render_in_idle_state && PA_SINK_IS_OPENED(u->sink->thread_info.state)) ||
+            (!u->render_in_idle_state && PA_SINK_IS_RUNNING(u->sink->thread_info.state));
+        if (flag) {
+            now = pa_rtclock_now();
         }
 
         if (PA_UNLIKELY(u->sink->thread_info.rewind_requested)) {
             pa_sink_process_rewind(u->sink, 0);
         }
 
-        // Render some data and drop it immediately
-        if (u->render_in_idle_state && PA_SINK_IS_OPENED(u->sink->thread_info.state)) {
+        if (flag) {
             if (u->timestamp <= now && pa_atomic_load(&u->dflag) == 0) {
                 pa_atomic_add(&u->dflag, 1);
                 ProcessRenderUseTiming(u, now);
             }
-
-            pa_usec_t sleep_for_usec = pa_bytes_to_usec(u->sink->thread_info.max_request, &u->sink->sample_spec);
-            pa_rtpoll_set_timer_relative(u->rtpoll, sleep_for_usec);
-        } else if (!u->render_in_idle_state && PA_SINK_IS_RUNNING(u->sink->thread_info.state)) {
-            if (u->timestamp <= now && pa_atomic_load(&u->dflag) == 0) {
-                pa_atomic_add(&u->dflag, 1);
-                ProcessRenderUseTiming(u, now);
-            }
-
-            pa_usec_t sleep_for_usec = pa_bytes_to_usec(u->sink->thread_info.max_request, &u->sink->sample_spec);
-            pa_rtpoll_set_timer_relative(u->rtpoll, sleep_for_usec);
+            pa_usec_t blockTime = pa_bytes_to_usec(u->sink->thread_info.max_request, &u->sink->sample_spec);
+            int64_t sleepForUsec = PA_MIN(blockTime - (pa_rtclock_now() - now), u->writeTime);
+            sleepForUsec = PA_MAX(sleepForUsec, 0);
+            pa_rtpoll_set_timer_relative(u->rtpoll, (pa_usec_t)sleepForUsec);
         } else {
             pa_rtpoll_set_timer_disabled(u->rtpoll);
         }
+
         // Hmm, nothing to do. Let's sleep
         if ((ret = pa_rtpoll_run(u->rtpoll)) < 0) {
-            goto fail;
+            // If this was no regular exit from the loop we have to continue
+            // processing messages until we received PA_MESSAGE_SHUTDOWN
+            pa_asyncmsgq_post(u->thread_mq.outq, PA_MSGOBJECT(u->core), PA_CORE_MESSAGE_UNLOAD_MODULE,
+                u->module, 0, NULL, NULL);
+            pa_asyncmsgq_wait_for(u->thread_mq.inq, PA_MESSAGE_SHUTDOWN);
+            break;
         }
 
         if (ret == 0) {
-            goto finish;
+            AUDIO_INFO_LOG("Thread (use timing) shutting down");
+            break;
         }
     }
-
-fail:
-    // If this was no regular exit from the loop we have to continue
-    // processing messages until we received PA_MESSAGE_SHUTDOWN
-    pa_asyncmsgq_post(u->thread_mq.outq, PA_MSGOBJECT(u->core), PA_CORE_MESSAGE_UNLOAD_MODULE,
-                      u->module, 0, NULL, NULL);
-    pa_asyncmsgq_wait_for(u->thread_mq.inq, PA_MESSAGE_SHUTDOWN);
-
-finish:
-    AUDIO_INFO_LOG("Thread (use timing) shutting down");
 }
 
 static void ThreadFuncWriteHDI(void *userdata)
@@ -286,7 +273,8 @@ static void ThreadFuncWriteHDI(void *userdata)
         pa_assert_se(pa_asyncmsgq_get(u->dq, NULL, &code, NULL, NULL, &chunk, 1) == 0);
 
         switch (code) {
-            case HDI_RENDER:
+            case HDI_RENDER: {
+                pa_usec_t now = pa_rtclock_now();
                 if (RenderWrite(u, &chunk) < 0) {
                     u->bytes_dropped += chunk.length;
                     AUDIO_ERR_LOG("RenderWrite failed");
@@ -294,7 +282,9 @@ static void ThreadFuncWriteHDI(void *userdata)
                 if (pa_atomic_load(&u->dflag) == 1) {
                     pa_atomic_sub(&u->dflag, 1);
                 }
+                u->writeTime = pa_rtclock_now() - now;
                 break;
+            }
             case QUIT:
                 quit = 1;
                 break;
@@ -750,6 +740,8 @@ pa_sink *PaHdiSinkNew(pa_module *m, pa_modargs *ma, const char *driver)
             goto fail;
         }
     }
+
+    u->writeTime = DEFAULT_WRITE_TIME;
 
     pa_sink_put(u->sink);
 
