@@ -90,7 +90,6 @@ static bool IsSinkInputSupportInnerCapturer(pa_sink_input *si, struct userdata *
 
 static pa_hook_result_t SinkInputProplistChangedCb(pa_core *c, pa_sink_input *si, struct userdata *u)
 {
-    pa_sink *effectSink;
     pa_assert(c);
     pa_assert(u);
     const char *sceneMode = pa_proplist_gets(si->proplist, "scene.mode");
@@ -134,7 +133,7 @@ static pa_hook_result_t SinkInputProplistChangedCb(pa_core *c, pa_sink_input *si
     }
 
     const char *sinkName = innerCapturerFlag ? pa_sprintf_malloc("%s_CAP", sceneType) : sceneType;
-    effectSink = pa_namereg_get(c, sinkName, PA_NAMEREG_SINK);
+    pa_sink *effectSink = pa_namereg_get(c, sinkName, PA_NAMEREG_SINK);
     if (!effectSink) { // if sink does not exist
         AUDIO_ERR_LOG("Effect sink [%{public}s] sink not found.", sceneType);
         if (innerCapturerFlag) {
