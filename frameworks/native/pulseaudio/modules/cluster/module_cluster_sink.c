@@ -148,25 +148,34 @@ static pa_hook_result_t SinkInputProplistChangedCb(pa_core *c, pa_sink_input *si
     return PA_HOOK_OK;
 }
 
-static pa_hook_result_t SourceOutputStateChangedCb(pa_core *c, pa_source_output *so, struct userdata *u)
+static bool IsSourceOutputForInnerCapturer(pa_source_output *so, struct userdata *u)
 {
-    uint32_t idx;
-    pa_sink_input *si;
-    int innerCapturerFlag = 0;
-
-    pa_assert(c);
-    pa_assert(u);
-    pa_assert(so);
+    if (so == NULL || u == NULL) {
+        return false;
+    }
+    int32_t innerCapturerFlag = 0;
 
     const char *flag = pa_proplist_gets(so->proplist, "stream.isInnerCapturer");
     if (flag != NULL) {
         pa_atoi(flag, &innerCapturerFlag);
     }
 
-    if (innerCapturerFlag == 0) {
-        u->isInnerCapturer = false;
-        return PA_HOOK_OK;
-    } else {
+    if (innerCapturerFlag == 1) {
+        return true;
+    }
+    return false;
+}
+
+static pa_hook_result_t SourceOutputStateChangedCb(pa_core *c, pa_source_output *so, struct userdata *u)
+{
+    uint32_t idx;
+    pa_sink_input *si;
+
+    pa_assert(c);
+    pa_assert(u);
+    pa_assert(so);
+
+    if (IsSourceOutputForInnerCapturer(so, u)) {
         u->isInnerCapturer = true;
     }
 
@@ -180,6 +189,18 @@ static pa_hook_result_t SourceOutputStateChangedCb(pa_core *c, pa_source_output 
             continue;
         }
         SinkInputProplistChangedCb(c, si, u);
+    }
+    return PA_HOOK_OK;
+}
+
+static pa_hook_result_t SourceOutputUnlinkCb(pa_core *c, pa_source_output *so, struct userdata *u)
+{
+    pa_assert(c);
+    pa_assert(u);
+    pa_assert(so);
+
+    if (IsSourceOutputForInnerCapturer(so, u)) {
+        u->isInnerCapturer = false;
     }
     return PA_HOOK_OK;
 }
@@ -230,6 +251,8 @@ int pa__init(pa_module *m)
         (pa_hook_cb_t)ClientProplistChangedCb, u);
     pa_module_hook_connect(m, &m->core->hooks[PA_CORE_HOOK_SOURCE_OUTPUT_STATE_CHANGED], PA_HOOK_LATE,
         (pa_hook_cb_t)SourceOutputStateChangedCb, u);
+    pa_module_hook_connect(m, &m->core->hooks[PA_CORE_HOOK_SOURCE_OUTPUT_UNLINK], PA_HOOK_LATE,
+        (pa_hook_cb_t)SourceOutputUnlinkCb, u);
 
     pa_modargs_free(ma);
 
