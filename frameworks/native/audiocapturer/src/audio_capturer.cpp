@@ -644,7 +644,7 @@ void AudioCapturerPrivate::SetValid(bool valid)
 
 int64_t AudioCapturerPrivate::GetFramesRead() const
 {
-    return audioStream_->GetFramesWritten();
+    return audioStream_->GetFramesRead();
 }
 }  // namespace AudioStandard
 }  // namespace OHOS

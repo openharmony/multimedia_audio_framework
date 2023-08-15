@@ -1049,14 +1049,14 @@ void AudioRendererPrivate::SetSwitchInfo(IAudioStream::SwitchInfo info, std::sha
         return;
     }
     audioStream->SetStreamTrackerState(info.streamTrackerRegistered);
-    audioStream->SetAudioStreamInfo(info.params, rendererProxyObj_);
     audioStream->SetApplicationCachePath(info.cachePath);
-    audioStream->SetRenderMode(info.renderMode);
+    audioStream->SetClientID(info.clientPid, info.clientUid);
+    audioStream->SetPrivacyType(info.privacyType);
     audioStream->SetRendererInfo(info.rendererInfo);
     audioStream->SetCapturerInfo(info.capturerInfo);
-    audioStream->SetClientID(info.clientPid, info.clientUid);
+    audioStream->SetAudioStreamInfo(info.params, rendererProxyObj_);
+    audioStream->SetRenderMode(info.renderMode);
     audioStream->SetAudioEffectMode(info.effectMode);
-    audioStream->SetPrivacyType(info.privacyType);
     audioStream->SetVolume(info.volume);
 
     // set callback
@@ -1129,10 +1129,10 @@ void AudioRendererPrivate::SwitchStream(bool isLowLatencyDevice)
         if (currentClass == IAudioStream::FAST_STREAM && !isLowLatencyDevice) {
             needSwitch = true;
             rendererInfo_.rendererFlags = 0; // Normal renderer type
+            targetClass = IAudioStream::PA_STREAM;
         }
         if (currentClass == IAudioStream::PA_STREAM && isLowLatencyDevice) {
-            // Jumping from normal stream to low latency stream is not supported yet.
-            needSwitch = false;
+            needSwitch = true;
             rendererInfo_.rendererFlags = STREAM_FLAG_FAST;
             targetClass = IAudioStream::FAST_STREAM;
         }
