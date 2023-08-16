@@ -34,7 +34,7 @@ public:
 private:
     void ReadAudioRendererChangeInfo(MessageParcel &data,
         std::unique_ptr<AudioRendererChangeInfo> &rendererChangeInfo);
-    std::vector<std::weak_ptr<AudioRendererStateChangeCallback>> callbacks_;
+    std::weak_ptr<AudioRendererStateChangeCallback> callback_;
 };
 } // namespace AudioStandard
 } // namespace OHOS
