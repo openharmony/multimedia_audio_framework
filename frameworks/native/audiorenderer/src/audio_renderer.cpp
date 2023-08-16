@@ -67,8 +67,10 @@ AudioRendererPrivate::~AudioRendererPrivate()
         Release();
     }
 
-    // Unregister the renderer event callaback in policy server
-    (void)AudioPolicyManager::GetInstance().UnregisterAudioRendererEventListener(appInfo_.appPid);
+    if (isFastRenderer_) {
+        // Unregister the renderer event callaback in policy server
+        (void)AudioPolicyManager::GetInstance().UnregisterAudioRendererEventListener(appInfo_.appPid);
+    }
 #ifdef DUMP_CLIENT_PCM
     if (dcp_) {
         fclose(dcp_);
@@ -307,7 +309,9 @@ int32_t AudioRendererPrivate::SetParams(const AudioRendererParams params)
     }
     AUDIO_INFO_LOG("AudioRendererPrivate::SetParams SetAudioStreamInfo Succeeded");
 
-    SetSelfRendererStateCallback();
+    if (isFastRenderer_) {
+        SetSelfRendererStateCallback();
+    }
     InitDumpInfo();
 
     return InitAudioInterruptCallback();
@@ -1202,6 +1206,7 @@ void AudioRendererPrivate::SetSelfRendererStateCallback()
 {
     if (GetCurrentOutputDevices(currentDeviceInfo) != SUCCESS) {
         AUDIO_ERR_LOG("get current device info failed");
+        return;
     }
 
     int32_t clientPid = getpid();
@@ -1209,6 +1214,7 @@ void AudioRendererPrivate::SetSelfRendererStateCallback()
         audioDeviceChangeCallback_ = std::make_shared<AudioRendererStateChangeCallbackImpl>();
         if (!audioDeviceChangeCallback_) {
             AUDIO_ERR_LOG("AudioRendererPrivate: Memory Allocation Failed !!");
+            return;
         }
     }
 
@@ -1216,6 +1222,7 @@ void AudioRendererPrivate::SetSelfRendererStateCallback()
         audioDeviceChangeCallback_);
     if (ret != 0) {
         AUDIO_ERR_LOG("AudioRendererPrivate::RegisterAudioRendererEventListener failed");
+        return;
     }
 
     audioDeviceChangeCallback_->setAudioRendererObj(this);
