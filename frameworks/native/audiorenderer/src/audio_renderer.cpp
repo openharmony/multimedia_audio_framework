@@ -837,6 +837,7 @@ AudioRenderMode AudioRendererPrivate::GetRenderMode() const
 
 int32_t AudioRendererPrivate::GetBufferDesc(BufferDesc &bufDesc) const
 {
+    std::lock_guard<std::mutex> lock(switchStreamMutex_);
     return audioStream_->GetBufferDesc(bufDesc);
 }
 
@@ -847,6 +848,7 @@ int32_t AudioRendererPrivate::Enqueue(const BufferDesc &bufDesc) const
         fwrite((void *)(bufDesc.buffer), 1, bufDesc.bufLength, dcp_);
     }
 #endif
+    std::lock_guard<std::mutex> lock(switchStreamMutex_);
     return audioStream_->Enqueue(bufDesc);
 }
 
@@ -1082,6 +1084,7 @@ void AudioRendererPrivate::SetSwitchInfo(IAudioStream::SwitchInfo info, std::sha
 
 bool AudioRendererPrivate::SwitchToTargetStream(IAudioStream::StreamClass targetClass)
 {
+    std::lock_guard<std::mutex> lock(switchStreamMutex_);
     bool switchResult = false;
     if (audioStream_) {
         Trace trace("SwitchToTargetStream");
