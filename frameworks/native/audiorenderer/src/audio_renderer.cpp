@@ -307,6 +307,8 @@ int32_t AudioRendererPrivate::SetParams(const AudioRendererParams params)
 
     SetAudioPrivacyType(privacyType_);
 
+    audioStream_->SetStreamTrackerState(false);
+
     int32_t ret = audioStream_->SetAudioStreamInfo(audioStreamParams, rendererProxyObj_);
     if (ret) {
         AUDIO_ERR_LOG("AudioRendererPrivate::SetParams SetAudioStreamInfo Failed");
