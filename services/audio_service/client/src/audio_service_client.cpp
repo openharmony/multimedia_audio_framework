@@ -473,7 +473,7 @@ AudioServiceClient::AudioServiceClient()
     mAudioSystemMgr = nullptr;
 
     streamIndex = 0;
-    sessionID = 0;
+    sessionID_ = 0;
     volumeChannels = STEREO;
     streamInfoUpdated = false;
     firstFrame_ = true;
@@ -989,7 +989,8 @@ int32_t AudioServiceClient::CreateStream(AudioStreamParams audioParams, AudioStr
     pa_proplist_sets(propList, "stream.type", streamName.c_str());
     pa_proplist_sets(propList, "stream.volumeFactor", std::to_string(mVolumeFactor).c_str());
     pa_proplist_sets(propList, "stream.powerVolumeFactor", std::to_string(mPowerVolumeFactor).c_str());
-    pa_proplist_sets(propList, "stream.sessionID", std::to_string(pa_context_get_index(context)).c_str());
+    sessionID_ = pa_context_get_index(context);
+    pa_proplist_sets(propList, "stream.sessionID", std::to_string(sessionID_).c_str());
     pa_proplist_sets(propList, "stream.startTime", streamStartTime.c_str());
 
     if (eAudioClientType == AUDIO_SERVICE_CLIENT_RECORD) {
@@ -1091,21 +1092,11 @@ uint32_t AudioServiceClient::GetUnderflowCount()
 
 int32_t AudioServiceClient::GetSessionID(uint32_t &sessionID) const
 {
-    AUDIO_DEBUG_LOG("GetSessionID");
-    if (CheckPaStatusIfinvalid(mainLoop, context, paStream, AUDIO_CLIENT_PA_ERR) < 0) {
-        AUDIO_ERR_LOG("GetSessionID failed, pa_status is invalid");
-        return AUDIO_CLIENT_PA_ERR;
-    }
-    pa_threaded_mainloop_lock(mainLoop);
-    uint32_t client_index = pa_context_get_index(context);
-    pa_threaded_mainloop_unlock(mainLoop);
-    if (client_index == PA_INVALID_INDEX) {
-        AUDIO_ERR_LOG("GetSessionID failed, sessionID is invalid");
+    AUDIO_DEBUG_LOG("GetSessionID sessionID: %{public}d", sessionID_);
+    if (sessionID_ == PA_INVALID_INDEX || sessionID_ == 0) {
         return AUDIO_CLIENT_ERR;
     }
-
-    sessionID = client_index;
-
+    sessionID = sessionID_;
     return AUDIO_CLIENT_SUCCESS;
 }
 
@@ -2273,7 +2264,7 @@ void AudioServiceClient::GetSinkInputInfoCb(pa_context *context, const pa_sink_i
 
     thiz->cvolume = info->volume;
     thiz->streamIndex = info->index;
-    thiz->sessionID = sessionID;
+    thiz->sessionID_ = sessionID;
     thiz->volumeChannels = info->channel_map.channels;
     thiz->streamInfoUpdated = true;
 
@@ -2301,7 +2292,7 @@ void AudioServiceClient::SetPaVolume(const AudioServiceClient &client)
     HiSysEventWrite(HiviewDFX::HiSysEvent::Domain::AUDIO,
         "VOLUME_CHANGE", HiviewDFX::HiSysEvent::EventType::BEHAVIOR,
         "ISOUTPUT", 1,
-        "STREAMID", client.sessionID,
+        "STREAMID", client.sessionID_,
         "APP_UID", client.clientUid_,
         "APP_PID", client.clientPid_,
         "STREAMTYPE", client.mStreamType,

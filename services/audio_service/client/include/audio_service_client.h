@@ -577,7 +577,7 @@ private:
 
     pa_cvolume cvolume;
     uint32_t streamIndex;
-    uint32_t sessionID;
+    uint32_t sessionID_;
     uint32_t volumeChannels;
     bool streamInfoUpdated;
     bool firstFrame_;
