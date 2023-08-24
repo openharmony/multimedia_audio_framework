@@ -3354,7 +3354,9 @@ void AudioPolicyService::RegiestPolicy()
         AUDIO_ERR_LOG("RegiestPolicy g_adProxy null");
         return;
     }
-    sptr<IRemoteObject> object = this->AsObject();
+    sptr<PolicyProviderWrapper> wrapper = new(std::nothrow) PolicyProviderWrapper(this);
+    CHECK_AND_RETURN_LOG(wrapper != nullptr, "Get null PolicyProviderWrapper");
+    sptr<IRemoteObject> object = wrapper->AsObject();
     if (object == nullptr) {
         AUDIO_ERR_LOG("RegiestPolicy AsObject is nullptr");
         return;
@@ -3437,7 +3439,7 @@ bool AudioPolicyService::SetSharedVolume(AudioStreamType streamType, DeviceType 
 void AudioPolicyService::SetParameterCallback(const std::shared_ptr<AudioParameterCallback>& callback)
 {
     AUDIO_INFO_LOG("Enter SetParameterCallback");
-    auto parameterChangeCbStub = new(std::nothrow) AudioManagerListenerStub();
+    sptr<AudioManagerListenerStub> parameterChangeCbStub = new(std::nothrow) AudioManagerListenerStub();
     if (parameterChangeCbStub == nullptr) {
         AUDIO_ERR_LOG("SetParameterCallback parameterChangeCbStub null");
         return;

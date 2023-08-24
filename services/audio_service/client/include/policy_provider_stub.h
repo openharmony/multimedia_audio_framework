@@ -36,6 +36,17 @@ private:
         &PolicyProviderStub::HandleInitSharedVolume
     };
 };
+
+class PolicyProviderWrapper : public PolicyProviderStub {
+public:
+    ~PolicyProviderWrapper();
+    PolicyProviderWrapper(IPolicyProvider *policyWorker);
+
+    int32_t GetProcessDeviceInfo(const AudioProcessConfig &config, DeviceInfo &deviceInfo) override;
+    int32_t InitSharedVolume(std::shared_ptr<AudioSharedMemory> &buffer) override;
+private:
+    IPolicyProvider *policyWorker_;
+};
 } // namespace AudioStandard
 } // namespace OHOS
 #endif // POLICY_PROVIDER_STUB_H
