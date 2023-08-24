@@ -110,21 +110,20 @@ void AudioRendererStateChangeListenerStub::OnRendererStateChange(
 {
     AUDIO_DEBUG_LOG("AudioRendererStateChangeListenerStub OnRendererStateChange");
 
-    for (const auto& callback : callbacks_) {
-        shared_ptr<AudioRendererStateChangeCallback> cb = callback.lock();
-        if (cb == nullptr) {
-            AUDIO_ERR_LOG("AudioRendererStateChangeListenerStub: callback_ is nullptr");
-        } else {
-            cb->OnRendererStateChange(audioRendererChangeInfos);
-        }
+    shared_ptr<AudioRendererStateChangeCallback> cb = callback_.lock();
+    if (cb == nullptr) {
+        AUDIO_ERR_LOG("AudioRendererStateChangeListenerStub: callback_ is nullptr");
+        return;
     }
+
+    cb->OnRendererStateChange(audioRendererChangeInfos);
     return;
 }
 
 void AudioRendererStateChangeListenerStub::SetCallback(const weak_ptr<AudioRendererStateChangeCallback> &callback)
 {
     AUDIO_DEBUG_LOG("AudioRendererStateChangeListenerStub SetCallback");
-    callbacks_.push_back(callback);
+    callback_ = callback;
 }
 } // namespace AudioStandard
 } // namespace OHOS

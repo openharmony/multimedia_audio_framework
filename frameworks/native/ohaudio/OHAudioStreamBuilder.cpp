@@ -29,7 +29,6 @@ using OHOS::AudioStandard::SourceType;
 static const int32_t RENDERER_TYPE = 1;
 static const int32_t CAPTURER_TYPE = 2;
 
-
 static OHOS::AudioStandard::OHAudioStreamBuilder *convertBuilder(OH_AudioStreamBuilder* builder)
 {
     return (OHOS::AudioStandard::OHAudioStreamBuilder*) builder;
@@ -66,7 +65,6 @@ OH_AudioStream_Result OH_AudioStreamBuilder_SetEncodingType(OH_AudioStreamBuilde
     AudioEncodingType type = (AudioEncodingType)encodingType;
     return audioStreamBuilder->SetEncodingType(type);
 }
-
 
 OH_AudioStream_Result OH_AudioStreamBuilder_SetLatencyMode(OH_AudioStreamBuilder* builder,
     OH_AudioStream_LatencyMode latencyMode)

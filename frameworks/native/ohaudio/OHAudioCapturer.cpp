@@ -18,6 +18,8 @@
 
 using OHOS::AudioStandard::Timestamp;
 
+const int64_t SECOND_TO_NANOSECOND = 1000000000;
+
 static OHOS::AudioStandard::OHAudioCapturer *convertCapturer(OH_AudioCapturer* capturer)
 {
     return (OHOS::AudioStandard::OHAudioCapturer*) capturer;
@@ -176,7 +178,7 @@ OH_AudioStream_Result OH_AudioCapturer_GetTimestamp(OH_AudioCapturer* capturer,
     Timestamp::Timestampbase base = Timestamp::Timestampbase::MONOTONIC;
     audioCapturer->GetAudioTime(stamp, base);
     *framePosition = stamp.framePosition;
-    *timestamp = stamp.time.tv_nsec;
+    *timestamp = stamp.time.tv_sec * SECOND_TO_NANOSECOND + stamp.time.tv_nsec;
     return AUDIOSTREAM_SUCCESS;
 }
 
@@ -312,9 +314,7 @@ void OHAudioCapturer::SetCapturerCallback(OH_AudioCapturer_Callbacks callbacks, 
 int64_t OHAudioCapturer::GetFramesRead()
 {
     CHECK_AND_RETURN_RET_LOG(audioCapturer_ != nullptr, ERROR, "capturer client is nullptr");
-    uint32_t frameCount = 0;
-    audioCapturer_->GetFrameCount(frameCount);
-    return (int64_t)frameCount;
+    return audioCapturer_->GetFramesRead();
 }
 
 void OHAudioCapturer::GetAudioTime(Timestamp &timestamp, Timestamp::Timestampbase base)
@@ -326,9 +326,9 @@ void OHAudioCapturer::GetAudioTime(Timestamp &timestamp, Timestamp::Timestampbas
 int32_t OHAudioCapturer::GetFrameSizeInCallback()
 {
     CHECK_AND_RETURN_RET_LOG(audioCapturer_ != nullptr, ERROR, "capturer client is nullptr");
-    BufferDesc bufDesc;
-    audioCapturer_->GetBufferDesc(bufDesc);
-    return bufDesc.bufLength;
+    uint32_t frameSize;
+    audioCapturer_->GetFrameCount(frameSize);
+    return static_cast<int32_t>(frameSize);
 }
 
 int32_t OHAudioCapturer::GetBufferDesc(BufferDesc &bufDesc) const

@@ -614,6 +614,7 @@ void FastAudioStream::GetSwitchInfo(IAudioStream::SwitchInfo& info)
     info.eStreamType = eStreamType_;
     info.state = state_;
     info.sessionId = sessionId_;
+    info.cachePath = cachePath_;
 
     info.clientPid = clientPid_;
     info.clientUid = clientUid_;

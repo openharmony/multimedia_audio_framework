@@ -67,8 +67,10 @@ AudioRendererPrivate::~AudioRendererPrivate()
         Release();
     }
 
-    // Unregister the renderer event callaback in policy server
-    (void)AudioPolicyManager::GetInstance().UnregisterAudioRendererEventListener(appInfo_.appPid);
+    if (isFastRenderer_) {
+        // Unregister the renderer event callaback in policy server
+        (void)AudioPolicyManager::GetInstance().UnregisterAudioRendererEventListener(appInfo_.appPid);
+    }
 #ifdef DUMP_CLIENT_PCM
     if (dcp_) {
         fclose(dcp_);
@@ -277,9 +279,14 @@ int32_t AudioRendererPrivate::SetParams(const AudioRendererParams params)
             AUDIO_INFO_LOG("Create stream with STREAM_FLAG_FAST");
             streamClass = IAudioStream::FAST_STREAM;
             isFastRenderer_ = true;
+            DeviceType deviceType = AudioPolicyManager::GetInstance().GetActiveOutputDevice();
+            if (deviceType == DEVICE_TYPE_BLUETOOTH_A2DP) {
+                streamClass = IAudioStream::PA_STREAM;
+            }
         } else {
             AUDIO_ERR_LOG("Unsupported parameter, try to create a normal stream");
             streamClass = IAudioStream::PA_STREAM;
+            isFastRenderer_ = false;
         }
     }
     // check AudioStreamParams for fast stream
@@ -307,7 +314,9 @@ int32_t AudioRendererPrivate::SetParams(const AudioRendererParams params)
     }
     AUDIO_INFO_LOG("AudioRendererPrivate::SetParams SetAudioStreamInfo Succeeded");
 
-    SetSelfRendererStateCallback();
+    if (isFastRenderer_) {
+        SetSelfRendererStateCallback();
+    }
     InitDumpInfo();
 
     return InitAudioInterruptCallback();
@@ -833,6 +842,7 @@ AudioRenderMode AudioRendererPrivate::GetRenderMode() const
 
 int32_t AudioRendererPrivate::GetBufferDesc(BufferDesc &bufDesc) const
 {
+    std::lock_guard<std::mutex> lock(switchStreamMutex_);
     return audioStream_->GetBufferDesc(bufDesc);
 }
 
@@ -843,6 +853,7 @@ int32_t AudioRendererPrivate::Enqueue(const BufferDesc &bufDesc) const
         fwrite((void *)(bufDesc.buffer), 1, bufDesc.bufLength, dcp_);
     }
 #endif
+    std::lock_guard<std::mutex> lock(switchStreamMutex_);
     return audioStream_->Enqueue(bufDesc);
 }
 
@@ -1045,14 +1056,14 @@ void AudioRendererPrivate::SetSwitchInfo(IAudioStream::SwitchInfo info, std::sha
         return;
     }
     audioStream->SetStreamTrackerState(info.streamTrackerRegistered);
-    audioStream->SetAudioStreamInfo(info.params, rendererProxyObj_);
     audioStream->SetApplicationCachePath(info.cachePath);
-    audioStream->SetRenderMode(info.renderMode);
+    audioStream->SetClientID(info.clientPid, info.clientUid);
+    audioStream->SetPrivacyType(info.privacyType);
     audioStream->SetRendererInfo(info.rendererInfo);
     audioStream->SetCapturerInfo(info.capturerInfo);
-    audioStream->SetClientID(info.clientPid, info.clientUid);
+    audioStream->SetAudioStreamInfo(info.params, rendererProxyObj_);
+    audioStream->SetRenderMode(info.renderMode);
     audioStream->SetAudioEffectMode(info.effectMode);
-    audioStream->SetPrivacyType(info.privacyType);
     audioStream->SetVolume(info.volume);
 
     // set callback
@@ -1078,6 +1089,7 @@ void AudioRendererPrivate::SetSwitchInfo(IAudioStream::SwitchInfo info, std::sha
 
 bool AudioRendererPrivate::SwitchToTargetStream(IAudioStream::StreamClass targetClass)
 {
+    std::lock_guard<std::mutex> lock(switchStreamMutex_);
     bool switchResult = false;
     if (audioStream_) {
         Trace trace("SwitchToTargetStream");
@@ -1125,10 +1137,10 @@ void AudioRendererPrivate::SwitchStream(bool isLowLatencyDevice)
         if (currentClass == IAudioStream::FAST_STREAM && !isLowLatencyDevice) {
             needSwitch = true;
             rendererInfo_.rendererFlags = 0; // Normal renderer type
+            targetClass = IAudioStream::PA_STREAM;
         }
         if (currentClass == IAudioStream::PA_STREAM && isLowLatencyDevice) {
-            // Jumping from normal stream to low latency stream is not supported yet.
-            needSwitch = false;
+            needSwitch = true;
             rendererInfo_.rendererFlags = STREAM_FLAG_FAST;
             targetClass = IAudioStream::FAST_STREAM;
         }
@@ -1202,6 +1214,7 @@ void AudioRendererPrivate::SetSelfRendererStateCallback()
 {
     if (GetCurrentOutputDevices(currentDeviceInfo) != SUCCESS) {
         AUDIO_ERR_LOG("get current device info failed");
+        return;
     }
 
     int32_t clientPid = getpid();
@@ -1209,6 +1222,7 @@ void AudioRendererPrivate::SetSelfRendererStateCallback()
         audioDeviceChangeCallback_ = std::make_shared<AudioRendererStateChangeCallbackImpl>();
         if (!audioDeviceChangeCallback_) {
             AUDIO_ERR_LOG("AudioRendererPrivate: Memory Allocation Failed !!");
+            return;
         }
     }
 
@@ -1216,6 +1230,7 @@ void AudioRendererPrivate::SetSelfRendererStateCallback()
         audioDeviceChangeCallback_);
     if (ret != 0) {
         AUDIO_ERR_LOG("AudioRendererPrivate::RegisterAudioRendererEventListener failed");
+        return;
     }
 
     audioDeviceChangeCallback_->setAudioRendererObj(this);

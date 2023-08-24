@@ -48,11 +48,11 @@ static int32_t AudioRendererOnWriteData(OH_AudioRenderer* capturer,
 {
     size_t readCount = fread(buffer, bufferLen, 1, g_file);
     if (!readCount) {
-        g_readEnd = true;
         if (ferror(g_file)) {
             printf("Error reading myfile");
         } else if (feof(g_file)) {
             printf("EOF found");
+            g_readEnd = true;
         }
     }
 
