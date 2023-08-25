@@ -631,7 +631,7 @@ private:
 
     uint32_t underFlowCount;
     int32_t ConnectStreamToPA();
-    const std::string GetDeviceNameForConnect();
+    std::pair<const int32_t, const std::string> GetDeviceNameForConnect();
 
     // Audio cache related functions. These APIs are applicable only for playback scenarios
     int32_t InitializeAudioCache();

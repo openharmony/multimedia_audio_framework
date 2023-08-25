@@ -956,7 +956,7 @@ int32_t AudioPolicyService::SetWakeUpAudioCapturer([[maybe_unused]] InternalAudi
             wakeupCount_ = 0;
         }
         if (wakeupCount_ >= WAKEUP_LIMIT) {
-            return -1;
+            return ERROR;
         }
         wakeupNo = wakeupCount_;
         wakeupCount_++;

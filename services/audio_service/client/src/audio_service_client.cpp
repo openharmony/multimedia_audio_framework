@@ -807,7 +807,7 @@ const std::string AudioServiceClient::GetStreamName(AudioStreamType audioType)
     return streamName;
 }
 
-const string AudioServiceClient::GetDeviceNameForConnect()
+std::pair<const int32_t, const std::string> AudioServiceClient::GetDeviceNameForConnect()
 {
     string deviceName;
     if (eAudioClientType == AUDIO_SERVICE_CLIENT_PLAYBACK) {
@@ -815,31 +815,33 @@ const string AudioServiceClient::GetDeviceNameForConnect()
             clientPid_,
             mStreamType);
         deviceName = (selectDevice.empty() ? "" : selectDevice);
-        return deviceName;
+        return {AUDIO_CLIENT_SUCCESS, deviceName};
     }
 
     if (eAudioClientType == AUDIO_SERVICE_CLIENT_RECORD) {
         if (isInnerCapturerStream_) {
-            return INNER_CAPTURER_SOURCE;
+            return {AUDIO_CLIENT_SUCCESS, INNER_CAPTURER_SOURCE};
         }
 
         if (isWakeupCapturerStream_) {
             int32_t no = AudioPolicyManager::GetInstance().SetWakeUpAudioCapturer({});
             if (no < 0) {
                 AUDIO_ERR_LOG("SetWakeUpAudioCapturer Error! ErrorCode: %{public}d", no);
-                return "noWakeupPermission";
+                return {no, ""};
+            }
+
+            if (no >= WAKEUP_LIMIT) {
+                AUDIO_ERR_LOG("SetWakeUpAudioCapturer Error! client no>=WAKEUP_LIMIT no=: %{public}d", no);
+                return {AUDIO_CLIENT_CREATE_STREAM_ERR, ""};
             }
 
             if (no < WAKEUP_LIMIT) {
                 deviceName = WAKEUP_NAMES[no];
-                return deviceName;
-            } else {
-                AUDIO_ERR_LOG("SetWakeUpAudioCapturer Error! no>=WAKEUP_LIMIT no=: %{public}d", no);
-                return "gtLimit";
+                return {AUDIO_CLIENT_SUCCESS, deviceName};
             }
         }
     }
-    return deviceName;
+    return {AUDIO_CLIENT_SUCCESS, deviceName};
 }
 
 int32_t AudioServiceClient::ConnectStreamToPA()
@@ -853,13 +855,11 @@ int32_t AudioServiceClient::ConnectStreamToPA()
     uint64_t latency_in_msec = AudioSystemManager::GetInstance()->GetAudioLatencyFromXml();
     sinkLatencyInMsec_ = AudioSystemManager::GetInstance()->GetSinkLatencyFromXml();
 
-    const string deviceNameS = GetDeviceNameForConnect();
-    if (deviceNameS == "noWakeupPermission") {
-        return AUDIO_CLIENT_PERMISSION_ERR;
+    auto [errorCode, deviceNameS] = GetDeviceNameForConnect();
+    if (errorCode != AUDIO_CLIENT_SUCCESS) {
+        return errorCode;
     }
-    if (deviceNameS == "gtLimit") {
-        return AUDIO_CLIENT_CREATE_STREAM_ERR;
-    }
+
     const char* deviceName = deviceNameS.empty() ? nullptr : deviceNameS.c_str();
 
     pa_threaded_mainloop_lock(mainLoop);
