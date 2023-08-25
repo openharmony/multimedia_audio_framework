@@ -330,11 +330,23 @@ enum AudioStreamType {
      * Indicates audio streams used for ultrasonic ranging.
      */
     STREAM_ULTRASONIC = 18,
-
     /**
      * Indicates audio streams for wakeup.
      */
     STREAM_WAKEUP = 19,
+    /**
+     * Indicates audio streams for voice message.
+     */
+    STREAM_VOICE_MESSAGE = 20,
+    /**
+     * Indicates audio streams for navigation.
+     */
+    STREAM_NAVIGATION = 21,
+    /**
+     * Indicates the max value of audio stream type (except STREAM_ALL).
+     */
+    STREAM_TYPE_MAX = STREAM_NAVIGATION,
+
     /**
      * Indicates audio streams used for only one volume bar of a device.
      */

@@ -2306,6 +2306,7 @@ AudioVolumeType AudioServiceClient::GetVolumeTypeFromStreamType(AudioStreamType 
 {
     switch (streamType) {
         case STREAM_VOICE_CALL:
+        case STREAM_VOICE_MESSAGE:
             return STREAM_VOICE_CALL;
         case STREAM_RING:
         case STREAM_SYSTEM:
@@ -2318,6 +2319,7 @@ AudioVolumeType AudioServiceClient::GetVolumeTypeFromStreamType(AudioStreamType 
         case STREAM_MOVIE:
         case STREAM_GAME:
         case STREAM_SPEECH:
+        case STREAM_NAVIGATION:
             return STREAM_MUSIC;
         case STREAM_VOICE_ASSISTANT:
             return STREAM_VOICE_ASSISTANT;

@@ -118,14 +118,14 @@ int32_t AudioAdapterManager::SetAudioSessionCallback(AudioSessionCallback *callb
 
 int32_t AudioAdapterManager::GetMaxVolumeLevel(AudioVolumeType volumeType)
 {
-    CHECK_AND_RETURN_RET_LOG(volumeType >= STREAM_VOICE_CALL && volumeType <= STREAM_ULTRASONIC,
+    CHECK_AND_RETURN_RET_LOG(volumeType >= STREAM_VOICE_CALL && volumeType <= STREAM_TYPE_MAX,
         ERR_INVALID_PARAM, "Invalid stream type");
     return maxVolumeIndexMap_[volumeType];
 }
 
 int32_t AudioAdapterManager::GetMinVolumeLevel(AudioVolumeType volumeType)
 {
-    CHECK_AND_RETURN_RET_LOG(volumeType >= STREAM_VOICE_CALL && volumeType <= STREAM_ULTRASONIC,
+    CHECK_AND_RETURN_RET_LOG(volumeType >= STREAM_VOICE_CALL && volumeType <= STREAM_TYPE_MAX,
         ERR_INVALID_PARAM, "Invalid stream type");
     return minVolumeIndexMap_[volumeType];
 }
@@ -224,10 +224,13 @@ int32_t AudioAdapterManager::SetVolumeDb(AudioStreamType streamType)
         return ERR_OPERATION_FAILED;
     }
     AUDIO_INFO_LOG("SetVolumeDb: streamType %{public}d, volumeDb %{public}f", streamType, volumeDb);
-    if (streamType == STREAM_MUSIC) {
+    if (streamType == STREAM_VOICE_CALL) {
+        audioServiceAdapter_->SetVolumeDb(STREAM_VOICE_MESSAGE, volumeDb);
+    } else if (streamType == STREAM_MUSIC) {
         audioServiceAdapter_->SetVolumeDb(STREAM_MOVIE, volumeDb);
         audioServiceAdapter_->SetVolumeDb(STREAM_GAME, volumeDb);
         audioServiceAdapter_->SetVolumeDb(STREAM_SPEECH, volumeDb);
+        audioServiceAdapter_->SetVolumeDb(STREAM_NAVIGATION, volumeDb);
     } else if (streamType == STREAM_RING) {
         audioServiceAdapter_->SetVolumeDb(STREAM_SYSTEM, volumeDb);
         audioServiceAdapter_->SetVolumeDb(STREAM_NOTIFICATION, volumeDb);
@@ -753,6 +756,7 @@ AudioStreamType AudioAdapterManager::GetStreamForVolumeMap(AudioStreamType strea
 {
     switch (streamType) {
         case STREAM_VOICE_CALL:
+        case STREAM_VOICE_MESSAGE:
             return STREAM_VOICE_CALL;
         case STREAM_RING:
         case STREAM_SYSTEM:
@@ -765,6 +769,7 @@ AudioStreamType AudioAdapterManager::GetStreamForVolumeMap(AudioStreamType strea
         case STREAM_MOVIE:
         case STREAM_GAME:
         case STREAM_SPEECH:
+        case STREAM_NAVIGATION:
             return STREAM_MUSIC;
         case STREAM_VOICE_ASSISTANT:
             return STREAM_VOICE_ASSISTANT;

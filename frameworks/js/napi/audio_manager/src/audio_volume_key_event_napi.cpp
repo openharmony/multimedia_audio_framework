@@ -102,6 +102,7 @@ static int32_t GetJsAudioVolumeType(AudioStreamType streamType)
     int32_t result = AudioManagerNapi::VOLUMETYPE_DEFAULT;
     switch (nativeStreamType) {
         case AudioStreamType::STREAM_VOICE_CALL:
+        case AudioStreamType::STREAM_VOICE_MESSAGE:
             result = AudioManagerNapi::VOICE_CALL;
             break;
         case AudioStreamType::STREAM_RING:
@@ -116,6 +117,7 @@ static int32_t GetJsAudioVolumeType(AudioStreamType streamType)
         case AudioStreamType::STREAM_MOVIE:
         case AudioStreamType::STREAM_GAME:
         case AudioStreamType::STREAM_SPEECH:
+        case AudioStreamType::STREAM_NAVIGATION:
             result = AudioManagerNapi::MEDIA;
             break;
         case AudioStreamType::STREAM_ALARM:

@@ -299,6 +299,7 @@ AudioVolumeType AudioPolicyServer::GetVolumeTypeFromStreamType(AudioStreamType s
 {
     switch (streamType) {
         case STREAM_VOICE_CALL:
+        case STREAM_VOICE_MESSAGE:
             return STREAM_VOICE_CALL;
         case STREAM_RING:
         case STREAM_SYSTEM:
@@ -311,6 +312,7 @@ AudioVolumeType AudioPolicyServer::GetVolumeTypeFromStreamType(AudioStreamType s
         case STREAM_MOVIE:
         case STREAM_GAME:
         case STREAM_SPEECH:
+        case STREAM_NAVIGATION:
             return STREAM_MUSIC;
         case STREAM_VOICE_ASSISTANT:
             return STREAM_VOICE_ASSISTANT;
@@ -1788,7 +1790,7 @@ void AudioPolicyServer::GetPolicyData(PolicyData &policyData)
     policyData.callStatus = GetAudioScene();
 
     // Get stream volumes
-    for (int stream = AudioStreamType::STREAM_VOICE_CALL; stream <= AudioStreamType::STREAM_ULTRASONIC; stream++) {
+    for (int stream = AudioStreamType::STREAM_VOICE_CALL; stream <= AudioStreamType::STREAM_TYPE_MAX; stream++) {
         AudioStreamType streamType = (AudioStreamType)stream;
 
         if (AudioServiceDump::IsStreamSupported(streamType)) {

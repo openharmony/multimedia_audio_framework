@@ -104,6 +104,7 @@ map<pair<ContentType, StreamUsage>, AudioStreamType> AudioSystemManager::CreateS
     streamMap[make_pair(CONTENT_TYPE_UNKNOWN, STREAM_USAGE_VOICE_MODEM_COMMUNICATION)] = STREAM_VOICE_CALL;
     streamMap[make_pair(CONTENT_TYPE_UNKNOWN, STREAM_USAGE_VOICE_ASSISTANT)] = STREAM_VOICE_ASSISTANT;
     streamMap[make_pair(CONTENT_TYPE_UNKNOWN, STREAM_USAGE_ALARM)] = STREAM_ALARM;
+    streamMap[make_pair(CONTENT_TYPE_UNKNOWN, STREAM_USAGE_VOICE_MESSAGE)] = STREAM_VOICE_MESSAGE;
     streamMap[make_pair(CONTENT_TYPE_UNKNOWN, STREAM_USAGE_NOTIFICATION_RINGTONE)] = STREAM_RING;
     streamMap[make_pair(CONTENT_TYPE_UNKNOWN, STREAM_USAGE_RINGTONE)] = STREAM_RING;
     streamMap[make_pair(CONTENT_TYPE_UNKNOWN, STREAM_USAGE_NOTIFICATION)] = STREAM_NOTIFICATION;
@@ -112,6 +113,7 @@ map<pair<ContentType, StreamUsage>, AudioStreamType> AudioSystemManager::CreateS
     streamMap[make_pair(CONTENT_TYPE_UNKNOWN, STREAM_USAGE_MOVIE)] = STREAM_MOVIE;
     streamMap[make_pair(CONTENT_TYPE_UNKNOWN, STREAM_USAGE_GAME)] = STREAM_GAME;
     streamMap[make_pair(CONTENT_TYPE_UNKNOWN, STREAM_USAGE_AUDIOBOOK)] = STREAM_SPEECH;
+    streamMap[make_pair(CONTENT_TYPE_UNKNOWN, STREAM_USAGE_NAVIGATION)] = STREAM_NAVIGATION;
     streamMap[make_pair(CONTENT_TYPE_UNKNOWN, STREAM_USAGE_DTMF)] = STREAM_DTMF;
     streamMap[make_pair(CONTENT_TYPE_UNKNOWN, STREAM_USAGE_ENFORCED_TONE)] = STREAM_SYSTEM_ENFORCED;
     streamMap[make_pair(CONTENT_TYPE_UNKNOWN, STREAM_USAGE_ULTRASONIC)] = STREAM_ULTRASONIC;
@@ -255,11 +257,21 @@ bool AudioSystemManager::IsStreamActive(AudioVolumeType volumeType) const
     switch (volumeType) {
         case STREAM_MUSIC:
         case STREAM_RING:
+        case STREAM_NOTIFICATION:
         case STREAM_VOICE_CALL:
         case STREAM_VOICE_ASSISTANT:
+        case STREAM_ALARM:
+        case STREAM_ACCESSIBILITY:
             break;
+        case STREAM_ULTRASONIC:
+            if (!PermissionUtil::VerifySelfPermission()) {
+                AUDIO_ERR_LOG("IsStreamActive: volumeType=%{public}d. No system permission", volumeType);
+                return false;
+            }
+            break;
+        case STREAM_ALL:
         default:
-            AUDIO_ERR_LOG("IsStreamActive volumeType=%{public}d not supported", volumeType);
+            AUDIO_ERR_LOG("IsStreamActive: volumeType=%{public}d not supported", volumeType);
             return false;
     }
 
@@ -928,15 +940,12 @@ int32_t AudioSystemManager::RequestAudioFocus(const AudioInterrupt &audioInterru
 {
     int32_t clientId = GetCallingPid();
     AUDIO_INFO_LOG("RequestAudioFocus client id: %{public}d", clientId);
-    CHECK_AND_RETURN_RET_LOG(audioInterrupt.contentType >= CONTENT_TYPE_UNKNOWN
-                             && audioInterrupt.contentType <= CONTENT_TYPE_ULTRASONIC, ERR_INVALID_PARAM,
-                             "Invalid content type");
-    CHECK_AND_RETURN_RET_LOG(audioInterrupt.streamUsage >= STREAM_USAGE_UNKNOWN
-                             && audioInterrupt.streamUsage <= STREAM_USAGE_SYSTEM,
-                             ERR_INVALID_PARAM, "Invalid stream usage");
-    CHECK_AND_RETURN_RET_LOG(audioInterrupt.audioFocusType.streamType >= AudioStreamType::STREAM_VOICE_CALL
-                             && audioInterrupt.audioFocusType.streamType <= AudioStreamType::STREAM_ULTRASONIC,
-                             ERR_INVALID_PARAM, "Invalid stream type");
+    CHECK_AND_RETURN_RET_LOG(audioInterrupt.contentType >= CONTENT_TYPE_UNKNOWN &&
+        audioInterrupt.contentType <= CONTENT_TYPE_ULTRASONIC, ERR_INVALID_PARAM, "Invalid content type");
+    CHECK_AND_RETURN_RET_LOG(audioInterrupt.streamUsage >= STREAM_USAGE_UNKNOWN &&
+        audioInterrupt.streamUsage <= STREAM_USAGE_ULTRASONIC, ERR_INVALID_PARAM, "Invalid stream usage");
+    CHECK_AND_RETURN_RET_LOG(audioInterrupt.audioFocusType.streamType >= STREAM_VOICE_CALL &&
+        audioInterrupt.audioFocusType.streamType <= STREAM_TYPE_MAX, ERR_INVALID_PARAM, "Invalid stream type");
     return AudioPolicyManager::GetInstance().RequestAudioFocus(clientId, audioInterrupt);
 }
 
@@ -944,15 +953,12 @@ int32_t AudioSystemManager::AbandonAudioFocus(const AudioInterrupt &audioInterru
 {
     int32_t clientId = GetCallingPid();
     AUDIO_INFO_LOG("AbandonAudioFocus client id: %{public}d", clientId);
-    CHECK_AND_RETURN_RET_LOG(audioInterrupt.contentType >= CONTENT_TYPE_UNKNOWN
-                             && audioInterrupt.contentType <= CONTENT_TYPE_ULTRASONIC, ERR_INVALID_PARAM,
-                             "Invalid content type");
-    CHECK_AND_RETURN_RET_LOG(audioInterrupt.streamUsage >= STREAM_USAGE_UNKNOWN
-                             && audioInterrupt.streamUsage <= STREAM_USAGE_SYSTEM,
-                             ERR_INVALID_PARAM, "Invalid stream usage");
-    CHECK_AND_RETURN_RET_LOG(audioInterrupt.audioFocusType.streamType >= AudioStreamType::STREAM_VOICE_CALL
-                             && audioInterrupt.audioFocusType.streamType <= AudioStreamType::STREAM_ULTRASONIC,
-                             ERR_INVALID_PARAM, "Invalid stream type");
+    CHECK_AND_RETURN_RET_LOG(audioInterrupt.contentType >= CONTENT_TYPE_UNKNOWN &&
+        audioInterrupt.contentType <= CONTENT_TYPE_ULTRASONIC, ERR_INVALID_PARAM, "Invalid content type");
+    CHECK_AND_RETURN_RET_LOG(audioInterrupt.streamUsage >= STREAM_USAGE_UNKNOWN &&
+        audioInterrupt.streamUsage <= STREAM_USAGE_ULTRASONIC, ERR_INVALID_PARAM, "Invalid stream usage");
+    CHECK_AND_RETURN_RET_LOG(audioInterrupt.audioFocusType.streamType >= STREAM_VOICE_CALL &&
+        audioInterrupt.audioFocusType.streamType <= STREAM_TYPE_MAX, ERR_INVALID_PARAM, "Invalid stream type");
     return AudioPolicyManager::GetInstance().AbandonAudioFocus(clientId, audioInterrupt);
 }
 

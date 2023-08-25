@@ -24,12 +24,14 @@ AudioFocusParser::AudioFocusParser()
     audioFocusMap = {
         // stream type for audio interrupt
         {"STREAM_VOICE_CALL", {AudioStreamType::STREAM_VOICE_CALL, SourceType::SOURCE_TYPE_INVALID, true}},
+        {"STREAM_VOICE_MESSAGE", {AudioStreamType::STREAM_VOICE_MESSAGE, SourceType::SOURCE_TYPE_INVALID, true}},
         {"STREAM_SYSTEM", {AudioStreamType::STREAM_SYSTEM, SourceType::SOURCE_TYPE_INVALID, true}},
         {"STREAM_RING", {AudioStreamType::STREAM_RING, SourceType::SOURCE_TYPE_INVALID, true}},
         {"STREAM_MUSIC", {AudioStreamType::STREAM_MUSIC, SourceType::SOURCE_TYPE_INVALID, true}},
         {"STREAM_MOVIE", {AudioStreamType::STREAM_MOVIE, SourceType::SOURCE_TYPE_INVALID, true}},
         {"STREAM_GAME", {AudioStreamType::STREAM_GAME, SourceType::SOURCE_TYPE_INVALID, true}},
         {"STREAM_SPEECH", {AudioStreamType::STREAM_SPEECH, SourceType::SOURCE_TYPE_INVALID, true}},
+        {"STREAM_NAVIGATION", {AudioStreamType::STREAM_NAVIGATION, SourceType::SOURCE_TYPE_INVALID, true}},
         {"STREAM_ALARM", {AudioStreamType::STREAM_ALARM, SourceType::SOURCE_TYPE_INVALID, true}},
         {"STREAM_NOTIFICATION", {AudioStreamType::STREAM_NOTIFICATION, SourceType::SOURCE_TYPE_INVALID, true}},
         {"STREAM_SYSTEM_ENFORCED", {AudioStreamType::STREAM_SYSTEM_ENFORCED, SourceType::SOURCE_TYPE_INVALID, true}},

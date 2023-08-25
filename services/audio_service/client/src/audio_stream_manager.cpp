@@ -13,10 +13,12 @@
  * limitations under the License.
  */
 
-#include "audio_errors.h"
-#include "audio_policy_manager.h"
-#include "audio_log.h"
 #include "audio_stream_manager.h"
+
+#include "audio_errors.h"
+#include "audio_log.h"
+#include "audio_policy_manager.h"
+#include "audio_utils.h"
 #include "i_audio_stream.h"
 
 namespace OHOS {
@@ -136,11 +138,21 @@ bool AudioStreamManager::IsStreamActive(AudioVolumeType volumeType) const
     switch (volumeType) {
         case STREAM_MUSIC:
         case STREAM_RING:
+        case STREAM_NOTIFICATION:
         case STREAM_VOICE_CALL:
         case STREAM_VOICE_ASSISTANT:
+        case STREAM_ALARM:
+        case STREAM_ACCESSIBILITY:
             break;
+        case STREAM_ULTRASONIC:
+            if (!PermissionUtil::VerifySelfPermission()) {
+                AUDIO_ERR_LOG("IsStreamActive: volumeType=%{public}d. No system permission", volumeType);
+                return false;
+            }
+            break;
+        case STREAM_ALL:
         default:
-            AUDIO_ERR_LOG("IsStreamActive volumeType=%{public}d not supported", volumeType);
+            AUDIO_ERR_LOG("IsStreamActive: volumeType=%{public}d not supported", volumeType);
             return false;
     }
 
