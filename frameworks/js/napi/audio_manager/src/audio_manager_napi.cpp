@@ -552,6 +552,7 @@ napi_value AudioManagerNapi::Init(napi_env env, napi_value exports)
         DECLARE_NAPI_FUNCTION("isMicrophoneMute", IsMicrophoneMute),
         DECLARE_NAPI_FUNCTION("setAudioScene", SetAudioScene),
         DECLARE_NAPI_FUNCTION("getAudioScene", GetAudioScene),
+        DECLARE_NAPI_FUNCTION("getAudioSceneSync", GetAudioSceneSync),
         DECLARE_NAPI_FUNCTION("on", On),
         DECLARE_NAPI_FUNCTION("off", Off),
         DECLARE_NAPI_FUNCTION("requestIndependentInterrupt", RequestIndependentInterrupt),
@@ -1268,6 +1269,34 @@ napi_value AudioManagerNapi::GetAudioScene(napi_env env, napi_callback_info info
         }
     }
 
+    return result;
+}
+
+napi_value AudioManagerNapi::GetAudioSceneSync(napi_env env, napi_callback_info info)
+{
+    napi_status status;
+    napi_value thisVar = nullptr;
+    napi_value result = nullptr;
+    size_t argCount = 0;
+    void *native = nullptr;
+
+    status = napi_get_cb_info(env, info, &argCount, nullptr, &thisVar, nullptr);
+    if (status != napi_ok) {
+        AUDIO_ERR_LOG("Invalid parameters!");
+        return result;
+    }
+
+    status = napi_unwrap(env, thisVar, &native);
+    auto *audioManagerNapi = reinterpret_cast<AudioManagerNapi *>(native);
+    if (status != napi_ok || audioManagerNapi == nullptr) {
+        AUDIO_ERR_LOG("GetAudioSceneSync unwrap failure!");
+        return result;
+    }
+
+    AudioScene audioScene = audioManagerNapi->audioMngr_->GetAudioScene();
+    napi_create_int32(env, audioScene, &result);
+
+    AUDIO_INFO_LOG("GetAudioSceneSync is successful");
     return result;
 }
 

@@ -296,6 +296,39 @@ napi_value TonePlayerNapi::CreateTonePlayer(napi_env env, napi_callback_info inf
     return result;
 }
 
+napi_value TonePlayerNapi::CreateTonePlayerSync(napi_env env, napi_callback_info info)
+{
+    HiLog::Info(LABEL, "%{public}s IN", __func__);
+    napi_value result = nullptr;
+
+    GET_PARAMS(env, info, ARGS_ONE);
+
+    if (argc < ARGS_ONE) {
+        AudioCommonNapi::throwError(env, NAPI_ERR_INPUT_INVALID);
+        return result;
+    }
+
+    napi_valuetype valueType = napi_undefined;
+    napi_typeof(env, argv[PARAM0], &valueType);
+    if (valueType != napi_object) {
+        AudioCommonNapi::throwError(env, NAPI_ERR_INPUT_INVALID);
+        return result;
+    }
+
+    AudioRendererInfo rendererInfo;
+    if (!ParseRendererInfo(env, argv[PARAM0], &rendererInfo)) {
+        AudioCommonNapi::throwError(env, NAPI_ERR_INVALID_PARAM);
+        return result;
+    }
+
+    unique_ptr<AudioRendererInfo> audioRendererInfo = make_unique<AudioRendererInfo>();
+    audioRendererInfo->contentType = rendererInfo.contentType;
+    audioRendererInfo->streamUsage = rendererInfo.streamUsage;
+    audioRendererInfo->rendererFlags = rendererInfo.rendererFlags;
+
+    return TonePlayerNapi::CreateTonePlayerWrapper(env, audioRendererInfo);
+}
+
 static shared_ptr<AbilityRuntime::Context> GetAbilityContext(napi_env env)
 {
     HiLog::Info(LABEL, "Getting context with FA model");
@@ -658,6 +691,7 @@ napi_value TonePlayerNapi::Init(napi_env env, napi_value exports)
 
     napi_property_descriptor static_prop[] = {
         DECLARE_NAPI_STATIC_FUNCTION("createTonePlayer", CreateTonePlayer),
+        DECLARE_NAPI_STATIC_FUNCTION("createTonePlayerSync", CreateTonePlayerSync),
         DECLARE_NAPI_PROPERTY("ToneType", CreateToneTypeObject(env)),
     };
 

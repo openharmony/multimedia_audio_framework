@@ -82,6 +82,7 @@ private:
     static napi_value GetRingerMode(napi_env env, napi_callback_info info);
     static napi_value SetAudioScene(napi_env env, napi_callback_info info);
     static napi_value GetAudioScene(napi_env env, napi_callback_info info);
+    static napi_value GetAudioSceneSync(napi_env env, napi_callback_info info);
     static napi_value SetDeviceActive(napi_env env, napi_callback_info info);
     static napi_value IsDeviceActive(napi_env env, napi_callback_info info);
     static napi_value SetAudioParameter(napi_env env, napi_callback_info info);

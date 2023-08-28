@@ -46,20 +46,27 @@ private:
     static void Destructor(napi_env env, void *nativeObject, void *finalize_hint);
     static napi_value Construct(napi_env env, napi_callback_info info);
     static napi_value GetVolume(napi_env env, napi_callback_info info);
+    static napi_value GetVolumeSync(napi_env env, napi_callback_info info);
     static napi_value SetVolume(napi_env env, napi_callback_info info);
     static napi_value GetMaxVolume(napi_env env, napi_callback_info info);
+    static napi_value GetMaxVolumeSync(napi_env env, napi_callback_info info);
     static napi_value GetMinVolume(napi_env env, napi_callback_info info);
+    static napi_value GetMinVolumeSync(napi_env env, napi_callback_info info);
     static napi_value SetMute(napi_env env, napi_callback_info info);
     static napi_value IsStreamMute(napi_env env, napi_callback_info info);
+    static napi_value IsStreamMuteSync(napi_env env, napi_callback_info info);
     static napi_value SetRingerMode(napi_env env, napi_callback_info info);
     static napi_value GetRingerMode(napi_env env, napi_callback_info info);
+    static napi_value GetRingerModeSync(napi_env env, napi_callback_info info);
     static napi_value SetMicrophoneMute(napi_env env, napi_callback_info info);
     static napi_value IsMicrophoneMute(napi_env env, napi_callback_info info);
+    static napi_value IsMicrophoneMuteSync(napi_env env, napi_callback_info info);
     static napi_value On(napi_env env, napi_callback_info info);
     static napi_value IsVolumeUnadjustable(napi_env env, napi_callback_info info);
     static napi_value AdjustVolumeByStep(napi_env env, napi_callback_info info);
     static napi_value AdjustSystemVolumeByStep(napi_env env, napi_callback_info info);
     static napi_value GetSystemVolumeInDb(napi_env env, napi_callback_info info);
+    static napi_value GetSystemVolumeInDbSync(napi_env env, napi_callback_info info);
     std::shared_ptr<AudioGroupManager> audioGroupMngr_ = nullptr;
     int32_t cachedClientId_ = -1;
 

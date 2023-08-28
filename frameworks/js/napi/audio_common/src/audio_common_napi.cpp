@@ -274,5 +274,20 @@ bool AudioCommonNapi::IsLegalInputArgumentDeviceType(int32_t deviceType)
     }
     return result;
 }
+
+bool AudioCommonNapi::IsLegalInputArgumentInterruptMode(int32_t interruptMode)
+{
+    bool result = false;
+    switch (interruptMode) {
+        case InterruptMode::SHARE_MODE:
+        case InterruptMode::INDEPENDENT_MODE:
+            result = true;
+            break;
+        default:
+            result = false;
+            break;
+    }
+    return result;
+}
 }  // namespace AudioStandard
 }  // namespace OHOS

@@ -411,6 +411,46 @@ napi_value AudioVolumeGroupManagerNapi::GetVolume(napi_env env, napi_callback_in
     return result;
 }
 
+napi_value AudioVolumeGroupManagerNapi::GetVolumeSync(napi_env env, napi_callback_info info)
+{
+    napi_status status;
+    napi_value result = nullptr;
+    void *native = nullptr;
+
+    GET_PARAMS(env, info, ARGS_ONE);
+
+    if (argc < ARGS_ONE) {
+        AudioCommonNapi::throwError(env, NAPI_ERR_INPUT_INVALID);
+        return result;
+    }
+
+    status = napi_unwrap(env, thisVar, &native);
+    auto *audioVolumeGroupManagerNapi = reinterpret_cast<AudioVolumeGroupManagerNapi *>(native);
+    if (status != napi_ok || audioVolumeGroupManagerNapi == nullptr) {
+        AUDIO_ERR_LOG("GetVolumeSync unwrap failure!");
+        return result;
+    }
+
+    napi_valuetype valueType = napi_undefined;
+    napi_typeof(env, argv[PARAM0], &valueType);
+    if (valueType != napi_number) {
+        AudioCommonNapi::throwError(env, NAPI_ERR_INPUT_INVALID);
+        return result;
+    }
+
+    int32_t volType;
+    napi_get_value_int32(env, argv[PARAM0], &volType);
+    if (!AudioCommonNapi::IsLegalInputArgumentVolType(volType)) {
+        AudioCommonNapi::throwError(env, NAPI_ERR_INVALID_PARAM);
+        return result;
+    }
+
+    int32_t volLevel = audioVolumeGroupManagerNapi->audioGroupMngr_->GetVolume(GetNativeAudioVolumeType(volType));
+    napi_create_int32(env, volLevel, &result);
+
+    return result;
+}
+
 napi_value AudioVolumeGroupManagerNapi::SetVolume(napi_env env, napi_callback_info info)
 {
     napi_status status;
@@ -558,6 +598,46 @@ napi_value AudioVolumeGroupManagerNapi::GetMaxVolume(napi_env env, napi_callback
     return result;
 }
 
+napi_value AudioVolumeGroupManagerNapi::GetMaxVolumeSync(napi_env env, napi_callback_info info)
+{
+    napi_status status;
+    napi_value result = nullptr;
+    void *native = nullptr;
+
+    GET_PARAMS(env, info, ARGS_ONE);
+
+    if (argc < ARGS_ONE) {
+        AudioCommonNapi::throwError(env, NAPI_ERR_INPUT_INVALID);
+        return result;
+    }
+
+    status = napi_unwrap(env, thisVar, &native);
+    auto *audioVolumeGroupManagerNapi = reinterpret_cast<AudioVolumeGroupManagerNapi *>(native);
+    if (status != napi_ok || audioVolumeGroupManagerNapi == nullptr) {
+        AUDIO_ERR_LOG("GetMaxVolumeSync unwrap failure!");
+        return result;
+    }
+
+    napi_valuetype valueType = napi_undefined;
+    napi_typeof(env, argv[PARAM0], &valueType);
+    if (valueType != napi_number) {
+        AudioCommonNapi::throwError(env, NAPI_ERR_INPUT_INVALID);
+        return result;
+    }
+
+    int32_t volType;
+    napi_get_value_int32(env, argv[PARAM0], &volType);
+    if (!AudioCommonNapi::IsLegalInputArgumentVolType(volType)) {
+        AudioCommonNapi::throwError(env, NAPI_ERR_INVALID_PARAM);
+        return result;
+    }
+
+    int32_t volLevel = audioVolumeGroupManagerNapi->audioGroupMngr_->GetMaxVolume(GetNativeAudioVolumeType(volType));
+    napi_create_int32(env, volLevel, &result);
+
+    return result;
+}
+
 napi_value AudioVolumeGroupManagerNapi::GetMinVolume(napi_env env, napi_callback_info info)
 {
     napi_status status;
@@ -626,6 +706,46 @@ napi_value AudioVolumeGroupManagerNapi::GetMinVolume(napi_env env, napi_callback
             }
         }
     }
+
+    return result;
+}
+
+napi_value AudioVolumeGroupManagerNapi::GetMinVolumeSync(napi_env env, napi_callback_info info)
+{
+    napi_status status;
+    napi_value result = nullptr;
+    void *native = nullptr;
+
+    GET_PARAMS(env, info, ARGS_ONE);
+
+    if (argc < ARGS_ONE) {
+        AudioCommonNapi::throwError(env, NAPI_ERR_INPUT_INVALID);
+        return result;
+    }
+
+    status = napi_unwrap(env, thisVar, &native);
+    auto *audioVolumeGroupManagerNapi = reinterpret_cast<AudioVolumeGroupManagerNapi *>(native);
+    if (status != napi_ok || audioVolumeGroupManagerNapi == nullptr) {
+        AUDIO_ERR_LOG("GetMinVolumeSync unwrap failure!");
+        return result;
+    }
+
+    napi_valuetype valueType = napi_undefined;
+    napi_typeof(env, argv[PARAM0], &valueType);
+    if (valueType != napi_number) {
+        AudioCommonNapi::throwError(env, NAPI_ERR_INPUT_INVALID);
+        return result;
+    }
+
+    int32_t volType;
+    napi_get_value_int32(env, argv[PARAM0], &volType);
+    if (!AudioCommonNapi::IsLegalInputArgumentVolType(volType)) {
+        AudioCommonNapi::throwError(env, NAPI_ERR_INVALID_PARAM);
+        return result;
+    }
+
+    int32_t volLevel = audioVolumeGroupManagerNapi->audioGroupMngr_->GetMinVolume(GetNativeAudioVolumeType(volType));
+    napi_create_int32(env, volLevel, &result);
 
     return result;
 }
@@ -770,6 +890,52 @@ napi_value AudioVolumeGroupManagerNapi::IsStreamMute(napi_env env, napi_callback
     return result;
 }
 
+napi_value AudioVolumeGroupManagerNapi::IsStreamMuteSync(napi_env env, napi_callback_info info)
+{
+    napi_status status;
+    napi_value result = nullptr;
+    void *native = nullptr;
+
+    GET_PARAMS(env, info, ARGS_ONE);
+
+    if (argc < ARGS_ONE) {
+        AudioCommonNapi::throwError(env, NAPI_ERR_INPUT_INVALID);
+        return result;
+    }
+
+    status = napi_unwrap(env, thisVar, &native);
+    auto *audioVolumeGroupManagerNapi = reinterpret_cast<AudioVolumeGroupManagerNapi *>(native);
+    if (status != napi_ok || audioVolumeGroupManagerNapi == nullptr) {
+        AUDIO_ERR_LOG("IsStreamMuteSync unwrap failure!");
+        return result;
+    }
+
+    napi_valuetype valueType = napi_undefined;
+    napi_typeof(env, argv[PARAM0], &valueType);
+    if (valueType != napi_number) {
+        AudioCommonNapi::throwError(env, NAPI_ERR_INPUT_INVALID);
+        return result;
+    }
+
+    int32_t volType;
+    napi_get_value_int32(env, argv[PARAM0], &volType);
+    if (!AudioCommonNapi::IsLegalInputArgumentVolType(volType)) {
+        AudioCommonNapi::throwError(env, NAPI_ERR_INVALID_PARAM);
+        return result;
+    }
+
+    bool isMute;
+    int32_t ret = audioVolumeGroupManagerNapi->audioGroupMngr_->IsStreamMute(
+        GetNativeAudioVolumeType(volType), isMute);
+    if (ret != SUCCESS) {
+        AUDIO_ERR_LOG("IsStreamMute failure!");
+        return result;
+    }
+    napi_get_boolean(env, isMute, &result);
+
+    return result;
+}
+
 napi_value AudioVolumeGroupManagerNapi::SetRingerMode(napi_env env, napi_callback_info info)
 {
     HiLog::Info(LABEL, " %{public}s IN", __func__);
@@ -896,6 +1062,34 @@ napi_value AudioVolumeGroupManagerNapi::GetRingerMode(napi_env env, napi_callbac
     return result;
 }
 
+napi_value AudioVolumeGroupManagerNapi::GetRingerModeSync(napi_env env, napi_callback_info info)
+{
+    HiLog::Info(LABEL, " %{public}s IN", __func__);
+    napi_status status;
+    napi_value thisVar = nullptr;
+    napi_value result = nullptr;
+    size_t argCount = 0;
+    void *native = nullptr;
+
+    status = napi_get_cb_info(env, info, &argCount, nullptr, &thisVar, nullptr);
+    if (status != napi_ok) {
+        AUDIO_ERR_LOG("Invalid parameters!");
+        return result;
+    }
+
+    status = napi_unwrap(env, thisVar, &native);
+    auto *audioVolumeGroupManagerNapi = reinterpret_cast<AudioVolumeGroupManagerNapi *>(native);
+    if (status != napi_ok || audioVolumeGroupManagerNapi == nullptr) {
+        AUDIO_ERR_LOG("GetRingerModeSync unwrap failure!");
+        return result;
+    }
+
+    AudioRingerMode ringerMode = audioVolumeGroupManagerNapi->audioGroupMngr_->GetRingerMode();
+    napi_create_int32(env, ringerMode, &result);
+
+    return result;
+}
+
 
 napi_value AudioVolumeGroupManagerNapi::SetMicrophoneMute(napi_env env, napi_callback_info info)
 {
@@ -1011,6 +1205,33 @@ napi_value AudioVolumeGroupManagerNapi::IsMicrophoneMute(napi_env env, napi_call
             }
         }
     }
+
+    return result;
+}
+
+napi_value AudioVolumeGroupManagerNapi::IsMicrophoneMuteSync(napi_env env, napi_callback_info info)
+{
+    napi_status status;
+    napi_value thisVar = nullptr;
+    napi_value result = nullptr;
+    size_t argCount = 0;
+    void *native = nullptr;
+
+    status = napi_get_cb_info(env, info, &argCount, nullptr, &thisVar, nullptr);
+    if (status != napi_ok) {
+        AUDIO_ERR_LOG("Invalid parameters!");
+        return result;
+    }
+
+    status = napi_unwrap(env, thisVar, &native);
+    auto *audioVolumeGroupManagerNapi = reinterpret_cast<AudioVolumeGroupManagerNapi *>(native);
+    if (status != napi_ok || audioVolumeGroupManagerNapi == nullptr) {
+        AUDIO_ERR_LOG("IsMicrophoneMuteSync unwrap failure!");
+        return result;
+    }
+
+    bool isMute = audioVolumeGroupManagerNapi->audioGroupMngr_->IsMicrophoneMute();
+    napi_get_boolean(env, isMute, &result);
 
     return result;
 }
@@ -1400,6 +1621,61 @@ napi_value AudioVolumeGroupManagerNapi::GetSystemVolumeInDb(napi_env env, napi_c
     return result;
 }
 
+napi_value AudioVolumeGroupManagerNapi::GetSystemVolumeInDbSync(napi_env env, napi_callback_info info)
+{
+    napi_status status;
+    napi_value result = nullptr;
+    void *native = nullptr;
+
+    GET_PARAMS(env, info, ARGS_THREE);
+
+    if (argc < ARGS_THREE) {
+        AudioCommonNapi::throwError(env, NAPI_ERR_INPUT_INVALID);
+        return result;
+    }
+
+    status = napi_unwrap(env, thisVar, &native);
+    auto *audioVolumeGroupManagerNapi = reinterpret_cast<AudioVolumeGroupManagerNapi *>(native);
+    if (status != napi_ok || audioVolumeGroupManagerNapi == nullptr) {
+        AUDIO_ERR_LOG("GetSystemVolumeInDbSync unwrap failure!");
+        return result;
+    }
+
+    int32_t volType;
+    int32_t volLevel;
+    int32_t deviceType;
+    for (size_t i = PARAM0; i < argc; i++) {
+        napi_valuetype valueType = napi_undefined;
+        napi_typeof(env, argv[i], &valueType);
+        if (valueType != napi_number) {
+            AudioCommonNapi::throwError(env, NAPI_ERR_INPUT_INVALID);
+            return result;
+        }
+
+        bool isLegalInput = false;
+        if (i == PARAM0) {
+            napi_get_value_int32(env, argv[i], &volType);
+            isLegalInput = AudioCommonNapi::IsLegalInputArgumentVolType(volType);
+        } else if (i == PARAM1) {
+            napi_get_value_int32(env, argv[i], &volLevel);
+            isLegalInput = AudioCommonNapi::IsLegalInputArgumentVolLevel(volLevel);
+        } else if (i == PARAM2) {
+            napi_get_value_int32(env, argv[i], &deviceType);
+            isLegalInput = AudioCommonNapi::IsLegalInputArgumentDeviceType(deviceType);
+        }
+        if (!isLegalInput) {
+            AudioCommonNapi::throwError(env, NAPI_ERR_INVALID_PARAM);
+            return result;
+        }
+    }
+
+    double volumeInDb = audioVolumeGroupManagerNapi->audioGroupMngr_->GetSystemVolumeInDb(
+        GetNativeAudioVolumeType(volType), volLevel, static_cast<DeviceType>(deviceType));
+    napi_create_double(env, volumeInDb, &result);
+
+    return result;
+}
+
 napi_value AudioVolumeGroupManagerNapi::Init(napi_env env, napi_value exports)
 {
     AUDIO_INFO_LOG("Init");
@@ -1412,19 +1688,26 @@ napi_value AudioVolumeGroupManagerNapi::Init(napi_env env, napi_value exports)
     napi_property_descriptor audio_svc_group_mngr_properties[] = {
         DECLARE_NAPI_FUNCTION("setVolume", AudioVolumeGroupManagerNapi::SetVolume),
         DECLARE_NAPI_FUNCTION("getVolume", AudioVolumeGroupManagerNapi::GetVolume),
+        DECLARE_NAPI_FUNCTION("getVolumeSync", AudioVolumeGroupManagerNapi::GetVolumeSync),
         DECLARE_NAPI_FUNCTION("getMaxVolume", AudioVolumeGroupManagerNapi::GetMaxVolume),
+        DECLARE_NAPI_FUNCTION("getMaxVolumeSync", AudioVolumeGroupManagerNapi::GetMaxVolumeSync),
         DECLARE_NAPI_FUNCTION("getMinVolume", AudioVolumeGroupManagerNapi::GetMinVolume),
+        DECLARE_NAPI_FUNCTION("getMinVolumeSync", AudioVolumeGroupManagerNapi::GetMinVolumeSync),
         DECLARE_NAPI_FUNCTION("mute", AudioVolumeGroupManagerNapi::SetMute),
         DECLARE_NAPI_FUNCTION("isMute", AudioVolumeGroupManagerNapi::IsStreamMute),
+        DECLARE_NAPI_FUNCTION("isMuteSync", AudioVolumeGroupManagerNapi::IsStreamMuteSync),
         DECLARE_NAPI_FUNCTION("setRingerMode", SetRingerMode),
         DECLARE_NAPI_FUNCTION("getRingerMode", GetRingerMode),
+        DECLARE_NAPI_FUNCTION("getRingerModeSync", GetRingerModeSync),
         DECLARE_NAPI_FUNCTION("setMicrophoneMute", SetMicrophoneMute),
         DECLARE_NAPI_FUNCTION("isMicrophoneMute", IsMicrophoneMute),
+        DECLARE_NAPI_FUNCTION("isMicrophoneMuteSync", IsMicrophoneMuteSync),
         DECLARE_NAPI_FUNCTION("on", On),
         DECLARE_NAPI_FUNCTION("isVolumeUnadjustable", IsVolumeUnadjustable),
         DECLARE_NAPI_FUNCTION("adjustVolumeByStep", AdjustVolumeByStep),
         DECLARE_NAPI_FUNCTION("adjustSystemVolumeByStep", AdjustSystemVolumeByStep),
         DECLARE_NAPI_FUNCTION("getSystemVolumeInDb", GetSystemVolumeInDb),
+        DECLARE_NAPI_FUNCTION("getSystemVolumeInDbSync", GetSystemVolumeInDbSync),
     };
 
     status = napi_define_class(env, AUDIO_VOLUME_GROUP_MNGR_NAPI_CLASS_NAME.c_str(),
