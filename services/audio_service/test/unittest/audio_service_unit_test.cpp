@@ -285,7 +285,7 @@ HWTEST(AudioServiceUnitTest, AudioManagerListenerStub_001, TestSize.Level1)
 * @tc.name  : Test AudioProcessInClientInner API
 * @tc.type  : FUNC
 * @tc.number: AudioProcessInClientInner_001
-* @tc.desc  : Test AudioProcessInClientInner interface.
+* @tc.desc  : Test AudioProcessInClientInner interface using unsupported parameters.
 */
 HWTEST(AudioServiceUnitTest, AudioProcessInClientInner_001, TestSize.Level1)
 {
@@ -302,7 +302,7 @@ HWTEST(AudioServiceUnitTest, AudioProcessInClientInner_001, TestSize.Level1)
     config.streamInfo.channels = STEREO;
     config.streamInfo.encoding = ENCODING_PCM;
     config.streamInfo.format = SAMPLE_S16LE;
-    config.streamInfo.samplingRate = SAMPLE_RATE_48000;
+    config.streamInfo.samplingRate = SAMPLE_RATE_64000;
 
     processClient_ = AudioProcessInClient::Create(config);
     EXPECT_EQ(processClient_, nullptr);
