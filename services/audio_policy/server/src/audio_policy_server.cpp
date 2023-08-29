@@ -649,6 +649,12 @@ std::vector<sptr<AudioDeviceDescriptor>> AudioPolicyServer::GetDevices(DeviceFla
 
 int32_t AudioPolicyServer::SetWakeUpAudioCapturer(InternalAudioCapturerOptions options)
 {
+    bool hasSystemPermission = PermissionUtil::VerifySystemPermission();
+    if (!hasSystemPermission) {
+        AUDIO_ERR_LOG("SetWakeUpAudioCapturer: No system permission");
+        return ERR_PERMISSION_DENIED;
+    }
+
     bool hasManageIntellgentPermission = VerifyPermission(MANAGE_INTELLIGENT_VOICE_PERMISSION);
     if (!hasManageIntellgentPermission) {
         AUDIO_ERR_LOG("SetWakeUpAudioCapturer: No permission");
@@ -659,6 +665,12 @@ int32_t AudioPolicyServer::SetWakeUpAudioCapturer(InternalAudioCapturerOptions o
 
 int32_t AudioPolicyServer::CloseWakeUpAudioCapturer()
 {
+    bool hasSystemPermission = PermissionUtil::VerifySystemPermission();
+    if (!hasSystemPermission) {
+        AUDIO_ERR_LOG("CloseWakeUpAudioCapturer: No system permission");
+        return ERR_PERMISSION_DENIED;
+    }
+
     bool hasManageIntellgentPermission = VerifyPermission(MANAGE_INTELLIGENT_VOICE_PERMISSION);
     if (!hasManageIntellgentPermission) {
         AUDIO_ERR_LOG("CloseWakeUpAudioCapturer: No permission");

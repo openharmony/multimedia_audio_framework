@@ -956,7 +956,7 @@ int32_t AudioPolicyService::SetWakeUpAudioCapturer([[maybe_unused]] InternalAudi
             wakeupCount_ = 0;
         }
         if (wakeupCount_ >= WAKEUP_LIMIT) {
-            return -1;
+            return ERROR;
         }
         wakeupNo = wakeupCount_;
         wakeupCount_++;
@@ -1008,6 +1008,9 @@ int32_t AudioPolicyService::CloseWakeUpAudioCapturer()
 std::vector<sptr<AudioDeviceDescriptor>> AudioPolicyService::GetDevices(DeviceFlag deviceFlag)
 {
     AUDIO_DEBUG_LOG("Entered %{public}s", __func__);
+
+    std::shared_lock<std::shared_mutex> lock(deviceStatusUpdateSharedMutex_);
+
     std::vector<sptr<AudioDeviceDescriptor>> deviceList = {};
 
     if (deviceFlag < DeviceFlag::OUTPUT_DEVICES_FLAG || deviceFlag > DeviceFlag::ALL_L_D_DEVICES_FLAG) {
@@ -1859,6 +1862,7 @@ void AudioPolicyService::OnDeviceStatusUpdated(DeviceType devType, bool isConnec
 {
     AUDIO_INFO_LOG("Device connection state updated | TYPE[%{public}d] STATUS[%{public}d]", devType, isConnected);
 
+    std::lock_guard<std::shared_mutex> lock(deviceStatusUpdateSharedMutex_);
     // Special logic for extern cable, need refactor
     if (devType == DEVICE_TYPE_EXTERN_CABLE) {
         if (!isConnected) {
@@ -2116,6 +2120,9 @@ void AudioPolicyService::OnDeviceStatusUpdated(DStatusInfo statusInfo)
 {
     AUDIO_INFO_LOG("Device connection updated | HDI_PIN[%{public}d] CONNECT_STATUS[%{public}d] NETWORKID[%{public}s]",
         statusInfo.hdiPin, statusInfo.isConnected, statusInfo.networkId);
+
+    std::lock_guard<std::shared_mutex> lock(deviceStatusUpdateSharedMutex_);
+
     DeviceType devType = GetDeviceTypeFromPin(statusInfo.hdiPin);
     const std::string networkId = statusInfo.networkId;
     AudioDeviceDescriptor deviceDesc(devType, GetDeviceRole(devType));

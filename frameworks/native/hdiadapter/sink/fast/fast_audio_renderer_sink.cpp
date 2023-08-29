@@ -171,6 +171,9 @@ bool FastAudioRendererSinkInner::IsInited()
 void FastAudioRendererSinkInner::DeInit()
 {
     KeepRunningUnlock();
+
+    keepRunningLock_ = nullptr;
+
     started_ = false;
     rendererInited_ = false;
     if ((audioRender_ != nullptr) && (audioAdapter_ != nullptr)) {
