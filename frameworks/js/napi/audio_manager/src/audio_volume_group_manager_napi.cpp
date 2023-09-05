@@ -1120,11 +1120,11 @@ bool GetArgvForAdjustVolumeByStep(napi_env env, size_t argc, napi_value* argv,
     const int32_t refCount = 1;
 
     if (argv == nullptr) {
-        AudioCommonNapi::throwError(NAPI_ERR_INPUT_INVALID);
+        AudioCommonNapi::throwError(env, NAPI_ERR_INPUT_INVALID);
         return false;
     }
     if (argc < ARGS_ONE) {
-        AudioCommonNapi::throwError(NAPI_ERR_INPUT_INVALID);
+        AudioCommonNapi::throwError(env, NAPI_ERR_INPUT_INVALID);
         return false;
     }
     for (size_t i = PARAM0; i < argc; i++) {
@@ -1142,7 +1142,7 @@ bool GetArgvForAdjustVolumeByStep(napi_env env, size_t argc, napi_value* argv,
             }
             break;
         } else {
-            AudioCommonNapi::throwError(NAPI_ERR_INPUT_INVALID);
+            AudioCommonNapi::throwError(env, NAPI_ERR_INPUT_INVALID);
             return false;
         }
     }
