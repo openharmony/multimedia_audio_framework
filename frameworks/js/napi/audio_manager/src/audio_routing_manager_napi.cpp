@@ -700,13 +700,13 @@ static void GetPreferredOutputDeviceForRendererInfoAsyncCallbackComplete(napi_en
     CommonCallbackRoutine(env, asyncContext, result[PARAM1]);
 }
 
-void AudioRoutingManagerNapi::CheckPreferredOutputDeviceForRendererInfo(napi_env env,
+bool AudioRoutingManagerNapi::CheckPreferredOutputDeviceForRendererInfo(napi_env env,
     std::unique_ptr<AudioRoutingManagerAsyncContext>& asyncContext, size_t argc, napi_value* argv)
 {
     const int32_t refCount = 1;
     if (argc < ARGS_ONE) {
         AudioCommonNapi::throwError(env, NAPI_ERR_INPUT_INVALID);
-        return;
+        return false;
     }
     for (size_t i = PARAM0; i < argc; i++) {
         napi_valuetype valueType = napi_undefined;
@@ -721,9 +721,10 @@ void AudioRoutingManagerNapi::CheckPreferredOutputDeviceForRendererInfo(napi_env
             break;
         } else {
             AudioCommonNapi::throwError(env, NAPI_ERR_INPUT_INVALID);
-            return;
+            return false;
         }
     }
+    return true;
 }
 
 napi_value AudioRoutingManagerNapi::GetPreferOutputDeviceForRendererInfo(napi_env env, napi_callback_info info)
@@ -746,7 +747,9 @@ napi_value AudioRoutingManagerNapi::GetPreferredOutputDeviceForRendererInfo(napi
 
     status = napi_unwrap(env, thisVar, reinterpret_cast<void**>(&asyncContext->objectInfo));
     if (status == napi_ok && asyncContext->objectInfo != nullptr) {
-        CheckPreferredOutputDeviceForRendererInfo(env, asyncContext, argc, argv);
+        if (!CheckPreferredOutputDeviceForRendererInfo(env, asyncContext, argc, argv)) {
+            return nullptr;
+        }
         if (asyncContext->callbackRef == nullptr) {
             napi_create_promise(env, &asyncContext->deferred, &result);
         } else {
@@ -796,13 +799,13 @@ static void ParseAudioCapturerInfo(napi_env env, napi_value root, AudioCapturerI
     }
 }
 
-void AudioRoutingManagerNapi::CheckPreferredInputDeviceForCaptureInfo(napi_env env,
+bool AudioRoutingManagerNapi::CheckPreferredInputDeviceForCaptureInfo(napi_env env,
     std::unique_ptr<AudioRoutingManagerAsyncContext> &asyncContext, size_t argc, napi_value *argv)
 {
     const int32_t refCount = 1;
     if (argc < ARGS_ONE) {
         AudioCommonNapi::throwError(env, NAPI_ERR_INPUT_INVALID);
-        return;
+        return false;
     }
     for (size_t i = PARAM0; i < argc; i++) {
         napi_valuetype valueType = napi_undefined;
@@ -817,9 +820,10 @@ void AudioRoutingManagerNapi::CheckPreferredInputDeviceForCaptureInfo(napi_env e
             break;
         } else {
             AudioCommonNapi::throwError(env, NAPI_ERR_INPUT_INVALID);
-            return;
+            return false;
         }
     }
+    return true;
 }
 
 static void GetPreferredInputDeviceForCapturerInfoAsyncCallbackComplete(napi_env env, napi_status status, void *data)
@@ -854,7 +858,9 @@ napi_value AudioRoutingManagerNapi::GetPreferredInputDeviceForCapturerInfo(napi_
 
     status = napi_unwrap(env, thisVar, reinterpret_cast<void**>(&asyncContext->objectInfo));
     if (status == napi_ok && asyncContext->objectInfo != nullptr) {
-        CheckPreferredInputDeviceForCaptureInfo(env, asyncContext, argc, argv);
+        if (!CheckPreferredInputDeviceForCaptureInfo(env, asyncContext, argc, argv)) {
+            return nullptr;
+        }
         if (asyncContext->callbackRef == nullptr) {
             napi_create_promise(env, &asyncContext->deferred, &result);
         } else {
