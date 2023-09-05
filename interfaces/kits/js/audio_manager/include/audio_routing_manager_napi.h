@@ -50,9 +50,9 @@ private:
     static napi_value GetPreferOutputDeviceForRendererInfo(napi_env env, napi_callback_info info);
     static napi_value GetPreferredOutputDeviceForRendererInfo(napi_env env, napi_callback_info info);
     static napi_value GetPreferredInputDeviceForCapturerInfo(napi_env env, napi_callback_info info);
-    static void CheckPreferredInputDeviceForCaptureInfo(napi_env env,
+    static bool CheckPreferredInputDeviceForCaptureInfo(napi_env env,
         std::unique_ptr<AudioRoutingManagerAsyncContext> &asyncContext, size_t argc, napi_value *argv);
-    static void CheckPreferredOutputDeviceForRendererInfo(napi_env env,
+    static bool CheckPreferredOutputDeviceForRendererInfo(napi_env env,
         std::unique_ptr<AudioRoutingManagerAsyncContext>& asyncContext, size_t argc, napi_value* argv);
     static void RegisterDeviceChangeCallback(napi_env env, size_t argc, napi_value* args, const std::string& cbName,
         AudioRoutingManagerNapi* routingMgrNapi);

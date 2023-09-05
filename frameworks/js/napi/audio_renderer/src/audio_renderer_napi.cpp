@@ -2251,21 +2251,10 @@ void AudioRendererNapi::AsyncSetAudioEffectMode(napi_env env, void *data)
     }
 }
 
-napi_value AudioRendererNapi::SetAudioEffectMode(napi_env env, napi_callback_info info)
+bool AudioRendererNapi::GetArgvForSetAudioEffectMode(napi_env env, size_t argc, napi_value *argv,
+    unique_ptr<AudioRendererAsyncContext> &asyncContext)
 {
-    napi_status status;
     const int32_t refCount = 1;
-    napi_value result = nullptr;
-
-    GET_PARAMS(env, info, ARGS_TWO);
-    unique_ptr<AudioRendererAsyncContext> asyncContext = make_unique<AudioRendererAsyncContext>();
-    THROW_ERROR_ASSERT(env, argc >= ARGS_ONE, NAPI_ERR_INVALID_PARAM);
-
-    status = napi_unwrap(env, thisVar, reinterpret_cast<void **>(&asyncContext->objectInfo));
-    if (status != napi_ok || asyncContext->objectInfo == nullptr) {
-        return result;
-    }
-
     for (size_t i = PARAM0; i < argc; i++) {
         napi_valuetype valueType = napi_undefined;
         napi_typeof(env, argv[i], &valueType);
@@ -2282,8 +2271,29 @@ napi_value AudioRendererNapi::SetAudioEffectMode(napi_env env, napi_callback_inf
             }
             break;
         } else {
-            asyncContext->status = NAPI_ERR_INVALID_PARAM;
+            AudioCommonNapi::throwError(env, NAPI_ERR_INPUT_INVALID);
+            return false;
         }
+    }
+    return true;
+}
+
+napi_value AudioRendererNapi::SetAudioEffectMode(napi_env env, napi_callback_info info)
+{
+    napi_status status;
+    napi_value result = nullptr;
+
+    GET_PARAMS(env, info, ARGS_TWO);
+    unique_ptr<AudioRendererAsyncContext> asyncContext = make_unique<AudioRendererAsyncContext>();
+    THROW_ERROR_ASSERT(env, argc >= ARGS_ONE, NAPI_ERR_INPUT_INVALID);
+
+    status = napi_unwrap(env, thisVar, reinterpret_cast<void **>(&asyncContext->objectInfo));
+    if (status != napi_ok || asyncContext->objectInfo == nullptr) {
+        return result;
+    }
+
+    if (!GetArgvForSetAudioEffectMode(env, argc, argv, asyncContext)) {
+        return nullptr;
     }
 
     if (asyncContext->callbackRef == nullptr) {
