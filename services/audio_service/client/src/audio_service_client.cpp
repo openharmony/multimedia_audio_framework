@@ -798,10 +798,10 @@ int32_t AudioServiceClient::ConnectStreamToPA()
         return AUDIO_CLIENT_ERR;
     }
     int32_t latency_in_msec = AudioSystemManager::GetInstance()->GetAudioLatencyFromXml();
-	if (latency_in_msec < 0) {
-		AUDIO_ERR_LOG("Get audio latency failed.");
-		return AUDIO_CLIENT_CREATE_STREAM_ERR;
-	}
+    if (latency_in_msec < 0) {
+        AUDIO_ERR_LOG("Get audio latency failed.");
+        return AUDIO_CLIENT_CREATE_STREAM_ERR;
+    }
     sinkLatencyInMsec_ = AudioSystemManager::GetInstance()->GetSinkLatencyFromXml();
     std::string selectDevice = AudioSystemManager::GetInstance()->GetSelectedDeviceInfo(clientUid_, clientPid_,
         mStreamType);
