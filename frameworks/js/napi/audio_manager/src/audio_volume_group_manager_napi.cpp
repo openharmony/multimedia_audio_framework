@@ -1310,13 +1310,8 @@ bool GetArgvForSystemVolumeInDb(napi_env env, size_t argc, napi_value* argv,
         AudioCommonNapi::throwError(env, NAPI_ERR_INPUT_INVALID);
         return false;
     }
-    if (argc > PARAM3) {
-        napi_valuetype valueType = napi_undefined;
-        napi_typeof(env, argv[PARAM3], &valueType);
-        if (valueType == napi_function) {
-            napi_create_reference(env, argv[PARAM3], refCount, &asyncContext->callbackRef);
-        }
-    } else {
+
+    if (argc < ARGS_THREE) {
         AudioCommonNapi::throwError(env, NAPI_ERR_INPUT_INVALID);
         return false;
     }
@@ -1339,6 +1334,10 @@ bool GetArgvForSystemVolumeInDb(napi_env env, size_t argc, napi_value* argv,
             napi_get_value_int32(env, argv[i], &asyncContext->deviceType);
             if (!AudioCommonNapi::IsLegalInputArgumentDeviceType(asyncContext->deviceType)) {
                 asyncContext->status = NAPI_ERR_INVALID_PARAM;
+            }
+        } else if (i == PARAM3) {
+            if (valueType == napi_function) {
+                napi_create_reference(env, argv[PARAM3], refCount, &asyncContext->callbackRef);
             }
             break;
         } else {
