@@ -776,6 +776,17 @@ void AudioRendererPrivate::SetInterruptMode(InterruptMode mode)
     }
     mode_ = mode;
 
+    if (mode_ == INDEPENDENT_MODE) {
+        // Switch to INDEPENDENT_MODE from SHARE_MODE
+        if (audioStream_->GetAudioSessionID(audioInterrupt_.sessionID) != 0) {
+            AUDIO_ERR_LOG("InitAudioInterruptCallback::GetAudioSessionID failed for INDEPENDENT_MODE");
+            return;
+        }
+        if (sharedInterrupt_.sessionID == audioInterrupt_.sessionID) {
+            AudioRendererPrivate::sharedInterrupts_.erase(appInfo_.appPid);
+        }
+    }
+
     if (AudioPolicyManager::GetInstance().UnsetAudioInterruptCallback(sessionID_) != 0) {
         AUDIO_ERR_LOG("AudioRendererPrivate::SetInterruptMode: UnsetAudioInterruptCallback failed!");
         return;
