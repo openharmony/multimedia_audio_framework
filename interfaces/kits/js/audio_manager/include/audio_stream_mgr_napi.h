@@ -57,11 +57,14 @@ private:
     };
 
     static napi_value GetCurrentAudioRendererInfos(napi_env env, napi_callback_info info);
+    static napi_value GetCurrentAudioRendererInfosSync(napi_env env, napi_callback_info info);
     static napi_value GetCurrentAudioCapturerInfos(napi_env env, napi_callback_info info);
+    static napi_value GetCurrentAudioCapturerInfosSync(napi_env env, napi_callback_info info);
     static napi_value On(napi_env env, napi_callback_info info);
     static napi_value Off(napi_env env, napi_callback_info info);
     static napi_value IsAudioRendererLowLatencySupported(napi_env env, napi_callback_info info);
     static napi_value IsStreamActive(napi_env env, napi_callback_info info);
+    static napi_value IsStreamActiveSync(napi_env env, napi_callback_info info);
     static void RegisterCallback(napi_env env, napi_value jsThis,
                                 napi_value* args, const std::string& cbName);
     static void RegisterCapturerStateChangeCallback(napi_env env, napi_value* args,
@@ -74,6 +77,7 @@ private:
     static bool ParseAudioStreamInfo(napi_env env, napi_value root, AudioStreamInfo &audioStreamInfo);
     static void IsLowLatencySupportedCallback(napi_env env, napi_status status, void *data);
     static napi_value GetEffectInfoArray(napi_env env, napi_callback_info info);
+    static napi_value GetEffectInfoArraySync(napi_env env, napi_callback_info info);
     static void GetCurrentCapturerChangeInfosCallbackComplete(napi_env env, napi_status status, void *data);
     static void IsTrueAsyncCallbackComplete(napi_env env, napi_status status, void *data);
     static void GetEffectInfoArrayCallbackComplete(napi_env env, napi_status status, void *data);

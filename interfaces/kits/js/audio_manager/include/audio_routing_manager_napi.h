@@ -36,6 +36,7 @@ public:
     static napi_value CreateRoutingManagerWrapper(napi_env env);
 private:
     static napi_value GetDevices(napi_env env, napi_callback_info info);
+    static napi_value GetDevicesSync(napi_env env, napi_callback_info info);
 
     static void CheckParams(size_t argc, napi_env env, napi_value* argv,
         std::unique_ptr<AudioRoutingManagerAsyncContext>& asyncContext, const int32_t refCount, napi_value& result);
@@ -46,10 +47,13 @@ private:
     static napi_value SelectInputDeviceByFilter(napi_env env, napi_callback_info info);
     static napi_value SetCommunicationDevice(napi_env env, napi_callback_info info);
     static napi_value IsCommunicationDeviceActive(napi_env env, napi_callback_info info);
+    static napi_value IsCommunicationDeviceActiveSync(napi_env env, napi_callback_info info);
     static napi_value GetActiveOutputDeviceDescriptors(napi_env env, napi_callback_info info);
     static napi_value GetPreferOutputDeviceForRendererInfo(napi_env env, napi_callback_info info);
     static napi_value GetPreferredOutputDeviceForRendererInfo(napi_env env, napi_callback_info info);
+    static napi_value GetPreferredOutputDeviceForRendererInfoSync(napi_env env, napi_callback_info info);
     static napi_value GetPreferredInputDeviceForCapturerInfo(napi_env env, napi_callback_info info);
+    static napi_value GetPreferredInputDeviceForCapturerInfoSync(napi_env env, napi_callback_info info);
     static bool CheckPreferredInputDeviceForCaptureInfo(napi_env env,
         std::unique_ptr<AudioRoutingManagerAsyncContext> &asyncContext, size_t argc, napi_value *argv);
     static bool CheckPreferredOutputDeviceForRendererInfo(napi_env env,

@@ -133,7 +133,9 @@ napi_value AudioVolumeManagerNapi::Init(napi_env env, napi_value exports)
 
     napi_property_descriptor audio_volume_manager_properties[] = {
         DECLARE_NAPI_FUNCTION("getVolumeGroupInfos", GetVolumeGroupInfos),
+        DECLARE_NAPI_FUNCTION("getVolumeGroupInfosSync", GetVolumeGroupInfosSync),
         DECLARE_NAPI_FUNCTION("getVolumeGroupManager", GetVolumeGroupManager),
+        DECLARE_NAPI_FUNCTION("getVolumeGroupManagerSync", GetVolumeGroupManagerSync),
         DECLARE_NAPI_FUNCTION("on", On),
 
     };
@@ -312,6 +314,65 @@ napi_value AudioVolumeManagerNapi::GetVolumeGroupInfos(napi_env env, napi_callba
     return result;
 }
 
+napi_value AudioVolumeManagerNapi::GetVolumeGroupInfosSync(napi_env env, napi_callback_info info)
+{
+    HiLog::Info(LABEL, " %{public}s IN", __func__);
+
+    napi_status status;
+    napi_value result = nullptr;
+    void *native = nullptr;
+
+    GET_PARAMS(env, info, ARGS_ONE);
+
+    if (argc < ARGS_ONE) {
+        AudioCommonNapi::throwError(env, NAPI_ERR_INPUT_INVALID);
+        return result;
+    }
+
+    status = napi_unwrap(env, thisVar, &native);
+    auto *audioVolumeManagerNapi = reinterpret_cast<AudioVolumeManagerNapi *>(native);
+    if (status != napi_ok || audioVolumeManagerNapi == nullptr) {
+        AUDIO_ERR_LOG("GetVolumeGroupInfosSync unwrap failure!");
+        return result;
+    }
+
+    napi_valuetype valueType = napi_undefined;
+    napi_typeof(env, argv[PARAM0], &valueType);
+    if (valueType != napi_string) {
+        AudioCommonNapi::throwError(env, NAPI_ERR_INPUT_INVALID);
+        return result;
+    }
+
+    std::string networkId = AudioCommonNapi::GetStringArgument(env, argv[PARAM0]);
+    if (networkId.empty()) {
+        AudioCommonNapi::throwError(env, NAPI_ERR_INVALID_PARAM);
+        return result;
+    }
+
+    vector<sptr<VolumeGroupInfo>> volumeGroupInfos;
+    int32_t ret = audioVolumeManagerNapi->audioSystemMngr_->GetVolumeGroups(networkId, volumeGroupInfos);
+    if (ret != AUDIO_OK) {
+        AUDIO_ERR_LOG("GetVolumeGroups failure!");
+        return result;
+    }
+
+    napi_value valueParam = nullptr;
+    napi_create_array_with_length(env, volumeGroupInfos.size(), &result);
+    for (size_t i = 0; i < volumeGroupInfos.size(); i++) {
+        if (volumeGroupInfos[i] != nullptr) {
+            (void)napi_create_object(env, &valueParam);
+            SetValueString(env, "networkId", static_cast<std::string>(volumeGroupInfos[i]->networkId_), valueParam);
+            SetValueInt32(env, "groupId", static_cast<int32_t>(volumeGroupInfos[i]->volumeGroupId_), valueParam);
+            SetValueInt32(env, "mappingId", static_cast<int32_t>(volumeGroupInfos[i]->mappingId_), valueParam);
+            SetValueString(env, "groupName", static_cast<std::string>(volumeGroupInfos[i]->groupName_), valueParam);
+            SetValueInt32(env, "ConnectType", static_cast<int32_t>(volumeGroupInfos[i]->connectType_), valueParam);
+            napi_set_element(env, result, i, valueParam);
+        }
+    }
+
+    return result;
+}
+
 static void GetGroupMgrAsyncCallbackComplete(napi_env env, napi_status status, void* data)
 {
     napi_value valueParam = nullptr;
@@ -388,6 +449,30 @@ napi_value AudioVolumeManagerNapi::GetVolumeGroupManager(napi_env env, napi_call
     }
 
     return result;
+}
+
+napi_value AudioVolumeManagerNapi::GetVolumeGroupManagerSync(napi_env env, napi_callback_info info)
+{
+    HiLog::Info(LABEL, " %{public}s IN", __func__);
+
+    GET_PARAMS(env, info, ARGS_ONE);
+
+    if (argc < ARGS_ONE) {
+        AudioCommonNapi::throwError(env, NAPI_ERR_INPUT_INVALID);
+        return nullptr;
+    }
+
+    napi_valuetype valueType = napi_undefined;
+    napi_typeof(env, argv[PARAM0], &valueType);
+    if (valueType != napi_number) {
+        AudioCommonNapi::throwError(env, NAPI_ERR_INPUT_INVALID);
+        return nullptr;
+    }
+
+    int32_t groupId;
+    napi_get_value_int32(env, argv[PARAM0], &groupId);
+
+    return AudioVolumeGroupManagerNapi::CreateAudioVolumeGroupManagerWrapper(env, groupId);
 }
 
 napi_value AudioVolumeManagerNapi::On(napi_env env, napi_callback_info info)

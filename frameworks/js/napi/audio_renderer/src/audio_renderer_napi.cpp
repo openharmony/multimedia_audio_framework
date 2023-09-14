@@ -408,6 +408,7 @@ napi_value AudioRendererNapi::CreateAudioPrivacyTypeObject(napi_env env)
 
 static void SetDeviceDescriptors(const napi_env& env, napi_value &valueParam, const DeviceInfo &deviceInfo)
 {
+    (void)napi_create_object(env, &valueParam);
     SetValueInt32(env, "deviceRole", static_cast<int32_t>(deviceInfo.deviceRole), valueParam);
     SetValueInt32(env, "deviceType", static_cast<int32_t>(deviceInfo.deviceType), valueParam);
     SetValueInt32(env, "id", static_cast<int32_t>(deviceInfo.deviceId), valueParam);
@@ -449,27 +450,38 @@ napi_value AudioRendererNapi::Init(napi_env env, napi_value exports)
     napi_property_descriptor audio_renderer_properties[] = {
         DECLARE_NAPI_FUNCTION("setRenderRate", SetRenderRate),
         DECLARE_NAPI_FUNCTION("getRenderRate", GetRenderRate),
+        DECLARE_NAPI_FUNCTION("getRenderRateSync", GetRenderRateSync),
         DECLARE_NAPI_FUNCTION("setRendererSamplingRate", SetRendererSamplingRate),
         DECLARE_NAPI_FUNCTION("getRendererSamplingRate", GetRendererSamplingRate),
         DECLARE_NAPI_FUNCTION("start", Start),
         DECLARE_NAPI_FUNCTION("write", Write),
         DECLARE_NAPI_FUNCTION("getAudioTime", GetAudioTime),
+        DECLARE_NAPI_FUNCTION("getAudioTimeSync", GetAudioTimeSync),
         DECLARE_NAPI_FUNCTION("drain", Drain),
         DECLARE_NAPI_FUNCTION("pause", Pause),
         DECLARE_NAPI_FUNCTION("stop", Stop),
         DECLARE_NAPI_FUNCTION("release", Release),
         DECLARE_NAPI_FUNCTION("getBufferSize", GetBufferSize),
+        DECLARE_NAPI_FUNCTION("getBufferSizeSync", GetBufferSizeSync),
         DECLARE_NAPI_FUNCTION("getAudioStreamId", GetAudioStreamId),
+        DECLARE_NAPI_FUNCTION("getAudioStreamIdSync", GetAudioStreamIdSync),
         DECLARE_NAPI_FUNCTION("setVolume", SetVolume),
         DECLARE_NAPI_FUNCTION("on", On),
         DECLARE_NAPI_FUNCTION("off", Off),
         DECLARE_NAPI_FUNCTION("getRendererInfo", GetRendererInfo),
+        DECLARE_NAPI_FUNCTION("getRendererInfoSync", GetRendererInfoSync),
         DECLARE_NAPI_FUNCTION("getStreamInfo", GetStreamInfo),
+        DECLARE_NAPI_FUNCTION("getStreamInfoSync", GetStreamInfoSync),
         DECLARE_NAPI_FUNCTION("setInterruptMode", SetInterruptMode),
+        DECLARE_NAPI_FUNCTION("setInterruptModeSync", SetInterruptModeSync),
         DECLARE_NAPI_FUNCTION("getMinStreamVolume", GetMinStreamVolume),
+        DECLARE_NAPI_FUNCTION("getMinStreamVolumeSync", GetMinStreamVolumeSync),
         DECLARE_NAPI_FUNCTION("getMaxStreamVolume", GetMaxStreamVolume),
+        DECLARE_NAPI_FUNCTION("getMaxStreamVolumeSync", GetMaxStreamVolumeSync),
         DECLARE_NAPI_FUNCTION("getCurrentOutputDevices", GetCurrentOutputDevices),
+        DECLARE_NAPI_FUNCTION("getCurrentOutputDevicesSync", GetCurrentOutputDevicesSync),
         DECLARE_NAPI_FUNCTION("getUnderflowCount", GetUnderflowCount),
+        DECLARE_NAPI_FUNCTION("getUnderflowCountSync", GetUnderflowCountSync),
         DECLARE_NAPI_FUNCTION("getAudioEffectMode", GetAudioEffectMode),
         DECLARE_NAPI_FUNCTION("setAudioEffectMode", SetAudioEffectMode),
         DECLARE_NAPI_GETTER("state", GetState)
@@ -477,6 +489,7 @@ napi_value AudioRendererNapi::Init(napi_env env, napi_value exports)
 
     napi_property_descriptor static_prop[] = {
         DECLARE_NAPI_STATIC_FUNCTION("createAudioRenderer", CreateAudioRenderer),
+        DECLARE_NAPI_STATIC_FUNCTION("createAudioRendererSync", CreateAudioRendererSync),
         DECLARE_NAPI_PROPERTY("AudioRendererRate", CreateAudioRendererRateObject(env)),
         DECLARE_NAPI_PROPERTY("InterruptType", CreateInterruptEventTypeObject(env)),
         DECLARE_NAPI_PROPERTY("InterruptForceType", CreateInterruptForceTypeObject(env)),
@@ -653,6 +666,44 @@ napi_value AudioRendererNapi::CreateAudioRenderer(napi_env env, napi_callback_in
         }
     }
     return result;
+}
+
+napi_value AudioRendererNapi::CreateAudioRendererSync(napi_env env, napi_callback_info info)
+{
+    HiLog::Info(LABEL, "%{public}s IN", __func__);
+    napi_value result = nullptr;
+
+    GET_PARAMS(env, info, ARGS_ONE);
+
+    if (argc < ARGS_ONE) {
+        AudioCommonNapi::throwError(env, NAPI_ERR_INPUT_INVALID);
+        return result;
+    }
+
+    napi_valuetype valueType = napi_undefined;
+    napi_typeof(env, argv[PARAM0], &valueType);
+    if (valueType != napi_object) {
+        AudioCommonNapi::throwError(env, NAPI_ERR_INPUT_INVALID);
+        return result;
+    }
+
+    AudioRendererOptions rendererOptions;
+    if (!ParseRendererOptions(env, argv[PARAM0], &rendererOptions)) {
+        AudioCommonNapi::throwError(env, NAPI_ERR_INVALID_PARAM);
+        return result;
+    }
+
+    unique_ptr<AudioRendererOptions> audioRendererOptions = make_unique<AudioRendererOptions>();
+    audioRendererOptions->streamInfo.samplingRate = rendererOptions.streamInfo.samplingRate;
+    audioRendererOptions->streamInfo.encoding = rendererOptions.streamInfo.encoding;
+    audioRendererOptions->streamInfo.format = rendererOptions.streamInfo.format;
+    audioRendererOptions->streamInfo.channels = rendererOptions.streamInfo.channels;
+    audioRendererOptions->rendererInfo.contentType = rendererOptions.rendererInfo.contentType;
+    audioRendererOptions->rendererInfo.streamUsage = rendererOptions.rendererInfo.streamUsage;
+    audioRendererOptions->rendererInfo.rendererFlags = rendererOptions.rendererInfo.rendererFlags;
+    audioRendererOptions->privacyType = rendererOptions.privacyType;
+
+    return AudioRendererNapi::CreateAudioRendererWrapper(env, audioRendererOptions);
 }
 
 void AudioRendererNapi::CommonCallbackRoutine(napi_env env, AudioRendererAsyncContext* &asyncContext,
@@ -1069,7 +1120,6 @@ void AudioRendererNapi::GetDeviceInfoAsyncCallbackComplete(napi_env env, napi_st
 
     if (asyncContext != nullptr) {
         if (!asyncContext->status) {
-            (void)napi_create_object(env, &valueParam);
             SetDeviceDescriptors(env, valueParam, asyncContext->deviceInfo);
             asyncContext->status = AudioRendererNapi::isConstructSuccess_;
             AudioRendererNapi::isConstructSuccess_ = SUCCESS;
@@ -1349,6 +1399,33 @@ napi_value AudioRendererNapi::GetRenderRate(napi_env env, napi_callback_info inf
     return result;
 }
 
+napi_value AudioRendererNapi::GetRenderRateSync(napi_env env, napi_callback_info info)
+{
+    napi_status status;
+    napi_value thisVar = nullptr;
+    napi_value result = nullptr;
+    size_t argCount = 0;
+    void *native = nullptr;
+
+    status = napi_get_cb_info(env, info, &argCount, nullptr, &thisVar, nullptr);
+    if (status != napi_ok) {
+        AUDIO_ERR_LOG("Invalid parameters!");
+        return result;
+    }
+
+    status = napi_unwrap(env, thisVar, &native);
+    auto *audioRendererNapi = reinterpret_cast<AudioRendererNapi *>(native);
+    if (status != napi_ok || audioRendererNapi == nullptr) {
+        AUDIO_ERR_LOG("GetRenderRateSync unwrap failure!");
+        return result;
+    }
+
+    AudioRendererRate rendererRate = audioRendererNapi->audioRenderer_->GetRenderRate();
+    napi_create_int32(env, rendererRate, &result);
+
+    return result;
+}
+
 napi_value AudioRendererNapi::GetRendererSamplingRate(napi_env env, napi_callback_info info)
 {
     napi_status status;
@@ -1613,6 +1690,41 @@ napi_value AudioRendererNapi::GetAudioTime(napi_env env, napi_callback_info info
             }
         }
     }
+
+    return result;
+}
+
+napi_value AudioRendererNapi::GetAudioTimeSync(napi_env env, napi_callback_info info)
+{
+    napi_status status;
+    napi_value thisVar = nullptr;
+    napi_value result = nullptr;
+    size_t argCount = 0;
+    void *native = nullptr;
+
+    status = napi_get_cb_info(env, info, &argCount, nullptr, &thisVar, nullptr);
+    if (status != napi_ok) {
+        AUDIO_ERR_LOG("Invalid parameters!");
+        return result;
+    }
+
+    status = napi_unwrap(env, thisVar, &native);
+    auto *audioRendererNapi = reinterpret_cast<AudioRendererNapi *>(native);
+    if (status != napi_ok || audioRendererNapi == nullptr) {
+        AUDIO_ERR_LOG("GetAudioTimeSync unwrap failure!");
+        return result;
+    }
+
+    Timestamp timestamp;
+    bool ret = audioRendererNapi->audioRenderer_->GetAudioTime(timestamp, Timestamp::Timestampbase::MONOTONIC);
+    if (!ret) {
+        AUDIO_ERR_LOG("GetAudioTime failure!");
+        return result;
+    }
+    const uint64_t secToNanosecond = 1000000000;
+    uint64_t time = timestamp.time.tv_nsec + timestamp.time.tv_sec * secToNanosecond;
+
+    napi_create_int64(env, time, &result);
 
     return result;
 }
@@ -1913,6 +2025,38 @@ napi_value AudioRendererNapi::GetBufferSize(napi_env env, napi_callback_info inf
     return result;
 }
 
+napi_value AudioRendererNapi::GetBufferSizeSync(napi_env env, napi_callback_info info)
+{
+    napi_status status;
+    napi_value thisVar = nullptr;
+    napi_value result = nullptr;
+    size_t argCount = 0;
+    void *native = nullptr;
+
+    status = napi_get_cb_info(env, info, &argCount, nullptr, &thisVar, nullptr);
+    if (status != napi_ok) {
+        AUDIO_ERR_LOG("Invalid parameters!");
+        return result;
+    }
+
+    status = napi_unwrap(env, thisVar, &native);
+    auto *audioRendererNapi = reinterpret_cast<AudioRendererNapi *>(native);
+    if (status != napi_ok || audioRendererNapi == nullptr) {
+        AUDIO_ERR_LOG("GetBufferSizeSync unwrap failure!");
+        return result;
+    }
+
+    size_t bufferSize;
+    int32_t ret = audioRendererNapi->audioRenderer_->GetBufferSize(bufferSize);
+    if (ret != SUCCESS) {
+        AUDIO_ERR_LOG("GetBufferSize failure!");
+        return result;
+    }
+    napi_create_uint32(env, bufferSize, &result);
+
+    return result;
+}
+
 napi_value AudioRendererNapi::GetAudioStreamId(napi_env env, napi_callback_info info)
 {
     napi_status status;
@@ -1940,6 +2084,38 @@ napi_value AudioRendererNapi::GetAudioStreamId(napi_env env, napi_callback_info 
         }
         JudgeFuncGetAudioStreamId(env, result, asyncContext);
     }
+
+    return result;
+}
+
+napi_value AudioRendererNapi::GetAudioStreamIdSync(napi_env env, napi_callback_info info)
+{
+    napi_status status;
+    napi_value thisVar = nullptr;
+    napi_value result = nullptr;
+    size_t argCount = 0;
+    void *native = nullptr;
+
+    status = napi_get_cb_info(env, info, &argCount, nullptr, &thisVar, nullptr);
+    if (status != napi_ok) {
+        AUDIO_ERR_LOG("Invalid parameters!");
+        return result;
+    }
+
+    status = napi_unwrap(env, thisVar, &native);
+    auto *audioRendererNapi = reinterpret_cast<AudioRendererNapi *>(native);
+    if (status != napi_ok || audioRendererNapi == nullptr) {
+        AUDIO_ERR_LOG("GetAudioStreamIdSync unwrap failure!");
+        return result;
+    }
+
+    uint32_t audioStreamId;
+    int32_t streamIdStatus = audioRendererNapi->audioRenderer_->GetAudioStreamId(audioStreamId);
+    if (streamIdStatus != SUCCESS) {
+        AUDIO_ERR_LOG("GetAudioStreamId failure!");
+        return result;
+    }
+    napi_create_uint32(env, audioStreamId, &result);
 
     return result;
 }
@@ -2116,6 +2292,43 @@ napi_value AudioRendererNapi::GetRendererInfo(napi_env env, napi_callback_info i
     return result;
 }
 
+napi_value AudioRendererNapi::GetRendererInfoSync(napi_env env, napi_callback_info info)
+{
+    HiLog::Info(LABEL, "Entered GetRendererInfoSync");
+    napi_status status;
+    napi_value thisVar = nullptr;
+    napi_value result = nullptr;
+    size_t argCount = 0;
+    void *native = nullptr;
+
+    status = napi_get_cb_info(env, info, &argCount, nullptr, &thisVar, nullptr);
+    if (status != napi_ok) {
+        AUDIO_ERR_LOG("Invalid parameters!");
+        return result;
+    }
+
+    status = napi_unwrap(env, thisVar, &native);
+    auto *audioRendererNapi = reinterpret_cast<AudioRendererNapi *>(native);
+    if (status != napi_ok || audioRendererNapi == nullptr) {
+        AUDIO_ERR_LOG("GetRendererInfoSync unwrap failure!");
+        return result;
+    }
+
+    AudioRendererInfo rendererInfo;
+    int32_t ret = audioRendererNapi->audioRenderer_->GetRendererInfo(rendererInfo);
+    if (ret != SUCCESS) {
+        AUDIO_ERR_LOG("GetRendererInfo failure!");
+        return result;
+    }
+
+    (void)napi_create_object(env, &result);
+    SetValueInt32(env, "content", static_cast<int32_t>(rendererInfo.contentType), result);
+    SetValueInt32(env, "usage", static_cast<int32_t>(rendererInfo.streamUsage), result);
+    SetValueInt32(env, "rendererFlags", rendererInfo.rendererFlags, result);
+
+    return result;
+}
+
 napi_value AudioRendererNapi::GetStreamInfo(napi_env env, napi_callback_info info)
 {
     napi_status status;
@@ -2173,6 +2386,43 @@ napi_value AudioRendererNapi::GetStreamInfo(napi_env env, napi_callback_info inf
             }
         }
     }
+
+    return result;
+}
+
+napi_value AudioRendererNapi::GetStreamInfoSync(napi_env env, napi_callback_info info)
+{
+    napi_status status;
+    napi_value thisVar = nullptr;
+    napi_value result = nullptr;
+    size_t argCount = 0;
+    void *native = nullptr;
+
+    status = napi_get_cb_info(env, info, &argCount, nullptr, &thisVar, nullptr);
+    if (status != napi_ok) {
+        AUDIO_ERR_LOG("Invalid parameters!");
+        return result;
+    }
+
+    status = napi_unwrap(env, thisVar, &native);
+    auto *audioRendererNapi = reinterpret_cast<AudioRendererNapi *>(native);
+    if (status != napi_ok || audioRendererNapi == nullptr) {
+        AUDIO_ERR_LOG("GetStreamInfoSync unwrap failure!");
+        return result;
+    }
+
+    AudioStreamInfo streamInfo;
+    int32_t ret = audioRendererNapi->audioRenderer_->GetStreamInfo(streamInfo);
+    if (ret != SUCCESS) {
+        AUDIO_ERR_LOG("GetStreamInfo failure!");
+        return result;
+    }
+
+    (void)napi_create_object(env, &result);
+    SetValueInt32(env, "samplingRate", static_cast<int32_t>(streamInfo.samplingRate), result);
+    SetValueInt32(env, "channels", static_cast<int32_t>(streamInfo.channels), result);
+    SetValueInt32(env, "sampleFormat", static_cast<int32_t>(streamInfo.format), result);
+    SetValueInt32(env, "encodingType", static_cast<int32_t>(streamInfo.encoding), result);
 
     return result;
 }
@@ -2749,6 +2999,45 @@ napi_value AudioRendererNapi::SetInterruptMode(napi_env env, napi_callback_info 
     return result;
 }
 
+napi_value AudioRendererNapi::SetInterruptModeSync(napi_env env, napi_callback_info info)
+{
+    napi_status status;
+    napi_value result = nullptr;
+    void *native = nullptr;
+
+    GET_PARAMS(env, info, ARGS_ONE);
+
+    if (argc < ARGS_ONE) {
+        AudioCommonNapi::throwError(env, NAPI_ERR_INPUT_INVALID);
+        return result;
+    }
+
+    status = napi_unwrap(env, thisVar, &native);
+    auto *audioRendererNapi = reinterpret_cast<AudioRendererNapi *>(native);
+    if (status != napi_ok || audioRendererNapi == nullptr) {
+        AUDIO_ERR_LOG("SetInterruptModeSync unwrap failure!");
+        return result;
+    }
+
+    napi_valuetype valueType = napi_undefined;
+    napi_typeof(env, argv[PARAM0], &valueType);
+    if (valueType != napi_number) {
+        AudioCommonNapi::throwError(env, NAPI_ERR_INPUT_INVALID);
+        return result;
+    }
+
+    int32_t interruptMode;
+    napi_get_value_int32(env, argv[PARAM0], &interruptMode);
+    if (!AudioCommonNapi::IsLegalInputArgumentInterruptMode(interruptMode)) {
+        AudioCommonNapi::throwError(env, NAPI_ERR_INVALID_PARAM);
+        return result;
+    }
+
+    audioRendererNapi->audioRenderer_->SetInterruptMode(GetNativeInterruptMode(interruptMode));
+
+    return result;
+}
+
 napi_value AudioRendererNapi::GetMinStreamVolume(napi_env env, napi_callback_info info)
 {
     napi_status status;
@@ -2802,6 +3091,33 @@ napi_value AudioRendererNapi::GetMinStreamVolume(napi_env env, napi_callback_inf
     return result;
 }
 
+napi_value AudioRendererNapi::GetMinStreamVolumeSync(napi_env env, napi_callback_info info)
+{
+    napi_status status;
+    napi_value thisVar = nullptr;
+    napi_value result = nullptr;
+    size_t argCount = 0;
+    void *native = nullptr;
+
+    status = napi_get_cb_info(env, info, &argCount, nullptr, &thisVar, nullptr);
+    if (status != napi_ok) {
+        AUDIO_ERR_LOG("Invalid parameters!");
+        return result;
+    }
+
+    status = napi_unwrap(env, thisVar, &native);
+    auto *audioRendererNapi = reinterpret_cast<AudioRendererNapi *>(native);
+    if (status != napi_ok || audioRendererNapi == nullptr) {
+        AUDIO_ERR_LOG("GetMinStreamVolumeSync unwrap failure!");
+        return result;
+    }
+
+    double volLevel = audioRendererNapi->audioRenderer_->GetMinStreamVolume();
+    napi_create_double(env, volLevel, &result);
+
+    return result;
+}
+
 napi_value AudioRendererNapi::GetMaxStreamVolume(napi_env env, napi_callback_info info)
 {
     napi_status status;
@@ -2852,6 +3168,33 @@ napi_value AudioRendererNapi::GetMaxStreamVolume(napi_env env, napi_callback_inf
             }
         }
     }
+    return result;
+}
+
+napi_value AudioRendererNapi::GetMaxStreamVolumeSync(napi_env env, napi_callback_info info)
+{
+    napi_status status;
+    napi_value thisVar = nullptr;
+    napi_value result = nullptr;
+    size_t argCount = 0;
+    void *native = nullptr;
+
+    status = napi_get_cb_info(env, info, &argCount, nullptr, &thisVar, nullptr);
+    if (status != napi_ok) {
+        AUDIO_ERR_LOG("Invalid parameters!");
+        return result;
+    }
+
+    status = napi_unwrap(env, thisVar, &native);
+    auto *audioRendererNapi = reinterpret_cast<AudioRendererNapi *>(native);
+    if (status != napi_ok || audioRendererNapi == nullptr) {
+        AUDIO_ERR_LOG("GetMaxStreamVolumeSync unwrap failure!");
+        return result;
+    }
+
+    double volLevel = audioRendererNapi->audioRenderer_->GetMaxStreamVolume();
+    napi_create_double(env, volLevel, &result);
+
     return result;
 }
 
@@ -2915,6 +3258,41 @@ napi_value AudioRendererNapi::GetCurrentOutputDevices(napi_env env, napi_callbac
     return result;
 }
 
+napi_value AudioRendererNapi::GetCurrentOutputDevicesSync(napi_env env, napi_callback_info info)
+{
+    napi_status status;
+    napi_value thisVar = nullptr;
+    napi_value result = nullptr;
+    size_t argCount = 0;
+    void *native = nullptr;
+
+    status = napi_get_cb_info(env, info, &argCount, nullptr, &thisVar, nullptr);
+    if (status != napi_ok) {
+        AUDIO_ERR_LOG("Invalid parameters!");
+        return result;
+    }
+
+    status = napi_unwrap(env, thisVar, &native);
+    auto *audioRendererNapi = reinterpret_cast<AudioRendererNapi *>(native);
+    if (status != napi_ok || audioRendererNapi == nullptr) {
+        AUDIO_ERR_LOG("GetCurrentOutputDevicesSync unwrap failure!");
+        return result;
+    }
+
+    DeviceInfo deviceInfo;
+    int32_t ret = audioRendererNapi->audioRenderer_->GetCurrentOutputDevices(deviceInfo);
+    if (ret != SUCCESS) {
+        AUDIO_ERR_LOG("GetCurrentOutputDevices failure!");
+        return result;
+    }
+    napi_create_array_with_length(env, 1, &result);
+    napi_value valueParam;
+    SetDeviceDescriptors(env, valueParam, deviceInfo);
+    napi_set_element(env, result, 0, valueParam);
+
+    return result;
+}
+
 napi_value AudioRendererNapi::GetUnderflowCount(napi_env env, napi_callback_info info)
 {
     napi_status status;
@@ -2965,6 +3343,34 @@ napi_value AudioRendererNapi::GetUnderflowCount(napi_env env, napi_callback_info
             }
         }
     }
+
+    return result;
+}
+
+napi_value AudioRendererNapi::GetUnderflowCountSync(napi_env env, napi_callback_info info)
+{
+    napi_status status;
+    napi_value thisVar = nullptr;
+    napi_value result = nullptr;
+    size_t argCount = 0;
+    void *native = nullptr;
+
+    status = napi_get_cb_info(env, info, &argCount, nullptr, &thisVar, nullptr);
+    if (status != napi_ok) {
+        AUDIO_ERR_LOG("Invalid parameters!");
+        return result;
+    }
+
+    status = napi_unwrap(env, thisVar, &native);
+    auto *audioRendererNapi = reinterpret_cast<AudioRendererNapi *>(native);
+    if (status != napi_ok || audioRendererNapi == nullptr) {
+        AUDIO_ERR_LOG("GetUnderflowCountSync unwrap failure!");
+        return result;
+    }
+
+    uint32_t underflowCount = audioRendererNapi->audioRenderer_->GetUnderflowCount();
+    napi_create_uint32(env, underflowCount, &result);
+
     return result;
 }
 

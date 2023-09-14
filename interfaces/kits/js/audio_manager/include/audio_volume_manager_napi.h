@@ -36,7 +36,9 @@ public:
     static napi_value CreateVolumeManagerWrapper(napi_env env);
 private:
     static napi_value GetVolumeGroupInfos(napi_env env, napi_callback_info info);
+    static napi_value GetVolumeGroupInfosSync(napi_env env, napi_callback_info info);
     static napi_value GetVolumeGroupManager(napi_env env, napi_callback_info info);
+    static napi_value GetVolumeGroupManagerSync(napi_env env, napi_callback_info info);
     static napi_value SetRingerMode(napi_env env, napi_callback_info info);
     static napi_value GetRingerMode(napi_env env, napi_callback_info info);
     static napi_value SetMicrophoneMute(napi_env env, napi_callback_info info);

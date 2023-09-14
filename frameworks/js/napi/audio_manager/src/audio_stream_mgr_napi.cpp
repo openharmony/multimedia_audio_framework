@@ -270,10 +270,14 @@ napi_value AudioStreamMgrNapi::Init(napi_env env, napi_value exports)
         DECLARE_NAPI_FUNCTION("on", On),
         DECLARE_NAPI_FUNCTION("off", Off),
         DECLARE_NAPI_FUNCTION("getCurrentAudioRendererInfoArray", GetCurrentAudioRendererInfos),
+        DECLARE_NAPI_FUNCTION("getCurrentAudioRendererInfoArraySync", GetCurrentAudioRendererInfosSync),
         DECLARE_NAPI_FUNCTION("getCurrentAudioCapturerInfoArray", GetCurrentAudioCapturerInfos),
+        DECLARE_NAPI_FUNCTION("getCurrentAudioCapturerInfoArraySync", GetCurrentAudioCapturerInfosSync),
         DECLARE_NAPI_FUNCTION("isAudioRendererLowLatencySupported", IsAudioRendererLowLatencySupported),
         DECLARE_NAPI_FUNCTION("isActive", IsStreamActive),
+        DECLARE_NAPI_FUNCTION("isActiveSync", IsStreamActiveSync),
         DECLARE_NAPI_FUNCTION("getAudioEffectInfoArray", GetEffectInfoArray),
+        DECLARE_NAPI_FUNCTION("getAudioEffectInfoArraySync", GetEffectInfoArraySync),
     };
 
     status = napi_define_class(env, AUDIO_STREAM_MGR_NAPI_CLASS_NAME.c_str(), NAPI_AUTO_LENGTH, Construct, nullptr,
@@ -573,6 +577,64 @@ napi_value AudioStreamMgrNapi::GetCurrentAudioRendererInfos(napi_env env, napi_c
     return result;
 }
 
+napi_value AudioStreamMgrNapi::GetCurrentAudioRendererInfosSync(napi_env env, napi_callback_info info)
+{
+    napi_status status;
+    napi_value thisVar = nullptr;
+    napi_value result = nullptr;
+    size_t argCount = 0;
+    void *native = nullptr;
+
+    status = napi_get_cb_info(env, info, &argCount, nullptr, &thisVar, nullptr);
+    if (status != napi_ok) {
+        AUDIO_ERR_LOG("Invalid parameters!");
+        return result;
+    }
+
+    status = napi_unwrap(env, thisVar, &native);
+    auto *audioStreamMgrNapi = reinterpret_cast<AudioStreamMgrNapi *>(native);
+    if (status != napi_ok || audioStreamMgrNapi == nullptr) {
+        AUDIO_ERR_LOG("GetCurrentAudioRendererInfosSync unwrap failure!");
+        return result;
+    }
+
+    vector<std::unique_ptr<AudioRendererChangeInfo>> audioRendererChangeInfos;
+    int32_t ret = audioStreamMgrNapi->audioStreamMngr_->GetCurrentRendererChangeInfos(audioRendererChangeInfos);
+    if (ret != AUDIO_OK) {
+        AUDIO_ERR_LOG("GetCurrentRendererChangeInfos failure!");
+        return result;
+    }
+
+    napi_value jsChangeInfoObj = nullptr;
+    napi_value jsRenInfoObj = nullptr;
+
+    int32_t position = 0;
+    napi_create_array_with_length(env, audioRendererChangeInfos.size(), &result);
+    for (const unique_ptr<AudioRendererChangeInfo> &changeInfo: audioRendererChangeInfos) {
+        if (!changeInfo) {
+            AUDIO_ERR_LOG("AudioStreamMgrNapi:AudioRendererChangeInfo Null, something wrong!!");
+            continue;
+        }
+
+        napi_create_object(env, &jsChangeInfoObj);
+        SetValueInt32(env, "streamId", changeInfo->sessionId, jsChangeInfoObj);
+        SetValueInt32(env, "rendererState", static_cast<int32_t>(changeInfo->rendererState), jsChangeInfoObj);
+        SetValueInt32(env, "clientUid", changeInfo->clientUID, jsChangeInfoObj);
+
+        napi_create_object(env, &jsRenInfoObj);
+        SetValueInt32(env, "content", static_cast<int32_t>(changeInfo->rendererInfo.contentType), jsRenInfoObj);
+        SetValueInt32(env, "usage", static_cast<int32_t>(changeInfo->rendererInfo.streamUsage), jsRenInfoObj);
+        SetValueInt32(env, "rendererFlags", changeInfo->rendererInfo.rendererFlags, jsRenInfoObj);
+        napi_set_named_property(env, jsChangeInfoObj, "rendererInfo", jsRenInfoObj);
+        SetDeviceDescriptors(env, jsChangeInfoObj, changeInfo->outputDeviceInfo);
+
+        napi_set_element(env, result, position, jsChangeInfoObj);
+        position++;
+    }
+
+    return result;
+}
+
 napi_value AudioStreamMgrNapi::GetCurrentAudioCapturerInfos(napi_env env, napi_callback_info info)
 {
     napi_status status;
@@ -634,6 +696,63 @@ napi_value AudioStreamMgrNapi::GetCurrentAudioCapturerInfos(napi_env env, napi_c
                 result = nullptr;
             }
         }
+    }
+
+    return result;
+}
+
+napi_value AudioStreamMgrNapi::GetCurrentAudioCapturerInfosSync(napi_env env, napi_callback_info info)
+{
+    napi_status status;
+    napi_value thisVar = nullptr;
+    napi_value result = nullptr;
+    size_t argCount = 0;
+    void *native = nullptr;
+
+    status = napi_get_cb_info(env, info, &argCount, nullptr, &thisVar, nullptr);
+    if (status != napi_ok) {
+        AUDIO_ERR_LOG("Invalid parameters!");
+        return result;
+    }
+
+    status = napi_unwrap(env, thisVar, &native);
+    auto *audioStreamMgrNapi = reinterpret_cast<AudioStreamMgrNapi *>(native);
+    if (status != napi_ok || audioStreamMgrNapi == nullptr) {
+        AUDIO_ERR_LOG("GetCurrentAudioCapturerInfosSync unwrap failure!");
+        return result;
+    }
+
+    vector<std::unique_ptr<AudioCapturerChangeInfo>> audioCapturerChangeInfos;
+    int32_t ret = audioStreamMgrNapi->audioStreamMngr_->GetCurrentCapturerChangeInfos(audioCapturerChangeInfos);
+    if (ret != AUDIO_OK) {
+        AUDIO_ERR_LOG("GetCurrentCapturerChangeInfos failure!");
+        return result;
+    }
+
+    napi_value jsChangeInfoObj = nullptr;
+    napi_value jsCapInfoObj = nullptr;
+
+    int32_t position = 0;
+    napi_create_array_with_length(env, audioCapturerChangeInfos.size(), &result);
+    for (const unique_ptr<AudioCapturerChangeInfo> &changeInfo: audioCapturerChangeInfos) {
+        if (!changeInfo) {
+            AUDIO_ERR_LOG("AudioCapturerChangeInfo Null, something wrong!!");
+            continue;
+        }
+
+        napi_create_object(env, &jsChangeInfoObj);
+        SetValueInt32(env, "streamId", changeInfo->sessionId, jsChangeInfoObj);
+        SetValueInt32(env, "capturerState", static_cast<int32_t>(changeInfo->capturerState), jsChangeInfoObj);
+        SetValueInt32(env, "clientUid", changeInfo->clientUID, jsChangeInfoObj);
+
+        napi_create_object(env, &jsCapInfoObj);
+        SetValueInt32(env, "source", static_cast<int32_t>(changeInfo->capturerInfo.sourceType), jsCapInfoObj);
+        SetValueInt32(env, "capturerFlags", changeInfo->capturerInfo.capturerFlags, jsCapInfoObj);
+        napi_set_named_property(env, jsChangeInfoObj, "capturerInfo", jsCapInfoObj);
+        SetDeviceDescriptors(env, jsChangeInfoObj, changeInfo->inputDeviceInfo);
+
+        napi_set_element(env, result, position, jsChangeInfoObj);
+        position++;
     }
 
     return result;
@@ -873,6 +992,46 @@ napi_value AudioStreamMgrNapi::IsStreamActive(napi_env env, napi_callback_info i
     return result;
 }
 
+napi_value AudioStreamMgrNapi::IsStreamActiveSync(napi_env env, napi_callback_info info)
+{
+    napi_status status;
+    napi_value result = nullptr;
+    void *native = nullptr;
+
+    GET_PARAMS(env, info, ARGS_ONE);
+
+    if (argc < ARGS_ONE) {
+        AudioCommonNapi::throwError(env, NAPI_ERR_INPUT_INVALID);
+        return result;
+    }
+
+    status = napi_unwrap(env, thisVar, &native);
+    auto *audioStreamMgrNapi = reinterpret_cast<AudioStreamMgrNapi *>(native);
+    if (status != napi_ok || audioStreamMgrNapi == nullptr) {
+        AUDIO_ERR_LOG("IsStreamActiveSync unwrap failure!");
+        return result;
+    }
+
+    napi_valuetype valueType = napi_undefined;
+    napi_typeof(env, argv[PARAM0], &valueType);
+    if (valueType != napi_number) {
+        AudioCommonNapi::throwError(env, NAPI_ERR_INPUT_INVALID);
+        return result;
+    }
+
+    int32_t volType;
+    napi_get_value_int32(env, argv[PARAM0], &volType);
+    if (!AudioCommonNapi::IsLegalInputArgumentVolType(volType)) {
+        AudioCommonNapi::throwError(env, NAPI_ERR_INVALID_PARAM);
+        return result;
+    }
+
+    bool isActive = audioStreamMgrNapi->audioStreamMngr_->IsStreamActive(GetNativeAudioVolumeType(volType));
+    napi_get_boolean(env, isActive, &result);
+
+    return result;
+}
+
 void AudioStreamMgrNapi::GetEffectInfoArrayCallbackComplete(napi_env env, napi_status status, void *data)
 {
     uint32_t i;
@@ -988,6 +1147,59 @@ napi_value AudioStreamMgrNapi::GetEffectInfoArray(napi_env env, napi_callback_in
     status = napi_create_async_work(env, nullptr, resource, AsyncGetEffectInfoArray,
         GetEffectInfoArrayCallbackComplete, static_cast<void*>(asyncContext.get()), &asyncContext->work);
     GetEffectInfoArrayResult(env, asyncContext, status, result);
+
+    return result;
+}
+
+napi_value AudioStreamMgrNapi::GetEffectInfoArraySync(napi_env env, napi_callback_info info)
+{
+    napi_status status;
+    napi_value result = nullptr;
+    void *native = nullptr;
+
+    GET_PARAMS(env, info, ARGS_ONE);
+
+    if (argc < ARGS_ONE) {
+        AudioCommonNapi::throwError(env, NAPI_ERR_INPUT_INVALID);
+        return result;
+    }
+
+    status = napi_unwrap(env, thisVar, &native);
+    auto *audioStreamMgrNapi = reinterpret_cast<AudioStreamMgrNapi *>(native);
+    if (status != napi_ok || audioStreamMgrNapi == nullptr) {
+        AUDIO_ERR_LOG("GetEffectInfoArraySync unwrap failure!");
+        return result;
+    }
+
+    napi_valuetype valueType = napi_undefined;
+    napi_typeof(env, argv[PARAM0], &valueType);
+    if (valueType != napi_number) {
+        AudioCommonNapi::throwError(env, NAPI_ERR_INPUT_INVALID);
+        return result;
+    }
+
+    int32_t streamUsage;
+    napi_get_value_int32(env, argv[PARAM0], &streamUsage);
+    if (!AudioCommonNapi::IsLegalInputArgumentStreamUsage(streamUsage)) {
+        AudioCommonNapi::throwError(env, NAPI_ERR_INVALID_PARAM);
+        return result;
+    }
+
+    AudioSceneEffectInfo audioSceneEffectInfo;
+    int32_t ret = audioStreamMgrNapi->audioStreamMngr_->GetEffectInfoArray(audioSceneEffectInfo,
+        static_cast<StreamUsage>(streamUsage));
+    if (ret != AUDIO_OK) {
+        AUDIO_ERR_LOG("GetEffectInfoArray failure!");
+        return result;
+    }
+
+    napi_value jsEffectInofObj = nullptr;
+    napi_create_array_with_length(env, audioSceneEffectInfo.mode.size(), &result);
+    napi_create_object(env, &jsEffectInofObj);
+    for (int32_t i = 0; i < audioSceneEffectInfo.mode.size(); i++) {
+        napi_create_uint32(env, audioSceneEffectInfo.mode[i], &jsEffectInofObj);
+        napi_set_element(env, result, i, jsEffectInofObj);
+    }
 
     return result;
 }

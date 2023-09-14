@@ -79,6 +79,7 @@ private:
     static napi_value Construct(napi_env env, napi_callback_info info);
     static bool ParseRendererInfo(napi_env env, napi_value root, AudioRendererInfo *rendererInfo);
     static napi_value CreateTonePlayer(napi_env env, napi_callback_info info);
+    static napi_value CreateTonePlayerSync(napi_env env, napi_callback_info info);
     static bool toneTypeCheck(napi_env env, int32_t type);
     static napi_value Load(napi_env env, napi_callback_info info);
     static napi_value Start(napi_env env, napi_callback_info info);
