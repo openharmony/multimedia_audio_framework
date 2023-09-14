@@ -17,10 +17,14 @@ group("audio_unit_test") {
   testonly = true
 
   deps = [
+    "../frameworks/js/napi/audio_manager/test/unittest/audio_manager_test:jsunittest",
     "../frameworks/js/napi/audio_manager/test/unittest/group_manager_test:jsunittest",
     "../frameworks/js/napi/audio_manager/test/unittest/routing_manager_test:jsunittest",
     "../frameworks/js/napi/audio_manager/test/unittest/stream_manager_test:jsunittest",
+    "../frameworks/js/napi/audio_manager/test/unittest/volume_manager_test:jsunittest",
     "../frameworks/js/napi/audio_renderer/test/unittest/audio_renderer_interrupt_test:js_audio_interrupt_test",
+    "../frameworks/js/napi/audio_renderer/test/unittest/audio_renderer_test:jsunittest",
+    "../frameworks/js/napi/toneplayer/test/unittest/tone_player_test:jsunittest",
     "../frameworks/native/audiocapturer/test/unittest/capturer_interrupt_test:audio_capturer_interrupt_unit_test",
     "../frameworks/native/audiocapturer/test/unittest/capturer_test:audio_capturer_unit_test",
     "../frameworks/native/audiocapturer/test/unittest/multiple_capturer_test:multiple_audio_capturer_unit_test",
