@@ -13,9 +13,9 @@
 
 import("//build/test.gni")
 
-module_output_path = "multimedia_audio_framework/audio_routing_manager_js"
+module_output_path = "multimedia_audio_framework/audio_renderer_js"
 
-ohos_js_unittest("AudioRoutingManagerJsTest") {
+ohos_js_unittest("AudioRendererJsUnitTest") {
   module_out_path = module_output_path
 
   hap_profile = "./config.json"
@@ -24,6 +24,5 @@ ohos_js_unittest("AudioRoutingManagerJsTest") {
 
 group("jsunittest") {
   testonly = true
-
-  deps = [ ":AudioRoutingManagerJsTest" ]
+  deps = [ ":AudioRendererJsUnitTest" ]
 }
