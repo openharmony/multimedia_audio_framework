@@ -810,7 +810,8 @@ bool AudioPolicyService::IsStreamActive(AudioStreamType streamType) const
     if (streamType == STREAM_VOICE_CALL && audioScene_ == AUDIO_SCENE_PHONE_CALL) {
         return true;
     }
-    return audioPolicyManager_.IsStreamActive(streamType);
+
+    return streamCollector_.IsStreamActive(streamType);
 }
 
 std::string AudioPolicyService::GetPortName(InternalDeviceType deviceType)

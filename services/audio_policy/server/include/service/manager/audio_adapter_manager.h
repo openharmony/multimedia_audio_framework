@@ -151,24 +151,6 @@ private:
         uint32_t idx;
     };
 
-    const std::vector<AudioStreamType> streamTypeList_ = {
-        // all volume types except STREAM_ALL
-        STREAM_MUSIC,
-        STREAM_RING,
-        STREAM_VOICE_CALL,
-        STREAM_VOICE_ASSISTANT,
-        STREAM_ALARM,
-        STREAM_ACCESSIBILITY,
-        STREAM_ULTRASONIC
-    };
-
-    const std::vector<DeviceType> deviceList_ = {
-        // The three devices represent the three volume groups(build-in, wireless, wired).
-        DEVICE_TYPE_SPEAKER,
-        DEVICE_TYPE_BLUETOOTH_A2DP,
-        DEVICE_TYPE_WIRED_HEADSET
-    };
-
     AudioAdapterManager()
         : ringerMode_(RINGER_MODE_NORMAL),
           audioPolicyKvStore_(nullptr)
@@ -205,6 +187,8 @@ private:
     void UpdateRingerModeForVolume(AudioStreamType streamType, int32_t volumeLevel);
     void UpdateMuteStatusForVolume(AudioStreamType streamType, int32_t volumeLevel);
     int32_t SetVolumeDb(AudioStreamType streamType);
+    int32_t SetVolumeDbForVolumeTypeGroup(const std::vector<AudioStreamType> &volumeTypeGroup, float volumeDb);
+    bool IsStreamActiveForVolumeTypeGroup(const std::vector<AudioStreamType> &volumeTypeGroup);
 
     template<typename T>
     std::vector<uint8_t> TransferTypeToByteArray(const T &t)
@@ -252,10 +236,9 @@ public:
         audioAdapterManager_ = nullptr;
     }
 
-    float OnGetVolumeDbCb(std::string streamType)
+    float OnGetVolumeDbCb(AudioStreamType streamType)
     {
-        AudioStreamType streamForVolumeMap = audioAdapterManager_->GetStreamForVolumeMap(
-            audioAdapterManager_->GetStreamIDByType(streamType));
+        AudioStreamType streamForVolumeMap = audioAdapterManager_->GetStreamForVolumeMap(streamType);
 
         bool muteStatus = audioAdapterManager_->muteStatusMap_[streamForVolumeMap];
         if (muteStatus) {

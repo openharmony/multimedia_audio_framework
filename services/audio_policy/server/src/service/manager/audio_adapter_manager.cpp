@@ -27,6 +27,48 @@ using namespace std;
 
 namespace OHOS {
 namespace AudioStandard {
+static const std::vector<AudioStreamType> VOLUME_TYPE_LIST = {
+    // all volume types except STREAM_ALL
+    STREAM_MUSIC,
+    STREAM_RING,
+    STREAM_VOICE_CALL,
+    STREAM_VOICE_ASSISTANT,
+    STREAM_ALARM,
+    STREAM_ACCESSIBILITY,
+    STREAM_ULTRASONIC
+};
+
+static const std::vector<DeviceType> DEVICE_TYPE_LIST = {
+    // The three devices represent the three volume groups(build-in, wireless, wired).
+    DEVICE_TYPE_SPEAKER,
+    DEVICE_TYPE_BLUETOOTH_A2DP,
+    DEVICE_TYPE_WIRED_HEADSET
+};
+
+static const std::vector<AudioStreamType> VOICE_CALL_VOLUME_TYPE_LIST = {
+    // all stream types for voice call volume type
+    STREAM_VOICE_CALL,
+    STREAM_VOICE_MESSAGE
+};
+
+static const std::vector<AudioStreamType> RINGTONE_VOLUME_TYPE_LIST = {
+    // all stream types for ringtone volume type
+    STREAM_RING,
+    STREAM_SYSTEM,
+    STREAM_NOTIFICATION,
+    STREAM_SYSTEM_ENFORCED,
+    STREAM_DTMF
+};
+
+static const std::vector<AudioStreamType> MEDIA_VOLUME_TYPE_LIST = {
+    // all stream types for media volume type
+    STREAM_MUSIC,
+    STREAM_MOVIE,
+    STREAM_GAME,
+    STREAM_SPEECH,
+    STREAM_NAVIGATION
+};
+
 bool AudioAdapterManager::Init()
 {
     char testMode[10] = {0}; // 10 for system parameter usage
@@ -223,21 +265,31 @@ int32_t AudioAdapterManager::SetVolumeDb(AudioStreamType streamType)
         AUDIO_ERR_LOG("SetSystemVolumeLevel audio adapter null");
         return ERR_OPERATION_FAILED;
     }
+
     AUDIO_INFO_LOG("SetVolumeDb: streamType %{public}d, volumeDb %{public}f", streamType, volumeDb);
     if (streamType == STREAM_VOICE_CALL) {
-        audioServiceAdapter_->SetVolumeDb(STREAM_VOICE_MESSAGE, volumeDb);
+        return SetVolumeDbForVolumeTypeGroup(VOICE_CALL_VOLUME_TYPE_LIST, volumeDb);
     } else if (streamType == STREAM_MUSIC) {
-        audioServiceAdapter_->SetVolumeDb(STREAM_MOVIE, volumeDb);
-        audioServiceAdapter_->SetVolumeDb(STREAM_GAME, volumeDb);
-        audioServiceAdapter_->SetVolumeDb(STREAM_SPEECH, volumeDb);
-        audioServiceAdapter_->SetVolumeDb(STREAM_NAVIGATION, volumeDb);
+        return SetVolumeDbForVolumeTypeGroup(MEDIA_VOLUME_TYPE_LIST, volumeDb);
     } else if (streamType == STREAM_RING) {
-        audioServiceAdapter_->SetVolumeDb(STREAM_SYSTEM, volumeDb);
-        audioServiceAdapter_->SetVolumeDb(STREAM_NOTIFICATION, volumeDb);
-        audioServiceAdapter_->SetVolumeDb(STREAM_SYSTEM_ENFORCED, volumeDb);
-        audioServiceAdapter_->SetVolumeDb(STREAM_DTMF, volumeDb);
+        return SetVolumeDbForVolumeTypeGroup(RINGTONE_VOLUME_TYPE_LIST, volumeDb);
     }
+
     return audioServiceAdapter_->SetVolumeDb(streamType, volumeDb);
+}
+
+int32_t AudioAdapterManager::SetVolumeDbForVolumeTypeGroup(const std::vector<AudioStreamType> &volumeTypeGroup,
+    float volumeDb)
+{
+    int32_t result = SUCCESS;
+    for (auto &streamType: volumeTypeGroup) {
+        result = audioServiceAdapter_->SetVolumeDb(streamType, volumeDb);
+        if (result != SUCCESS) {
+            // The operation of setting volume has failed, return error directly.
+            return result;
+        }
+    }
+    return result;
 }
 
 int32_t AudioAdapterManager::GetSystemVolumeLevel(AudioStreamType streamType, bool isFromVolumeKey)
@@ -305,7 +357,29 @@ bool AudioAdapterManager::IsStreamActive(AudioStreamType streamType)
         return false;
     }
 
+    if (streamType == STREAM_VOICE_CALL) {
+        return IsStreamActiveForVolumeTypeGroup(VOICE_CALL_VOLUME_TYPE_LIST);
+    } else if (streamType == STREAM_MUSIC) {
+        return IsStreamActiveForVolumeTypeGroup(MEDIA_VOLUME_TYPE_LIST);
+    } else if (streamType == STREAM_RING) {
+        return IsStreamActiveForVolumeTypeGroup(RINGTONE_VOLUME_TYPE_LIST);
+    }
+
     return audioServiceAdapter_->IsStreamActive(streamType);
+}
+
+
+bool AudioAdapterManager::IsStreamActiveForVolumeTypeGroup(const std::vector<AudioStreamType> &volumeTypeGroup)
+{
+    bool result = false;
+    for (auto &streamType: volumeTypeGroup) {
+        result = audioServiceAdapter_->IsStreamActive(streamType);
+        if (result) {
+            // An active stream has been found, return true directly.
+            return true;
+        }
+    }
+    return false;
 }
 
 vector<SinkInfo> AudioAdapterManager::GetAllSinks()
@@ -428,8 +502,8 @@ void AudioAdapterManager::SetVolumeForSwitchDevice(InternalDeviceType deviceType
     LoadVolumeMap();
     LoadMuteStatusMap();
 
-    auto iter = streamTypeList_.begin();
-    while (iter != streamTypeList_.end()) {
+    auto iter = VOLUME_TYPE_LIST.begin();
+    while (iter != VOLUME_TYPE_LIST.end()) {
         // update volume level and mute status for each stream type
         SetVolumeDb(*iter);
         AUDIO_INFO_LOG("SetVolumeForSwitchDevice: volume: %{public}d, mute: %{public}d for stream type %{public}d",
@@ -873,8 +947,8 @@ void AudioAdapterManager::InitVolumeMap(bool isFirstBoot)
     }
     if (isFirstBoot) {
         AUDIO_INFO_LOG("InitVolumeMap: Wrote default stream volumes to KvStore");
-        for (auto &deviceType: deviceList_) {
-            for (auto &streamType: streamTypeList_) {
+        for (auto &deviceType: DEVICE_TYPE_LIST) {
+            for (auto &streamType: VOLUME_TYPE_LIST) {
                 WriteVolumeToKvStore(deviceType, streamType, volumeLevelMap_[streamType]);
             }
         }
@@ -929,7 +1003,7 @@ bool AudioAdapterManager::LoadVolumeMap(void)
         return false;
     }
 
-    for (auto &streamType: streamTypeList_) {
+    for (auto &streamType: VOLUME_TYPE_LIST) {
         bool result = LoadVolumeFromKvStore(currentActiveDevice_, streamType);
         if (!result) {
             AUDIO_ERR_LOG("LoadVolumeMap: Could not load volume for streamType[%{public}d] from kvStore", streamType);
@@ -1014,8 +1088,8 @@ void AudioAdapterManager::InitMuteStatusMap(bool isFirstBoot)
     }
     if (isFirstBoot) {
         AUDIO_INFO_LOG("InitMuteStatusMap: Wrote default mute status to KvStore");
-        for (auto &deviceType: deviceList_) {
-            for (auto &streamType: streamTypeList_) {
+        for (auto &deviceType: DEVICE_TYPE_LIST) {
+            for (auto &streamType: VOLUME_TYPE_LIST) {
                 WriteMuteStatusToKvStore(deviceType, streamType, 0);
             }
         }
@@ -1032,7 +1106,7 @@ bool AudioAdapterManager::LoadMuteStatusMap(void)
         return false;
     }
 
-    for (auto &streamType: streamTypeList_) {
+    for (auto &streamType: VOLUME_TYPE_LIST) {
         bool result = LoadMuteStatusFromKvStore(currentActiveDevice_, streamType);
         if (!result) {
             AUDIO_ERR_LOG("Could not load mute status for stream type %{public}d from kvStore", streamType);
@@ -1305,7 +1379,7 @@ float AudioAdapterManager::CalculateVolumeDbNonlinear(AudioStreamType streamType
 void AudioAdapterManager::InitVolumeMapIndex()
 {
     useNonlinearAlgo_ = 0;
-    for (auto streamType : streamTypeList_) {
+    for (auto streamType : VOLUME_TYPE_LIST) {
         minVolumeIndexMap_[streamType] = MIN_VOLUME_LEVEL;
         maxVolumeIndexMap_[streamType] = MAX_VOLUME_LEVEL;
         volumeLevelMap_[streamType] = DEFAULT_VOLUME_LEVEL;

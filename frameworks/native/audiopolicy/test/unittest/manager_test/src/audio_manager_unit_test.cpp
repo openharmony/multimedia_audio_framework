@@ -33,9 +33,9 @@ namespace {
     constexpr uint32_t MIN_DEVICE_COUNT = 2;
     constexpr uint32_t MIN_DEVICE_ID = 1;
     constexpr uint32_t MIN_DEVICE_NUM = 1;
-    constexpr uint32_t CONTENT_TYPE_UPPER_INVALID = 10;
-    constexpr uint32_t STREAM_USAGE_UPPER_INVALID = 10;
-    constexpr uint32_t STREAM_TYPE_UPPER_INVALID = 100;
+    constexpr uint32_t CONTENT_TYPE_UPPER_INVALID = 1000;
+    constexpr uint32_t STREAM_USAGE_UPPER_INVALID = 1000;
+    constexpr uint32_t STREAM_TYPE_UPPER_INVALID = 1000;
     constexpr uint32_t CONTENT_TYPE_LOWER_INVALID = -1;
     constexpr uint32_t STREAM_USAGE_LOWER_INVALID = -1;
     constexpr uint32_t STREAM_TYPE_LOWER_INVALID = -1;
@@ -1020,7 +1020,7 @@ HWTEST(AudioManagerUnitTest, GetTypeValueFromPin_013, TestSize.Level1)
 */
 HWTEST(AudioManagerUnitTest, GetTypeValueFromPin_014, TestSize.Level1)
 {
-    int32_t invalid_value = 128;
+    int32_t invalid_value = 1000;
     AudioPin pin = AudioPin(invalid_value);
     DeviceType ret = AudioSystemManager::GetInstance()->GetTypeValueFromPin(pin);
     EXPECT_EQ(ret, DeviceType::DEVICE_TYPE_NONE);

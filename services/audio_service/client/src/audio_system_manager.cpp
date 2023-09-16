@@ -321,22 +321,16 @@ uint64_t AudioSystemManager::GetTransactionId(DeviceType deviceType, DeviceRole 
 
 int32_t AudioSystemManager::SetVolume(AudioVolumeType volumeType, int32_t volumeLevel) const
 {
-    AUDIO_DEBUG_LOG("AudioSystemManager SetVolume volumeType=%{public}d ", volumeType);
+    AUDIO_DEBUG_LOG("SetVolume volumeType[%{public}d], volumeLevel[%{public}d]", volumeType, volumeLevel);
 
-    /* Validate and return INVALID_PARAMS error */
-    if ((volumeLevel < MIN_VOLUME_LEVEL) || (volumeLevel > MAX_VOLUME_LEVEL)) {
-        AUDIO_ERR_LOG("Invalid Volume Input!");
-        return ERR_INVALID_PARAM;
-    }
-
+    /* Validate volumeType and return INVALID_PARAMS error */
     switch (volumeType) {
-        case STREAM_MUSIC:
-        case STREAM_RING:
-        case STREAM_NOTIFICATION:
         case STREAM_VOICE_CALL:
-        case STREAM_VOICE_ASSISTANT:
+        case STREAM_RING:
+        case STREAM_MUSIC:
         case STREAM_ALARM:
         case STREAM_ACCESSIBILITY:
+        case STREAM_VOICE_ASSISTANT:
             break;
         case STREAM_ULTRASONIC:
         case STREAM_ALL:
@@ -346,7 +340,7 @@ int32_t AudioSystemManager::SetVolume(AudioVolumeType volumeType, int32_t volume
             }
             break;
         default:
-            AUDIO_ERR_LOG("SetVolume volumeType=%{public}d not supported", volumeType);
+            AUDIO_ERR_LOG("SetVolume: volumeType[%{public}d] is not supported", volumeType);
             return ERR_NOT_SUPPORTED;
     }
 

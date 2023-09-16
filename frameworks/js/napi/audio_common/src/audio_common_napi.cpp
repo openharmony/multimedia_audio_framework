@@ -53,7 +53,9 @@ std::string AudioCommonNapi::getMessageByCode(int32_t &code)
             err_message = NAPI_ERR_ILLEGAL_STATE_INFO;
             break;
         case NAPI_ERR_UNSUPPORTED:
+        case ERR_NOT_SUPPORTED:
             err_message = NAPI_ERR_UNSUPPORTED_INFO;
+            code = NAPI_ERR_UNSUPPORTED;
             break;
         case NAPI_ERR_TIMEOUT:
             err_message = NAPI_ERR_TIMEOUT_INFO;
@@ -67,8 +69,8 @@ std::string AudioCommonNapi::getMessageByCode(int32_t &code)
         case NAPI_ERR_INPUT_INVALID:
             err_message = NAPI_ERR_INPUT_INVALID_INFO;
             break;
-        case ERR_PERMISSION_DENIED:
         case NAPI_ERR_PERMISSION_DENIED:
+        case ERR_PERMISSION_DENIED:
             err_message = NAPI_ERROR_PERMISSION_DENIED_INFO;
             code = NAPI_ERR_PERMISSION_DENIED;
             break;
@@ -84,11 +86,6 @@ void AudioCommonNapi::throwError(napi_env env, int32_t code)
 {
     std::string messageValue = AudioCommonNapi::getMessageByCode(code);
     napi_throw_error(env, (std::to_string(code)).c_str(), messageValue.c_str());
-}
-
-bool AudioCommonNapi::IsLegalInputArgumentVolLevel(int32_t volLevel)
-{
-    return (volLevel < MIN_VOLUME_LEVEL || volLevel > MAX_VOLUME_LEVEL) ? false : true;
 }
 
 bool AudioCommonNapi::IsLegalInputArgumentVolType(int32_t inputType)

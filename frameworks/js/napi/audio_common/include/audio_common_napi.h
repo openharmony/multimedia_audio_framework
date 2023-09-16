@@ -63,7 +63,6 @@ public:
     static std::string GetStringArgument(napi_env env, napi_value value);
     static std::string getMessageByCode(int32_t &code);
     static void throwError (napi_env env, int32_t code);
-    static bool IsLegalInputArgumentVolLevel(int32_t volLevel);
     static bool IsLegalInputArgumentVolType(int32_t inputType);
     static bool IsLegalInputArgumentDeviceFlag(int32_t inputType);
     static bool IsLegalInputArgumentActiveDeviceType(int32_t deviceType);

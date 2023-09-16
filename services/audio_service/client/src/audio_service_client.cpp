@@ -48,6 +48,31 @@ const string PATH_SEPARATOR = "/";
 const string COOKIE_FILE_NAME = "cookie";
 static const string INNER_CAPTURER_SOURCE = "InnerCapturer.monitor";
 
+static const std::unordered_map<AudioStreamType, std::string> STREAM_TYPE_ENUM_STRING_MAP = {
+    {STREAM_VOICE_CALL, "voice_call"},
+    {STREAM_MUSIC, "music"},
+    {STREAM_RING, "ring"},
+    {STREAM_MEDIA, "media"},
+    {STREAM_VOICE_ASSISTANT, "voice_assistant"},
+    {STREAM_SYSTEM, "system"},
+    {STREAM_ALARM, "alarm"},
+    {STREAM_NOTIFICATION, "notification"},
+    {STREAM_BLUETOOTH_SCO, "bluetooth_sco"},
+    {STREAM_ENFORCED_AUDIBLE, "enforced_audible"},
+    {STREAM_DTMF, "dtmf"},
+    {STREAM_TTS, "tts"},
+    {STREAM_ACCESSIBILITY, "accessibility"},
+    {STREAM_RECORDING, "recording"},
+    {STREAM_MOVIE, "movie"},
+    {STREAM_GAME, "game"},
+    {STREAM_SPEECH, "speech"},
+    {STREAM_SYSTEM_ENFORCED, "system_enforced"},
+    {STREAM_ULTRASONIC, "ultrasonic"},
+    {STREAM_WAKEUP, "wakeup"},
+    {STREAM_VOICE_MESSAGE, "voice_message"},
+    {STREAM_NAVIGATION, "navigation"}
+};
+
 static int32_t CheckReturnIfinvalid(bool expr, const int32_t retVal)
 {
     do {
@@ -758,51 +783,12 @@ int32_t AudioServiceClient::Initialize(ASClientType eClientType)
 
 const std::string AudioServiceClient::GetStreamName(AudioStreamType audioType)
 {
-    std::string name;
-    switch (audioType) {
-        case STREAM_VOICE_ASSISTANT:
-            name = "voice_assistant";
-            break;
-        case STREAM_VOICE_CALL:
-            name = "voice_call";
-            break;
-        case STREAM_SYSTEM:
-            name = "system";
-            break;
-        case STREAM_RING:
-            name = "ring";
-            break;
-        case STREAM_MUSIC:
-            name = "music";
-            break;
-        case STREAM_ALARM:
-            name = "alarm";
-            break;
-        case STREAM_NOTIFICATION:
-            name = "notification";
-            break;
-        case STREAM_BLUETOOTH_SCO:
-            name = "bluetooth_sco";
-            break;
-        case STREAM_DTMF:
-            name = "dtmf";
-            break;
-        case STREAM_TTS:
-            name = "tts";
-            break;
-        case STREAM_ACCESSIBILITY:
-            name = "accessibility";
-            break;
-        case STREAM_ULTRASONIC:
-            name = "ultrasonic";
-            break;
-        case STREAM_WAKEUP:
-            name = "wakeup";
-            break;
-        default:
-            name = "unknown";
+    std::string name = "unknown";
+    if (STREAM_TYPE_ENUM_STRING_MAP.find(audioType) != STREAM_TYPE_ENUM_STRING_MAP.end()) {
+        name = STREAM_TYPE_ENUM_STRING_MAP.at(audioType);
+    } else {
+        AUDIO_ERR_LOG("GetStreamName: Invalid stream type [%{public}d], return unknown", audioType);
     }
-
     const std::string streamName = name;
     return streamName;
 }
@@ -2285,7 +2271,7 @@ void AudioServiceClient::SetPaVolume(const AudioServiceClient &client)
     AudioVolumeType volumeType = GetVolumeTypeFromStreamType(client.mStreamType);
     int32_t systemVolumeLevel = AudioSystemManager::GetInstance()->GetVolume(volumeType);
     DeviceType deviceType = AudioSystemManager::GetInstance()->GetActiveOutputDevice();
-    float systemVolumeDb = AudioPolicyManager::GetInstance().GetSystemVolumeInDb(client.mStreamType,
+    float systemVolumeDb = AudioPolicyManager::GetInstance().GetSystemVolumeInDb(volumeType,
         systemVolumeLevel, deviceType);
     float vol = systemVolumeDb * client.mVolumeFactor * client.mPowerVolumeFactor;
 
