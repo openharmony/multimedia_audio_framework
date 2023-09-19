@@ -163,11 +163,14 @@ static void SetDeviceDescriptors(const napi_env& env, napi_value &jsChangeInfoOb
     napi_set_named_property(env, jsChangeInfoObj, "channelMasks", channelMasks);
 }
 
-static void NativeRendererChangeInfoToJsObj(const napi_env &env, napi_value &jsChangeDeviceInfoObj,
+static void NativeRendererChangeInfoToJsObj(const napi_env &env, napi_value &jsChangeDeviceInfosObj,
     const DeviceInfo &devInfo)
 {
-    napi_create_object(env, &jsChangeDeviceInfoObj);
-    SetDeviceDescriptors(env, jsChangeDeviceInfoObj, devInfo);
+    napi_value valueParam = nullptr;
+    napi_create_array_with_length(env, 1, &jsChangeDeviceInfosObj);
+    napi_create_object(env, &valueParam);
+    SetDeviceDescriptors(env, valueParam, devInfo);
+    napi_set_element(env, jsChangeDeviceInfosObj, 0, valueParam);
 }
 
 void AudioRendererDeviceChangeCallbackNapi::WorkCallbackCompleted(uv_work_t *work, int status)

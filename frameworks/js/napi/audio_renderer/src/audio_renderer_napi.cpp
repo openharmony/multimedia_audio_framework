@@ -1116,15 +1116,18 @@ void AudioRendererNapi::GetRendererAsyncCallbackComplete(napi_env env, napi_stat
 void AudioRendererNapi::GetDeviceInfoAsyncCallbackComplete(napi_env env, napi_status status, void *data)
 {
     napi_value valueParam = nullptr;
+    napi_value deviceDescriptors = nullptr;
     auto asyncContext = static_cast<AudioRendererAsyncContext *>(data);
 
     if (asyncContext != nullptr) {
         if (!asyncContext->status) {
+            napi_create_array_with_length(env, 1, &deviceDescriptors);
             SetDeviceDescriptors(env, valueParam, asyncContext->deviceInfo);
+            napi_set_element(env, deviceDescriptors, 0, valueParam);
             asyncContext->status = AudioRendererNapi::isConstructSuccess_;
             AudioRendererNapi::isConstructSuccess_ = SUCCESS;
         }
-        CommonCallbackRoutine(env, asyncContext, valueParam);
+        CommonCallbackRoutine(env, asyncContext, deviceDescriptors);
     } else {
         HiLog::Error(LABEL, "ERROR: GetDeviceInfoAsyncCallbackComplete asyncContext is Null!");
     }
