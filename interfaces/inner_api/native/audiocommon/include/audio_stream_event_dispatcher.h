@@ -59,19 +59,16 @@ public:
         std::vector<std::unique_ptr<AudioCapturerChangeInfo>> &audioCapturerChangeInfos);
     void HandleCapturerStreamStateChange(const unique_ptr<StreamStateChangeRequest> &streamStateChangeRequest);
     void HandleRendererStreamStateChange(const unique_ptr<StreamStateChangeRequest> &streamStateChangeRequest);
-    void HandleStreamStateChange();
     void DispatcherEvent();
 
 private:
     std::mutex rendererStateChangeListnerMutex_;
     std::mutex capturerStateChangeListnerMutex_;
+    std::mutex streamStateChangeQueueMutex_;
     std::unordered_map<int32_t, std::shared_ptr<AudioRendererStateChangeCallback>> rendererCBMap_;
     std::unordered_map<int32_t, std::shared_ptr<AudioCapturerStateChangeCallback>> capturerCBMap_;
     std::queue<unique_ptr<StreamStateChangeRequest>> streamStateChangeQueue_;
     std::unique_ptr<StreamStateChangeRequest> request;
-
-uint32_t activeThread_;
-static constexpr uint32_t MAX_THREAD = 1;
 };
 } // namespace AudioStandard
 } // namespace OHOS

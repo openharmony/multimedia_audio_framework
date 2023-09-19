@@ -329,6 +329,41 @@ AudioVolumeType AudioPolicyServer::GetVolumeTypeFromStreamType(AudioStreamType s
     }
 }
 
+bool AudioPolicyServer::IsVolumeTypeValid(AudioStreamType streamType)
+{
+    bool result = false;
+    switch (streamType) {
+        case STREAM_MUSIC:
+        case STREAM_RING:
+        case STREAM_NOTIFICATION:
+        case STREAM_VOICE_CALL:
+        case STREAM_VOICE_ASSISTANT:
+        case STREAM_ALARM:
+        case STREAM_ACCESSIBILITY:
+        case STREAM_ULTRASONIC:
+        case STREAM_ALL:
+            result = true;
+            break;
+        default:
+            result = false;
+            AUDIO_ERR_LOG("IsVolumeTypeValid: streamType[%{public}d] is not supported", streamType);
+            break;
+    }
+    return result;
+}
+
+bool AudioPolicyServer::IsVolumeLevelValid(AudioStreamType streamType, int32_t volumeLevel)
+{
+    bool result = true;
+    if (volumeLevel < mPolicyService.GetMinVolumeLevel(streamType) ||
+        volumeLevel > mPolicyService.GetMaxVolumeLevel(streamType)) {
+        AUDIO_ERR_LOG("IsVolumeLevelValid: volumeLevel[%{public}d] is out of valid range for streamType[%{public}d]",
+            volumeLevel, streamType);
+        result = false;
+    }
+    return result;
+}
+
 void AudioPolicyServer::InitKVStore()
 {
     mPolicyService.InitKVStore();
@@ -363,6 +398,14 @@ int32_t AudioPolicyServer::SetSystemVolumeLevel(AudioStreamType streamType, int3
         AUDIO_ERR_LOG("SetSystemVolumeLevel: No system permission");
         return ERR_PERMISSION_DENIED;
     }
+
+    if (!IsVolumeTypeValid(streamType)) {
+        return ERR_NOT_SUPPORTED;
+    }
+    if (!IsVolumeLevelValid(streamType, volumeLevel)) {
+        return ERR_NOT_SUPPORTED;
+    }
+
     return SetSystemVolumeLevelInternal(streamType, volumeLevel, false);
 }
 
@@ -440,6 +483,13 @@ int32_t AudioPolicyServer::AdjustSystemVolumeByStep(AudioVolumeType volumeType, 
 
 float AudioPolicyServer::GetSystemVolumeInDb(AudioVolumeType volumeType, int32_t volumeLevel, DeviceType deviceType)
 {
+    if (!IsVolumeTypeValid(volumeType)) {
+        return static_cast<float>(ERR_INVALID_PARAM);
+    }
+    if (!IsVolumeLevelValid(volumeType, volumeLevel)) {
+        return static_cast<float>(ERR_INVALID_PARAM);
+    }
+
     return mPolicyService.GetSystemVolumeInDb(volumeType, volumeLevel, deviceType);
 }
 
@@ -1261,11 +1311,14 @@ int32_t AudioPolicyServer::ActivateAudioInterrupt(const AudioInterrupt &audioInt
     std::lock_guard<std::mutex> lock(interruptMutex_);
 
     AudioStreamType streamType = audioInterrupt.audioFocusType.streamType;
-    AUDIO_INFO_LOG("ActivateAudioInterrupt::[audioInterrupt] streamType: %{public}d, sessionID: %{public}u, "\
-        "isPlay: %{public}d, sourceType: %{public}d", streamType, audioInterrupt.sessionID,
-        (audioInterrupt.audioFocusType).isPlay, (audioInterrupt.audioFocusType).sourceType);
-    AUDIO_DEBUG_LOG("ActivateAudioInterrupt::streamUsage: %{public}d, contentType: %{public}d, audioScene: %{public}d",
-        audioInterrupt.streamUsage, audioInterrupt.contentType, GetAudioScene());
+    AUDIO_INFO_LOG("ActivateAudioInterrupt::sessionID: %{public}u, streamType: %{public}d, streamUsage: %{public}d, "\
+        "sourceType: %{public}d, pid: %{public}d", audioInterrupt.sessionID, streamType, audioInterrupt.streamUsage,
+        (audioInterrupt.audioFocusType).sourceType, audioInterrupt.pid);
+
+    if (audioInterrupt.parallelPlayFlag) {
+        AUDIO_INFO_LOG("ActivateAudioInterrupt::parallelPlayFlag is true.");
+        return SUCCESS;
+    }
 
     if (!mPolicyService.IsAudioInterruptEnabled()) {
         AUDIO_WARNING_LOG("AudioInterrupt is not enabled. No need to ActivateAudioInterrupt");
@@ -1476,9 +1529,14 @@ int32_t AudioPolicyServer::DeactivateAudioInterrupt(const AudioInterrupt &audioI
         return SUCCESS;
     }
 
-    AUDIO_INFO_LOG("DeactivateAudioInterrupt audioInterrupt:streamType: %{public}d, sessionID: %{public}u, "\
-        "isPlay: %{public}d, sourceType: %{public}d", (audioInterrupt.audioFocusType).streamType,
-        audioInterrupt.sessionID, (audioInterrupt.audioFocusType).isPlay, (audioInterrupt.audioFocusType).sourceType);
+    AUDIO_INFO_LOG("DeactivateAudioInterrupt::sessionID: %{public}u, streamType: %{public}d, streamUsage: %{public}d, "\
+        "sourceType: %{public}d, pid: %{public}d", audioInterrupt.sessionID, (audioInterrupt.audioFocusType).streamType,
+        audioInterrupt.streamUsage, (audioInterrupt.audioFocusType).sourceType, audioInterrupt.pid);
+
+    if (audioInterrupt.parallelPlayFlag) {
+        AUDIO_INFO_LOG("DeactivateAudioInterrupt::parallelPlayFlag is true.");
+        return SUCCESS;
+    }
 
     bool isInterruptActive = false;
     for (auto it = audioFocusInfoList_.begin(); it != audioFocusInfoList_.end();) {

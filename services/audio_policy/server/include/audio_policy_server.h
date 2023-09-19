@@ -340,6 +340,8 @@ private:
     int32_t SetSingleStreamMute(AudioStreamType streamType, bool mute, bool isUpdateUi);
     bool GetStreamMuteInternal(AudioStreamType streamType);
     AudioVolumeType GetVolumeTypeFromStreamType(AudioStreamType streamType);
+    bool IsVolumeTypeValid(AudioStreamType streamType);
+    bool IsVolumeLevelValid(AudioStreamType streamType, int32_t volumeLevel);
 
     // Permission and privacy
     bool VerifyPermission(const std::string &permission, uint32_t tokenId = 0, bool isRecording = false);

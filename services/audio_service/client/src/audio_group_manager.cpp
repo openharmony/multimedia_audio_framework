@@ -49,25 +49,24 @@ int32_t AudioGroupManager::SetVolume(AudioVolumeType volumeType, int32_t volume)
 
     AUDIO_DEBUG_LOG("AudioSystemManager SetVolume volumeType=%{public}d ", volumeType);
 
-    /* Validate and return INVALID_PARAMS error */
-    if ((volume < MIN_VOLUME_LEVEL) || (volume > MAX_VOLUME_LEVEL)) {
-        AUDIO_ERR_LOG("Invalid Volume Input!");
-        return ERR_INVALID_PARAM;
-    }
-
+    /* Validate volume type and return INVALID_PARAMS error */
     switch (volumeType) {
-        case STREAM_MUSIC:
-        case STREAM_RING:
-        case STREAM_NOTIFICATION:
         case STREAM_VOICE_CALL:
-        case STREAM_VOICE_ASSISTANT:
+        case STREAM_RING:
+        case STREAM_MUSIC:
         case STREAM_ALARM:
         case STREAM_ACCESSIBILITY:
+        case STREAM_VOICE_ASSISTANT:
+                break;
         case STREAM_ULTRASONIC:
         case STREAM_ALL:
+            if (!PermissionUtil::VerifySelfPermission()) {
+                AUDIO_ERR_LOG("SetVolume: No system permission");
+                return ERR_PERMISSION_DENIED;
+            }
             break;
         default:
-            AUDIO_ERR_LOG("SetVolume volumeType=%{public}d not supported", volumeType);
+            AUDIO_ERR_LOG("SetVolume: volumeType[%{public}d] is not supported", volumeType);
             return ERR_NOT_SUPPORTED;
     }
 
@@ -390,7 +389,7 @@ float AudioGroupManager::GetSystemVolumeInDb(AudioVolumeType volumeType, int32_t
     /* Call Audio Policy GetSystemVolumeInDb */
     if (netWorkId_ != LOCAL_NETWORK_ID) {
         AUDIO_ERR_LOG("AudioGroupManager::GetSystemVolumeInDb is only supported for LOCAL_NETWORK_ID.");
-        return ERROR;
+        return static_cast<float>(ERROR);
     }
     return AudioPolicyManager::GetInstance().GetSystemVolumeInDb(volumeType, volumeLevel, deviceType);
 }

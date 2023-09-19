@@ -542,6 +542,61 @@ int32_t AudioStreamCollector::UpdateStreamState(int32_t clientUid,
     return SUCCESS;
 }
 
+bool AudioStreamCollector::IsStreamActive(AudioStreamType volumeType)
+{
+    std::lock_guard<std::mutex> lock(streamsInfoMutex_);
+    bool result = false;
+    for (auto &changeInfo: audioRendererChangeInfos_) {
+        if (changeInfo->rendererState != RENDERER_RUNNING) {
+            continue;
+        }
+        AudioStreamType rendererVolumeType = GetVolumeTypeFromContentUsage((changeInfo->rendererInfo).contentType,
+            (changeInfo->rendererInfo).streamUsage);
+        if (rendererVolumeType == volumeType) {
+            // An active stream has been found, return true directly.
+            return true;
+        }
+    }
+    return result;
+}
+
+AudioStreamType AudioStreamCollector::GetVolumeTypeFromContentUsage(ContentType contentType, StreamUsage streamUsage)
+{
+    AudioStreamType streamType = STREAM_MUSIC;
+    auto pos = streamTypeMap_.find(make_pair(contentType, streamUsage));
+    if (pos != streamTypeMap_.end()) {
+        streamType = pos->second;
+    }
+    switch (streamType) {
+        case STREAM_VOICE_CALL:
+        case STREAM_VOICE_MESSAGE:
+            return STREAM_VOICE_CALL;
+        case STREAM_RING:
+        case STREAM_SYSTEM:
+        case STREAM_NOTIFICATION:
+        case STREAM_SYSTEM_ENFORCED:
+        case STREAM_DTMF:
+            return STREAM_RING;
+        case STREAM_MUSIC:
+        case STREAM_MEDIA:
+        case STREAM_MOVIE:
+        case STREAM_GAME:
+        case STREAM_SPEECH:
+        case STREAM_NAVIGATION:
+            return STREAM_MUSIC;
+        case STREAM_VOICE_ASSISTANT:
+            return STREAM_VOICE_ASSISTANT;
+        case STREAM_ALARM:
+            return STREAM_ALARM;
+        case STREAM_ACCESSIBILITY:
+            return STREAM_ACCESSIBILITY;
+        case STREAM_ULTRASONIC:
+            return STREAM_ULTRASONIC;
+        default:
+            return STREAM_MUSIC;
+    }
+}
+
 int32_t AudioStreamCollector::SetLowPowerVolume(int32_t streamId, float volume)
 {
     std::lock_guard<std::mutex> lock(streamsInfoMutex_);

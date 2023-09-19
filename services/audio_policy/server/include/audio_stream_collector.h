@@ -46,6 +46,7 @@ public:
     void RegisteredTrackerClientDied(int32_t uid);
     void RegisteredStreamListenerClientDied(int32_t uid);
     int32_t UpdateStreamState(int32_t clientUid, StreamSetStateEventInternal &streamSetStateEventInternal);
+    bool IsStreamActive(AudioStreamType volumeType);
     int32_t SetLowPowerVolume(int32_t streamId, float volume);
     float GetLowPowerVolume(int32_t streamId);
     float GetSingleStreamVolume(int32_t streamId);
@@ -66,6 +67,7 @@ private:
     int32_t UpdateCapturerStream(AudioStreamChangeInfo &streamChangeInfo);
     int32_t UpdateRendererDeviceInfo(DeviceInfo &outputDeviceInfo);
     int32_t UpdateCapturerDeviceInfo(DeviceInfo &inputDeviceInfo);
+    AudioStreamType GetVolumeTypeFromContentUsage(ContentType contentType, StreamUsage streamUsage);
 };
 } // namespace AudioStandard
 } // namespace OHOS

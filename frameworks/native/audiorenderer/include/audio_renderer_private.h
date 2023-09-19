@@ -71,6 +71,7 @@ public:
     int32_t GetBufQueueState(BufferQueueState &bufState) const override;
     void SetApplicationCachePath(const std::string cachePath) override;
     void SetInterruptMode(InterruptMode mode) override;
+    int32_t SetParallelPlayFlag(bool parallelPlayFlag) override;
     int32_t SetLowPowerVolume(float volume) const override;
     float GetLowPowerVolume() const override;
     float GetSingleStreamVolume() const override;

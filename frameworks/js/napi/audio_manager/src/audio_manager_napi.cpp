@@ -1820,10 +1820,6 @@ napi_value AudioManagerNapi::SetVolume(napi_env env, napi_callback_info info)
                 }
             } else if (i == PARAM1 && valueType == napi_number) {
                 napi_get_value_int32(env, argv[i], &asyncContext->volLevel);
-                if (!AudioCommonNapi::IsLegalInputArgumentVolLevel(asyncContext->volLevel)) {
-                    asyncContext->status = (asyncContext->status ==
-                        NAPI_ERR_INVALID_PARAM) ? NAPI_ERR_INVALID_PARAM : NAPI_ERR_UNSUPPORTED;
-                }
             } else if (i == PARAM2) {
                 if (valueType == napi_function) {
                     napi_create_reference(env, argv[i], refCount, &asyncContext->callbackRef);

@@ -33,6 +33,7 @@ void AudioPolicyManagerStub::ReadAudioInterruptParams(MessageParcel &data, Audio
     audioInterrupt.sessionID = data.ReadUint32();
     audioInterrupt.pid = data.ReadInt32();
     audioInterrupt.mode = static_cast<InterruptMode>(data.ReadInt32());
+    audioInterrupt.parallelPlayFlag = data.ReadBool();
 }
 
 void AudioPolicyManagerStub::ReadAudioManagerInterruptParams(MessageParcel &data, AudioInterrupt &audioInterrupt)
@@ -57,6 +58,7 @@ void AudioPolicyManagerStub::WriteAudioInteruptParams(MessageParcel &reply, cons
     reply.WriteUint32(audioInterrupt.sessionID);
     reply.WriteInt32(audioInterrupt.pid);
     reply.WriteInt32(static_cast<int32_t>(audioInterrupt.mode));
+    reply.WriteBool(audioInterrupt.parallelPlayFlag);
 }
 
 void AudioPolicyManagerStub::ReadStreamChangeInfo(MessageParcel &data, const AudioMode &mode,

@@ -20,7 +20,7 @@
 
 namespace OHOS {
 namespace AudioStandard {
-AudioStreamEventDispatcher::AudioStreamEventDispatcher() : activeThread_(0)
+AudioStreamEventDispatcher::AudioStreamEventDispatcher()
 {
     AUDIO_DEBUG_LOG("AudioStreamEventDispatcher::AudioStreamEventDispatcher()");
 }
@@ -70,13 +70,15 @@ void AudioStreamEventDispatcher::SendRendererInfoEventToDispatcher(AudioMode mod
     std::vector<std::unique_ptr<AudioRendererChangeInfo>> &audioRendererChangeInfos)
 {
     AUDIO_DEBUG_LOG("AudioStreamEventDispatcher::SendRendererInfoEventToDispatcher:mode %{public}d ", mode);
-    unique_ptr<StreamStateChangeRequest> streamStateChangeRequest = make_unique<StreamStateChangeRequest>();
+
+    std::lock_guard<std::mutex> lock(streamStateChangeQueueMutex_);
 
     std::vector<std::unique_ptr<AudioRendererChangeInfo>> rendererChangeInfos;
     for (const auto &changeInfo : audioRendererChangeInfos) {
         rendererChangeInfos.push_back(std::make_unique<AudioRendererChangeInfo>(*changeInfo));
     }
 
+    unique_ptr<StreamStateChangeRequest> streamStateChangeRequest = make_unique<StreamStateChangeRequest>();
     if (!streamStateChangeRequest) {
         AUDIO_ERR_LOG("AudioStreamEventDispatcher::SendRendererInfoEventToDispatcher:Memory alloc failed!!");
         return;
@@ -91,6 +93,8 @@ void AudioStreamEventDispatcher::SendCapturerInfoEventToDispatcher(AudioMode mod
     std::vector<std::unique_ptr<AudioCapturerChangeInfo>> &audioCapturerChangeInfos)
 {
     AUDIO_DEBUG_LOG("AudioStreamEventDispatcher::SendCapturerInfoEventToDispatcher:mode %{public}d ", mode);
+
+    std::lock_guard<std::mutex> lock(streamStateChangeQueueMutex_);
 
     std::vector<std::unique_ptr<AudioCapturerChangeInfo>> capturerChangeInfos;
     for (const auto &changeInfo : audioCapturerChangeInfos) {
@@ -138,9 +142,9 @@ void AudioStreamEventDispatcher::HandleCapturerStreamStateChange(
     }
 }
 
-void AudioStreamEventDispatcher::HandleStreamStateChange()
+void AudioStreamEventDispatcher::DispatcherEvent()
 {
-    AUDIO_DEBUG_LOG("HandleStreamStateChange entered");
+    AUDIO_DEBUG_LOG("DispatcherEvent entered");
     while (!streamStateChangeQueue_.empty()) {
         std::unique_ptr<StreamStateChangeRequest> streamStateChangeRequest =
             std::move(streamStateChangeQueue_.front());
@@ -152,19 +156,6 @@ void AudioStreamEventDispatcher::HandleStreamStateChange()
             }
         }
         streamStateChangeQueue_.pop();
-    }
-    activeThread_ --;
-}
-
-void AudioStreamEventDispatcher::DispatcherEvent()
-{
-    AUDIO_DEBUG_LOG("DispatcherEvent entered");
-    size_t avlThread = MAX_THREAD - activeThread_;
-    for (size_t i = 0; i < avlThread; i++) {
-        if (!streamStateChangeQueue_.empty() && (activeThread_ < streamStateChangeQueue_.size())) {
-            std::thread(&AudioStreamEventDispatcher::HandleStreamStateChange, this).detach();
-            activeThread_++;
-        }
     }
 }
 } // namespace AudioStandard

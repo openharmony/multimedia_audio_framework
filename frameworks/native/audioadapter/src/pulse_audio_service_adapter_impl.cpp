@@ -38,6 +38,31 @@ int32_t g_playbackCapturerSourceOutputIndex = -1;
 
 std::set<uint32_t> g_wakeupCapturerSourceOutputIndexs;
 
+static const unordered_map<std::string, AudioStreamType> STREAM_TYPE_STRING_ENUM_MAP = {
+    {"voice_call", STREAM_VOICE_CALL},
+    {"music", STREAM_MUSIC},
+    {"ring", STREAM_RING},
+    {"media", STREAM_MEDIA},
+    {"voice_assistant", STREAM_VOICE_ASSISTANT},
+    {"system", STREAM_SYSTEM},
+    {"alarm", STREAM_ALARM},
+    {"notification", STREAM_NOTIFICATION},
+    {"bluetooth_sco", STREAM_BLUETOOTH_SCO},
+    {"enforced_audible", STREAM_ENFORCED_AUDIBLE},
+    {"dtmf", STREAM_DTMF},
+    {"tts", STREAM_TTS},
+    {"accessibility", STREAM_ACCESSIBILITY},
+    {"recording", STREAM_RECORDING},
+    {"movie", STREAM_MOVIE},
+    {"game", STREAM_GAME},
+    {"speech", STREAM_SPEECH},
+    {"system_enforced", STREAM_SYSTEM_ENFORCED},
+    {"ultrasonic", STREAM_ULTRASONIC},
+    {"wakeup", STREAM_WAKEUP},
+    {"voice_message", STREAM_VOICE_MESSAGE},
+    {"navigation", STREAM_NAVIGATION}
+};
+
 AudioServiceAdapter::~AudioServiceAdapter() = default;
 PulseAudioServiceAdapterImpl::~PulseAudioServiceAdapterImpl() = default;
 
@@ -534,7 +559,7 @@ bool PulseAudioServiceAdapterImpl::IsStreamActive(AudioStreamType streamType)
 {
     lock_guard<mutex> lock(lock_);
     if (!isSetDefaultSink_) {
-        AUDIO_ERR_LOG("IsStreamActive not SetDefaultSink first");
+        AUDIO_ERR_LOG("IsStreamActive: not SetDefaultSink first");
         return false;
     }
 
@@ -544,7 +569,7 @@ bool PulseAudioServiceAdapterImpl::IsStreamActive(AudioStreamType streamType)
     userData->isCorked = true;
 
     if (mContext == nullptr) {
-        AUDIO_ERR_LOG("IsStreamActive mContext is nullptr");
+        AUDIO_ERR_LOG("IsStreamActive: mContext is nullptr");
         return false;
     }
 
@@ -553,7 +578,7 @@ bool PulseAudioServiceAdapterImpl::IsStreamActive(AudioStreamType streamType)
     pa_operation *operation = pa_context_get_sink_input_info_list(mContext,
         PulseAudioServiceAdapterImpl::PaGetSinkInputInfoCorkStatusCb, reinterpret_cast<void*>(userData.get()));
     if (operation == nullptr) {
-        AUDIO_ERR_LOG("[IsStreamActive] pa_context_get_sink_input_info_list returned nullptr");
+        AUDIO_ERR_LOG("IsStreamActive: pa_context_get_sink_input_info_list returned nullptr");
         pa_threaded_mainloop_unlock(mMainLoop);
         return false;
     }
@@ -565,8 +590,7 @@ bool PulseAudioServiceAdapterImpl::IsStreamActive(AudioStreamType streamType)
     pa_operation_unref(operation);
     pa_threaded_mainloop_unlock(mMainLoop);
 
-    AUDIO_DEBUG_LOG("[IsStreamActive] cork for stream %s : %d",
-        GetNameByStreamType(streamType).c_str(), userData->isCorked);
+    AUDIO_DEBUG_LOG("IsStreamActive: streamType: %{puiblic}d, isCorked: %{puiblic}d", streamType, userData->isCorked);
 
     return (userData->isCorked) ? false : true;
 }
@@ -659,60 +683,14 @@ void PulseAudioServiceAdapterImpl::Disconnect()
     }
 }
 
-string PulseAudioServiceAdapterImpl::GetNameByStreamType(AudioStreamType streamType)
-{
-    switch (streamType) {
-        case STREAM_MUSIC:
-            return "music";
-        case STREAM_RING:
-            return "ring";
-        case STREAM_SYSTEM:
-            return "system";
-        case STREAM_NOTIFICATION:
-            return "notification";
-        case STREAM_ALARM:
-            return "alarm";
-        case STREAM_DTMF:
-            return "dtmf";
-        case STREAM_VOICE_CALL:
-            return "voice_call";
-        case STREAM_VOICE_ASSISTANT:
-            return "voice_assistant";
-        case STREAM_ACCESSIBILITY:
-            return "accessibility";
-        case STREAM_ULTRASONIC:
-            return "ultrasonic";
-        default:
-            return "";
-    }
-}
-
 AudioStreamType PulseAudioServiceAdapterImpl::GetIdByStreamType(string streamType)
 {
-    AudioStreamType stream;
-
-    if (!streamType.compare(string("music"))) {
-        stream = STREAM_MUSIC;
-    } else if (!streamType.compare(string("ring"))) {
-        stream = STREAM_RING;
-    } else if (!streamType.compare(string("system"))) {
-        stream = STREAM_SYSTEM;
-    } else if (!streamType.compare(string("notification"))) {
-        stream = STREAM_NOTIFICATION;
-    } else if (!streamType.compare(string("alarm"))) {
-        stream = STREAM_ALARM;
-    } else if (!streamType.compare(string("voice_call"))) {
-        stream = STREAM_VOICE_CALL;
-    }  else if (!streamType.compare(string("voice_assistant"))) {
-        stream = STREAM_VOICE_ASSISTANT;
-    } else if (!streamType.compare(string("accessibility"))) {
-        stream = STREAM_ACCESSIBILITY;
-    } else if (!streamType.compare(string("ultrasonic"))) {
-        stream = STREAM_ULTRASONIC;
+    AudioStreamType stream = STREAM_MUSIC;
+    if (STREAM_TYPE_STRING_ENUM_MAP.find(streamType) != STREAM_TYPE_STRING_ENUM_MAP.end()) {
+        stream = STREAM_TYPE_STRING_ENUM_MAP.at(streamType);
     } else {
-        stream = STREAM_MUSIC;
+        AUDIO_ERR_LOG("GetIdByStreamType: Invalid stream type [%{public}s]. Use default type", streamType.c_str());
     }
-
     return stream;
 }
 
@@ -853,7 +831,7 @@ void PulseAudioServiceAdapterImpl::PaGetSinkInputInfoVolumeCb(pa_context *c, con
     float volumeFactor = atof(streamVolume);
     float powerVolumeFactor = atof(streamPowerVolume);
     AudioStreamType streamTypeID = thiz->GetIdByStreamType(streamType);
-    float volumeDbCb = g_audioServiceAdapterCallback->OnGetVolumeDbCb(streamtype);
+    float volumeDbCb = g_audioServiceAdapterCallback->OnGetVolumeDbCb(streamTypeID);
     float vol = volumeDbCb * volumeFactor * powerVolumeFactor;
 
     pa_cvolume cv = i->volume;
@@ -900,7 +878,7 @@ void PulseAudioServiceAdapterImpl::PaGetSinkInputInfoCorkStatusCb(pa_context *c,
     }
 
     string streamType(streamtype);
-    if (!streamType.compare(thiz->GetNameByStreamType(userData->streamType))) {
+    if (thiz->GetIdByStreamType(streamType) == userData->streamType) {
         userData->isCorked = i->corked;
         AUDIO_INFO_LOG("PaGetSinkInputInfoCorkStatusCb corked : %{public}d for stream : %{public}s",
             userData->isCorked, i->name);

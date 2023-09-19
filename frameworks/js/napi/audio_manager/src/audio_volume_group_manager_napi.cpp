@@ -28,6 +28,8 @@ namespace OHOS {
 namespace AudioStandard {
 static __thread napi_ref g_groupmanagerConstructor = nullptr;
 int32_t AudioVolumeGroupManagerNapi::isConstructSuccess_ = SUCCESS;
+std::mutex AudioVolumeGroupManagerNapi::volumeGroupManagerMutex_;
+
 #define GET_PARAMS(env, info, num) \
     size_t argc = num;             \
     napi_value argv[num] = {0};    \
@@ -272,6 +274,8 @@ static void IsTrueAsyncCallbackComplete(napi_env env, napi_status status, void *
 // Constructor callback
 napi_value AudioVolumeGroupManagerNapi::Construct(napi_env env, napi_callback_info info)
 {
+    std::lock_guard<mutex> lock(volumeGroupManagerMutex_);
+
     napi_status status;
     napi_value jsThis;
     napi_value undefinedResult = nullptr;
@@ -309,6 +313,8 @@ napi_value AudioVolumeGroupManagerNapi::Construct(napi_env env, napi_callback_in
 
 void AudioVolumeGroupManagerNapi::Destructor(napi_env env, void *nativeObject, void *finalize_hint)
 {
+    std::lock_guard<mutex> lock(volumeGroupManagerMutex_);
+
     if (nativeObject != nullptr) {
         auto obj = static_cast<AudioVolumeGroupManagerNapi*>(nativeObject);
         delete obj;
@@ -478,10 +484,6 @@ napi_value AudioVolumeGroupManagerNapi::SetVolume(napi_env env, napi_callback_in
                 }
             } else if (i == PARAM1 && valueType == napi_number) {
                 napi_get_value_int32(env, argv[i], &asyncContext->volLevel);
-                if (!AudioCommonNapi::IsLegalInputArgumentVolLevel(asyncContext->volLevel)) {
-                    asyncContext->status = (asyncContext->status ==
-                        NAPI_ERR_INVALID_PARAM) ? NAPI_ERR_INVALID_PARAM : NAPI_ERR_UNSUPPORTED;
-                }
             } else if (i == PARAM2) {
                 if (valueType == napi_function) {
                     napi_create_reference(env, argv[i], refCount, &asyncContext->callbackRef);
@@ -505,10 +507,12 @@ napi_value AudioVolumeGroupManagerNapi::SetVolume(napi_env env, napi_callback_in
         status = napi_create_async_work(
             env, nullptr, resource,
             [](napi_env env, void *data) {
+                std::lock_guard<mutex> lock(volumeGroupManagerMutex_);
                 auto context = static_cast<AudioVolumeGroupManagerAsyncContext*>(data);
                 if (context->status == SUCCESS) {
-                    context->status = context->objectInfo->audioGroupMngr_->SetVolume(GetNativeAudioVolumeType(
-                        context->volType), context->volLevel);
+                    auto &audioGroupManager = context->objectInfo->audioGroupMngr_;
+                    context->status = (audioGroupManager == nullptr) ? NAPI_ERR_SYSTEM :
+                        audioGroupManager->SetVolume(GetNativeAudioVolumeType(context->volType), context->volLevel);
                 }
             }, SetFunctionAsyncCallbackComplete, static_cast<void*>(asyncContext.get()), &asyncContext->work);
         if (status != napi_ok) {
@@ -1548,9 +1552,6 @@ bool GetArgvForSystemVolumeInDb(napi_env env, size_t argc, napi_value* argv,
             }
         } else if (i == PARAM1 && valueType == napi_number) {
             napi_get_value_int32(env, argv[i], &asyncContext->volLevel);
-            if (!AudioCommonNapi::IsLegalInputArgumentVolLevel(asyncContext->volLevel)) {
-                asyncContext->status = NAPI_ERR_INVALID_PARAM;
-            }
         } else if (i == PARAM2 && valueType == napi_number) {
             napi_get_value_int32(env, argv[i], &asyncContext->deviceType);
             if (!AudioCommonNapi::IsLegalInputArgumentDeviceType(asyncContext->deviceType)) {
@@ -1602,7 +1603,10 @@ napi_value AudioVolumeGroupManagerNapi::GetSystemVolumeInDb(napi_env env, napi_c
                 context->volumeInDb = context->objectInfo->audioGroupMngr_->GetSystemVolumeInDb(
                     GetNativeAudioVolumeType(context->volType), context->volLevel,
                     static_cast<DeviceType>(context->deviceType));
-                if (context->volumeInDb < 0) {
+                if (FLOAT_COMPARE_EQ(context->volumeInDb, static_cast<float>(ERR_INVALID_PARAM))) {
+                    // The return value is ERR_INVALID_PARAM
+                    context->status = NAPI_ERR_INVALID_PARAM;
+                } else if (context->volumeInDb < 0) {
                     context->status = NAPI_ERR_SYSTEM;
                 } else {
                     context->status = SUCCESS;
@@ -1658,7 +1662,7 @@ napi_value AudioVolumeGroupManagerNapi::GetSystemVolumeInDbSync(napi_env env, na
             isLegalInput = AudioCommonNapi::IsLegalInputArgumentVolType(volType);
         } else if (i == PARAM1) {
             napi_get_value_int32(env, argv[i], &volLevel);
-            isLegalInput = AudioCommonNapi::IsLegalInputArgumentVolLevel(volLevel);
+            isLegalInput = true;
         } else if (i == PARAM2) {
             napi_get_value_int32(env, argv[i], &deviceType);
             isLegalInput = AudioCommonNapi::IsLegalInputArgumentDeviceType(deviceType);
@@ -1671,6 +1675,10 @@ napi_value AudioVolumeGroupManagerNapi::GetSystemVolumeInDbSync(napi_env env, na
 
     double volumeInDb = audioVolumeGroupManagerNapi->audioGroupMngr_->GetSystemVolumeInDb(
         GetNativeAudioVolumeType(volType), volLevel, static_cast<DeviceType>(deviceType));
+    if (FLOAT_COMPARE_EQ(static_cast<float>(volumeInDb), static_cast<float>(ERR_INVALID_PARAM))) {
+        AudioCommonNapi::throwError(env, NAPI_ERR_INVALID_PARAM);
+        return result;
+    }
     napi_create_double(env, volumeInDb, &result);
 
     return result;
