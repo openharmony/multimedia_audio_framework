@@ -668,6 +668,7 @@ struct AudioInterrupt {
     bool pauseWhenDucked;
     int32_t pid { -1 };
     InterruptMode mode { SHARE_MODE };
+    bool parallelPlayFlag { false };
 };
 
 struct VolumeEvent {

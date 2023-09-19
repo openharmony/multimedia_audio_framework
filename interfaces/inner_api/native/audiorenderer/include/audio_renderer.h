@@ -791,6 +791,16 @@ public:
      */
     virtual void DestroyAudioRendererStateCallback() = 0;
 
+    /**
+     * @brief Set parallel play flag (only for sound pool)
+     *
+     * @param parallelPlayFlag Indicates whether the audio renderer can play in parallel with other stream.
+     * @return Returns {@link SUCCESS} if the setting is successful; returns an error code defined
+     * in {@link audio_errors.h} otherwise.
+     * @since 10
+     */
+    virtual int32_t SetParallelPlayFlag(bool parallelPlayFlag) = 0;
+
     virtual ~AudioRenderer();
 private:
     static std::mutex createRendererMutex_;

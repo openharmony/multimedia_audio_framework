@@ -28,6 +28,8 @@ namespace OHOS {
 namespace AudioStandard {
 static __thread napi_ref g_groupmanagerConstructor = nullptr;
 int32_t AudioVolumeGroupManagerNapi::isConstructSuccess_ = SUCCESS;
+std::mutex AudioVolumeGroupManagerNapi::volumeGroupManagerMutex_;
+
 #define GET_PARAMS(env, info, num) \
     size_t argc = num;             \
     napi_value argv[num] = {0};    \
@@ -272,6 +274,8 @@ static void IsTrueAsyncCallbackComplete(napi_env env, napi_status status, void *
 // Constructor callback
 napi_value AudioVolumeGroupManagerNapi::Construct(napi_env env, napi_callback_info info)
 {
+    std::lock_guard<mutex> lock(volumeGroupManagerMutex_);
+
     napi_status status;
     napi_value jsThis;
     napi_value undefinedResult = nullptr;
@@ -309,6 +313,8 @@ napi_value AudioVolumeGroupManagerNapi::Construct(napi_env env, napi_callback_in
 
 void AudioVolumeGroupManagerNapi::Destructor(napi_env env, void *nativeObject, void *finalize_hint)
 {
+    std::lock_guard<mutex> lock(volumeGroupManagerMutex_);
+
     if (nativeObject != nullptr) {
         auto obj = static_cast<AudioVolumeGroupManagerNapi*>(nativeObject);
         delete obj;
@@ -501,10 +507,12 @@ napi_value AudioVolumeGroupManagerNapi::SetVolume(napi_env env, napi_callback_in
         status = napi_create_async_work(
             env, nullptr, resource,
             [](napi_env env, void *data) {
+                std::lock_guard<mutex> lock(volumeGroupManagerMutex_);
                 auto context = static_cast<AudioVolumeGroupManagerAsyncContext*>(data);
                 if (context->status == SUCCESS) {
-                    context->status = context->objectInfo->audioGroupMngr_->SetVolume(GetNativeAudioVolumeType(
-                        context->volType), context->volLevel);
+                    auto &audioGroupManager = context->objectInfo->audioGroupMngr_;
+                    context->status = (audioGroupManager == nullptr) ? NAPI_ERR_SYSTEM :
+                        audioGroupManager->SetVolume(GetNativeAudioVolumeType(context->volType), context->volLevel);
                 }
             }, SetFunctionAsyncCallbackComplete, static_cast<void*>(asyncContext.get()), &asyncContext->work);
         if (status != napi_ok) {
