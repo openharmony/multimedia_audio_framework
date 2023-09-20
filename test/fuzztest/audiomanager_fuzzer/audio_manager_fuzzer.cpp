@@ -131,6 +131,9 @@ void AudioGroupManagerFuzzTest(const uint8_t* data, size_t size)
     DeviceType device = *reinterpret_cast<const DeviceType *>(data);
     std::vector<sptr<VolumeGroupInfo>> infos;
     AudioSystemManager::GetInstance()->GetVolumeGroups(g_networkId, infos);
+    if (infos.empty() || infos[0] == nullptr) {
+        return;
+    }
     int32_t groupId = infos[0]->volumeGroupId_;
     auto audioGroupMngr_ = AudioSystemManager::GetInstance()->GetGroupManager(groupId);
     audioGroupMngr_->IsVolumeUnadjustable();
