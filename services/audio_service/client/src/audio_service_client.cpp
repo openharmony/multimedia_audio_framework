@@ -861,7 +861,11 @@ int32_t AudioServiceClient::ConnectStreamToPA()
     if (CheckReturnIfinvalid(mainLoop && context && paStream, AUDIO_CLIENT_ERR) < 0) {
         return AUDIO_CLIENT_ERR;
     }
-    uint64_t latency_in_msec = AudioSystemManager::GetInstance()->GetAudioLatencyFromXml();
+    int32_t latency_in_msec = AudioSystemManager::GetInstance()->GetAudioLatencyFromXml();
+    if (latency_in_msec < 0) {
+        AUDIO_ERR_LOG("Get audio latency failed");
+        return AUDIO_CLIENT_CREATE_STREAM_ERR;
+    }
     sinkLatencyInMsec_ = AudioSystemManager::GetInstance()->GetSinkLatencyFromXml();
 
     auto [errorCode, deviceNameS] = GetDeviceNameForConnect();
