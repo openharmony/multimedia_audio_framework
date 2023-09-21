@@ -35,6 +35,12 @@ AudioRendererStateCallbackNapi::~AudioRendererStateCallbackNapi()
     AUDIO_DEBUG_LOG("AudioRendererStateCallbackNapi: instance destroy");
 }
 
+void AudioRendererStateCallbackNapi::RemoveCallbackReference()
+{
+    std::lock_guard<std::mutex> lock(mutex_);
+    rendererStateCallback_.reset();
+}
+
 void AudioRendererStateCallbackNapi::SaveCallbackReference(napi_value args)
 {
     std::lock_guard<std::mutex> lock(mutex_);
@@ -56,6 +62,8 @@ void AudioRendererStateCallbackNapi::OnRendererStateChange(
     AUDIO_INFO_LOG("OnRendererStateChange entered");
 
     std::lock_guard<std::mutex> lock(mutex_);
+
+    CHECK_AND_RETURN_LOG(rendererStateCallback_ != nullptr, "rendererStateCallback_ is nullptr!");
 
     std::unique_ptr<AudioRendererStateJsCallback> cb = std::make_unique<AudioRendererStateJsCallback>();
     CHECK_AND_RETURN_LOG(cb != nullptr, "No memory!!");
