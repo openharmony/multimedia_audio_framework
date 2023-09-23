@@ -469,6 +469,7 @@ void AudioStreamMgrNapi::UnregisterCallback(napi_env env, napi_value jsThis, con
                 std::static_pointer_cast<AudioRendererStateCallbackNapi>(streamMgrNapi->
                     rendererStateChangeCallbackNapi_);
             cb->RemoveCallbackReference();
+            streamMgrNapi->rendererStateChangeCallbackNapi_.reset();
         }
         AUDIO_INFO_LOG("UnRegistering of renderer State Change Callback successful");
     } else if (!cbName.compare(CAPTURERCHANGE_CALLBACK_NAME)) {
