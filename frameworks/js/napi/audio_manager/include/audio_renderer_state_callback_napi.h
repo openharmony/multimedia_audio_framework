@@ -29,6 +29,7 @@ public:
     explicit AudioRendererStateCallbackNapi(napi_env env);
     virtual ~AudioRendererStateCallbackNapi();
     void SaveCallbackReference(napi_value callback);
+    void RemoveCallbackReference();
     void OnRendererStateChange(
         const std::vector<std::unique_ptr<AudioRendererChangeInfo>> &audioRendererChangeInfos) override;
 
