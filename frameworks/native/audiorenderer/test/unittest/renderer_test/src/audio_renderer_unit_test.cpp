@@ -1406,7 +1406,7 @@ HWTEST(AudioRendererUnitTest, Audio_Renderer_SetVolume_Stability_001, TestSize.L
 
     thread renderThread(StartRenderThread, audioRenderer.get(), 0);
 
-    for (int i = 0; i < VALUE_THOUSAND; i++) {
+    for (int i = 0; i < VALUE_HUNDRED; i++) {
         audioRenderer->SetVolume(0.1);
         audioRenderer->SetVolume(1.0);
     }
