@@ -87,5 +87,28 @@ int32_t PolicyProviderStub::HandleInitSharedVolume(MessageParcel &data, MessageP
     }
     return ret;
 }
+
+PolicyProviderWrapper::~PolicyProviderWrapper()
+{
+    AUDIO_INFO_LOG("~PolicyProviderWrapper()");
+    policyWorker_ = nullptr;
+}
+
+PolicyProviderWrapper::PolicyProviderWrapper(IPolicyProvider *policyWorker) : policyWorker_(policyWorker)
+{
+    AUDIO_INFO_LOG("PolicyProviderWrapper()");
+}
+
+int32_t PolicyProviderWrapper::GetProcessDeviceInfo(const AudioProcessConfig &config, DeviceInfo &deviceInfo)
+{
+    CHECK_AND_RETURN_RET_LOG(policyWorker_ != nullptr, AUDIO_INIT_FAIL, "policyWorker_ is null");
+    return policyWorker_->GetProcessDeviceInfo(config, deviceInfo);
+}
+
+int32_t PolicyProviderWrapper::InitSharedVolume(std::shared_ptr<AudioSharedMemory> &buffer)
+{
+    CHECK_AND_RETURN_RET_LOG(policyWorker_ != nullptr, AUDIO_INIT_FAIL, "policyWorker_ is null");
+    return policyWorker_->InitSharedVolume(buffer);
+}
 } // namespace AudioStandard
 } // namespace OHOS
