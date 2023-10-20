@@ -64,7 +64,8 @@ std::unique_ptr<AudioCapturer> AudioCapturer::Create(const AudioCapturerOptions 
     const std::string cachePath, const AppInfo &appInfo)
 {
     auto sourceType = capturerOptions.capturerInfo.sourceType;
-    if (sourceType < SOURCE_TYPE_MIC || sourceType > SOURCE_TYPE_ULTRASONIC) {
+    if (sourceType < SOURCE_TYPE_MIC || sourceType > SOURCE_TYPE_MAX) {
+        AUDIO_ERR_LOG("AudioCapturer::Create: Invalid source type %{public}d!", sourceType);
         return nullptr;
     }
 
@@ -189,23 +190,23 @@ int32_t AudioCapturerPrivate::SetParams(const AudioCapturerParams params)
 
     if (capturerInfo_.sourceType == SOURCE_TYPE_PLAYBACK_CAPTURE) {
         audioStream_->SetInnerCapturerState(true);
-    }
-
-    if (capturerInfo_.sourceType == SourceType::SOURCE_TYPE_WAKEUP) {
+    } else if (capturerInfo_.sourceType == SourceType::SOURCE_TYPE_WAKEUP) {
         audioStream_->SetWakeupCapturerState(true);
     }
 
     int32_t ret = audioStream_->SetAudioStreamInfo(audioStreamParams, capturerProxyObj_);
-    if (ret) {
-        AUDIO_ERR_LOG("AudioCapturerPrivate::SetParams SetAudioStreamInfo Failed");
-        return ret;
-    }
+    CHECK_AND_RETURN_RET_LOG(ret == SUCCESS, ret, "AudioCapturerPrivate::SetParams SetAudioStreamInfo Failed");
+
     if (audioStream_->GetAudioSessionID(sessionID_) != 0) {
         AUDIO_ERR_LOG("InitAudioInterruptCallback::GetAudioSessionID failed for INDEPENDENT_MODE");
         return ERR_INVALID_INDEX;
     }
     audioInterrupt_.sessionID = sessionID_;
     audioInterrupt_.audioFocusType.sourceType = capturerInfo_.sourceType;
+    if (audioInterrupt_.audioFocusType.sourceType == SOURCE_TYPE_VOICE_MODEM_COMMUNICATION) {
+        isVoiceCallCapturer_ = true;
+        audioInterrupt_.audioFocusType.sourceType = SOURCE_TYPE_VOICE_COMMUNICATION;
+    }
     if (audioInterruptCallback_ == nullptr) {
         audioInterruptCallback_ = std::make_shared<AudioCapturerInterruptCallbackImpl>(audioStream_);
         if (audioInterruptCallback_ == nullptr) {
@@ -350,6 +351,11 @@ bool AudioCapturerPrivate::Start() const
         return false;
     }
 
+    if (isVoiceCallCapturer_) {
+        // When the cellular call stream is starting, only need to activate audio interrupt.
+        return true;
+    }
+
     return audioStream_->StartAudioStream();
 }
 
@@ -382,6 +388,11 @@ bool AudioCapturerPrivate::Pause() const
         AUDIO_ERR_LOG("AudioRenderer: DeactivateAudioInterrupt Failed");
     }
 
+    if (isVoiceCallCapturer_) {
+        // When the cellular call stream is pausing, only need to deactivate audio interrupt.
+        return true;
+    }
+
     return audioStream_->PauseAudioStream();
 }
 
@@ -396,6 +407,11 @@ bool AudioCapturerPrivate::Stop() const
     int32_t ret = AudioPolicyManager::GetInstance().DeactivateAudioInterrupt(audioInterrupt_);
     if (ret != 0) {
         AUDIO_ERR_LOG("AudioCapturer: DeactivateAudioInterrupt Failed");
+    }
+
+    if (isVoiceCallCapturer_) {
+        // When the cellular call stream is stopping, only need to deactivate audio interrupt.
+        return true;
     }
 
     return audioStream_->StopAudioStream();
@@ -593,6 +609,7 @@ AudioStreamType AudioCapturer::FindStreamTypeBySourceType(SourceType sourceType)
 {
     switch (sourceType) {
         case SOURCE_TYPE_VOICE_COMMUNICATION:
+        case SOURCE_TYPE_VOICE_MODEM_COMMUNICATION:
             return STREAM_VOICE_CALL;
         case SOURCE_TYPE_WAKEUP:
             return STREAM_WAKEUP;
