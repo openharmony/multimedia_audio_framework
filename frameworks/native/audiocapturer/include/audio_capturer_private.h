@@ -89,6 +89,7 @@ private:
     AppInfo appInfo_ = {};
     AudioInterrupt audioInterrupt_ = {STREAM_USAGE_UNKNOWN, CONTENT_TYPE_UNKNOWN,
         {AudioStreamType::STREAM_DEFAULT, SourceType::SOURCE_TYPE_INVALID, false}, 0};
+    bool isVoiceCallCapturer_ = false;
     uint32_t sessionID_ = INVALID_SESSION_ID;
     std::shared_ptr<AudioCapturerProxyObj> capturerProxyObj_;
     std::map<AudioStreamType, SourceType> streamToSource_ = {
