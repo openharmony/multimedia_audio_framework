@@ -777,6 +777,7 @@ int32_t AudioServiceClient::Initialize(ASClientType eClientType)
         StopTimer();
         if (IsTimeOut()) {
             AUDIO_ERR_LOG("Initialize timeout");
+            pa_threaded_mainloop_unlock(mainLoop);
             return AUDIO_CLIENT_INIT_ERR;
         }
     }
