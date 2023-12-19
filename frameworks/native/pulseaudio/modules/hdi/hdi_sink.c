@@ -1898,6 +1898,11 @@ static void SetHdiParam(struct Userdata *userdata)
         }
     }
 
+    if (userdata == NULL || userdata->sinkSceneType == NULL || userdata->sinkSceneMode == NULL) {
+        AUDIO_ERR_LOG("SetHdiParam userdata null pointer");
+        return;
+    }
+
     if (!pa_safe_streq(userdata->sinkSceneType, sinkSceneTypeMax) ||
         !pa_safe_streq(userdata->sinkSceneMode, sinkSceneModeMax) ||
         (userdata->spatialEnabled != spatialEnabledMax)) {
