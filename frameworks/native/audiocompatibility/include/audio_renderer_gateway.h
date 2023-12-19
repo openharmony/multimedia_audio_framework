@@ -72,6 +72,7 @@ public:
     int32_t SetLowPowerVolume(float volume) const override;
     float GetLowPowerVolume() const override;
     float GetSingleStreamVolume() const override;
+    bool IsFastRenderer() override;
     AudioRendererInfo rendererInfo_ = {};
 
 private:
