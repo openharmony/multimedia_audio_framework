@@ -1472,6 +1472,11 @@ RendererPolicyServiceDiedCallback::RendererPolicyServiceDiedCallback()
 RendererPolicyServiceDiedCallback::~RendererPolicyServiceDiedCallback()
 {
     AUDIO_DEBUG_LOG("RendererPolicyServiceDiedCallback destroy");
+    if (restoreThread_ != nullptr && restoreThread_->joinable()) {
+        restoreThread_->join();
+        restoreThread_.reset();
+        restoreThread_ = nullptr;
+    }
 }
 
 void RendererPolicyServiceDiedCallback::SetAudioRendererObj(AudioRendererPrivate *rendererObj)
