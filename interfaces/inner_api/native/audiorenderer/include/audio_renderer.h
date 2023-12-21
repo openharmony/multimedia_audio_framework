@@ -884,6 +884,8 @@ public:
      */
     virtual float GetSpeed() = 0;
 
+    virtual bool IsFastRenderer() = 0;
+
     virtual ~AudioRenderer();
 private:
     static std::mutex createRendererMutex_;

@@ -111,6 +111,7 @@ public:
 
     int32_t SetSpeed(float speed) override;
     float GetSpeed() override;
+    bool IsFastRenderer() override;
 #ifdef SONIC_ENABLE
     int32_t ChangeSpeed(uint8_t *buffer, int32_t bufferSize);
 #endif
