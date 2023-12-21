@@ -170,7 +170,7 @@ private:
 #ifdef SONIC_ENABLE
     size_t bufferSize_;
     size_t formatSize_;
-    sonicStream  sonicStream_;
+    sonicStream sonicStream_ = nullptr;
 #endif
 };
 
