@@ -1015,6 +1015,11 @@ CapturerPolicyServiceDiedCallback::CapturerPolicyServiceDiedCallback()
 CapturerPolicyServiceDiedCallback::~CapturerPolicyServiceDiedCallback()
 {
     AUDIO_DEBUG_LOG("CapturerPolicyServiceDiedCallback destroy");
+    if (restoreThread_ != nullptr && restoreThread_->joinable()) {
+        restoreThread_->join();
+        restoreThread_.reset();
+        restoreThread_ = nullptr;
+    }
 }
 
 void CapturerPolicyServiceDiedCallback::SetAudioCapturerObj(AudioCapturerPrivate *capturerObj)
