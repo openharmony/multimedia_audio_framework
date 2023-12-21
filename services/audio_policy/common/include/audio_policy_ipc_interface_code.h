@@ -16,8 +16,6 @@
 #ifndef ST_AUDIO_POLICY_INTERFACE_H
 #define ST_AUDIO_POLICY_INTERFACE_H
 
-#include <audio_info.h>
-
 /* SAID: 3009 */
 namespace OHOS {
 namespace AudioStandard {
