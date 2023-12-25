@@ -182,6 +182,7 @@ int32_t AudioPolicyClientStubImpl::AddMicStateChangeCallback(
     const std::shared_ptr<AudioManagerMicStateChangeCallback> &cb)
 {
     std::lock_guard<std::mutex> lockCbMap(micStateChangeMutex_);
+    micStateChangeCallbackList_.clear();
     micStateChangeCallbackList_.push_back(cb);
     return SUCCESS;
 }
