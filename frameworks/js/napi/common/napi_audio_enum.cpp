@@ -65,12 +65,25 @@ napi_ref NapiAudioEnum::interruptRequestType_ = nullptr;
 napi_ref NapiAudioEnum::interruptRequestResultType_ = nullptr;
 napi_ref NapiAudioEnum::toneType_ = nullptr;
 napi_ref NapiAudioEnum::audioDviceUsage_ = nullptr;
+napi_ref NapiAudioEnum::audioSpatialDeivceType_ = nullptr;
+napi_ref NapiAudioEnum::audioChannelLayout_ = nullptr;
 
 static const std::string NAPI_AUDIO_ENUM_CLASS_NAME = "AudioEnum";
 
 const std::map<std::string, int32_t> NapiAudioEnum::audioChannelMap = {
     {"CHANNEL_1", MONO},
-    {"CHANNEL_2", STEREO}
+    {"CHANNEL_2", STEREO},
+    {"CHANNEL_3", CHANNEL_3},
+    {"CHANNEL_4", CHANNEL_4},
+    {"CHANNEL_5", CHANNEL_5},
+    {"CHANNEL_6", CHANNEL_6},
+    {"CHANNEL_7", CHANNEL_7},
+    {"CHANNEL_8", CHANNEL_8},
+    {"CHANNEL_9", CHANNEL_9},
+    {"CHANNEL_10", CHANNEL_10},
+    {"CHANNEL_12", CHANNEL_12},
+    {"CHANNEL_14", CHANNEL_14},
+    {"CHANNEL_16", CHANNEL_16},
 };
 
 const std::map<std::string, int32_t> NapiAudioEnum::samplingRateMap = {
@@ -348,6 +361,67 @@ const std::map<std::string, int32_t> NapiAudioEnum::audioDeviceUsageMap = {
     {"ALL_CALL_DEVICES", ALL_CALL_DEVICES},
 };
 
+const std::map<std::string, int32_t> NapiAudioEnum::audioSpatialDeivceTypeMap = {
+    {"SPATIAL_DEVICE_TYPE_NONE", EARPHONE_TYPE_NONE },
+    {"SPATIAL_DEVICE_TYPE_IN_EAR_HEADPHONE", EARPHONE_TYPE_INEAR},
+    {"SPATIAL_DEVICE_TYPE_HALF_IN_EAR_HEADPHONE", EARPHONE_TYPE_HALF_INEAR},
+    {"SPATIAL_DEVICE_TYPE_OVER_EAR_HEADPHONE", EARPHONE_TYPE_HEADPHONE},
+    {"SPATIAL_DEVICE_TYPE_GLASSES", EARPHONE_TYPE_GLASSES},
+    {"SPATIAL_DEVICE_TYPE_OTHERS", EARPHONE_TYPE_OTHERS},
+};
+
+const std::map<std::string, uint64_t> NapiAudioEnum::audioChannelLayoutMap = {
+    {"CH_LAYOUT_UNKNOWN", CH_LAYOUT_UNKNOWN},
+    {"CH_LAYOUT_MONO", CH_LAYOUT_MONO},
+    {"CH_LAYOUT_STEREO", CH_LAYOUT_STEREO},
+    {"CH_LAYOUT_STEREO_DOWNMIX", CH_LAYOUT_STEREO_DOWNMIX},
+    {"CH_LAYOUT_2POINT1", CH_LAYOUT_2POINT1},
+    {"CH_LAYOUT_3POINT0", CH_LAYOUT_3POINT0},
+    {"CH_LAYOUT_SURROUND", CH_LAYOUT_SURROUND},
+    {"CH_LAYOUT_3POINT1", CH_LAYOUT_3POINT1},
+    {"CH_LAYOUT_4POINT0", CH_LAYOUT_4POINT0},
+    {"CH_LAYOUT_QUAD_SIDE", CH_LAYOUT_QUAD_SIDE},
+    {"CH_LAYOUT_QUAD", CH_LAYOUT_QUAD},
+    {"CH_LAYOUT_2POINT0POINT2", CH_LAYOUT_2POINT0POINT2},
+    {"CH_LAYOUT_4POINT1", CH_LAYOUT_4POINT1},
+    {"CH_LAYOUT_5POINT0", CH_LAYOUT_5POINT0},
+    {"CH_LAYOUT_5POINT0_BACK", CH_LAYOUT_5POINT0_BACK},
+    {"CH_LAYOUT_2POINT1POINT2", CH_LAYOUT_2POINT1POINT2},
+    {"CH_LAYOUT_3POINT0POINT2", CH_LAYOUT_3POINT0POINT2},
+    {"CH_LAYOUT_5POINT1", CH_LAYOUT_5POINT1},
+    {"CH_LAYOUT_5POINT1_BACK", CH_LAYOUT_5POINT1_BACK},
+    {"CH_LAYOUT_6POINT0", CH_LAYOUT_6POINT0},
+    {"CH_LAYOUT_HEXAGONAL", CH_LAYOUT_HEXAGONAL},
+    {"CH_LAYOUT_3POINT1POINT2", CH_LAYOUT_3POINT1POINT2},
+    {"CH_LAYOUT_6POINT0_FRONT", CH_LAYOUT_6POINT0_FRONT},
+    {"CH_LAYOUT_6POINT1", CH_LAYOUT_6POINT1},
+    {"CH_LAYOUT_6POINT1_BACK", CH_LAYOUT_6POINT1_BACK},
+    {"CH_LAYOUT_6POINT1_FRONT", CH_LAYOUT_6POINT1_FRONT},
+    {"CH_LAYOUT_7POINT0", CH_LAYOUT_7POINT0},
+    {"CH_LAYOUT_7POINT0_FRONT", CH_LAYOUT_7POINT0_FRONT},
+    {"CH_LAYOUT_7POINT1", CH_LAYOUT_7POINT1},
+    {"CH_LAYOUT_OCTAGONAL", CH_LAYOUT_OCTAGONAL},
+    {"CH_LAYOUT_5POINT1POINT2", CH_LAYOUT_5POINT1POINT2},
+    {"CH_LAYOUT_7POINT1_WIDE", CH_LAYOUT_7POINT1_WIDE},
+    {"CH_LAYOUT_7POINT1_WIDE_BACK", CH_LAYOUT_7POINT1_WIDE_BACK},
+    {"CH_LAYOUT_5POINT1POINT4", CH_LAYOUT_5POINT1POINT4},
+    {"CH_LAYOUT_7POINT1POINT2", CH_LAYOUT_7POINT1POINT2},
+    {"CH_LAYOUT_7POINT1POINT4", CH_LAYOUT_7POINT1POINT4},
+    {"CH_LAYOUT_10POINT2", CH_LAYOUT_10POINT2},
+    {"CH_LAYOUT_9POINT1POINT4", CH_LAYOUT_9POINT1POINT4},
+    {"CH_LAYOUT_9POINT1POINT6", CH_LAYOUT_9POINT1POINT6},
+    {"CH_LAYOUT_HEXADECAGONAL", CH_LAYOUT_HEXADECAGONAL},
+    {"CH_LAYOUT_AMB_ORDER1_ACN_N3D", CH_LAYOUT_HOA_ORDER1_ACN_N3D},
+    {"CH_LAYOUT_AMB_ORDER1_ACN_SN3D", CH_LAYOUT_HOA_ORDER1_ACN_SN3D},
+    {"CH_LAYOUT_AMB_ORDER1_FUMA", CH_LAYOUT_HOA_ORDER1_FUMA},
+    {"CH_LAYOUT_AMB_ORDER2_ACN_N3D", CH_LAYOUT_HOA_ORDER2_ACN_N3D},
+    {"CH_LAYOUT_AMB_ORDER2_ACN_SN3D", CH_LAYOUT_HOA_ORDER2_ACN_SN3D},
+    {"CH_LAYOUT_AMB_ORDER2_FUMA", CH_LAYOUT_HOA_ORDER2_FUMA},
+    {"CH_LAYOUT_AMB_ORDER3_ACN_N3D", CH_LAYOUT_HOA_ORDER3_ACN_N3D},
+    {"CH_LAYOUT_AMB_ORDER3_ACN_SN3D", CH_LAYOUT_HOA_ORDER3_ACN_SN3D},
+    {"CH_LAYOUT_AMB_ORDER3_FUMA", CH_LAYOUT_HOA_ORDER3_FUMA},
+};
+
 NapiAudioEnum::NapiAudioEnum()
     : env_(nullptr) {
 }
@@ -396,6 +470,37 @@ error:
     return result;
 }
 
+napi_value NapiAudioEnum::CreateEnumInt64Object(const napi_env &env, const std::map<std::string, uint64_t> &map,
+    napi_ref &ref)
+{
+    std::string propName;
+    napi_value result = nullptr;
+    napi_status status = napi_create_object(env, &result);
+    if (status != napi_ok) {
+        goto error;
+    }
+
+    for (auto &iter : map) {
+        propName = iter.first;
+        status = NapiParamUtils::SetValueInt64(env, propName, iter.second, result);
+        CHECK_AND_BREAK_LOG(status == napi_ok, "Failed to add named prop!");
+        propName.clear();
+    }
+    if (status != napi_ok) {
+        goto error;
+    }
+    status = napi_create_reference(env, result, REFERENCE_CREATION_COUNT, &ref);
+    if (status != napi_ok) {
+        goto error;
+    }
+    return result;
+
+error:
+    AUDIO_ERR_LOG("create Enum Object failed");
+    napi_get_undefined(env, &result);
+    return result;
+}
+
 napi_value NapiAudioEnum::CreateLocalNetworkIdObject(napi_env env)
 {
     napi_value result = nullptr;
@@ -415,6 +520,19 @@ napi_value NapiAudioEnum::CreateDefaultInterruptIdObject(napi_env env)
     napi_value defaultInterruptId;
     napi_create_int32(env, DEFAULT_VOLUME_INTERRUPT_ID, &defaultInterruptId);
     return defaultInterruptId;
+}
+
+napi_status NapiAudioEnum::InitAudioExternEnum(napi_env env, napi_value exports)
+{
+    napi_property_descriptor static_prop[] = {
+        DECLARE_NAPI_PROPERTY("AudioSpatialDeviceType", CreateEnumObject(env,
+            audioSpatialDeivceTypeMap, audioSpatialDeivceType_)),
+        DECLARE_NAPI_PROPERTY("AudioChannelLayout", CreateEnumInt64Object(env,
+            audioChannelLayoutMap, audioChannelLayout_)),
+    };
+    napi_status status =
+        napi_define_properties(env, exports, sizeof(static_prop) / sizeof(static_prop[0]), static_prop);
+    return status;
 }
 
 napi_status NapiAudioEnum::InitAudioEnum(napi_env env, napi_value exports)
@@ -498,6 +616,8 @@ napi_value NapiAudioEnum::Init(napi_env env, napi_value exports)
     CHECK_AND_RETURN_RET_LOG(status == napi_ok, result, "napi_set_named_property fail");
     status = InitAudioEnum(env, exports);
     CHECK_AND_RETURN_RET_LOG(status == napi_ok, result, "InitAudioEnum failed");
+    status = InitAudioExternEnum(env, exports);
+    CHECK_AND_RETURN_RET_LOG(status == napi_ok, result, "InitAudioExternEnum failed");
 
     return exports;
 }

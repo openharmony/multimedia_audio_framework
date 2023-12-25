@@ -103,6 +103,7 @@ public:
 private:
     static void Destructor(napi_env env, void *nativeObject, void *finalizeHint);
     static napi_status InitAudioEnum(napi_env env, napi_value exports);
+    static napi_status InitAudioExternEnum(napi_env env, napi_value exports);
     static napi_value Construct(napi_env env, napi_callback_info info);
     static NapiAudioEnum* SetValue(napi_env env, napi_callback_info info, napi_value *args, napi_value &result);
     static NapiAudioEnum* GetValue(napi_env env, napi_callback_info info);
@@ -124,6 +125,8 @@ private:
     static napi_value SetDeviceType(napi_env env, napi_callback_info info);
 
     static napi_value CreateEnumObject(const napi_env &env, const std::map<std::string, int32_t> &map,
+        napi_ref &ref);
+    static napi_value CreateEnumInt64Object(const napi_env &env, const std::map<std::string, uint64_t> &map,
         napi_ref &ref);
     static napi_value CreateLocalNetworkIdObject(napi_env env);
     static napi_value CreateDefaultVolumeGroupIdObject(napi_env env);
@@ -164,6 +167,8 @@ private:
     static napi_ref interruptRequestResultType_;
     static napi_ref toneType_;
     static napi_ref audioDviceUsage_;
+    static napi_ref audioSpatialDeivceType_;
+    static napi_ref audioChannelLayout_;
 
     static const std::map<std::string, int32_t> audioChannelMap;
     static const std::map<std::string, int32_t> samplingRateMap;
@@ -199,6 +204,8 @@ private:
     static const std::map<std::string, int32_t> audioRingModeMap;
     static const std::map<std::string, int32_t> toneTypeMap;
     static const std::map<std::string, int32_t> audioDeviceUsageMap;
+    static const std::map<std::string, int32_t> audioSpatialDeivceTypeMap;
+    static const std::map<std::string, uint64_t> audioChannelLayoutMap;
     static std::unique_ptr<AudioParameters> sAudioParameters_;
 
     std::unique_ptr<AudioParameters> audioParameters_;

@@ -37,13 +37,8 @@ public:
 
 private:
 struct AudioSpatializationManagerAsyncContext : public ContextBase {
-    napi_env env;
-    napi_async_work work;
-    napi_deferred deferred;
-    napi_ref callbackRef = nullptr;
     bool spatializationEnable;
     bool headTrackingEnable;
-    int32_t status = SUCCESS;
     int32_t intValue;
     AudioSpatialDeviceState spatialDeviceState;
 };
