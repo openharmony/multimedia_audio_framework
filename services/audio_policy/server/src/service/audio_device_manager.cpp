@@ -681,6 +681,8 @@ void AudioDeviceManager::UpdateDeviceCategory(const sptr<AudioDeviceDescriptor> 
             if (devDesc->deviceCategory_ == BT_UNWEAR_HEADPHONE) {
                 RemoveBtFromOtherList(deviceDescriptor);
             } else {
+                // Update connectTimeStamp_ when wearing headphones that support wear detection
+                desc->connectTimeStamp_ = GetCurrentTimeMS();
                 AddBtToOtherList(desc);
             }
         }
