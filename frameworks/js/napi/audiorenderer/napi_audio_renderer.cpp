@@ -149,6 +149,10 @@ unique_ptr<NapiAudioRenderer> NapiAudioRenderer::CreateAudioRendererNativeObject
 
     AudioRendererOptions rendererOptions = *sRendererOptions_;
     std::string cacheDir = "";
+    /* NapiAudioRenderer not support other rendererFlags, only support flag 0 */
+    if (rendererOptions.rendererInfo.rendererFlags != 0) {
+        rendererOptions.rendererInfo.rendererFlags = 0;
+    }
     rendererNapi->audioRenderer_ = AudioRenderer::Create(cacheDir, rendererOptions);
 
     if (rendererNapi->audioRenderer_ == nullptr) {

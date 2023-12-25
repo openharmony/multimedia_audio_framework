@@ -116,6 +116,10 @@ napi_value NapiTonePlayer::Construct(napi_env env, napi_callback_info info)
     CHECK_AND_RETURN_RET_LOG(sRendererInfo_ != nullptr, result, "Construct sRendererInfo_ is null");
     rendererInfo = *sRendererInfo_;
     std::string cacheDir = "/data/storage/el2/base/temp";
+    /* NapiTonePlayer not support other rendererFlags, only support flag 0 */
+    if (rendererInfo.rendererFlags != 0) {
+        rendererInfo.rendererFlags = 0;
+    }
     napiTonePlayer->tonePlayer_ = TonePlayer::Create(cacheDir, rendererInfo);
 
     if (napiTonePlayer->tonePlayer_  == nullptr) {
