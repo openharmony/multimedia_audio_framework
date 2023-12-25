@@ -382,6 +382,12 @@ napi_status NapiParamUtils::GetStreamInfo(const napi_env &env, AudioStreamInfo *
         streamInfo->encoding = static_cast<AudioEncodingType>(intValue);
     }
 
+    int64_t int64Value = 0;
+    status = GetValueInt64(env, "channelLayout", int64Value, in);
+    if (status == napi_ok) {
+        streamInfo->channelLayout = static_cast<AudioChannelLayout>(int64Value);
+    }
+
     return napi_ok;
 }
 
@@ -393,6 +399,7 @@ napi_status NapiParamUtils::SetStreamInfo(const napi_env &env, const AudioStream
     SetValueInt32(env, "channels", static_cast<int32_t>(streamInfo.channels), result);
     SetValueInt32(env, "sampleFormat", static_cast<int32_t>(streamInfo.format), result);
     SetValueInt32(env, "encodingType", static_cast<int32_t>(streamInfo.encoding), result);
+    SetValueInt64(env, "channelLayout", static_cast<int64_t>(streamInfo.channelLayout), result);
 
     return napi_ok;
 }
