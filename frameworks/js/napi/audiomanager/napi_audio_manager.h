@@ -38,10 +38,6 @@ public:
 
 private:
 struct AudioManagerAsyncContext : public ContextBase {
-    napi_env env;
-    napi_async_work work;
-    napi_deferred deferred;
-    napi_ref callbackRef = nullptr;
     int32_t volType;
     int32_t volLevel;
     int32_t deviceType;
@@ -49,7 +45,6 @@ struct AudioManagerAsyncContext : public ContextBase {
     int32_t scene;
     int32_t deviceFlag;
     int32_t intValue;
-    int32_t status = 0;
     int32_t focusType;
     int32_t groupId;
     bool isMute;

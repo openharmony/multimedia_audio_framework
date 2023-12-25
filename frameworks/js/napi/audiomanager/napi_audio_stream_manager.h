@@ -40,12 +40,7 @@ public:
 
 private:
     struct AudioStreamMgrAsyncContext : public ContextBase {
-        napi_env env;
-        napi_async_work work;
-        napi_deferred deferred;
-        napi_ref callbackRef = nullptr;
         int32_t intValue;
-        int32_t status = SUCCESS;
         int32_t volType;
         int32_t contentType;
         int32_t streamUsage;

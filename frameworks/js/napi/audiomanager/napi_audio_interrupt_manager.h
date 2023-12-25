@@ -37,13 +37,8 @@ public:
 
 private:
     struct AudioInterruptManagerAsyncContext : public ContextBase {
-        napi_env env;
-        napi_async_work work;
-        napi_deferred deferred;
-        napi_ref callbackRef = nullptr;
         int32_t deviceFlag;
         bool bArgTransFlag = true;
-        int32_t status = SUCCESS;
         int32_t groupId;
         std::string networkId;
     };

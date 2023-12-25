@@ -45,7 +45,6 @@ private:
         int32_t intValue;
         AudioRendererInfo rendererInfo;
         int32_t toneType;
-        int32_t status;
     };
 
     static void Destructor(napi_env env, void *nativeObject, void *finalizeHint);

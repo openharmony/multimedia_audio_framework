@@ -783,7 +783,7 @@ napi_value NapiAudioVolumeGroupManager::AdjustSystemVolumeByStep(napi_env env, n
         NAPI_CHECK_ARGS_RETURN_VOID(context, argc >= ARGS_TWO, "invalid arguments", NAPI_ERR_INPUT_INVALID);
         context->status = NapiParamUtils::GetValueInt32(env, context->volType, argv[PARAM0]);
         NAPI_CHECK_ARGS_RETURN_VOID(context, context->status == napi_ok, "get volType failed", NAPI_ERR_INPUT_INVALID);
-        NAPI_CHECK_ARGS_RETURN_VOID(context, NapiAudioEnum::IsLegalInputArgumentVolType(context->volType) ||
+        NAPI_CHECK_ARGS_RETURN_VOID(context, NapiAudioEnum::IsLegalInputArgumentVolType(context->volType) &&
             context->volType != NapiAudioEnum::ALL, "volType invaild", NAPI_ERR_INVALID_PARAM);
         context->status = NapiParamUtils::GetValueInt32(env, context->adjustType, argv[PARAM1]);
         NAPI_CHECK_ARGS_RETURN_VOID(context, context->status == napi_ok, "get adjustType failed",
