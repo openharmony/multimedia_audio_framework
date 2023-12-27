@@ -517,11 +517,14 @@ private:
 
     DeviceType FetchHighPriorityDevice(bool isOutputDevice);
 
-    int32_t HandleScoDeviceFetched(unique_ptr<AudioDeviceDescriptor> &desc,
+    int32_t HandleScoOutputDeviceFetched(unique_ptr<AudioDeviceDescriptor> &desc,
         vector<unique_ptr<AudioRendererChangeInfo>> &rendererChangeInfos, bool &isStreamStatusUpdated);
 
     void FetchOutputDevice(vector<unique_ptr<AudioRendererChangeInfo>> &rendererChangeInfos,
         bool isStreamStatusUpdated);
+
+    int32_t HandleScoInputDeviceFetched(unique_ptr<AudioDeviceDescriptor> &desc,
+        vector<unique_ptr<AudioCapturerChangeInfo>> &capturerChangeInfos, bool &isStreamStatusUpdated);
 
     void FetchInputDevice(vector<unique_ptr<AudioCapturerChangeInfo>> &capturerChangeInfos,
         bool isStreamStatusUpdated);
@@ -664,6 +667,8 @@ private:
     bool IsSameDevice(unique_ptr<AudioDeviceDescriptor> &desc, DeviceInfo &deviceInfo);
 
     bool IsSameDevice(unique_ptr<AudioDeviceDescriptor> &desc, AudioDeviceDescriptor &deviceDesc);
+
+    bool IsRendererStreamRunning(unique_ptr<AudioRendererChangeInfo> &rendererChangeInfo);
 
     bool interruptEnabled_ = true;
     bool isUpdateRouteSupported_ = true;
