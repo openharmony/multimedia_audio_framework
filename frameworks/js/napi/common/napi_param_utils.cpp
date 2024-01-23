@@ -987,5 +987,62 @@ napi_status NapiParamUtils::GetSpatialDeviceState(napi_env env, AudioSpatialDevi
 
     return napi_ok;
 }
+
+napi_status NapiParamUtils::GetExtraParametersSubKV(napi_env env,
+    std::vector<std::pair<std::string, std::string>> &subKV, napi_value in)
+{
+    napi_value jsProNameList = nullptr;
+    uint32_t jsProCount = 0;
+    napi_status status = napi_get_property_names(env, in, &jsProNameList);
+    CHECK_AND_RETURN_RET_LOG(status == napi_ok, status, "get property name failed");
+    status = napi_get_array_length(env, jsProNameList, &jsProCount);
+    CHECK_AND_RETURN_RET_LOG(status == napi_ok, status, "get subKeys length failed");
+
+    napi_value jsProName = nullptr;
+    napi_value jsProValue = nullptr;
+    for (uint32_t i = 0; i < jsProCount; i++) {
+        status = napi_get_element(env, jsProNameList, i, &jsProName);
+        CHECK_AND_RETURN_RET_LOG(status == napi_ok, status, "get sub key failed");
+
+        std::string strProName = NapiParamUtils::GetStringArgument(env, jsProName);
+        status = napi_get_named_property(env, in, strProName.c_str(), &jsProValue);
+        CHECK_AND_RETURN_RET_LOG(status == napi_ok, status, "get sub value failed");
+
+        subKV.push_back(std::make_pair(strProName, NapiParamUtils::GetStringArgument(env, jsProValue)));
+    }
+
+    return napi_ok;
+}
+
+napi_status NapiParamUtils::GetExtraParametersVector(const napi_env &env,
+    std::vector<std::string> &subKeys, napi_value in)
+{
+    uint32_t arrayLen = 0;
+    napi_get_array_length(env, in, &arrayLen);
+    CHECK_AND_RETURN_RET_LOG(arrayLen != 0, napi_invalid_arg, "subKeys is empty");
+
+    for (uint32_t i = 0; i < arrayLen; i++) {
+        napi_value element;
+        if (napi_get_element(env, in, i, &element) == napi_ok) {
+            subKeys.push_back(GetStringArgument(env, element));
+        }
+    }
+
+    return napi_ok;
+}
+
+napi_status NapiParamUtils::SetExtraAudioParametersInfo(const napi_env &env,
+    const std::vector<std::pair<std::string, std::string>> &extraParameters, napi_value &result)
+{
+    napi_status status = napi_create_array_with_length(env, extraParameters.size(), &result);
+    CHECK_AND_RETURN_RET_LOG(status == napi_ok, status, "malloc array buffer failed");
+
+    for (auto it = extraParameters.begin(); it != extraParameters.end(); it++) {
+        status = SetValueString(env, it->first, it->second, result);
+        CHECK_AND_RETURN_RET_LOG(status == napi_ok, status, "SetValueString failed");
+    }
+
+    return status;
+}
 } // namespace AudioStandard
 } // namespace OHOS
