@@ -22,7 +22,6 @@
 #include <unordered_map>
 #include <unordered_set>
 #include <mutex>
-#include <shared_mutex>
 #include "singleton.h"
 #include "audio_group_handle.h"
 #include "audio_info.h"
@@ -785,7 +784,7 @@ private:
 
     std::mutex deviceClassInfoMutex_;
 
-    std::shared_mutex deviceStatusUpdateSharedMutex_;
+    std::mutex deviceStatusUpdateSharedMutex_;
     std::mutex microphonesMutex_;
 
     bool isArmUsbDevice_ = false;

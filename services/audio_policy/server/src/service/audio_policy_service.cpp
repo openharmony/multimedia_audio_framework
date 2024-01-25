@@ -959,7 +959,7 @@ int32_t AudioPolicyService::OpenRemoteAudioDevice(std::string networkId, DeviceR
         return descriptor->deviceType_ == deviceType && descriptor->networkId_ == networkId;
     };
 
-    std::lock_guard<std::shared_mutex> lock(deviceStatusUpdateSharedMutex_);
+    std::lock_guard<std::mutex> lock(deviceStatusUpdateSharedMutex_);
     connectedDevices_.erase(std::remove_if(connectedDevices_.begin(), connectedDevices_.end(), isPresent),
         connectedDevices_.end());
     UpdateDisplayName(remoteDeviceDescriptor);
@@ -1398,7 +1398,7 @@ std::vector<sptr<AudioDeviceDescriptor>> AudioPolicyService::GetDevices(DeviceFl
 {
     AUDIO_DEBUG_LOG("GetDevices start");
 
-    std::shared_lock<std::shared_mutex> lock(deviceStatusUpdateSharedMutex_);
+    std::lock_guard<std::mutex> lock(deviceStatusUpdateSharedMutex_);
 
     std::vector<sptr<AudioDeviceDescriptor>> deviceList = {};
 
@@ -1408,7 +1408,7 @@ std::vector<sptr<AudioDeviceDescriptor>> AudioPolicyService::GetDevices(DeviceFl
 
     CHECK_AND_RETURN_RET(deviceFlag != DeviceFlag::ALL_L_D_DEVICES_FLAG, connectedDevices_);
 
-    for (const auto& device : connectedDevices_) {
+    for (auto device : connectedDevices_) {
         if (device == nullptr) {
             continue;
         }
@@ -2870,7 +2870,7 @@ void AudioPolicyService::OnDeviceStatusUpdated(DeviceType devType, bool isConnec
     // Pnp device status update
     AUDIO_INFO_LOG("Device connection state updated | TYPE[%{public}d] STATUS[%{public}d]", devType, isConnected);
 
-    std::lock_guard<std::shared_mutex> lock(deviceStatusUpdateSharedMutex_);
+    std::lock_guard<std::mutex> lock(deviceStatusUpdateSharedMutex_);
 
     int32_t result = ERROR;
     result = HandleSpecialDeviceType(devType, isConnected);
@@ -2928,7 +2928,7 @@ void AudioPolicyService::OnDeviceStatusUpdated(AudioDeviceDescriptor &updatedDes
 
     AUDIO_INFO_LOG("Device connection state updated | TYPE[%{public}d] STATUS[%{public}d]", devType, isConnected);
 
-    std::lock_guard<std::shared_mutex> lock(deviceStatusUpdateSharedMutex_);
+    std::lock_guard<std::mutex> lock(deviceStatusUpdateSharedMutex_);
 
     UpdateLocalGroupInfo(isConnected, macAddress, deviceName, streamInfo, updatedDesc);
 
@@ -3272,7 +3272,7 @@ void AudioPolicyService::UpdateDisplayName(sptr<AudioDeviceDescriptor> deviceDes
 
 void AudioPolicyService::HandleOfflineDistributedDevice()
 {
-    std::lock_guard<std::shared_mutex> lock(deviceStatusUpdateSharedMutex_);
+    std::lock_guard<std::mutex> lock(deviceStatusUpdateSharedMutex_);
     std::vector<sptr<AudioDeviceDescriptor>> deviceChangeDescriptor = {};
     for (auto deviceDesc : connectedDevices_) {
         if (deviceDesc != nullptr && deviceDesc->networkId_ != LOCAL_NETWORK_ID) {
@@ -3299,7 +3299,7 @@ void AudioPolicyService::HandleOfflineDistributedDevice()
 int32_t AudioPolicyService::HandleDistributedDeviceUpdate(DStatusInfo &statusInfo,
     std::vector<sptr<AudioDeviceDescriptor>> &descForCb)
 {
-    std::lock_guard<std::shared_mutex> lock(deviceStatusUpdateSharedMutex_);
+    std::lock_guard<std::mutex> lock(deviceStatusUpdateSharedMutex_);
     DeviceType devType = GetDeviceTypeFromPin(statusInfo.hdiPin);
     const std::string networkId = statusInfo.networkId;
     AudioDeviceDescriptor deviceDesc(devType, GetDeviceRole(devType));
