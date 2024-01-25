@@ -1750,7 +1750,8 @@ void AudioPolicyService::FetchOutputDevice(vector<unique_ptr<AudioRendererChange
                 isUpdateActiveDevice = true;
             }
             needUpdateActiveDevice = false;
-            if (reason == AudioStreamDeviceChangeReason::OLD_DEVICE_UNAVALIABLE) {
+            if (reason == AudioStreamDeviceChangeReason::OLD_DEVICE_UNAVALIABLE ||
+                audioScene_ == AUDIO_SCENE_DEFAULT) {
                 MuteSinkPort(desc);
             }
         }
@@ -2904,11 +2905,12 @@ void AudioPolicyService::OnDeviceStatusUpdated(DeviceType devType, bool isConnec
         reason = AudioStreamDeviceChangeReason::OLD_DEVICE_UNAVALIABLE;
     }
 
+    TriggerDeviceChangedCallback(descForCb, isConnected);
+    TriggerAvailableDeviceChangedCallback(descForCb, isConnected);
+
     // fetch input&output device
     FetchDevice(true, reason);
     FetchDevice(false);
-    TriggerDeviceChangedCallback(descForCb, isConnected);
-    TriggerAvailableDeviceChangedCallback(descForCb, isConnected);
 }
 
 void AudioPolicyService::OnDeviceStatusUpdated(AudioDeviceDescriptor &updatedDesc, bool isConnected)
@@ -2955,11 +2957,12 @@ void AudioPolicyService::OnDeviceStatusUpdated(AudioDeviceDescriptor &updatedDes
         reason = AudioStreamDeviceChangeReason::OLD_DEVICE_UNAVALIABLE;
     }
 
+    TriggerDeviceChangedCallback(descForCb, isConnected);
+    TriggerAvailableDeviceChangedCallback(descForCb, isConnected);
+
     // fetch input&output device
     FetchDevice(true, reason);
     FetchDevice(false);
-    TriggerDeviceChangedCallback(descForCb, isConnected);
-    TriggerAvailableDeviceChangedCallback(descForCb, isConnected);
 }
 
 #ifdef FEATURE_DTMF_TONE
@@ -3290,10 +3293,12 @@ void AudioPolicyService::HandleOfflineDistributedDevice()
             }
         }
     }
-    FetchDevice(true, AudioStreamDeviceChangeReason::OLD_DEVICE_UNAVALIABLE);
-    FetchDevice(false);
+
     TriggerDeviceChangedCallback(deviceChangeDescriptor, false);
     TriggerAvailableDeviceChangedCallback(deviceChangeDescriptor, false);
+
+    FetchDevice(true, AudioStreamDeviceChangeReason::OLD_DEVICE_UNAVALIABLE);
+    FetchDevice(false);
 }
 
 int32_t AudioPolicyService::HandleDistributedDeviceUpdate(DStatusInfo &statusInfo,
@@ -3360,10 +3365,12 @@ void AudioPolicyService::OnDeviceStatusUpdated(DStatusInfo statusInfo, bool isSt
         reason = AudioStreamDeviceChangeReason::OLD_DEVICE_UNAVALIABLE;
     }
 
-    FetchDevice(true, reason);
-    FetchDevice(false);
     TriggerDeviceChangedCallback(descForCb, statusInfo.isConnected);
     TriggerAvailableDeviceChangedCallback(descForCb, statusInfo.isConnected);
+
+    FetchDevice(true, reason);
+    FetchDevice(false);
+
     DeviceType devType = GetDeviceTypeFromPin(statusInfo.hdiPin);
     if (GetDeviceRole(devType) == DeviceRole::INPUT_DEVICE) {
         remoteCapturerSwitch_ = true;
