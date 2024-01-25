@@ -366,28 +366,9 @@ int32_t CapturerInServer::GetLatency(uint64_t &latency)
     return stream_->GetLatency(latency);
 }
 
-
 void CapturerInServer::RegisterTestCallback(const std::weak_ptr<CapturerListener> &callback)
 {
     testCallback_ = callback;
-}
-
-int32_t CapturerInServer::ReadOneFrame()
-{
-    // if buffer ready, get buffer, else, return
-    size_t minBufferSize = 0;
-    if (stream_->GetMinimumBufferSize(minBufferSize) < 0) {
-        AUDIO_ERR_LOG("Get min buffer size err");
-        return ERR_OPERATION_FAILED;
-    }
-    BufferDesc bufferDesc = stream_->DequeueBuffer(minBufferSize);
-    stream_->EnqueueBuffer(bufferDesc);
-    return SUCCESS;
-}
-
-std::shared_ptr<OHAudioBuffer> CapturerInServer::GetOHSharedBuffer()
-{
-    return audioServerBuffer_;
 }
 } // namespace AudioStandard
 } // namespace OHOS

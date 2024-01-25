@@ -66,8 +66,6 @@ public:
     void WriteEmptyData();
     int32_t DrainAudioBuffer();
     int32_t GetInfo();
-    int32_t WriteOneFrame();
-    std::shared_ptr<OHAudioBuffer> GetOHSharedBuffer();
 
 private:
     void OnStatusUpdateSub(IOperation operation);
@@ -82,6 +80,7 @@ private:
     AudioProcessConfig processConfig_;
     size_t totalSizeInFrame_ = 0;
     size_t spanSizeInFrame_ = 0;
+    size_t spanSizeInByte_ = 0;
     size_t byteSizePerFrame_ = 0;
     bool isBufferConfiged_  = false;
     std::atomic<bool> isInited_ = false;
