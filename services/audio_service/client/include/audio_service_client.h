@@ -745,6 +745,7 @@ private:
     uint64_t offloadTimeStamp_ = 0;
     uint64_t offloadLastHdiPosFrames_ = 0;
     uint64_t offloadLastHdiPosTs_ = 0;
+    uint64_t offloadLastUpdatePaInfoTs_ = 0;
     std::timed_mutex offloadWaitWriteableMutex_;
     AudioOffloadType offloadStatePolicy_ = OFFLOAD_DEFAULT;
     AudioOffloadType offloadNextStateTargetPolicy_ = OFFLOAD_DEFAULT;

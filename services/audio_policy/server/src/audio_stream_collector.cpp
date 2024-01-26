@@ -492,7 +492,6 @@ int32_t AudioStreamCollector::GetChannelCount(int32_t sessionId)
     const auto &it = std::find_if(audioRendererChangeInfos_.begin(), audioRendererChangeInfos_.end(),
         [&sessionId](const std::unique_ptr<AudioRendererChangeInfo> &changeInfo) {
             return changeInfo->sessionId == sessionId;
-
         });
     if (it != audioRendererChangeInfos_.end()) {
         channelCount = (*it)->channelCount;
@@ -596,7 +595,6 @@ int32_t AudioStreamCollector::GetUid(int32_t sessionId)
     const auto &it = std::find_if(audioRendererChangeInfos_.begin(), audioRendererChangeInfos_.end(),
         [&sessionId](const std::unique_ptr<AudioRendererChangeInfo> &changeInfo) {
             return changeInfo->sessionId == sessionId;
-
         });
     if (it != audioRendererChangeInfos_.end()) {
         defaultUid = (*it)->createrUID;
