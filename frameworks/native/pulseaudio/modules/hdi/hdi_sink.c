@@ -2200,7 +2200,6 @@ static void ThreadFuncRendererTimerOffloadProcess(struct Userdata *u, pa_usec_t 
     const uint64_t pos = u->offload.pos;
     const uint64_t hdiPos = u->offload.hdiPos + (pa_rtclock_now() - u->offload.hdiPosTs);
     const uint64_t pw = u->offload.prewrite;
-    const int32_t size100ms = pa_usec_to_bytes(100 * PA_USEC_PER_MSEC, &u->sink->sample_spec); // 100
     int64_t blockTime = pa_bytes_to_usec(u->sink->thread_info.max_request, &u->sink->sample_spec);
 
     int32_t nInput = -1;
@@ -2218,10 +2217,7 @@ static void ThreadFuncRendererTimerOffloadProcess(struct Userdata *u, pa_usec_t 
                 u->offload.minWait = now + 1 * PA_USEC_PER_MSEC; // 1ms for min wait
             }
         } else {
-            blockTime = 0;
-            if (writen >= size100ms) {
-                blockTime = 1 * PA_USEC_PER_MSEC; // 1ms for min wait
-            }
+            blockTime = 1 * PA_USEC_PER_MSEC; // 1ms for min wait
         }
     } else if (hdistate == 1) {
         blockTime = (int64_t)(pos - hdiPos - HDI_MIN_MS_MAINTAIN * PA_USEC_PER_MSEC);
@@ -2231,8 +2227,10 @@ static void ThreadFuncRendererTimerOffloadProcess(struct Userdata *u, pa_usec_t 
         u->offload.minWait = now + 1 * PA_USEC_PER_MSEC; // 1ms for min wait
     }
     if (pos < hdiPos) {
-        AUDIO_DEBUG_LOG("ThreadFuncRendererTimerOffload hdiPos wrong need sync, pos %" PRIu64 ", hdiPos %" PRIu64,
-            pos, hdiPos);
+        if (pos != 0) {
+            AUDIO_DEBUG_LOG("ThreadFuncRendererTimerOffload hdiPos wrong need sync, pos %" PRIu64 ", hdiPos %" PRIu64,
+                pos, hdiPos);
+        }
         if (u->offload.hdiPosTs + 300 * PA_USEC_PER_MSEC < now) { // 300ms for update pos
             UpdatePresentationPosition(u);
         }
