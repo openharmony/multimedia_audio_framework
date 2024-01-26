@@ -2228,7 +2228,7 @@ static void ThreadFuncRendererTimerOffloadProcess(struct Userdata *u, pa_usec_t 
     }
     if (pos < hdiPos) {
         if (pos != 0) {
-            AUDIO_DEBUG_LOG("ThreadFuncRendererTimerOffload hdiPos wrong need sync, pos %" PRIu64 ", hdiPos %" PRIu64,
+            AUDIO_INFO_LOG("ThreadFuncRendererTimerOffload hdiPos wrong need sync, pos %" PRIu64 ", hdiPos %" PRIu64,
                 pos, hdiPos);
         }
         if (u->offload.hdiPosTs + 300 * PA_USEC_PER_MSEC < now) { // 300ms for update pos
@@ -2585,7 +2585,10 @@ static void ThreadFuncRendererTimerLoop(struct Userdata *u, int64_t *sleepForUse
             ProcessRenderUseTiming(u, now);
         }
         pa_usec_t blockTime = pa_bytes_to_usec(u->sink->thread_info.max_request, &u->sink->sample_spec);
-        *sleepForUsec = PA_MIN(blockTime - (pa_rtclock_now() - now), u->primary.writeTime);
+        *sleepForUsec = blockTime - (pa_rtclock_now() - now);
+        if (u->primary.timestamp <= now + u->primary.prewrite) {
+            *sleepForUsec = PA_MIN(*sleepForUsec, u->primary.writeTime);
+        }
         *sleepForUsec = PA_MAX(*sleepForUsec, 0);
     }
 }

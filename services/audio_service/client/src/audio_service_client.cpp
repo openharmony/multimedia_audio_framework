@@ -2156,7 +2156,8 @@ void AudioServiceClient::GetOffloadApproximatelyCacheTime(uint64_t paTimeStamp, 
         std::chrono::steady_clock::now().time_since_epoch()).count());
     bool offloadPwrActive = offloadStatePolicy_ != OFFLOAD_INACTIVE_BACKGROUND;
     if (offloadPwrActive ||
-        timeNowSteady > offloadLastHdiPosTs_ + AUDIO_US_PER_SECOND / 20) { // 20 times per sec is max
+        timeNowSteady >
+        static_cast<int64_t>(offloadLastHdiPosTs_ + AUDIO_US_PER_SECOND / 20)) { // 20 times per sec is max
         int64_t timeSec;
         int64_t timeNanoSec;
         int32_t ret = audioSystemManager_->OffloadGetPresentationPosition(frames, timeSec, timeNanoSec);
@@ -2271,7 +2272,8 @@ void AudioServiceClient::GetAudioLatencyOffload(uint64_t &latency)
         std::chrono::system_clock::now().time_since_epoch()).count());
     bool offloadPwrActive = offloadStatePolicy_ != OFFLOAD_INACTIVE_BACKGROUND;
     if (offloadPwrActive ||
-        timeNow > offloadLastUpdatePaInfoTs_ + AUDIO_US_PER_SECOND / 20) { // 20 times per sec is max
+        timeNow >
+        static_cast<int64_t>(offloadLastUpdatePaInfoTs_ + AUDIO_US_PER_SECOND / 20)) { // 20 times per sec is max
         pa_threaded_mainloop_lock(mainLoop);
         pa_operation *operation = pa_stream_update_timing_info(
             paStream, PAStreamUpdateTimingInfoSuccessCb, (void *)this);
