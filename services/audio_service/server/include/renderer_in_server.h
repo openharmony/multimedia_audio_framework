@@ -85,13 +85,13 @@ private:
     bool isBufferConfiged_  = false;
     std::atomic<bool> isInited_ = false;
     std::shared_ptr<OHAudioBuffer> audioServerBuffer_ = nullptr;
-    int32_t needStart = 0;
-    bool requestFailed_;
+    int32_t needForceWrite_ = 0;
     bool afterDrain = false;
     std::mutex updateIndexLock_;
     bool resetTime_ = false;
     uint64_t resetTimestamp_ = 0;
     std::mutex writeLock_;
+    FILE *dumpC2S_ = nullptr; // client to server dump file
 };
 } // namespace AudioStandard
 } // namespace OHOS

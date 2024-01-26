@@ -38,6 +38,7 @@ RendererInServer::~RendererInServer()
     if (status_ != I_STATUS_RELEASED && status_ != I_STATUS_IDLE) {
         Release();
     }
+    DumpFileUtil::CloseDumpFile(&dumpC2S_);
 }
 
 int32_t RendererInServer::ConfigServerBuffer()
@@ -116,6 +117,13 @@ int32_t RendererInServer::Init()
         "Construct rendererInServer failed: %{public}d", ret);
     stream_->RegisterStatusCallback(shared_from_this());
     stream_->RegisterWriteCallback(shared_from_this());
+
+    // eg: /data/local/tmp/100001_48000_2_1_c2s.pcm
+    AudioStreamInfo tempInfo = processConfig_.streamInfo;
+    std::string dumpName = std::to_string(streamIndex_) + "_" + std::to_string(tempInfo.samplingRate) + "_" +
+        std::to_string(tempInfo.channels) + "_" + std::to_string(tempInfo.format) + "_c2s.pcm";
+    DumpFileUtil::OpenDumpFile(DUMP_SERVER_PARA, dumpName, &dumpC2S_);
+
     return SUCCESS;
 }
 
@@ -133,7 +141,7 @@ void RendererInServer::OnStatusUpdate(IOperation operation)
             // In plan, maxlength is 4
             if (audioServerBuffer_->GetAvailableDataFrames() == static_cast<int32_t>(4 * spanSizeInFrame_)) {
                 AUDIO_INFO_LOG("Buffer is empty");
-                needStart = 0;
+                needForceWrite_ = 0;
             } else {
                 AUDIO_INFO_LOG("Buffer is not empty");
                 WriteData();
@@ -223,6 +231,7 @@ int32_t RendererInServer::WriteData()
 
     if (audioServerBuffer_->GetReadbuffer(currentReadFrame, bufferDesc) == SUCCESS) {
         stream_->EnqueueBuffer(bufferDesc);
+        DumpFileUtil::WriteDumpFile(dumpC2S_, static_cast<void *>(bufferDesc.buffer), bufferDesc.bufLength);
         uint64_t nextReadFrame = currentReadFrame + spanSizeInFrame_;
         audioServerBuffer_->SetCurReadFrame(nextReadFrame);
         memset_s(bufferDesc.buffer, bufferDesc.bufLength, 0, bufferDesc.bufLength); // clear is needed for reuse.
@@ -249,36 +258,39 @@ void RendererInServer::WriteEmptyData()
 int32_t RendererInServer::OnWriteData(size_t length)
 {
     Trace trace("RendererInServer::OnWriteData length " + std::to_string(length));
-    requestFailed_ = false;
+    bool mayNeedForceWrite = false;
     if (writeLock_.try_lock()) {
         // length unit is bytes, using spanSizeInByte_
         for (size_t i = 0; i < length / spanSizeInByte_; i++) {
-            if (WriteData() != SUCCESS) {
-                requestFailed_ = true;
-            }
+            mayNeedForceWrite = WriteData() != SUCCESS ? true : false;
         }
         writeLock_.unlock();
     } else {
-        requestFailed_ = true;
+        mayNeedForceWrite = true;
+    }
+
+    size_t maxEmptyCount = 3;
+    if (mayNeedForceWrite && stream_->GetWritableSize() >= spanSizeInByte_ * maxEmptyCount) {
+        AUDIO_WARNING_LOG("Server need force write to recycle callback");
+        needForceWrite_ = 0;
     }
     return SUCCESS;
 }
 
+// Call WriteData will hold mainloop lock in EnqueueBuffer, we should not lock a mutex in WriteData while OnWriteData is
+// called with mainloop locking.
 int32_t RendererInServer::UpdateWriteIndex()
 {
     Trace trace("RendererInServer::UpdateWriteIndex");
-    if (audioServerBuffer_->GetAvailableDataFrames() == static_cast<int32_t>(spanSizeInFrame_)
-        && needStart < 3) { // 3 is maxlength - 1
-        AUDIO_WARNING_LOG("Start write data");
-        WriteData();
-        needStart++;
-    }
-    if (requestFailed_ && stream_->GetWritableSize() >= spanSizeInFrame_ * byteSizePerFrame_) {
+    if (needForceWrite_ < 3 && stream_->GetWritableSize() >= spanSizeInByte_) { // 3 is maxlength - 1
         if (writeLock_.try_lock()) {
+            AUDIO_INFO_LOG("Start force write data");
             WriteData();
+            needForceWrite_++;
             writeLock_.unlock();
         }
     }
+
     if (afterDrain == true) {
         afterDrain = false;
         AUDIO_WARNING_LOG("After drain, start write data");
@@ -306,7 +318,7 @@ int32_t RendererInServer::GetSessionId(uint32_t &sessionId)
 int32_t RendererInServer::Start()
 {
     AUDIO_INFO_LOG("Start.");
-    needStart = 0;
+    needForceWrite_ = 0;
     std::unique_lock<std::mutex> lock(statusLock_);
     if (status_ != I_STATUS_IDLE && status_ != I_STATUS_PAUSED && status_ != I_STATUS_STOPPED) {
         AUDIO_ERR_LOG("RendererInServer::Start failed, Illegal state: %{public}u", status_);
