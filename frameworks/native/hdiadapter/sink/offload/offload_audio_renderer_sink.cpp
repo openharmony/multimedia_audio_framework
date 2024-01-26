@@ -110,7 +110,7 @@ public:
     OffloadAudioRendererSinkInner();
     ~OffloadAudioRendererSinkInner();
 private:
-    IAudioSinkAttr attr_;
+    IAudioSinkAttr attr_ = {};
     bool rendererInited_;
     bool started_;
     bool isFlushing_;
@@ -150,7 +150,6 @@ OffloadAudioRendererSinkInner::OffloadAudioRendererSinkInner()
       leftVolume_(DEFAULT_VOLUME_LEVEL), rightVolume_(DEFAULT_VOLUME_LEVEL),
       audioManager_(nullptr), audioAdapter_(nullptr), audioRender_(nullptr)
 {
-    attr_ = {};
 #ifdef FEATURE_POWER_MANAGER
     runninglocked = false;
 #endif
@@ -325,7 +324,7 @@ int32_t OffloadAudioRendererSinkInner::RenderEventCallback(struct IAudioCallback
     if (self == nullptr) {
         AUDIO_WARNING_LOG("self is null!");
     }
-    auto *impl = (struct AudioCallbackService *)self;
+    auto *impl = reinterpret_cast<struct AudioCallbackService *>(self);
     if (!impl->registered || impl->cookie == nullptr || impl->renderCallback == nullptr) {
         AUDIO_ERR_LOG("impl invalid, %{public}d, %{public}d, %{public}d",
             impl->registered, impl->cookie == nullptr, impl->renderCallback == nullptr);
@@ -394,7 +393,7 @@ void InitAttrs(struct AudioSampleAttributes &attrs)
     attrs.offloadInfo.bitWidth = PCM_32_BIT;
 }
 
-static int32_t SwitchAdapterRender(struct AudioAdapterDescriptor *descs, const string adapterNameCase,
+static int32_t SwitchAdapterRender(struct AudioAdapterDescriptor *descs, const string &adapterNameCase,
     enum AudioPortDirection portFlag, struct AudioPort &renderPort, uint32_t size)
 {
     if (descs == nullptr) {

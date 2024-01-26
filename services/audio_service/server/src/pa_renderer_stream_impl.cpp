@@ -899,9 +899,7 @@ int32_t PaRendererStreamImpl::SetOffloadMode(int32_t state, bool isAppBack)
     auto powerState = static_cast<PowerMgr::PowerState>(state);
     if ((powerState != PowerMgr::PowerState::AWAKE) && (powerState != PowerMgr::PowerState::FREEZE)) {
         statePolicy = OFFLOAD_INACTIVE_BACKGROUND;
-    } else if (isAppBack) {
-        statePolicy = OFFLOAD_ACTIVE_FOREGROUND;
-    } else if (!isAppBack) {
+    } else {
         statePolicy = OFFLOAD_ACTIVE_FOREGROUND;
     }
 

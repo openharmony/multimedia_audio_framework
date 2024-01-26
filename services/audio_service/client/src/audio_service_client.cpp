@@ -2265,6 +2265,7 @@ int32_t AudioServiceClient::GetCurrentPosition(uint64_t &framePosition, uint64_t
 
 void AudioServiceClient::GetAudioLatencyOffload(uint64_t &latency)
 {
+    pa_threaded_mainloop_lock(mainLoop);
     pa_operation *operation = pa_stream_update_timing_info(
         paStream, PAStreamUpdateTimingInfoSuccessCb, (void *)this);
     if (operation != nullptr) {
@@ -2272,6 +2273,7 @@ void AudioServiceClient::GetAudioLatencyOffload(uint64_t &latency)
     } else {
         AUDIO_ERR_LOG("pa_stream_update_timing_info failed");
     }
+    pa_threaded_mainloop_unlock(mainLoop);
 
     uint64_t paTimeStamp = offloadTimeStamp_;
     uint64_t paWriteIndex = offloadWriteIndex_;
