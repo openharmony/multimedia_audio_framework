@@ -38,6 +38,7 @@ namespace OHOS {
 namespace AudioStandard {
 namespace {
     const int64_t SECOND_TO_NANOSECOND = 1000000000;
+    const unsigned int DEINIT_TIME_OUT_SECONDS = 5;
 }
 class AudioCapturerSourceInner : public AudioCapturerSource {
 public:
@@ -374,6 +375,8 @@ bool AudioCapturerSourceInner::IsInited(void)
 
 void AudioCapturerSourceInner::DeInit()
 {
+    AudioXCollie sourceXCollie("AudioCapturerSourceInner::DeInit", DEINIT_TIME_OUT_SECONDS);
+    AUDIO_INFO_LOG("Start deinit of source inner");
     started_ = false;
     sourceInited_ = false;
 
@@ -1077,6 +1080,8 @@ bool AudioCapturerSourceWakeup::IsInited(void)
 
 void AudioCapturerSourceWakeup::DeInit(void)
 {
+    AudioXCollie wakeupXCollie("AudioCapturerSourceWakeup::DeInit", DEINIT_TIME_OUT_SECONDS);
+    AUDIO_INFO_LOG("Start deinit of source wakeup");
     std::lock_guard<std::mutex> lock(wakeupMutex_);
     if (!isInited) {
         return;
