@@ -61,8 +61,6 @@ const uint64_t HDI_OFFLOAD_SAMPLE_RATE = 48000;
 const int64_t SECOND_TO_MICROSECOND = 1000000;
 const uint64_t AUDIO_FIRST_FRAME_LATENCY = 230; //ms
 
-static const string INNER_CAPTURER_SOURCE = "Speaker.monitor";
-
 static const std::unordered_map<AudioStreamType, std::string> STREAM_TYPE_ENUM_STRING_MAP = {
     {STREAM_VOICE_CALL, "voice_call"},
     {STREAM_MUSIC, "music"},

@@ -73,6 +73,8 @@ constexpr std::string_view WAKEUP_NAMES[WAKEUP_LIMIT] = {
 };
 constexpr std::string_view VOICE_CALL_REC_NAME = "Voice_call_rec";
 
+const std::string INNER_CAPTURER_SOURCE = "Speaker.monitor";
+
 #ifdef FEATURE_DTMF_TONE
 // Maximun number of sine waves in a tone segment
 constexpr uint32_t TONEINFO_MAX_WAVES = 3;

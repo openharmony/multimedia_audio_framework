@@ -281,11 +281,11 @@ int32_t PaAdapterManager::GetDeviceNameForConnect(AudioProcessConfig processConf
             if (no < WAKEUP_LIMIT) {
                 deviceName = WAKEUP_NAMES[no];
             }
-        } else {
-            int32_t res = PolicyHandler::GetInstance().NotifyCapturerAdded(processConfig.capturerInfo,
-                processConfig.streamInfo, sessionId);
-            return res;
+        } else if (processConfig.isInnerCapturer) {
+            deviceName = INNER_CAPTURER_SOURCE;
         }
+        return PolicyHandler::GetInstance().NotifyCapturerAdded(processConfig.capturerInfo,
+            processConfig.streamInfo, sessionId);
     }
     return SUCCESS;
 }
