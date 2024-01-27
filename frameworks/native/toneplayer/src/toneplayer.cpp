@@ -467,6 +467,10 @@ bool TonePlayerPrivate::ContinueToneplay(uint32_t reqSample, int8_t *audioBuffer
     if (tonePlayerState_ != TONE_PLAYER_PLAYING) {
         return false;
     }
+    if(playWait) {
+        waitAudioCbkCond_.notify_all();
+        AUDIO_INFO_LOG("AudioToneSequenceGen is TONE_PLAYER_PLAYING waitAudioCbkCond_ notify_all");
+    }
     if (totalSample_ <= nextSegSample_) {
         if (toneDesc->segments[currSegment_].duration != 0) {
             GetSamples(toneDesc->segments[currSegment_].waveFreq, audioBuffer, reqSample);
@@ -512,7 +516,6 @@ bool TonePlayerPrivate::AudioToneSequenceGen(BufferDesc &bufDesc)
         AUDIO_DEBUG_LOG("AudioToneDataThreadFunc, lReqSmp: %{public}d totalBufAvailable: %{public}d",
             reqSamples, totalBufAvailable);
         mutexLock_.lock();
-
         // Update pcm frame count and end time (current time at the end of this process)
         totalSample_ += reqSamples;
         if (CheckToneStopped()) {
@@ -543,10 +546,6 @@ bool TonePlayerPrivate::AudioToneSequenceGen(BufferDesc &bufDesc)
         } else {
             if (ContinueToneplay(reqSamples, audioBuffer)) {
                 bufDesc.dataLength += reqSamples * sizeof(int16_t);
-            }
-            if(tonePlayerState_ == TONE_PLAYER_PLAYING && playWait) {
-                waitAudioCbkCond_.notify_all();
-                AUDIO_INFO_LOG("AudioToneSequenceGen is TONE_PLAYER_PLAYING waitAudioCbkCond_ notify_all");
             }
         }
         totalBufAvailable -= reqSamples;
