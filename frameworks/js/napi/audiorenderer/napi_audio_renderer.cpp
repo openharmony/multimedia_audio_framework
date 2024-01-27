@@ -133,11 +133,11 @@ napi_value NapiAudioRenderer::Init(napi_env env, napi_value exports)
 
 void NapiAudioRenderer::CreateRendererFailed()
 {
-    AUDIO_ERR_LOG("Renderer Create failed");
     NapiAudioRenderer::isConstructSuccess_ = NAPI_ERR_SYSTEM;
     if (AudioRenderer::CheckMaxRendererInstances() == ERR_OVERFLOW) {
         NapiAudioRenderer::isConstructSuccess_ = NAPI_ERR_STREAM_LIMIT;
     }
+    AUDIO_ERR_LOG("Renderer Create failed %{public}d", isConstructSuccess_);
 }
 
 unique_ptr<NapiAudioRenderer> NapiAudioRenderer::CreateAudioRendererNativeObject(napi_env env)
@@ -256,7 +256,6 @@ napi_value NapiAudioRenderer::CreateAudioRendererWrapper(napi_env env, const Aud
         AUDIO_ERR_LOG("napi_new_instance failed, sttaus:%{public}d", status);
         goto fail;
     }
-    NapiAudioRenderer::isConstructSuccess_ = SUCCESS;
     return result;
 
 fail:
@@ -283,6 +282,12 @@ napi_value NapiAudioRenderer::CreateAudioRenderer(napi_env env, napi_callback_in
 
     auto complete = [env, context](napi_value &output) {
         output = CreateAudioRendererWrapper(env, context->rendererOptions);
+
+        // IsConstructSuccess_ Used when creating a renderer fails.
+        if (isConstructSuccess_ != SUCCESS) {
+            context->SignError(isConstructSuccess_);
+            isConstructSuccess_ = SUCCESS;
+        }
     };
 
     return NapiAsyncWork::Enqueue(env, context, "CreateAudioRenderer", nullptr, complete);
