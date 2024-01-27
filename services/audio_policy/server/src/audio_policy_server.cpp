@@ -2177,7 +2177,7 @@ int32_t AudioPolicyServer::UpdateTracker(AudioMode &mode, AudioStreamChangeInfo 
     auto callerUid = IPCSkeleton::GetCallingUid();
     streamChangeInfo.audioRendererChangeInfo.createrUID = callerUid;
     streamChangeInfo.audioCapturerChangeInfo.createrUID = callerUid;
-    AUDIO_INFO_LOG("UpdateTracker: [caller uid: %{public}d]", callerUid);
+    AUDIO_DEBUG_LOG("UpdateTracker: [caller uid: %{public}d]", callerUid);
     if (callerUid != MEDIA_SERVICE_UID) {
         if (mode == AUDIO_MODE_PLAYBACK) {
             streamChangeInfo.audioRendererChangeInfo.clientUID = callerUid;

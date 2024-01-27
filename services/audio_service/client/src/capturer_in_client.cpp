@@ -812,7 +812,7 @@ int32_t CapturerInClientInner::GetBufferSize(size_t &bufferSize)
     if (capturerMode_ == CAPTURE_MODE_CALLBACK) {
         bufferSize = cbBufferSize_;
     }
-    AUDIO_INFO_LOG("Buffer size is %{public}zu, mode is %{public}s", bufferSize, capturerMode_ == CAPTURE_MODE_NORMAL ?
+    AUDIO_DEBUG_LOG("Buffer size is %{public}zu, mode is %{public}s", bufferSize, capturerMode_ == CAPTURE_MODE_NORMAL ?
         "CAPTURE_MODE_NORMAL" : "CAPTURE_MODE_CALLBACK");
     return SUCCESS;
 }

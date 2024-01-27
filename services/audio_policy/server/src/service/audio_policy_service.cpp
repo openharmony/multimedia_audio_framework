@@ -1603,7 +1603,7 @@ void AudioPolicyService::FetchOutputDeviceWhenNoRunningStream()
     AUDIO_INFO_LOG("fetch output device when no running stream");
     unique_ptr<AudioDeviceDescriptor> desc = audioRouterCenter_.FetchOutputDevice(STREAM_USAGE_MEDIA, -1);
     if (desc->deviceType_ == DEVICE_TYPE_NONE || IsSameDevice(desc, currentActiveDevice_)) {
-        AUDIO_INFO_LOG("output device is not change");
+        AUDIO_DEBUG_LOG("output device is not change");
         return;
     }
     SetVolumeForSwitchDevice(desc->deviceType_);
@@ -1620,7 +1620,7 @@ void AudioPolicyService::FetchInputDeviceWhenNoRunningStream()
     AUDIO_INFO_LOG("fetch input device when no running stream");
     unique_ptr<AudioDeviceDescriptor> desc = audioRouterCenter_.FetchInputDevice(SOURCE_TYPE_MIC, -1);
     if (desc->deviceType_ == DEVICE_TYPE_NONE || IsSameDevice(desc, currentActiveInputDevice_)) {
-        AUDIO_INFO_LOG("input device is not change");
+        AUDIO_DEBUG_LOG("input device is not change");
         return;
     }
     currentActiveInputDevice_ = AudioDeviceDescriptor(*desc);
@@ -5221,7 +5221,13 @@ void AudioPolicyService::UpdateA2dpOffloadFlag(const std::vector<Bluetooth::A2dp
         (a2dpOffloadFlag_ != A2DP_NOT_OFFLOAD)) {
         AUDIO_ERR_LOG("A2dpOffloadSessionRequest failed");
     }
-    AUDIO_INFO_LOG("a2dpOffloadFlag_ change from %{public}d to %{public}d", preA2dpOffloadFlag_, a2dpOffloadFlag_);
+    if (!updateA2dpOffloadLogFlag) {
+        AUDIO_INFO_LOG("a2dpOffloadFlag_ change from %{public}d to %{public}d", preA2dpOffloadFlag_, a2dpOffloadFlag_);
+        updateA2dpOffloadLogFlag = true;
+    } else {
+        AUDIO_DEBUG_LOG("a2dpOffloadFlag_ change from %{public}d to %{public}d", preA2dpOffloadFlag_, a2dpOffloadFlag_);
+    }
+
     if (HandleA2dpDeviceInOffload() == SUCCESS) {
         return;
     }

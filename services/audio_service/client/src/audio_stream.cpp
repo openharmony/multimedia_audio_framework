@@ -650,7 +650,7 @@ bool AudioStream::FlushAudioStream()
     int32_t ret = FlushStream();
     CHECK_AND_RETURN_RET_LOG(ret == SUCCESS, false, "Flush stream fail,ret:%{public}d", ret);
 
-    AUDIO_INFO_LOG("Flush stream SUCCESS, sessionId: %{public}d", sessionId_);
+    AUDIO_DEBUG_LOG("Flush stream SUCCESS, sessionId: %{public}d", sessionId_);
     return true;
 }
 
