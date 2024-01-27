@@ -165,7 +165,9 @@ bool TonePlayerPrivate::PlayEventStateHandler()
     if (tonePlayerState_ == TONE_PLAYER_STARTING) {
         mutexLock_.unlock();
         std::unique_lock<std::mutex> lock(cbkCondLock_);
+        playWait = true;
         retStatus = waitAudioCbkCond_.wait_for(lock, std::chrono::seconds(CMAXWAIT));
+        playWait = false;
         AUDIO_DEBUG_LOG("Immediate start got notified, status %{public}d", retStatus);
         mutexLock_.lock();
         if (retStatus == std::cv_status::timeout) {
@@ -173,6 +175,7 @@ bool TonePlayerPrivate::PlayEventStateHandler()
             return false;
         }
     }
+    playWait = false;
     return result;
 }
 
@@ -540,6 +543,10 @@ bool TonePlayerPrivate::AudioToneSequenceGen(BufferDesc &bufDesc)
         } else {
             if (ContinueToneplay(reqSamples, audioBuffer)) {
                 bufDesc.dataLength += reqSamples * sizeof(int16_t);
+            }
+            if(tonePlayerState_ == TONE_PLAYER_PLAYING && playWait) {
+                waitAudioCbkCond_.notify_all();
+                AUDIO_INFO_LOG("AudioToneSequenceGen is TONE_PLAYER_PLAYING waitAudioCbkCond_ notify_all");
             }
         }
         totalBufAvailable -= reqSamples;
