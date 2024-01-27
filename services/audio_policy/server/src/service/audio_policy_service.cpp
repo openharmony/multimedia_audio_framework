@@ -2492,6 +2492,12 @@ int32_t AudioPolicyService::SetAudioScene(AudioScene audioScene)
     AUDIO_INFO_LOG("SetAudioScene: %{public}d", audioScene);
     const sptr<IStandardAudioService> gsp = GetAudioServerProxy();
     CHECK_AND_RETURN_RET_LOG(gsp != nullptr, ERR_OPERATION_FAILED, "Service proxy unavailable");
+
+    if (audioScene_ == AUDIO_SCENE_RINGING && audioScene == AUDIO_SCENE_PHONE_CHAT) {
+#ifdef BLUETOOTH_ENABLE
+        Bluetooth::AudioHfpManager::DisconnectSco();
+#endif
+    }
     audioScene_ = audioScene;
 
     if (audioScene_ == AUDIO_SCENE_DEFAULT) {
