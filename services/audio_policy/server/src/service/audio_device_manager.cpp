@@ -640,9 +640,9 @@ std::vector<unique_ptr<AudioDeviceDescriptor>> AudioDeviceManager::GetAvailableD
 {
     std::vector<unique_ptr<AudioDeviceDescriptor>> audioDeviceDescriptors;
 
+    std::lock_guard<std::mutex> connectLock(connectedDevicesMutex_);
     GetDefaultAvailableDevicesByUsage(usage, audioDeviceDescriptors);
 
-    std::lock_guard<std::mutex> connectLock(connectedDevicesMutex_);
     for (const auto &dev : connectedDevices_) {
         for (const auto &devicePrivacy : devicePrivacyMaps_) {
             list<DevicePrivacyInfo> deviceInfos = devicePrivacy.second;
