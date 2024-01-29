@@ -340,7 +340,10 @@ void AudioPolicyClientStubImpl::OnCapturerStateChange(
 {
     std::lock_guard<std::mutex> lockCbMap(capturerStateChangeMutex_);
     for (auto it = capturerStateChangeCallbackList_.begin(); it != capturerStateChangeCallbackList_.end(); ++it) {
-        (*it)->OnCapturerStateChange(audioCapturerChangeInfos);
+        std::shared_ptr<AudioCapturerStateChangeCallback> capturerStateChangeCallback = (*it).lock();
+        if (capturerStateChangeCallback != nullptr) {
+            capturerStateChangeCallback->OnCapturerStateChange(audioCapturerChangeInfos);
+        }
     }
 }
 } // namespace AudioStandard
