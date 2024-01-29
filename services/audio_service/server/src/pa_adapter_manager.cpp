@@ -367,7 +367,7 @@ int32_t PaAdapterManager::SetPaProplist(pa_proplist *propList, pa_channel_map &m
     if (processConfig.audioMode == AUDIO_MODE_PLAYBACK) {
         pa_proplist_sets(propList, "stream.flush", "false");
         pa_proplist_sets(propList, "spatialization.enabled", "0");
-        AudioPrivacyType privacyType = PRIVACY_TYPE_PUBLIC;
+        AudioPrivacyType privacyType = processConfig.privacyType;
         pa_proplist_sets(propList, "stream.privacyType", std::to_string(privacyType).c_str());
         pa_proplist_sets(propList, "stream.usage", std::to_string(processConfig.rendererInfo.streamUsage).c_str());
     } else if (processConfig.audioMode == AUDIO_MODE_RECORD) {

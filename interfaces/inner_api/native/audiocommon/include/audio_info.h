@@ -634,6 +634,8 @@ struct AudioProcessConfig {
 
     bool isWakeupCapturer;
 
+    AudioPrivacyType privacyType;
+
     // Waiting for review:  add isWakeupCapturer  isInnerCapturer
 };
 
