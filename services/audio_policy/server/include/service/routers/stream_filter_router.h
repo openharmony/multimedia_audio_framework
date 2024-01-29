@@ -36,6 +36,13 @@ public:
     std::unique_ptr<AudioDeviceDescriptor> GetRingRenderDevice(StreamUsage streamUsage, int32_t clientUID) override;
     std::unique_ptr<AudioDeviceDescriptor> GetRecordCaptureDevice(SourceType sourceType, int32_t clientUID) override;
     std::unique_ptr<AudioDeviceDescriptor> GetToneRenderDevice(StreamUsage streamUsage, int32_t clientUID) override;
+
+private:
+    bool IsIncomingDeviceInRemoteDevice(vector<unique_ptr<AudioDeviceDescriptor>> &descriptors,
+        sptr<AudioDeviceDescriptor> incomingDevice);
+    std::unique_ptr<AudioDeviceDescriptor> SelectRemoteCaptureDevice(
+        vector<unique_ptr<AudioDeviceDescriptor>> &descriptors, sptr<AudioDeviceDescriptor> incomingDevice,
+        bool &hasDescriptor);
 };
 } // namespace AudioStandard
 } // namespace OHOS

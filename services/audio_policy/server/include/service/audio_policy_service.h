@@ -402,9 +402,6 @@ public:
 
     DistributedRoutingInfo GetDistributedRoutingRoleInfo();
 
-    bool IsIncomingDeviceInRemoteDevice(vector<unique_ptr<AudioDeviceDescriptor>> &descriptors,
-        sptr<AudioDeviceDescriptor> incomingDevice);
-
     void OnScoStateChanged(const std::string &macAddress, bool isConnnected);
 
     void OnDeviceInfoUpdated(AudioDeviceDescriptor &desc, const DeviceInfoUpdateCommand updateCommand);

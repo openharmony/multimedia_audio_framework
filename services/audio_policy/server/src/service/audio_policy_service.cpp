@@ -1146,24 +1146,6 @@ DistributedRoutingInfo AudioPolicyService::GetDistributedRoutingRoleInfo()
     return distributedRoutingInfo_;
 }
 
-bool AudioPolicyService::IsIncomingDeviceInRemoteDevice(vector<unique_ptr<AudioDeviceDescriptor>> &descriptors,
-    sptr<AudioDeviceDescriptor> incomingDevice)
-{
-    for (const auto &desc : descriptors) {
-        if (desc != nullptr) {
-            if (desc->deviceRole_ == incomingDevice->deviceRole_ &&
-                desc->deviceType_ == incomingDevice->deviceType_ &&
-                desc->interruptGroupId_ == incomingDevice->interruptGroupId_ &&
-                desc->volumeGroupId_ == incomingDevice->volumeGroupId_ &&
-                desc->networkId_ == incomingDevice->networkId_ &&
-                desc->macAddress_ == incomingDevice->macAddress_) {
-                return true;
-            }
-        }
-    }
-    return false;
-}
-
 std::string AudioPolicyService::GetSinkPortName(InternalDeviceType deviceType)
 {
     std::string portName = PORT_NONE;

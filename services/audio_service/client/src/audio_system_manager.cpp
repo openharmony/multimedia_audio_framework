@@ -1229,6 +1229,7 @@ int32_t AudioSystemManager::ConfigDistributedRoutingRole(AudioDeviceDescriptor *
         AUDIO_ERR_LOG("ConfigDistributedRoutingRole: invalid parameter");
         return ERR_INVALID_PARAM;
     }
+    AUDIO_INFO_LOG(" Entered ConfigDistributedRoutingRole casttype %{public}d", type);
     if (descriptor->deviceRole_ != DeviceRole::OUTPUT_DEVICE) {
         AUDIO_ERR_LOG("ConfigDistributedRoutingRole: not an output device");
         return ERR_INVALID_PARAM;
