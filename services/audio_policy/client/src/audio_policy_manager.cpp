@@ -1392,5 +1392,15 @@ int32_t AudioPolicyManager::SetCallDeviceActive(InternalDeviceType deviceType, b
     }
     return gsp->SetCallDeviceActive(deviceType, active, address);
 }
+
+std::unique_ptr<AudioDeviceDescriptor> AudioPolicyManager::GetActiveBluetoothDevice()
+{
+    const sptr<IAudioPolicy> gsp = GetAudioPolicyManagerProxy();
+    if (gsp == nullptr) {
+        AUDIO_ERR_LOG("audio policy manager proxy is NULL.");
+        return make_unique<AudioDeviceDescriptor>();
+    }
+    return gsp->GetActiveBluetoothDevice();
+}
 } // namespace AudioStandard
 } // namespace OHOS

@@ -145,6 +145,8 @@ bool AudioDeviceDescriptor::Marshalling(Parcel &parcel) const
     parcel.WriteInt32(volumeGroupId_);
     parcel.WriteString(networkId_);
     parcel.WriteString(displayName_);
+
+    parcel.WriteInt32(deviceCategory_);
     return true;
 }
 
@@ -171,6 +173,8 @@ sptr<AudioDeviceDescriptor> AudioDeviceDescriptor::Unmarshalling(Parcel &in)
     audioDeviceDescriptor->volumeGroupId_ = in.ReadInt32();
     audioDeviceDescriptor->networkId_ = in.ReadString();
     audioDeviceDescriptor->displayName_ = in.ReadString();
+
+    audioDeviceDescriptor->deviceCategory_ = static_cast<DeviceCategory>(in.ReadInt32());
 
     return audioDeviceDescriptor;
 }

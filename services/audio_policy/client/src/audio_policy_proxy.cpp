@@ -1916,5 +1916,25 @@ int32_t AudioPolicyProxy::SetCallDeviceActive(InternalDeviceType deviceType, boo
     }
     return reply.ReadInt32();
 }
+
+std::unique_ptr<AudioDeviceDescriptor> AudioPolicyProxy::GetActiveBluetoothDevice()
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+    std::unique_ptr<AudioDeviceDescriptor> audioDeviceDescriptor;
+
+    CHECK_AND_RETURN_RET_LOG(data.WriteInterfaceToken(GetDescriptor()),
+        audioDeviceDescriptor, "WriteInterfaceToken failed");
+    
+    int32_t error = Remote()->SendRequest(
+        static_cast<uint32_t>(AudioPolicyInterfaceCode::GET_ACTIVE_BLUETOOTH_DESCRIPTOR), data, reply, option);
+    CHECK_AND_RETURN_RET_LOG(error == ERR_NONE, audioDeviceDescriptor,
+        "GetActiveBluetoothDevice failed, error: %d", error);
+
+    std::unique_ptr<AudioDeviceDescriptor> desc =
+        std::make_unique<AudioDeviceDescriptor>(AudioDeviceDescriptor::Unmarshalling(reply));
+    return desc;
+}
 } // namespace AudioStandard
 } // namespace OHOS

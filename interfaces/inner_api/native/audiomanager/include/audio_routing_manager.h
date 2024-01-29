@@ -69,6 +69,7 @@ public:
     int32_t UnsetPreferredInputDeviceChangeCallback();
     std::vector<sptr<MicrophoneDescriptor>> GetAvailableMicrophones();
     std::vector<std::unique_ptr<AudioDeviceDescriptor>> GetAvailableDevices(AudioDeviceUsage usage);
+    std::unique_ptr<AudioDeviceDescriptor> GetActiveBluetoothDevice();
 private:
     uint32_t GetCallingPid();
 };

@@ -108,5 +108,10 @@ std::vector<std::unique_ptr<AudioDeviceDescriptor>> AudioRoutingManager::GetAvai
 {
     return AudioPolicyManager::GetInstance().GetAvailableDevices(usage);
 }
+
+std::unique_ptr<AudioDeviceDescriptor> AudioRoutingManager::GetActiveBluetoothDevice()
+{
+    return AudioPolicyManager::GetInstance().GetActiveBluetoothDevice();
+}
 } // namespace AudioStandard
 } // namespace OHOS
