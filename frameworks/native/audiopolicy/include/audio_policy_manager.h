@@ -325,6 +325,8 @@ public:
 
     int32_t SetCallDeviceActive(InternalDeviceType deviceType, bool active, std::string address);
 
+    std::unique_ptr<AudioDeviceDescriptor> GetActiveBluetoothDevice();
+
 private:
     AudioPolicyManager()
     {

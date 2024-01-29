@@ -3373,5 +3373,24 @@ int32_t AudioPolicyServer::SetCallDeviceActive(InternalDeviceType deviceType, bo
     }
     return audioPolicyService_.SetCallDeviceActive(deviceType, active, address);
 }
+
+std::unique_ptr<AudioDeviceDescriptor> AudioPolicyServer::GetActiveBluetoothDevice()
+{
+    bool hasSystemPermission = PermissionUtil::VerifySystemPermission();
+    if (!hasSystemPermission) {
+        AUDIO_ERR_LOG("No system permission");
+        return make_unique<AudioDeviceDescriptor>();
+    }
+   
+    auto btdevice = audioPolicyService_.GetActiveBluetoothDevice();
+
+    bool hasBTPermission = VerifyPermission(USE_BLUETOOTH_PERMISSION);
+    if (!hasBTPermission) {
+        btdevice->deviceName_ = "";
+        btdevice->macAddress_ = "";
+    }
+
+    return btdevice;
+}
 } // namespace AudioStandard
 } // namespace OHOS

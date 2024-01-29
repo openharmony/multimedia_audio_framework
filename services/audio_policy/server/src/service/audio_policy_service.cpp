@@ -5447,5 +5447,28 @@ int32_t AudioPolicyService::SetCallDeviceActive(InternalDeviceType deviceType, b
     FetchDevice(false);
     return SUCCESS;
 }
+
+std::unique_ptr<AudioDeviceDescriptor> AudioPolicyService::GetActiveBluetoothDevice()
+{
+    std::vector<unique_ptr<AudioDeviceDescriptor>> audioPrivacyDeviceDescriptors =
+        audioDeviceManager_.GetCommRenderPrivacyDevices();
+    std::unique_ptr<AudioDeviceDescriptor> result = nullptr;
+
+    for (size_t i = 0; i < audioPrivacyDeviceDescriptors.size(); i++) {
+        if (audioPrivacyDeviceDescriptors[i]->deviceType_ == DEVICE_TYPE_BLUETOOTH_SCO) {
+            if (result == nullptr) {
+                result = std::move(audioPrivacyDeviceDescriptors[i]);
+            }
+            if (audioPrivacyDeviceDescriptors[i]->connectTimeStamp_ > result->connectTimeStamp_) {
+                result = std::move(audioPrivacyDeviceDescriptors[i]);
+            }
+        }
+    }
+
+    if (result == nullptr) {
+        return make_unique<AudioDeviceDescriptor>();
+    }
+    return result;
+}
 } // namespace AudioStandard
 } // namespace OHOS

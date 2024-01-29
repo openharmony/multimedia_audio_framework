@@ -1050,5 +1050,11 @@ void AudioPolicyManagerStub::SetCallDeviceActiveInternal(MessageParcel &data, Me
     int32_t result = SetCallDeviceActive(deviceType, active, address);
     reply.WriteInt32(result);
 }
+
+void AudioPolicyManagerStub::GetActiveBluetoothDeviceInternal(MessageParcel &data, MessageParcel &reply)
+{
+    std::unique_ptr<AudioDeviceDescriptor> desc = GetActiveBluetoothDevice();
+    desc->Marshalling(reply);
+}
 } // namespace audio_policy
 } // namespace OHOS
