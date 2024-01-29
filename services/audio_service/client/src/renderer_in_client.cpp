@@ -328,7 +328,7 @@ private:
     size_t bufferSize_ = 0;
     std::unique_ptr<AudioSpeed> audioSpeed_ = nullptr;
 
-    bool offloadEnable_;
+    bool offloadEnable_ = false;
     uint64_t offloadStartReadPos_ = 0;
     int64_t offloadStartHandleTime_ = 0;
 
@@ -378,11 +378,12 @@ RendererInClientInner::~RendererInClientInner()
 int32_t RendererInClientInner::OnOperationHandled(Operation operation, int64_t result)
 {
     if (operation == SET_OFFLOAD_ENABLE) {
-        AUDIO_DEBUG_LOG("SET_OFFLOAD_ENABLE result:%{public}" PRId64".", result);
+        AUDIO_INFO_LOG("SET_OFFLOAD_ENABLE result:%{public}" PRId64".", result);
         if (!offloadEnable_ && static_cast<bool>(result)) {
             offloadStartReadPos_ = 0;
         }
         offloadEnable_ = static_cast<bool>(result);
+        return SUCCESS;
     }
     // read/write operation may print many log, use debug.
     if (operation == UPDATE_STREAM) {
@@ -1468,6 +1469,7 @@ bool RendererInClientInner::ReleaseAudioStream(bool releaseRunner)
     if (renderMode_ == RENDER_MODE_CALLBACK) {
         cbThreadReleased_ = true; // stop loop
         if (cbBufferQueue_.IsEmpty()) {
+            std::lock_guard<std::mutex> lockWriteCb(writeCbMutex_);
             cbBufferQueue_.PushNoWait({nullptr, 0, 0});
         }
         cbThreadCv_.notify_all();

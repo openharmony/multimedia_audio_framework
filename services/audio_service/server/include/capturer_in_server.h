@@ -56,8 +56,6 @@ public:
     BufferDesc DequeueBuffer(size_t length);
     void ReadData(size_t length);
     int32_t DrainAudioBuffer();
-    int32_t ReadOneFrame();
-    std::shared_ptr<OHAudioBuffer> GetOHSharedBuffer();
 
 private:
     std::mutex statusLock_;

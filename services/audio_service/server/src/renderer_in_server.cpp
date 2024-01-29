@@ -54,9 +54,10 @@ int32_t RendererInServer::ConfigServerBuffer()
         return ERR_INVALID_PARAM;
     }
 
-    stream_->GetByteSizePerFrame(byteSizePerFrame_);
-    AUDIO_INFO_LOG("ConfigProcessBuffer: totalSizeInFrame_: %{public}zu, spanSizeInFrame_: %{public}zu,"
-        "byteSizePerFrame_:%{public}zu", totalSizeInFrame_, spanSizeInFrame_, byteSizePerFrame_);
+    spanSizeInByte_ = spanSizeInFrame_ * byteSizePerFrame_;
+    CHECK_AND_RETURN_RET_LOG(spanSizeInByte_ != 0, ERR_OPERATION_FAILED, "Config oh audio buffer failed");
+    AUDIO_INFO_LOG("totalSizeInFrame_: %{public}zu, spanSizeInFrame_: %{public}zu, byteSizePerFrame_:%{public}zu "
+        "spanSizeInByte_: %{public}zu,", totalSizeInFrame_, spanSizeInFrame_, byteSizePerFrame_, spanSizeInByte_);
 
     // create OHAudioBuffer in server
     audioServerBuffer_ = OHAudioBuffer::CreateFromLocal(totalSizeInFrame_, spanSizeInFrame_, byteSizePerFrame_);
@@ -218,7 +219,7 @@ int32_t RendererInServer::WriteData()
         stateListener->OnOperationHandled(UPDATE_STREAM, currentReadFrame);
         return ERR_OPERATION_FAILED;
     }
-    BufferDesc bufferDesc = {nullptr, totalSizeInFrame_, totalSizeInFrame_};
+    BufferDesc bufferDesc = {nullptr, 0, 0}; // will be changed in GetReadbuffer
 
     if (audioServerBuffer_->GetReadbuffer(currentReadFrame, bufferDesc) == SUCCESS) {
         stream_->EnqueueBuffer(bufferDesc);
@@ -239,7 +240,7 @@ void RendererInServer::WriteEmptyData()
 {
     Trace trace("RendererInServer::WriteEmptyData");
     AUDIO_WARNING_LOG("Underrun, write empty data");
-    BufferDesc bufferDesc = stream_->DequeueBuffer(totalSizeInFrame_);
+    BufferDesc bufferDesc = stream_->DequeueBuffer(spanSizeInByte_);
     memset_s(bufferDesc.buffer, bufferDesc.bufLength, 0, bufferDesc.bufLength);
     stream_->EnqueueBuffer(bufferDesc);
     return;
@@ -250,7 +251,8 @@ int32_t RendererInServer::OnWriteData(size_t length)
     Trace trace("RendererInServer::OnWriteData length " + std::to_string(length));
     requestFailed_ = false;
     if (writeLock_.try_lock()) {
-        for (size_t i = 0; i < length / totalSizeInFrame_; i++) {
+        // length unit is bytes, using spanSizeInByte_
+        for (size_t i = 0; i < length / spanSizeInByte_; i++) {
             if (WriteData() != SUCCESS) {
                 requestFailed_ = true;
             }
@@ -504,24 +506,6 @@ int32_t RendererInServer::GetOffloadApproximatelyCacheTime(uint64_t &timeStamp, 
 int32_t RendererInServer::OffloadSetVolume(float volume)
 {
     return stream_->OffloadSetVolume(volume);
-}
-
-int32_t RendererInServer::WriteOneFrame()
-{
-    // if buffer ready, get buffer, else, return
-    size_t minBufferSize = 0;
-    if (stream_->GetMinimumBufferSize(minBufferSize) < 0) {
-        AUDIO_ERR_LOG("Get min buffer size err");
-        return ERR_OPERATION_FAILED;
-    }
-    BufferDesc bufferDesc = stream_->DequeueBuffer(minBufferSize);
-    stream_->EnqueueBuffer(bufferDesc);
-    return SUCCESS;
-}
-
-std::shared_ptr<OHAudioBuffer> RendererInServer::GetOHSharedBuffer()
-{
-    return audioServerBuffer_;
 }
 } // namespace AudioStandard
 } // namespace OHOS
