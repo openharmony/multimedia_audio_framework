@@ -516,11 +516,6 @@ int32_t MultiChannelRendererSinkInner::RenderFrame(char &data, uint64_t len, uin
     }
     Trace trace("AudioRendererSinkInner::RenderFrame");
 
-    ret = audioRender_->SetVolume(audioRender_, 0.99f);
-    if (ret) {
-        return ERR_NOT_STARTED;
-    }
-
     ret = audioRender_->RenderFrame(audioRender_, reinterpret_cast<int8_t*>(&data), static_cast<uint32_t>(len),
         &writeLen);
     if (ret != 0) {
@@ -571,7 +566,7 @@ int32_t MultiChannelRendererSinkInner::Start(void)
             AUDIO_ERR_LOG("Mch GetFrameCount failed!");
             return ERR_NOT_STARTED;
         }
-        ret = audioRender_->SetVolume(audioRender_, 0.99f);
+        ret = audioRender_->SetVolume(audioRender_, 1);
         if (ret) {
             AUDIO_ERR_LOG("Mch setvolume failed!");
             return ERR_NOT_STARTED;
