@@ -191,7 +191,6 @@ int32_t PaRendererTest::InitRenderer(RendererMode rendererMode, int32_t fileInde
     rendererOptions.streamInfo.samplingRate = static_cast<AudioSamplingRate>(wavHeader_.SamplesPerSec);
     rendererOptions.streamInfo.format = GetSampleFormat(wavHeader_.bitsPerSample);
     rendererOptions.streamInfo.channels = static_cast<AudioChannel>(wavHeader_.NumOfChan);
-    rendererOptions.streamInfo.channels = static_cast<AudioChannel>(wavHeader_.NumOfChan);
     rendererOptions.rendererInfo.contentType = contentType;
     rendererOptions.rendererInfo.streamUsage = streamUsage;
     rendererOptions.rendererInfo.rendererFlags = 0;
@@ -399,7 +398,7 @@ private:
     int32_t fast_ = 1; // min sleep time
     int32_t slow_ = 2; // max sleep time
     FILE *pfd_ = nullptr;
-    CapturerMode capturerMode_;
+    CapturerMode capturerMode_ = DIRECTLY_READ;
 };
 
 void PaCapturerTest::OnReadData(size_t length)
@@ -513,6 +512,7 @@ int32_t PaCapturerTest::ReleaseRecorder()
     }
     audioCapturer_ = nullptr;
     fclose(pfd_);
+    pfd_ = nullptr;
     return 0;
 }
 
@@ -536,7 +536,7 @@ void PaCapturerTest::ReadDataWorker()
         std::mt19937 gen(rd());
         std::uniform_int_distribution<> dis(fast_, slow_);
 
-        uint8_t *buffer = (uint8_t *) malloc(ONE_READ_FRAME);
+        uint8_t *buffer = reinterpret_cast<uint8_t *>(malloc(ONE_READ_FRAME));
         memset_s(buffer, ONE_READ_FRAME, 0, ONE_READ_FRAME);
         int32_t currentReadIndex = 0;
         while (currentReadIndex < ONE_READ_FRAME) {

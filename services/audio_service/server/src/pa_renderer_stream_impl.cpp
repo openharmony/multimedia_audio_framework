@@ -80,10 +80,11 @@ int32_t PaRendererStreamImpl::InitParams()
         return ERR_ILLEGAL_STATE;
     }
 
-    pa_stream_set_moved_callback(paStream_, PAStreamMovedCb, (void *)this); // used to notify sink/source moved
-    pa_stream_set_write_callback(paStream_, PAStreamWriteCb, (void *)this);
-    pa_stream_set_underflow_callback(paStream_, PAStreamUnderFlowCb, (void *)this);
-    pa_stream_set_started_callback(paStream_, PAStreamSetStartedCb, (void *)this);
+    pa_stream_set_moved_callback(paStream_, PAStreamMovedCb,
+        reinterpret_cast<void *>(this)); // used to notify sink/source moved
+    pa_stream_set_write_callback(paStream_, PAStreamWriteCb, reinterpret_cast<void *>(this));
+    pa_stream_set_underflow_callback(paStream_, PAStreamUnderFlowCb, reinterpret_cast<void *>(this));
+    pa_stream_set_started_callback(paStream_, PAStreamSetStartedCb, reinterpret_cast<void *>(this));
 
     // Get byte size per frame
     const pa_sample_spec *sampleSpec = pa_stream_get_sample_spec(paStream_);
@@ -138,7 +139,7 @@ int32_t PaRendererStreamImpl::Start()
     }
 
     streamCmdStatus_ = 0;
-    operation = pa_stream_cork(paStream_, 0, PAStreamStartSuccessCb, (void *)this);
+    operation = pa_stream_cork(paStream_, 0, PAStreamStartSuccessCb, reinterpret_cast<void *>(this));
     pa_operation_unref(operation);
     return SUCCESS;
 }
@@ -157,7 +158,7 @@ int32_t PaRendererStreamImpl::Pause()
         AUDIO_ERR_LOG("Stream Stop Failed");
         return ERR_OPERATION_FAILED;
     }
-    operation = pa_stream_cork(paStream_, 1, PAStreamPauseSuccessCb, (void *)this);
+    operation = pa_stream_cork(paStream_, 1, PAStreamPauseSuccessCb, reinterpret_cast<void *>(this));
     pa_operation_unref(operation);
     return SUCCESS;
 }
@@ -178,7 +179,7 @@ int32_t PaRendererStreamImpl::Flush()
     }
 
     streamFlushStatus_ = 0;
-    operation = pa_stream_flush(paStream_, PAStreamFlushSuccessCb, (void *)this);
+    operation = pa_stream_flush(paStream_, PAStreamFlushSuccessCb, reinterpret_cast<void *>(this));
     if (operation == nullptr) {
         AUDIO_ERR_LOG("Stream Flush Operation Failed");
         return ERR_OPERATION_FAILED;
@@ -203,7 +204,7 @@ int32_t PaRendererStreamImpl::Drain()
         return ERR_OPERATION_FAILED;
     }
     streamDrainStatus_ = 0;
-    operation = pa_stream_drain(paStream_, PAStreamDrainSuccessCb, (void *)this);
+    operation = pa_stream_drain(paStream_, PAStreamDrainSuccessCb, reinterpret_cast<void *>(this));
     pa_operation_unref(operation);
     return SUCCESS;
 }
@@ -219,7 +220,7 @@ int32_t PaRendererStreamImpl::Stop()
     }
 
     pa_operation *operation = pa_stream_cork(paStream_, 1, PaRendererStreamImpl::PAStreamAsyncStopSuccessCb,
-        (void *)this);
+        reinterpret_cast<void *>(this));
     CHECK_AND_RETURN_RET_LOG(operation != nullptr, ERR_OPERATION_FAILED, "pa_stream_cork operation is null");
     pa_operation_unref(operation);
     return SUCCESS;

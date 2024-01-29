@@ -111,10 +111,11 @@ int32_t AudioSpeed::ChangeSpeedFor16Bit(uint8_t *buffer, int32_t bufferSize,
     std::unique_ptr<uint8_t []> &outBuffer, int32_t &outBufferSize)
 {
     int32_t numSamples = bufferSize / (formatSize_ * channels_);
-    int32_t res = sonicWriteShortToStream(sonicStream_, (short*)(buffer), numSamples);
+    int32_t res = sonicWriteShortToStream(sonicStream_, reinterpret_cast<short*>(buffer), numSamples);
     CHECK_AND_RETURN_RET_LOG(res == 1, 0, "sonic write short to stream failed.");
 
-    int32_t outSamples = sonicReadShortFromStream(sonicStream_, (short*)(outBuffer.get()), MAX_BUFFER_SIZE);
+    int32_t outSamples = sonicReadShortFromStream(sonicStream_, reinterpret_cast<short*>(outBuffer.get()),
+        MAX_BUFFER_SIZE);
     CHECK_AND_RETURN_RET_LOG(outSamples != 0, bufferSize, "sonic stream is not full continue to write.");
 
     outBufferSize = outSamples * (formatSize_ * channels_);

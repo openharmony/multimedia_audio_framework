@@ -21,7 +21,7 @@ using namespace std;
 namespace OHOS {
 namespace AudioStandard {
 
-vector<unique_ptr<AudioDeviceDescriptor>> GetBTCarDevices(vector<unique_ptr<AudioDeviceDescriptor>> &descs)
+vector<unique_ptr<AudioDeviceDescriptor>> GetBTCarDevices(const vector<unique_ptr<AudioDeviceDescriptor>> &descs)
 {
     vector<unique_ptr<AudioDeviceDescriptor>> carDescs;
     for (const auto &desc : descs) {
