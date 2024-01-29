@@ -1232,7 +1232,7 @@ int32_t AudioEffectChainManager::SetHdiParam(std::string sceneType, std::string 
     memset_s(static_cast<void *>(effectHdiInput), sizeof(effectHdiInput), 0, sizeof(effectHdiInput));
     effectHdiInput[0] = HDI_BYPASS;
     effectHdiInput[1] = enabled == true ? 0 : 1;
-    AUDIO_INFO_LOG("set hdi bypass.");
+    AUDIO_INFO_LOG("set hdi bypass: %{public}d", effectHdiInput[1]);
     int32_t ret = audioEffectHdi_->UpdateHdiState(effectHdiInput);
     if (ret != 0) {
         AUDIO_WARNING_LOG("set hdi bypass failed");
@@ -1242,7 +1242,8 @@ int32_t AudioEffectChainManager::SetHdiParam(std::string sceneType, std::string 
     effectHdiInput[0] = HDI_ROOM_MODE;
     effectHdiInput[1] = GetKeyFromValue(AUDIO_SUPPORTED_SCENE_TYPES, sceneType);
     effectHdiInput[HDI_ROOM_MODE_INDEX_TWO] = GetKeyFromValue(AUDIO_SUPPORTED_SCENE_MODES, effectMode);
-    AUDIO_INFO_LOG("set hdi room mode.");
+    AUDIO_INFO_LOG("set hdi room mode sceneType: %{public}d, effectMode: %{public}d",
+        effectHdiInput[1], effectHdiInput[HDI_ROOM_MODE_INDEX_TWO]);
     ret = audioEffectHdi_->UpdateHdiState(effectHdiInput);
     if (ret != 0) {
         AUDIO_WARNING_LOG("set hdi room mode failed");
@@ -1319,7 +1320,7 @@ void AudioEffectChainManager::UpdateSensorState()
 {
     effectHdiInput[0] = HDI_HEAD_MODE;
     effectHdiInput[1] = headTrackingEnabled_ == true ? 1 : 0;
-    AUDIO_INFO_LOG("set hdi head mode.");
+    AUDIO_INFO_LOG("set hdi head mode: %{public}d", effectHdiInput[1]);
     int32_t ret = audioEffectHdi_->UpdateHdiState(effectHdiInput);
     if (ret != 0) {
         AUDIO_ERR_LOG("set hdi head mode failed");
