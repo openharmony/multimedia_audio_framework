@@ -467,7 +467,7 @@ bool TonePlayerPrivate::ContinueToneplay(uint32_t reqSample, int8_t *audioBuffer
     if (tonePlayerState_ != TONE_PLAYER_PLAYING) {
         return false;
     }
-    if(playWait) {
+    if (playWait) {
         waitAudioCbkCond_.notify_all();
         AUDIO_INFO_LOG("AudioToneSequenceGen is TONE_PLAYER_PLAYING waitAudioCbkCond_ notify_all");
     }
