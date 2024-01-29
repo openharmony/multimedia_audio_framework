@@ -63,7 +63,7 @@ static const int32_t OPERATION_TIMEOUT_IN_MS = 500; // 500ms
 static const int32_t OFFLOAD_OPERATION_TIMEOUT_IN_MS = 8000; // 8000ms for offload
 static const int32_t WRITE_BUFFER_TIMEOUT_IN_MS = 20; // ms
 static const int32_t SHORT_TIMEOUT_IN_MS = 20; // ms
-static constexpr int CB_QUEUE_CAPACITY = 1;
+static constexpr int CB_QUEUE_CAPACITY = 3;
 constexpr int32_t MAX_BUFFER_SIZE = 100000;
 }
 class RendererInClientInner : public RendererInClient, public IStreamListener, public IHandler,
