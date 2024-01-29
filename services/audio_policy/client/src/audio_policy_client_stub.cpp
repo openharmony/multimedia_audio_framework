@@ -67,7 +67,7 @@ void AudioPolicyClientStub::HandleAudioFocusInfoChange(MessageParcel &data, Mess
     std::list<std::pair<AudioInterrupt, AudioFocuState>> infoList;
     std::pair<AudioInterrupt, AudioFocuState> focusInfo = {};
     int32_t size = data.ReadInt32();
-    for (size_t i = 0; i < size; i++) {
+    for (int32_t i = 0; i < size; i++) {
         focusInfo.first.Unmarshalling(data);
         focusInfo.second = static_cast<AudioFocuState>(data.ReadInt32());
         infoList.emplace_back(focusInfo);
@@ -95,8 +95,8 @@ void AudioPolicyClientStub::HandleDeviceChange(MessageParcel &data, MessageParce
     DeviceChangeAction deviceChange;
     deviceChange.type = static_cast<DeviceChangeType>(data.ReadUint32());
     deviceChange.flag = static_cast<DeviceFlag>(data.ReadUint32());
-    size_t size = data.ReadInt32();
-    for (uint32_t i = 0; i < size; i++) {
+    int32_t size = data.ReadInt32();
+    for (int32_t i = 0; i < size; i++) {
         deviceChange.deviceDescriptors.emplace_back(AudioDeviceDescriptor::Unmarshalling(data));
     }
     OnDeviceChange(deviceChange);
