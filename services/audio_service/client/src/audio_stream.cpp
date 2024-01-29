@@ -643,6 +643,10 @@ bool AudioStream::FlushAudioStream()
     CHECK_AND_RETURN_RET_LOG((state_ == RUNNING) || (state_ == PAUSED) || (state_ == STOPPED),
         false, "State is not RUNNING. Illegal state:%{public}u", state_);
 
+    if (converter_ != nullptr && streamParams_.encoding == ENCODING_AUDIOVIVID) {
+        CHECK_AND_RETURN_RET_LOG(converter_->Flush(), false, "Flush stream fail, failed in converter");
+    }
+
     int32_t ret = FlushStream();
     CHECK_AND_RETURN_RET_LOG(ret == SUCCESS, false, "Flush stream fail,ret:%{public}d", ret);
 

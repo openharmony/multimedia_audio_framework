@@ -35,6 +35,8 @@ public:
     bool AddAlgoHandle(Library lib);
     void SetIOBufferConfig(bool isInput, uint8_t format, uint32_t channels, uint64_t channelLayout);
     int32_t ApplyAlgo(AudioBuffer &inputBuffer, AudioBuffer &outputBuffer);
+    bool FlushAlgo();
+
 private:
     bool LoadLibrary(const std::string &relativePath) noexcept;
     std::unique_ptr<AudioEffectLibEntry> libEntry_;
@@ -53,6 +55,7 @@ public:
     int32_t Process(const BufferDesc pcmBuf, const BufferDesc metaBuf);
     void ConverterChannels(uint8_t &channel, uint64_t &channelLayout);
     void GetOutputBufferStream(uint8_t *&buffer, uint32_t &bufferLen);
+    bool Flush();
 
 private:
     int32_t GetPcmLength(int32_t channels, int8_t bps);
