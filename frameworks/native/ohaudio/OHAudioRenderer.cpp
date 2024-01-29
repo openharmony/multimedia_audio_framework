@@ -206,11 +206,8 @@ OH_AudioStream_Result OH_AudioRenderer_SetSpeed(OH_AudioRenderer* renderer, floa
 {
     OHOS::AudioStandard::OHAudioRenderer *audioRenderer = convertRenderer(renderer);
     CHECK_AND_RETURN_RET_LOG(audioRenderer != nullptr, AUDIOSTREAM_ERROR_INVALID_PARAM, "convert renderer failed");
-    if (audioRenderer->SetSpeed(speed)) {
-        return AUDIOSTREAM_SUCCESS;
-    } else {
-        return AUDIOSTREAM_ERROR_ILLEGAL_STATE;
-    }
+    audioRenderer->SetSpeed(speed);
+    return AUDIOSTREAM_SUCCESS;
 }
 namespace OHOS {
 namespace AudioStandard {
