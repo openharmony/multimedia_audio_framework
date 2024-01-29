@@ -173,6 +173,11 @@ int32_t AudioFormatConverter3DA::Process(const BufferDesc pcmBuffer, const Buffe
     return ret;
 }
 
+bool AudioFormatConverter3DA::Flush()
+{
+    return loadSuccess_ ? externalLoader_.FlushAlgo() : true;
+}
+
 static bool ResolveLibrary(const std::string &path, std::string &resovledPath)
 {
     for (auto *libDir: LD_EFFECT_LIBRARY_PATH) {
@@ -258,10 +263,10 @@ bool LibLoader::Init()
     AudioEffectTransInfo cmdInfo = {sizeof(AudioEffectConfig), &ioBufferConfig_};
     AudioEffectTransInfo replyInfo = {sizeof(int32_t), &replyData};
     ret = (*handle_)->command(handle_, EFFECT_CMD_INIT, &cmdInfo, &replyInfo);
-    CHECK_AND_RETURN_RET_LOG(ret ==0, false,
+    CHECK_AND_RETURN_RET_LOG(ret == 0, false,
         "[%{public}s] lib EFFECT_CMD_INIT fail", libEntry_->libraryName.c_str());
     ret = (*handle_)->command(handle_, EFFECT_CMD_ENABLE, &cmdInfo, &replyInfo);
-    CHECK_AND_RETURN_RET_LOG(ret ==0, false,
+    CHECK_AND_RETURN_RET_LOG(ret == 0, false,
         "[%{public}s] lib EFFECT_CMD_ENABLE fail", libEntry_->libraryName.c_str());
     ret = (*handle_)->command(handle_, EFFECT_CMD_SET_CONFIG, &cmdInfo, &replyInfo);
     CHECK_AND_RETURN_RET_LOG(ret == 0, false,
@@ -274,6 +279,18 @@ int32_t LibLoader::ApplyAlgo(AudioBuffer &inputBuffer, AudioBuffer &outputBuffer
     int32_t ret = (*handle_)->process(handle_, &inputBuffer, &outputBuffer);
     CHECK_AND_RETURN_RET_LOG(ret == 0, ret, "converter algo lib process fail");
     return ret;
+}
+
+bool LibLoader::FlushAlgo()
+{
+    int32_t ret = 0;
+    int32_t replyData = 0;
+    AudioEffectTransInfo cmdInfo = {sizeof(AudioEffectConfig), &ioBufferConfig_};
+    AudioEffectTransInfo replyInfo = {sizeof(int32_t), &replyData};
+    ret = (*handle_)->command(handle_, EFFECT_CMD_ENABLE, &cmdInfo, &replyInfo);
+    CHECK_AND_RETURN_RET_LOG(ret == 0, false,
+        "[%{public}s] lib EFFECT_CMD_ENABLE fail", libEntry_->libraryName.c_str());
+    return true;
 }
 } // namespace AudioStandard
 } // namespace OHOS
