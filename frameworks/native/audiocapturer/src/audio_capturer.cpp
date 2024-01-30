@@ -353,7 +353,7 @@ void AudioCapturerPrivate::UnsetCapturerPeriodPositionCallback()
 
 bool AudioCapturerPrivate::Start() const
 {
-    AUDIO_INFO_LOG("AudioCapturer::Start");
+    AUDIO_INFO_LOG("AudioCapturer::Start %{public}u", sessionID_);
     bool recordingStateChange = audioStream_->CheckRecordingStateChange(appInfo_.appTokenId, appInfo_.appFullTokenId,
         appInfo_.appUid, AUDIO_PERMISSION_START);
     CHECK_AND_RETURN_RET_LOG(recordingStateChange, false, "recording start check failed");
@@ -389,7 +389,7 @@ bool AudioCapturerPrivate::GetAudioTime(Timestamp &timestamp, Timestamp::Timesta
 
 bool AudioCapturerPrivate::Pause() const
 {
-    AUDIO_INFO_LOG("AudioCapturer::Pause");
+    AUDIO_INFO_LOG("AudioCapturer::Pause %{public}u", sessionID_);
     if (!audioStream_->CheckRecordingStateChange(appInfo_.appTokenId, appInfo_.appFullTokenId,
         appInfo_.appUid, AUDIO_PERMISSION_STOP)) {
         AUDIO_WARNING_LOG("Pause monitor permission failed");
@@ -408,7 +408,7 @@ bool AudioCapturerPrivate::Pause() const
 
 bool AudioCapturerPrivate::Stop() const
 {
-    AUDIO_INFO_LOG("AudioCapturer::Stop");
+    AUDIO_INFO_LOG("AudioCapturer::Stop %{public}u", sessionID_);
     if (!audioStream_->CheckRecordingStateChange(appInfo_.appTokenId, appInfo_.appFullTokenId,
         appInfo_.appUid, AUDIO_PERMISSION_STOP)) {
         AUDIO_WARNING_LOG("Stop monitor permission failed");
@@ -432,7 +432,7 @@ bool AudioCapturerPrivate::Flush() const
 
 bool AudioCapturerPrivate::Release()
 {
-    AUDIO_INFO_LOG("AudioCapturer::Release");
+    AUDIO_INFO_LOG("AudioCapturer::Release %{public}u", sessionID_);
     abortRestore_ = true;
     std::lock_guard<std::mutex> lock(lock_);
     CHECK_AND_RETURN_RET_LOG(isValid_, false, "Release when capturer invalid");
