@@ -238,6 +238,7 @@ config("audio_service_config") {
     "common/include",
     "client/include",
     "server/include",
+    "server/include/config",
     "$pulseaudio_dir/src",
     "$pulseaudio_dir/confgure/src",
     "$pulseaudio_dir/include",
@@ -350,6 +351,7 @@ ohos_shared_library("audio_service") {
     "server/src/audio_manager_listener_proxy.cpp",
     "server/src/audio_manager_stub.cpp",
     "server/src/audio_server.cpp",
+    "server/src/config/audio_param_parser.cpp",
   ]
 
   configs = [ ":audio_service_config" ]
@@ -365,6 +367,7 @@ ohos_shared_library("audio_service") {
     ":audio_process_service",
     "$pulseaudio_build_path/src/daemon:pulseaudio",
     "$pulseaudio_build_path/src/pulse:pulse",
+    "${third_party_path}/libxml2:xml2",
     "../../frameworks/native/audioeffect:audio_effect",
     "../../frameworks/native/audioschedule:audio_schedule",
     "../../frameworks/native/audioutils:audio_utils",

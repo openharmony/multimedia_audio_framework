@@ -24,6 +24,8 @@ namespace AudioStandard {
     enum class AudioServerInterfaceCode {
         GET_AUDIO_PARAMETER,
         SET_AUDIO_PARAMETER,
+        GET_EXTRA_AUDIO_PARAMETERS,
+        SET_EXTRA_AUDIO_PARAMETERS,
         SET_MICROPHONE_MUTE,
         SET_AUDIO_SCENE,
         UPDATE_ROUTE_REQ,

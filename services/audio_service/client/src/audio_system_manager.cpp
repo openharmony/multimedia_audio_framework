@@ -281,6 +281,21 @@ void AudioSystemManager::SetAudioParameter(const std::string &key, const std::st
     gasp->SetAudioParameter(key, value);
 }
 
+const std::vector<std::pair<std::string, std::string>> AudioSystemManager::GetExtraParameters(
+    const std::string mainKey, const std::vector<std::string> subKeys)
+{
+    const sptr<IStandardAudioService> gasp = GetAudioSystemManagerProxy();
+    CHECK_AND_RETURN_RET_LOG(gasp != nullptr, {}, "Audio service unavailable.");
+    return gasp->GetExtraParameters(mainKey, subKeys);
+}
+
+void AudioSystemManager::SetExtraParameters(const std::string &key,
+    const std::vector<std::pair<std::string, std::string>> &kvpairs)
+{
+    const sptr<IStandardAudioService> gasp = GetAudioSystemManagerProxy();
+    CHECK_AND_RETURN_LOG(gasp != nullptr, "Audio service unavailable.");
+    return gasp->SetExtraParameters(key, kvpairs);
+}
 
 uint64_t AudioSystemManager::GetTransactionId(DeviceType deviceType, DeviceRole deviceRole)
 {

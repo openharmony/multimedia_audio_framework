@@ -111,6 +111,8 @@ napi_status NapiAudioManager::InitNapiAudioManager(napi_env env, napi_value &con
         DECLARE_NAPI_FUNCTION("isDeviceActive", IsDeviceActive),
         DECLARE_NAPI_FUNCTION("setAudioParameter", SetAudioParameter),
         DECLARE_NAPI_FUNCTION("getAudioParameter", GetAudioParameter),
+        DECLARE_NAPI_FUNCTION("setExtraParameters", SetExtraParameters),
+        DECLARE_NAPI_FUNCTION("getExtraParameters", GetExtraParameters),
         DECLARE_NAPI_FUNCTION("setMicrophoneMute", SetMicrophoneMute),
         DECLARE_NAPI_FUNCTION("isMicrophoneMute", IsMicrophoneMute),
         DECLARE_NAPI_FUNCTION("requestIndependentInterrupt", RequestIndependentInterrupt),
@@ -882,6 +884,80 @@ napi_value NapiAudioManager::GetAudioParameter(napi_env env, napi_callback_info 
         NapiParamUtils::SetValueString(env, context->valueStr, output);
     };
     return NapiAsyncWork::Enqueue(env, context, "GetAudioParameter", executor, complete);
+}
+
+napi_value NapiAudioManager::SetExtraParameters(napi_env env, napi_callback_info info)
+{
+    auto context = std::make_shared<AudioManagerAsyncContext>();
+    if (context == nullptr) {
+        AUDIO_ERR_LOG("set extra parameters failed : no memory");
+        NapiAudioError::ThrowError(env, "SetExtraParameters failed : no memory", NAPI_ERR_NO_MEMORY);
+        return NapiParamUtils::GetUndefinedValue(env);
+    }
+
+    auto inputParser = [env, context](size_t argc, napi_value *argv) {
+        NAPI_CHECK_ARGS_RETURN_VOID(context, argc >= ARGS_TWO, "invalid arguments", NAPI_ERR_INVALID_PARAM);
+        context->key = NapiParamUtils::GetStringArgument(env, argv[PARAM0]);
+        NAPI_CHECK_ARGS_RETURN_VOID(context, !context->key.empty(), "get main key failed", NAPI_ERR_INVALID_PARAM);
+
+        context->status = NapiParamUtils::GetExtraParametersSubKV(env, context->subKvpairs, argv[PARAM1]);
+        NAPI_CHECK_ARGS_RETURN_VOID(context, context->status == napi_ok, "get sub key and value failed",
+            NAPI_ERR_INVALID_PARAM);
+        NAPI_CHECK_ARGS_RETURN_VOID(context, !context->subKvpairs.empty(), "sub key and value is empty",
+            NAPI_ERR_INVALID_PARAM);
+    };
+    context->GetCbInfo(env, info, inputParser);
+
+    auto executor = [context]() {
+        CHECK_AND_RETURN_LOG(CheckContextStatus(context), "context object state is error.");
+        auto obj = reinterpret_cast<NapiAudioManager *>(context->native);
+        ObjectRefMap objectGuard(obj);
+        auto *napiAudioManager = objectGuard.GetPtr();
+        CHECK_AND_RETURN_LOG(CheckAudioManagerStatus(napiAudioManager, context), "audio manager state is error.");
+
+        napiAudioManager->audioMngr_->SetExtraParameters(context->key, context->subKvpairs);
+    };
+
+    auto complete = [env](napi_value &output) {
+        output = NapiParamUtils::GetUndefinedValue(env);
+    };
+    return NapiAsyncWork::Enqueue(env, context, "SetExtraParameters", executor, complete);
+}
+
+napi_value NapiAudioManager::GetExtraParameters(napi_env env, napi_callback_info info)
+{
+    auto context = std::make_shared<AudioManagerAsyncContext>();
+    if (context == nullptr) {
+        AUDIO_ERR_LOG("get extra parameters failed : no memory");
+        NapiAudioError::ThrowError(env, "GetExtraParameters failed : no memory", NAPI_ERR_NO_MEMORY);
+        return NapiParamUtils::GetUndefinedValue(env);
+    }
+
+    auto inputParser = [env, context](size_t argc, napi_value *argv) {
+        NAPI_CHECK_ARGS_RETURN_VOID(context, argc >= ARGS_TWO, "invalid arguments", NAPI_ERR_INVALID_PARAM);
+        context->key = NapiParamUtils::GetStringArgument(env, argv[PARAM0]);
+        NAPI_CHECK_ARGS_RETURN_VOID(context, !context->key.empty(), "get main key failed", NAPI_ERR_INVALID_PARAM);
+
+        context->status = NapiParamUtils::GetExtraParametersVector(env, context->subKeys, argv[PARAM1]);
+        NAPI_CHECK_ARGS_RETURN_VOID(context, context->status == napi_ok, "get sub key failed", NAPI_ERR_INVALID_PARAM);
+        NAPI_CHECK_ARGS_RETURN_VOID(context, !context->subKeys.empty(), "sub key is empty", NAPI_ERR_INVALID_PARAM);
+    };
+    context->GetCbInfo(env, info, inputParser);
+
+    auto executor = [context]() {
+        CHECK_AND_RETURN_LOG(CheckContextStatus(context), "context object state is error.");
+        auto obj = reinterpret_cast<NapiAudioManager *>(context->native);
+        ObjectRefMap objectGuard(obj);
+        auto *napiAudioManager = objectGuard.GetPtr();
+        CHECK_AND_RETURN_LOG(CheckAudioManagerStatus(napiAudioManager, context), "audio manager state is error.");
+
+        context->subKvpairs = napiAudioManager->audioMngr_->GetExtraParameters(context->key, context->subKeys);
+    };
+
+    auto complete = [env, context](napi_value &output) {
+        NapiParamUtils::SetExtraAudioParametersInfo(env, context->subKvpairs, output);
+    };
+    return NapiAsyncWork::Enqueue(env, context, "GetExtraParameters", executor, complete);
 }
 
 napi_value NapiAudioManager::SetMicrophoneMute(napi_env env, napi_callback_info info)

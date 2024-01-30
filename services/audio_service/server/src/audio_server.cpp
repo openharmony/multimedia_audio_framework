@@ -40,6 +40,7 @@
 #include "audio_effect_chain_manager.h"
 #include "playback_capturer_manager.h"
 #include "policy_handler.h"
+#include "config/audio_param_parser.h"
 
 #define PA
 #ifdef PA
@@ -53,6 +54,7 @@ using namespace std;
 namespace OHOS {
 namespace AudioStandard {
 std::map<std::string, std::string> AudioServer::audioParameters;
+std::unordered_map<std::string, std::unordered_map<std::string, std::set<std::string>>> AudioServer::audioParameterKeys;
 const string DEFAULT_COOKIE_PATH = "/data/data/.pulse_dir/state/cookie";
 const unsigned int TIME_OUT_SECONDS = 10;
 const unsigned int SCHEDULE_REPORT_TIME_OUT_SECONDS = 2;
@@ -117,6 +119,12 @@ void AudioServer::OnStart()
 #endif
 
     RegisterAudioCapturerSourceCallback();
+
+    std::unique_ptr<AudioParamParser> audioParamParser = make_unique<AudioParamParser>();
+    CHECK_AND_RETURN_LOG(audioParamParser != nullptr, "Failed to create audio extra parameters parser");
+    if (audioParamParser->LoadConfiguration(audioParameterKeys)) {
+        AUDIO_INFO_LOG("Audio extra parameters load configuration successfully.");
+    }
 }
 
 void AudioServer::OnAddSystemAbility(int32_t systemAbilityId, const std::string& deviceId)
@@ -136,6 +144,33 @@ void AudioServer::OnAddSystemAbility(int32_t systemAbilityId, const std::string&
 void AudioServer::OnStop()
 {
     AUDIO_DEBUG_LOG("OnStop");
+}
+
+void AudioServer::SetExtraParameters(const std::string& key,
+    const std::vector<std::pair<std::string, std::string>>& kvpairs)
+{
+    bool hasSystemPermission = PermissionUtil::VerifySystemPermission();
+    bool hasSettingsPermission = VerifyClientPermission(MODIFY_AUDIO_SETTINGS_PERMISSION);
+    CHECK_AND_RETURN_LOG(hasSystemPermission && hasSettingsPermission, "set extra parameters failed: no permission.");
+
+    if (audioParameterKeys.empty()) {
+        AUDIO_ERR_LOG("audio extra parameters mainKey and subKey is empty");
+    }
+
+    auto mainKeyIt = audioParameterKeys.find(key);
+    if (mainKeyIt == audioParameterKeys.end()) {
+        return;
+    }
+
+    std::unordered_map<std::string, std::set<std::string>> subKeyMap = mainKeyIt->second;
+    std::string value;
+    for (auto it = kvpairs.begin(); it != kvpairs.end(); it++) {
+        auto subKeyIt = subKeyMap.find(it->first);
+        if (subKeyIt != subKeyMap.end()) {
+            value += it->first + "=" + it->second + ";";
+        }
+    }
+    SetAudioParameter(key, value);
 }
 
 void AudioServer::SetAudioParameter(const std::string &key, const std::string &value)
@@ -202,6 +237,30 @@ void AudioServer::SetAudioParameter(const std::string& networkId, const AudioPar
     CHECK_AND_RETURN_LOG(audioRendererSinkInstance != nullptr, "has no valid sink");
 
     audioRendererSinkInstance->SetAudioParameter(key, condition, value);
+}
+
+const std::vector<std::pair<std::string, std::string>> AudioServer::GetExtraParameters(const std::string &mainKey,
+    const std::vector<std::string> &subKeys)
+{
+    if (audioParameterKeys.empty()) {
+        AUDIO_ERR_LOG("audio extra parameters mainKey and subKey is empty");
+    }
+
+    auto mainKeyIt = audioParameterKeys.find(mainKey);
+    if (mainKeyIt == audioParameterKeys.end()) {
+        return {};
+    }
+
+    std::unordered_map<std::string, std::set<std::string>> subKeyMap = mainKeyIt->second;
+    std::vector<std::pair<std::string, std::string>> values;
+    for (auto it = subKeys.begin(); it != subKeys.end(); it++) {
+        auto subKeyIt = subKeyMap.find(*it);
+        if (subKeyIt != subKeyMap.end()) {
+            std::string value = GetAudioParameter(mainKey + "_" + *it);
+            values.emplace_back(std::make_pair(*it, value));
+        }
+    }
+    return values;
 }
 
 const std::string AudioServer::GetAudioParameter(const std::string &key)

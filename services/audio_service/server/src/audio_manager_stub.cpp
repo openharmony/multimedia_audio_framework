@@ -64,6 +64,39 @@ int AudioManagerStub::HandleSetAudioParameter(MessageParcel &data, MessageParcel
     return AUDIO_OK;
 }
 
+int AudioManagerStub::HandleGetExtraAudioParameters(MessageParcel &data, MessageParcel &reply)
+{
+    const std::string mainKey = data.ReadString();
+    int32_t num = data.ReadInt32();
+    std::vector<std::string> subKeys = {};
+    for (int32_t i = 0; i < num; i++) {
+        std::string subKey = data.ReadString();
+        subKeys.push_back(subKey);
+    }
+
+    const std::vector<std::pair<std::string, std::string>> value = GetExtraParameters(mainKey, subKeys);
+    reply.WriteInt32(static_cast<int32_t>(value.size()));
+    for (auto it = value.begin(); it != value.end(); it++) {
+        reply.WriteString(static_cast<std::string>(it->first));
+        reply.WriteString(static_cast<std::string>(it->second));
+    }
+    return AUDIO_OK;
+}
+
+int AudioManagerStub::HandleSetExtraAudioParameters(MessageParcel &data, MessageParcel &reply)
+{
+    const std::string mainKey = data.ReadString();
+    std::vector<std::pair<std::string, std::string>> audioParametersSubKVPairs;
+    int32_t mapSize = data.ReadInt32();
+    for (int32_t i = 0; i < mapSize; i++) {
+        std::string subKey = data.ReadString();
+        std::string value = data.ReadString();
+        audioParametersSubKVPairs.push_back(std::make_pair(subKey, value));
+    }
+    SetExtraParameters(mainKey, audioParametersSubKVPairs);
+    return AUDIO_OK;
+}
+
 int AudioManagerStub::HandleSetMicrophoneMute(MessageParcel &data, MessageParcel &reply)
 {
     bool isMute = data.ReadBool();

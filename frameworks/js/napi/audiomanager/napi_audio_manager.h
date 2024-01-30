@@ -55,6 +55,8 @@ struct AudioManagerAsyncContext : public ContextBase {
     std::string networkId;
     std::vector<sptr<AudioDeviceDescriptor>> deviceDescriptors;
     std::vector<sptr<VolumeGroupInfo>> volumeGroupInfos;
+    std::vector<std::pair<std::string, std::string>> subKvpairs;
+    std::vector<std::string> subKeys;
 };
     static NapiAudioManager* GetParamWithSync(const napi_env &env, napi_callback_info info,
     size_t &argc, napi_value *args);
@@ -82,6 +84,8 @@ struct AudioManagerAsyncContext : public ContextBase {
     static napi_value IsDeviceActive(napi_env env, napi_callback_info info);
     static napi_value SetAudioParameter(napi_env env, napi_callback_info info);
     static napi_value GetAudioParameter(napi_env env, napi_callback_info info);
+    static napi_value SetExtraParameters(napi_env env, napi_callback_info info);
+    static napi_value GetExtraParameters(napi_env env, napi_callback_info info);
     static napi_value SetMicrophoneMute(napi_env env, napi_callback_info info);
     static napi_value IsMicrophoneMute(napi_env env, napi_callback_info info);
     static napi_value RequestIndependentInterrupt(napi_env env, napi_callback_info info);

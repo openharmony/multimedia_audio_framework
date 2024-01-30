@@ -105,6 +105,26 @@ public:
         const std::string& condition) = 0;
 
     /**
+     * Set Extra Audio Parameters.
+     *
+     * @param key main key for the extra audio parameter to be set
+     * @param kvpairs associated with the sub keys and values for the extra audio parameter to be set
+     * @return none.
+     */
+    virtual void SetExtraParameters(const std::string &key,
+        const std::vector<std::pair<std::string, std::string>> &kvpairs) = 0;
+
+    /**
+     * Get Extra Audio Parameters.
+     *
+     * @param mainKey main key for the extra audio parameter to be get
+     * @param subKeys associated with the key for the extra audio parameter to be get
+     * @return Returns value associated to the key requested.
+     */
+    virtual const std::vector<std::pair<std::string, std::string>> GetExtraParameters(const std::string &mainKey,
+        const std::vector<std::string> &subKyes) = 0;
+
+    /**
      * Update the audio route after device is detected and route is decided
      *
      * @return Returns 0 if success. Otherwise returns Errocode defined in audio_errors.h.
@@ -267,6 +287,8 @@ public:
 private:
     int HandleGetAudioParameter(MessageParcel &data, MessageParcel &reply);
     int HandleSetAudioParameter(MessageParcel &data, MessageParcel &reply);
+    int HandleGetExtraAudioParameters(MessageParcel &data, MessageParcel &reply);
+    int HandleSetExtraAudioParameters(MessageParcel &data, MessageParcel &reply);
     int HandleSetMicrophoneMute(MessageParcel &data, MessageParcel &reply);
     int HandleSetAudioScene(MessageParcel &data, MessageParcel &reply);
     int HandleUpdateActiveDeviceRoute(MessageParcel &data, MessageParcel &reply);
@@ -302,6 +324,8 @@ private:
     static inline HandlerFunc handlers[] = {
         &AudioManagerStub::HandleGetAudioParameter,
         &AudioManagerStub::HandleSetAudioParameter,
+        &AudioManagerStub::HandleGetExtraAudioParameters,
+        &AudioManagerStub::HandleSetExtraAudioParameters,
         &AudioManagerStub::HandleSetMicrophoneMute,
         &AudioManagerStub::HandleSetAudioScene,
         &AudioManagerStub::HandleUpdateActiveDeviceRoute,

@@ -194,6 +194,11 @@ public:
         napi_value &result);
     static napi_status GetSpatialDeviceState(napi_env env, AudioSpatialDeviceState *spatialDeviceState,
         napi_value in);
+    static napi_status GetExtraParametersSubKV(napi_env env, std::vector<std::pair<std::string, std::string>> &subKV,
+        napi_value in);
+    static napi_status GetExtraParametersVector(const napi_env &env, std::vector<std::string> &subKeys, napi_value in);
+    static napi_status SetExtraAudioParametersInfo(const napi_env &env,
+        const std::vector<std::pair<std::string, std::string>> &extraParameters, napi_value &result);
 };
 } // namespace AudioStandard
 } // namespace OHOS

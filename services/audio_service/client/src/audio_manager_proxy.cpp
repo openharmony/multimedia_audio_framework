@@ -270,6 +270,37 @@ const std::string AudioManagerProxy::GetAudioParameter(const std::string& networ
     return value;
 }
 
+const std::vector<std::pair<std::string, std::string>> AudioManagerProxy::GetExtraParameters(
+    const std::string &mainKey, const std::vector<std::string> &subKeys)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+
+    bool ret = data.WriteInterfaceToken(GetDescriptor());
+    CHECK_AND_RETURN_RET_LOG(ret, {}, "WriteInterfaceToken failed");
+    data.WriteString(static_cast<std::string>(mainKey));
+    data.WriteInt32(static_cast<int32_t>(subKeys.size()));
+    for (std::string subKey : subKeys) {
+        data.WriteString(static_cast<std::string>(subKey));
+    }
+    int32_t error = Remote()->SendRequest(
+        static_cast<uint32_t>(AudioServerInterfaceCode::GET_EXTRA_AUDIO_PARAMETERS), data, reply, option);
+    if (error != ERR_NONE) {
+        AUDIO_ERR_LOG("Get extra audio parameters failed, error: %d", error);
+        return {};
+    }
+
+    std::vector<std::pair<std::string, std::string>> valueMap;
+    int32_t num = reply.ReadInt32();
+    for (auto i = 0; i < num; i++) {
+        const std::string key = reply.ReadString();
+        const std::string value = reply.ReadString();
+        valueMap.push_back(std::make_pair(key, value));
+    }
+    return valueMap;
+}
+
 void AudioManagerProxy::SetAudioParameter(const std::string &key, const std::string &value)
 {
     MessageParcel data;
@@ -301,6 +332,30 @@ void AudioManagerProxy::SetAudioParameter(const std::string& networkId, const Au
     int32_t error = Remote()->SendRequest(
         static_cast<uint32_t>(AudioServerInterfaceCode::SET_REMOTE_AUDIO_PARAMETER), data, reply, option);
     CHECK_AND_RETURN_LOG(error == ERR_NONE, "Get audio parameter failed, error: %d", error);
+}
+
+void AudioManagerProxy::SetExtraParameters(const std::string &key,
+    const std::vector<std::pair<std::string, std::string>> &kvpairs)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+
+    bool ret = data.WriteInterfaceToken(GetDescriptor());
+    CHECK_AND_RETURN_LOG(ret, "WriteInterfaceToken failed");
+    data.WriteString(static_cast<std::string>(key));
+    data.WriteInt32(static_cast<int32_t>(kvpairs.size()));
+    for (auto it = kvpairs.begin(); it != kvpairs.end(); it++) {
+        data.WriteString(static_cast<std::string>(it->first));
+        data.WriteString(static_cast<std::string>(it->second));
+    }
+
+    int32_t error = Remote()->SendRequest(
+        static_cast<uint32_t>(AudioServerInterfaceCode::SET_EXTRA_AUDIO_PARAMETERS), data, reply, option);
+    if (error != ERR_NONE) {
+        AUDIO_ERR_LOG("Set extra audio parameters failed, error: %d", error);
+        return;
+    }
 }
 
 uint64_t AudioManagerProxy::GetTransactionId(DeviceType deviceType, DeviceRole deviceRole)

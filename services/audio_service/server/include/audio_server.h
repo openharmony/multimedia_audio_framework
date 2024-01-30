@@ -58,9 +58,13 @@ public:
     int32_t OffloadSetVolume(float volume) override;
     int32_t SetAudioScene(AudioScene audioScene, DeviceType activeDevice) override;
     static void *paDaemonThread(void *arg);
+    void SetExtraParameters(const std::string& key,
+        const std::vector<std::pair<std::string, std::string>>& kvpairs) override;
     void SetAudioParameter(const std::string& key, const std::string& value) override;
     void SetAudioParameter(const std::string& networkId, const AudioParamKey key, const std::string& condition,
         const std::string& value) override;
+    const std::vector<std::pair<std::string, std::string>> GetExtraParameters(const std::string &mainKey,
+        const std::vector<std::string> &subKeys) override;
     const std::string GetAudioParameter(const std::string &key) override;
     const std::string GetAudioParameter(const std::string& networkId, const AudioParamKey key,
         const std::string& condition) override;
@@ -132,6 +136,7 @@ private:
     static constexpr int32_t MIN_VOLUME = 0;
     static std::unordered_map<int, float> AudioStreamVolumeMap;
     static std::map<std::string, std::string> audioParameters;
+    static std::unordered_map<std::string, std::unordered_map<std::string, std::set<std::string>>> audioParameterKeys;
 
     int32_t audioUid_ = 1041;
     pthread_t m_paDaemonThread;
