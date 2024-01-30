@@ -106,8 +106,8 @@ static pa_hook_result_t SinkInputNewCb(pa_core *c, pa_sink_input *si)
             EffectChainManagerInitCb(sceneType);
         }
         EffectChainManagerCreateCb(sceneType, sessionID);
-        SessionInfoPack pack = PackSessionInfo(channels, channelLayout, sceneMode, spatializationEnabled);
-        if (si->state == PA_SINK_INPUT_RUNNING && EffectChainManagerAddSessionInfo(sceneType, sessionID, pack)) {
+        SessionInfoPack pack = {channels, channelLayout, sceneMode, spatializationEnabled};
+        if (si->state == PA_SINK_INPUT_RUNNING && !EffectChainManagerAddSessionInfo(sceneType, sessionID, pack)) {
             EffectChainManagerMultichannelUpdate(sceneType);
         }
     }
@@ -179,8 +179,8 @@ static pa_hook_result_t SinkInputStateChangedCb(pa_core *c, pa_sink_input *si)
     const char *bootUpMusic = "1003";
 
     if (si->state == PA_SINK_INPUT_RUNNING && si->sink && !pa_safe_streq(clientUid, bootUpMusic)) {
-        SessionInfoPack pack = PackSessionInfo(channels, channelLayout, sceneMode, spatializationEnabled);
-        if (EffectChainManagerAddSessionInfo(sceneType, sessionID, pack)) {
+        SessionInfoPack pack = {channels, channelLayout, sceneMode, spatializationEnabled};
+        if (!EffectChainManagerAddSessionInfo(sceneType, sessionID, pack)) {
             EffectChainManagerMultichannelUpdate(sceneType);
         }
     }

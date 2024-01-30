@@ -153,8 +153,11 @@ int32_t EffectChainManagerMultichannelUpdate(const char *sceneType)
     AudioEffectChainManager *audioEffectChainManager = AudioEffectChainManager::GetInstance();
     CHECK_AND_RETURN_RET_LOG(audioEffectChainManager != nullptr, ERR_INVALID_HANDLE, "null audioEffectChainManager");
     std::string sceneTypeString = "";
-    if (sceneType) {
+    if (sceneType != nullptr && strlen(sceneType)) {
         sceneTypeString = sceneType;
+    } else {
+        AUDIO_ERR_LOG("Scenetype is null.");
+        return ERROR;
     }
     if (audioEffectChainManager->UpdateMultichannelConfig(sceneTypeString) != SUCCESS) {
         return ERROR;
@@ -236,40 +239,6 @@ bool EffectChainManagerCheckA2dpOffload()
         return true;
     }
     return false;
-}
-
-SessionInfoPack PackSessionInfo(const uint32_t channels, const char *channelLayout, const char *sceneMode,
-    const char *spatializationEnabled)
-{
-    SessionInfoPack pack;
-    pack.channels = channels;
-    char buffer[50];
-
-    if (channelLayout != nullptr && sceneMode != nullptr && spatializationEnabled != nullptr) {
-        errno_t err = strcpy_s(buffer, sizeof(buffer), channelLayout);
-        if (err != 0) {
-            AUDIO_ERR_LOG("String copy channelLayout failed!");
-            return pack;
-        }
-        pack.channelLayout = buffer;
-
-        err = strcpy_s(buffer, sizeof(buffer), sceneMode);
-        if (err != 0) {
-            AUDIO_ERR_LOG("String copy sceneMode failed!");
-            return pack;
-        }
-        pack.sceneMode = buffer;
-        
-        err = strcpy_s(buffer, sizeof(buffer), spatializationEnabled);
-        if (err != 0) {
-            AUDIO_ERR_LOG("String copy spatializationEnabled failed!");
-            return pack;
-        }
-        pack.spatializationEnabled = buffer;
-    } else {
-        AUDIO_ERR_LOG("Session info pack failed!");
-    }
-    return pack;
 }
 
 int32_t EffectChainManagerAddSessionInfo(const char *sceneType, const char *sessionID, SessionInfoPack pack)
@@ -1116,10 +1085,10 @@ int32_t AudioEffectChainManager::UpdateSpatializationState(AudioSpatializationSt
             }
         } else {
             effectHdiInput[0] = HDI_DESTROY;
-            AUDIO_INFO_LOG("set hdi destory.");
+            AUDIO_INFO_LOG("set hdi destroy.");
             int32_t ret = audioEffectHdi_->UpdateHdiState(effectHdiInput);
             if (ret != 0) {
-                AUDIO_ERR_LOG("set hdi destory failed");
+                AUDIO_ERR_LOG("set hdi destroy failed");
             }
             offloadEnabled_ = false;
             RecoverAllChains();
@@ -1142,13 +1111,6 @@ int32_t AudioEffectChainManager::ReturnEffectChannelInfo(const std::string &scen
     std::set<std::string> sessions = SceneTypeToSessionIDMap_[sceneType];
     for (auto s = sessions.begin(); s != sessions.end(); ++s) {
         sessionEffectInfo info = SessionIDToEffectInfoMap_[*s];
-        if ((info.spatializationEnabled == "0")
-            && (GetDeviceTypeName() == "DEVICE_TYPE_BLUETOOTH_A2DP")) {
-            *channels = DEFAULT_NUM_CHANNEL;
-            *channelLayout = DEFAULT_NUM_CHANNELLAYOUT;
-            return SUCCESS;
-        }
-
         uint32_t TmpChannelCount;
         uint64_t TmpChannelLayout;
         if (GetDeviceTypeName() != "DEVICE_TYPE_BLUETOOTH_A2DP"
@@ -1215,7 +1177,11 @@ int32_t AudioEffectChainManager::SessionInfoMapDelete(std::string sceneType, std
     if (!SceneTypeToSessionIDMap_.count(sceneType)) {
         return ERROR;
     }
-    if (!SceneTypeToSessionIDMap_[sceneType].erase(sessionID)) {
+    if (SceneTypeToSessionIDMap_[sceneType].erase(sessionID)) {
+        if (SceneTypeToSessionIDMap_[sceneType].empty()) {
+            SceneTypeToSessionIDMap_.erase(sceneType);
+        }
+    } else {
         return ERROR;
     }
     if (!SessionIDToEffectInfoMap_.erase(sessionID)) {

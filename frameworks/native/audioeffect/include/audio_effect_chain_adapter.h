@@ -36,10 +36,10 @@ typedef struct BufferAttr {
 } BufferAttr;
 
 typedef struct SessionInfoPack {
-    uint32_t channels;
-    char *channelLayout;
-    char *sceneMode;
-    char *spatializationEnabled;
+    const uint32_t channels;
+    const char *channelLayout;
+    const char *sceneMode;
+    const char *spatializationEnabled;
 } SessionInfoPack;
 
 int32_t EffectChainManagerProcess(char *sceneType, BufferAttr *bufferAttr);
@@ -57,8 +57,6 @@ bool EffectChainManagerCheckA2dpOffload();
 int32_t EffectChainManagerDeleteSessionInfo(const char *sceneType, const char *sessionID);
 int32_t EffectChainManagerReturnEffectChannelInfo(const char *sceneType, uint32_t *channels, uint64_t *channelLayout);
 int32_t EffectChainManagerReturnMultiChannelInfo(uint32_t *channels, uint64_t *channelLayout);
-SessionInfoPack PackSessionInfo(const uint32_t channels, const char *channelLayout, const char *sceneMode,
-    const char *spatializationEnabled);
 
 #ifdef __cplusplus
 }
