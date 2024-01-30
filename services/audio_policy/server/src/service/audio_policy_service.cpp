@@ -1732,7 +1732,7 @@ void AudioPolicyService::FetchOutputDevice(vector<unique_ptr<AudioRendererChange
                 isUpdateActiveDevice = true;
             }
             needUpdateActiveDevice = false;
-            if (reason == AudioStreamDeviceChangeReason::OLD_DEVICE_UNAVALIABLE ||
+            if (reason == AudioStreamDeviceChangeReason::OLD_DEVICE_UNAVALIABLE &&
                 audioScene_ == AUDIO_SCENE_DEFAULT) {
                 MuteSinkPort(desc);
             }
