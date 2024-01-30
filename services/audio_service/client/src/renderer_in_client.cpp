@@ -647,7 +647,7 @@ const AudioProcessConfig RendererInClientInner::ConstructConfig()
 
     config.streamType = eStreamType_;
 
-    // in plan: add privacyType_
+    config.privacyType = privacyType_;
 
     clientConfig_ = config;
 
@@ -1292,8 +1292,14 @@ void RendererInClientInner::SetCapturerSource(int capturerSource)
 
 void RendererInClientInner::SetPrivacyType(AudioPrivacyType privacyType)
 {
+    if (privacyType_ == privacyType) {
+        AUDIO_INFO_LOG("Set same privacy type");
+        return;
+    }
     privacyType_ = privacyType;
-    //in plan: should we update it after create?
+    CHECK_AND_RETURN_LOG(ipcStream_ != nullptr, "ipcStream is not inited!");
+    int32_t ret = ipcStream_->SetPrivacyType(privacyType);
+    CHECK_AND_RETURN_LOG(ret == SUCCESS, "Set privacy type failed");
 }
 
 bool RendererInClientInner::StartAudioStream(StateChangeCmdType cmdType)
