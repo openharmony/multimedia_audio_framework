@@ -55,7 +55,10 @@ if (!audio_framework_feature_dtmf_tone) {
 
     configs = [ ":audio_toneplayer_config" ]
 
-    sources = [ "src/toneplayer.cpp" ]
+    sources = [
+      "src/toneplayer.cpp",
+      "src/toneplayer_impl.cpp",
+    ]
 
     defines = [ "FEATURE_DTMF_TONE" ]
 

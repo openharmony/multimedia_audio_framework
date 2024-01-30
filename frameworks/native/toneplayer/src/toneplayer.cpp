@@ -23,6 +23,7 @@
 #include "audio_log.h"
 #include "audio_policy_manager.h"
 #include "tone_player_private.h"
+#include "tone_player_impl.h"
 #include "audio_utils.h"
 #include "audio_errors.h"
 
@@ -43,14 +44,14 @@ std::shared_ptr<TonePlayer> TonePlayer::Create(const AudioRendererInfo &renderer
         AUDIO_ERR_LOG("Create: No system permission");
         return nullptr;
     }
-    return std::make_shared <TonePlayerPrivate>("", rendererInfo);
+    return std::make_shared<TonePlayerImpl>("", rendererInfo);
 }
 
 std::shared_ptr<TonePlayer> TonePlayer::Create(const std::string cachePath, const AudioRendererInfo &rendererInfo)
 {
     bool checkPermission = PermissionUtil::VerifySelfPermission();
     CHECK_AND_RETURN_RET_LOG(checkPermission, nullptr, "Create: No system permission");
-    return std::make_shared <TonePlayerPrivate>(cachePath, rendererInfo);
+    return std::make_shared<TonePlayerImpl>(cachePath, rendererInfo);
 }
 
 TonePlayerPrivate::TonePlayerPrivate(const std::string cachePath, const AudioRendererInfo &rendereInfo)
@@ -240,6 +241,7 @@ bool TonePlayerPrivate::StartTone()
 
 bool TonePlayerPrivate::Release()
 {
+    AUDIO_INFO_LOG("Release tonePlayerState_ %{public}d", tonePlayerState_);
     bool retVal = true;
     if (audioRenderer_ != nullptr) {
         retVal = StopTone();

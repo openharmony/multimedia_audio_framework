@@ -1101,6 +1101,7 @@ void RendererInClientInner::WriteCallbackFunc()
                 AUDIO_WARNING_LOG("Queue pop error: get nullptr.");
                 break;
             }
+            if (state_ != RUNNING) { continue; }
             traceQueuePop.End();
             if (!isEqual(speed_, 1.0f) && !ProcessSpeed(temp)) {
                 continue;
@@ -1111,7 +1112,7 @@ void RendererInClientInner::WriteCallbackFunc()
                 AUDIO_WARNING_LOG("Call write fail, result:%{public}d, bufLength:%{public}zu", result, temp.bufLength);
             }
         }
-
+        if (state_ != RUNNING) { continue; }
         // call client write
         std::unique_lock<std::mutex> lockCb(writeCbMutex_);
         if (writeCb_ != nullptr) {
@@ -1192,6 +1193,10 @@ int32_t RendererInClientInner::Enqueue(const BufferDesc &bufDesc)
 
     BufferDesc temp = bufDesc;
 
+    if (state_ == RELEASED) {
+        AUDIO_WARNING_LOG("Invalid state: %{public}d", state_.load());
+        return ERR_ILLEGAL_STATE;
+    }
     // Call write here may block, so put it in loop callbackLoop_
     cbBufferQueue_.Push(temp);
     return SUCCESS;
@@ -1406,16 +1411,16 @@ bool RendererInClientInner::StopAudioStream()
         return false;
     }
 
+    if (renderMode_ == RENDER_MODE_CALLBACK) {
+        state_ = STOPPING;
+        AUDIO_INFO_LOG("Stop begin in callback mode sessionId %{public}d uid: %{public}d", sessionId_, clientUid_);
+    }
+
     CHECK_AND_RETURN_RET_LOG(ipcStream_ != nullptr, false, "ipcStream is not inited!");
     int32_t ret = ipcStream_->Stop();
     if (ret != SUCCESS) {
         AUDIO_ERR_LOG("Stop call server failed:%{public}u", ret);
         return false;
-    }
-
-    if (renderMode_ == RENDER_MODE_CALLBACK) {
-        state_ = STOPPING;
-        AUDIO_INFO_LOG("Stop begin in callback mode sessionId %{public}d uid: %{public}d", sessionId_, clientUid_);
     }
 
     std::unique_lock<std::mutex> waitLock(callServerMutex_);
@@ -1930,7 +1935,7 @@ int32_t RendererInClientInner::SetBufferSizeInMsec(int32_t bufferSizeInMsec)
 {
     // bufferSizeInMsec is checked between 5ms and 20ms.
     bufferSizeInMsec_ = bufferSizeInMsec;
-    AUDIO_INFO_LOG("SetBufferSizeInMsec to %{publid}d", bufferSizeInMsec_);
+    AUDIO_INFO_LOG("SetBufferSizeInMsec to %{public}d", bufferSizeInMsec_);
     if (renderMode_ == RENDER_MODE_CALLBACK) {
         uint64_t bufferDurationInUs = bufferSizeInMsec_ * AUDIO_US_PER_MS;
         InitCallbackBuffer(bufferDurationInUs);

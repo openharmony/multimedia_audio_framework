@@ -1671,7 +1671,7 @@ int32_t CapturerInClientInner::SetBufferSizeInMsec(int32_t bufferSizeInMsec)
 {
     // bufferSizeInMsec is checked between 5ms and 20ms.
     bufferSizeInMsec_ = bufferSizeInMsec;
-    AUDIO_INFO_LOG("SetBufferSizeInMsec to %{publid}d", bufferSizeInMsec_);
+    AUDIO_INFO_LOG("SetBufferSizeInMsec to %{public}d", bufferSizeInMsec_);
     if (capturerMode_ == CAPTURE_MODE_CALLBACK) {
         uint64_t bufferDurationInUs = bufferSizeInMsec_ * AUDIO_US_PER_MS;
         InitCallbackBuffer(bufferDurationInUs);
