@@ -79,6 +79,7 @@ private:
     int32_t underflowCount = 0;
     bool resetTime_ = false;
     uint64_t resetTimestamp_ = 0;
+    bool overFlowLogFlag = false;
 };
 } // namespace AudioStandard
 } // namespace OHOS

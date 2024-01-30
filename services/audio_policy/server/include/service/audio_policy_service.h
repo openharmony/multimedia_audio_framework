@@ -816,6 +816,7 @@ private:
 
     SourceType currentSourceType = SOURCE_TYPE_MIC;
     uint32_t currentRate = 0;
+    bool updateA2dpOffloadLogFlag = false;
     
     std::unordered_map<uint32_t, bool> sessionHasBeenSpatialized_;
     std::mutex checkSpatializedMutex_;

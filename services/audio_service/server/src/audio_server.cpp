@@ -327,7 +327,7 @@ const std::string AudioServer::GetAudioParameter(const std::string& networkId, c
 uint64_t AudioServer::GetTransactionId(DeviceType deviceType, DeviceRole deviceRole)
 {
     uint64_t transactionId = 0;
-    AUDIO_INFO_LOG("device type: %{public}d, device role: %{public}d", deviceType, deviceRole);
+    AUDIO_DEBUG_LOG("device type: %{public}d, device role: %{public}d", deviceType, deviceRole);
     if (deviceRole != INPUT_DEVICE && deviceRole != OUTPUT_DEVICE) {
         AUDIO_ERR_LOG("AudioServer::GetTransactionId: error device role");
         return ERR_INVALID_PARAM;
@@ -742,7 +742,7 @@ void AudioServer::OnWakeupClose()
 
 void AudioServer::OnCapturerState(bool isActive)
 {
-    AUDIO_INFO_LOG("OnCapturerState Callback start");
+    AUDIO_DEBUG_LOG("OnCapturerState Callback start");
     std::shared_ptr<WakeUpSourceCallback> callback = nullptr;
     {
         std::lock_guard<std::mutex> lockSet(setWakeupCloseCallbackMutex_);
