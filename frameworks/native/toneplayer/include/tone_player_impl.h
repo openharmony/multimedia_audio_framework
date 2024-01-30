@@ -43,7 +43,6 @@ public:
     bool StopTone() override;
     bool Release() override;
 
-private:
     enum ToneState : uint8_t {
         TONE_IDLE,
         TONE_INIT,
@@ -53,6 +52,18 @@ private:
         TONE_STOPPED,
         TONE_RELEASED,
     };
+
+private:
+    bool InitAudioRenderer();
+    bool InitToneWaveInfo();
+    bool AudioToneSequenceGen(BufferDesc &bufDesc);
+    bool ContinueToneplay(uint32_t sampleCnt, int8_t *audioBuf);
+    bool CheckToneStarted(uint32_t sampleCnt, int8_t *audioBuf);
+    bool CheckToneStopped();
+    void GetCurrentSegmentUpdated();
+    bool CheckToneContinuity();
+    int32_t GetSamples(uint16_t *freqs, int8_t *buffer, uint32_t samples);
+
     AudioRendererOptions rendererOptions_ = {};
     std::string cachePath_; // NAPI interface to create AudioRenderer
     std::unique_ptr<AudioRenderer> audioRenderer_;  // Pointer to AudioRenderer used for playback
@@ -78,17 +89,6 @@ private:
     // to wait for audio rendere callback completion after a change is requested
     FILE *dumpFile_ = nullptr;
     uint32_t processSize_;  // In audioRenderer, Size of audio blocks generated at a time
-
-private:
-    bool InitAudioRenderer();
-    bool InitToneWaveInfo();
-    bool AudioToneSequenceGen(BufferDesc &bufDesc);
-    bool ContinueToneplay(uint32_t sampleCnt, int8_t *audioBuf);
-    bool CheckToneStarted(uint32_t sampleCnt, int8_t *audioBuf);
-    bool CheckToneStopped();
-    void GetCurrentSegmentUpdated();
-    bool CheckToneContinuity();
-    int32_t GetSamples(uint16_t *freqs, int8_t *buffer, uint32_t samples);
 };
 } // namespace AudioStandard
 } // namespace OHOS
