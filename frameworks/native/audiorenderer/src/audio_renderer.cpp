@@ -647,7 +647,7 @@ bool AudioRendererPrivate::Pause(StateChangeCmdType cmdType) const
 
 bool AudioRendererPrivate::Stop() const
 {
-    AUDIO_INFO_LOG("AudioRenderer::Stop id: %{public}u", sessionID_");
+    AUDIO_INFO_LOG("AudioRenderer::Stop id: %{public}u", sessionID_);
     CHECK_AND_RETURN_RET_LOG(!isSwitching_, false,
         "AudioRenderer::Stop failed. Switching state: %{public}d", isSwitching_);
     if (audioInterrupt_.streamUsage == STREAM_USAGE_VOICE_MODEM_COMMUNICATION) {
