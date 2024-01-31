@@ -29,8 +29,7 @@ namespace OHOS {
 namespace AudioStandard {
 namespace {
     constexpr int32_t MEDIA_UID = 1013;
-    constexpr int32_t IPC_FOR_NOT_MEDIA = 1;
-    constexpr int32_t IPC_FOR_ALL = 2;
+    constexpr int32_t FORCED_NORMAL = 1;
 }
 const std::map<std::pair<ContentType, StreamUsage>, AudioStreamType> streamTypeMap_ = IAudioStream::CreateStreamMap();
 std::map<std::pair<ContentType, StreamUsage>, AudioStreamType> IAudioStream::CreateStreamMap()
@@ -210,21 +209,17 @@ std::shared_ptr<IAudioStream> IAudioStream::GetPlaybackStream(StreamClass stream
         (void)params;
         AUDIO_INFO_LOG("Create fast playback stream");
         return std::make_shared<FastAudioStream>(eStreamType, AUDIO_MODE_PLAYBACK, appUid);
-    } else if (streamClass == FORCED_PA_STREAM) {
-        AUDIO_INFO_LOG("Forced create normal playback stream");
-        return std::make_shared<AudioStream>(eStreamType, AUDIO_MODE_PLAYBACK, appUid);
-    }
-
-    int32_t ipcFlag = 0;
-    GetSysPara("persist.multimedia.audiostream.ipc.renderer", ipcFlag);
-    if (ipcFlag == IPC_FOR_ALL || (ipcFlag == IPC_FOR_NOT_MEDIA && getuid() != MEDIA_UID)) {
-        AUDIO_INFO_LOG("Create ipc playback stream");
-        return RendererInClient::GetInstance(eStreamType, appUid);
     }
 
     if (streamClass == PA_STREAM) {
-        AUDIO_INFO_LOG("Create pa playback stream");
-        return std::make_shared<AudioStream>(eStreamType, AUDIO_MODE_PLAYBACK, appUid);
+        int32_t ipcFlag = -1;
+        GetSysPara("persist.multimedia.audioflag.ipc.renderer", ipcFlag);
+        if (getuid() == MEDIA_UID || ipcFlag == FORCED_NORMAL) {
+            AUDIO_INFO_LOG("Create normal playback stream");
+            return std::make_shared<AudioStream>(eStreamType, AUDIO_MODE_PLAYBACK, appUid);
+        }
+        AUDIO_INFO_LOG("Create ipc playback stream");
+        return RendererInClient::GetInstance(eStreamType, appUid);
     }
     return nullptr;
 }
@@ -237,17 +232,15 @@ std::shared_ptr<IAudioStream> IAudioStream::GetRecordStream(StreamClass streamCl
         AUDIO_INFO_LOG("Create fast record stream");
         return std::make_shared<FastAudioStream>(eStreamType, AUDIO_MODE_RECORD, appUid);
     }
-
-    int32_t ipcFlag = 0;
-    GetSysPara("persist.multimedia.audiostream.ipc.capturer", ipcFlag);
-    if (ipcFlag == IPC_FOR_ALL || (ipcFlag == IPC_FOR_NOT_MEDIA && getuid() != MEDIA_UID)) {
+    if (streamClass == PA_STREAM) {
+        int32_t ipcFlag = -1;
+        GetSysPara("persist.multimedia.audioflag.ipc.capturer", ipcFlag);
+        if (getuid() == MEDIA_UID || ipcFlag == FORCED_NORMAL) {
+            AUDIO_INFO_LOG("Create normal record stream");
+            return std::make_shared<AudioStream>(eStreamType, AUDIO_MODE_RECORD, appUid);
+        }
         AUDIO_INFO_LOG("Create ipc record stream");
         return CapturerInClient::GetInstance(eStreamType, appUid);
-    }
-
-    if (streamClass == PA_STREAM) {
-        AUDIO_INFO_LOG("Create pa record stream");
-        return std::make_shared<AudioStream>(eStreamType, AUDIO_MODE_RECORD, appUid);
     }
     return nullptr;
 }
