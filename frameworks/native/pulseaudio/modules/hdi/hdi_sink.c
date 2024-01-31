@@ -2972,6 +2972,11 @@ static int32_t SinkSetStateInIoThreadCbStartPrimary(struct Userdata *u, pa_sink_
         return 0;
     }
 
+    if (u->sink->thread_info.state == PA_SINK_SUSPENDED && newState == PA_SINK_IDLE) {
+        AUDIO_INFO_LOG("Primary sink from suspend to idle");
+        return 0;
+    }
+
     if (u->primary.sinkAdapter->RendererSinkStart(u->primary.sinkAdapter)) {
         AUDIO_ERR_LOG("audiorenderer control start failed!");
         u->primary.sinkAdapter->RendererSinkDeInit(u->primary.sinkAdapter);
