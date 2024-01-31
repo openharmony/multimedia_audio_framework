@@ -2154,7 +2154,10 @@ void AudioServiceClient::GetOffloadApproximatelyCacheTime(uint64_t paTimeStamp, 
     uint64_t frames = 0;
     int64_t timeNowSteady = static_cast<int64_t>(std::chrono::duration_cast<std::chrono::microseconds>(
         std::chrono::steady_clock::now().time_since_epoch()).count());
-    if (timeNowSteady > offloadLastHdiPosTs_ + AUDIO_US_PER_SECOND / 20) { // 20 times per sec is max
+    bool offloadPwrActive = offloadStatePolicy_ != OFFLOAD_INACTIVE_BACKGROUND;
+    if (offloadPwrActive ||
+        timeNowSteady >
+        static_cast<int64_t>(offloadLastHdiPosTs_ + AUDIO_US_PER_SECOND / 20)) { // 20 times per sec is max
         int64_t timeSec;
         int64_t timeNanoSec;
         int32_t ret = audioSystemManager_->OffloadGetPresentationPosition(frames, timeSec, timeNanoSec);
@@ -2265,12 +2268,22 @@ int32_t AudioServiceClient::GetCurrentPosition(uint64_t &framePosition, uint64_t
 
 void AudioServiceClient::GetAudioLatencyOffload(uint64_t &latency)
 {
-    pa_operation *operation = pa_stream_update_timing_info(
-        paStream, PAStreamUpdateTimingInfoSuccessCb, (void *)this);
-    if (operation != nullptr) {
-        pa_operation_unref(operation);
-    } else {
-        AUDIO_ERR_LOG("pa_stream_update_timing_info failed");
+    int64_t timeNow = static_cast<int64_t>(std::chrono::duration_cast<std::chrono::microseconds>(
+        std::chrono::system_clock::now().time_since_epoch()).count());
+    bool offloadPwrActive = offloadStatePolicy_ != OFFLOAD_INACTIVE_BACKGROUND;
+    if (offloadPwrActive ||
+        timeNow >
+        static_cast<int64_t>(offloadLastUpdatePaInfoTs_ + AUDIO_US_PER_SECOND / 20)) { // 20 times per sec is max
+        pa_threaded_mainloop_lock(mainLoop);
+        pa_operation *operation = pa_stream_update_timing_info(
+            paStream, PAStreamUpdateTimingInfoSuccessCb, (void *)this);
+        if (operation != nullptr) {
+            pa_operation_unref(operation);
+        } else {
+            AUDIO_ERR_LOG("pa_stream_update_timing_info failed");
+        }
+        pa_threaded_mainloop_unlock(mainLoop);
+        offloadLastUpdatePaInfoTs_ = timeNow;
     }
 
     uint64_t paTimeStamp = offloadTimeStamp_;

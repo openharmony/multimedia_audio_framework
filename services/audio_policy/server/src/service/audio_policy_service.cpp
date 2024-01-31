@@ -223,7 +223,7 @@ int32_t AudioPolicyService::GetMinVolumeLevel(AudioVolumeType volumeType) const
 
 int32_t AudioPolicyService::SetSystemVolumeLevel(AudioStreamType streamType, int32_t volumeLevel, bool isFromVolumeKey)
 {
-    int32_t result = SUCCESS;
+    int32_t result;
     // if current active device's type is DEVICE_TYPE_BLUETOOTH_A2DP and it support absolute volume, set
     // its absolute volume value.
 
@@ -508,7 +508,7 @@ bool AudioPolicyService::CheckActiveOutputDeviceSupportOffload()
 void AudioPolicyService::SetOffloadAvailableFromXML(AudioModuleInfo &moduleInfo)
 {
     if (moduleInfo.name == "Speaker") {
-        for (auto &portInfo : moduleInfo.ports) {
+        for (const auto &portInfo : moduleInfo.ports) {
             if ((portInfo.adapterName == "primary") && (portInfo.offloadEnable == "1")) {
                 isOffloadAvailable_ = true;
             }
@@ -5142,8 +5142,9 @@ int32_t AudioPolicyService::OffloadStartPlaying(const std::vector<int32_t> &sess
         return ERROR;
     }
     return Bluetooth::AudioA2dpManager::OffloadStartPlaying(sessionIds);
-#endif
+#else
     return SUCCESS;
+#endif
 }
 
 int32_t AudioPolicyService::OffloadStopPlaying(const std::vector<int32_t> &sessionIds)

@@ -489,10 +489,12 @@ int32_t AudioStreamCollector::GetChannelCount(int32_t sessionId)
 {
     int32_t channelCount = 0;
     std::lock_guard<std::mutex> lock(streamsInfoMutex_);
-    for (const auto &changeInfo : audioRendererChangeInfos_) {
-        if (changeInfo->sessionId == sessionId) {
-            channelCount = changeInfo->channelCount;
-        }
+    const auto &it = std::find_if(audioRendererChangeInfos_.begin(), audioRendererChangeInfos_.end(),
+        [&sessionId](const std::unique_ptr<AudioRendererChangeInfo> &changeInfo) {
+            return changeInfo->sessionId == sessionId;
+        });
+    if (it != audioRendererChangeInfos_.end()) {
+        channelCount = (*it)->channelCount;
     }
     return channelCount;
 }
@@ -590,11 +592,12 @@ int32_t AudioStreamCollector::GetUid(int32_t sessionId)
 {
     int32_t defaultUid = -1;
     std::lock_guard<std::mutex> lock(streamsInfoMutex_);
-    for (const auto &changeInfo : audioRendererChangeInfos_) {
-        if (changeInfo->sessionId == sessionId) {
-            defaultUid = changeInfo->createrUID;
-            break;
-        }
+    const auto &it = std::find_if(audioRendererChangeInfos_.begin(), audioRendererChangeInfos_.end(),
+        [&sessionId](const std::unique_ptr<AudioRendererChangeInfo> &changeInfo) {
+            return changeInfo->sessionId == sessionId;
+        });
+    if (it != audioRendererChangeInfos_.end()) {
+        defaultUid = (*it)->createrUID;
     }
     return defaultUid;
 }
