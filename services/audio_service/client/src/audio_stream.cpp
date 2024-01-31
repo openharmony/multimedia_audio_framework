@@ -1199,6 +1199,7 @@ void AudioStream::WriteMuteDataSysEvent(uint8_t *buffer, size_t bufferSize)
         }
         std::time_t currentTime = std::chrono::system_clock::to_time_t(std::chrono::system_clock::now());
         if ((currentTime - startMuteTime_ >= ONE_MINUTE) && !isUpEvent_) {
+            AUDIO_WARNING_LOG("write silent data for some time");
             isUpEvent_ = true;
             HiSysEventWrite(HiviewDFX::HiSysEvent::Domain::AUDIO, "BACKGROUND_SILENT_PLAYBACK",
                 HiviewDFX::HiSysEvent::EventType::STATISTIC,
