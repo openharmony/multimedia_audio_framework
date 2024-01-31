@@ -5451,7 +5451,7 @@ int32_t AudioPolicyService::SetCallDeviceActive(InternalDeviceType deviceType, b
         }
 #endif
     }
-    FetchDevice(false);
+    FetchDevice(true);
     return SUCCESS;
 }
 
@@ -5459,23 +5459,31 @@ std::unique_ptr<AudioDeviceDescriptor> AudioPolicyService::GetActiveBluetoothDev
 {
     std::vector<unique_ptr<AudioDeviceDescriptor>> audioPrivacyDeviceDescriptors =
         audioDeviceManager_.GetCommRenderPrivacyDevices();
-    std::unique_ptr<AudioDeviceDescriptor> result = nullptr;
+    std::vector<unique_ptr<AudioDeviceDescriptor>> activeDeviceDescriptors;
 
-    for (size_t i = 0; i < audioPrivacyDeviceDescriptors.size(); i++) {
-        if (audioPrivacyDeviceDescriptors[i]->deviceType_ == DEVICE_TYPE_BLUETOOTH_SCO) {
-            if (result == nullptr) {
-                result = std::move(audioPrivacyDeviceDescriptors[i]);
-            }
-            if (audioPrivacyDeviceDescriptors[i]->connectTimeStamp_ > result->connectTimeStamp_) {
-                result = std::move(audioPrivacyDeviceDescriptors[i]);
-            }
+    for (auto &desc : audioPrivacyDeviceDescriptors) {
+        if (desc->deviceType_ == DEVICE_TYPE_BLUETOOTH_SCO) {
+            activeDeviceDescriptors.push_back(make_unique<AudioDeviceDescriptor>(*desc));
         }
     }
-
-    if (result == nullptr) {
+    
+    uint32_t btDeviceSize = activeDeviceDescriptors.size();
+    if (btDeviceSize == 0) {
         return make_unique<AudioDeviceDescriptor>();
+    } else if (btDeviceSize == 1) {
+        unique_ptr<AudioDeviceDescriptor> res = std::move(activeDeviceDescriptors[0]);
+        return res;
     }
-    return result;
+
+    uint32_t index = 0;
+    for (uint32_t i = 1; i < btDeviceSize; ++i) {
+        if (activeDeviceDescriptors[i]->connectTimeStamp_ <
+            activeDeviceDescriptors[index]->connectTimeStamp_) {
+                index = i;
+        }
+    }
+    unique_ptr<AudioDeviceDescriptor> res = std::move(activeDeviceDescriptors[index]);
+    return res;
 }
 } // namespace AudioStandard
 } // namespace OHOS
