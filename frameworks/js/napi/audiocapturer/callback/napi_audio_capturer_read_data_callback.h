@@ -29,7 +29,7 @@ public:
     virtual ~NapiCapturerReadDataCallback();
     void OnReadData(size_t length) override;
 
-    void AddCallbackReference(const std::string &callbackName, napi_value callback);
+    void AddCallbackReference(const std::string &callbackName, napi_value args);
     void RemoveCallbackReference(napi_env env, napi_value callback);
 
 private:

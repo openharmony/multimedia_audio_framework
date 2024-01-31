@@ -194,7 +194,6 @@ int32_t PaAdapterManager::InitPaContext()
         AUDIO_INFO_LOG("Context is not null, return");
         return SUCCESS;
     }
-    int error = ERROR;
     mainLoop_ = pa_threaded_mainloop_new();
     CHECK_AND_RETURN_RET_LOG(mainLoop_ != nullptr, ERR_DEVICE_INIT, "Failed to init pa mainLoop");
     api_ = pa_threaded_mainloop_get_api(mainLoop_);
@@ -223,7 +222,7 @@ int32_t PaAdapterManager::InitPaContext()
 
     pa_context_set_state_callback(context_, PAContextStateCb, mainLoop_);
     if (pa_context_connect(context_, nullptr, PA_CONTEXT_NOFAIL, nullptr) < 0) {
-        error = pa_context_errno(context_);
+        int error = pa_context_errno(context_);
         AUDIO_ERR_LOG("Context connect error: %{public}s", pa_strerror(error));
         return ERR_DEVICE_INIT;
     }
@@ -235,7 +234,6 @@ int32_t PaAdapterManager::InitPaContext()
 
 int32_t PaAdapterManager::HandleMainLoopStart()
 {
-    int error = ERROR;
     PaLockGuard lock(mainLoop_);
     if (pa_threaded_mainloop_start(mainLoop_) < 0) {
         return ERR_DEVICE_INIT;
@@ -250,7 +248,7 @@ int32_t PaAdapterManager::HandleMainLoopStart()
         }
 
         if (!PA_CONTEXT_IS_GOOD(state)) {
-            error = pa_context_errno(context_);
+            int error = pa_context_errno(context_);
             AUDIO_ERR_LOG("Context bad state error: %{public}s", pa_strerror(error));
             lock.Unlock();
             ResetPaContext();
@@ -294,7 +292,6 @@ pa_stream *PaAdapterManager::InitPaStream(AudioProcessConfig processConfig, uint
 {
     AUDIO_DEBUG_LOG("Enter InitPaStream");
     std::lock_guard<std::mutex> lock(paElementsMutex_);
-    int32_t error = ERROR;
     PaLockGuard palock(mainLoop_);
     if (CheckReturnIfinvalid(mainLoop_ && context_, ERR_ILLEGAL_STATE) < 0) {
         AUDIO_ERR_LOG("CheckReturnIfinvalid failed");
@@ -315,14 +312,14 @@ pa_stream *PaAdapterManager::InitPaStream(AudioProcessConfig processConfig, uint
 
     pa_stream *paStream = pa_stream_new_with_proplist(context_, streamName.c_str(), &sampleSpec, nullptr, propList);
     if (!paStream) {
-        error = pa_context_errno(context_);
+        int32_t error = pa_context_errno(context_);
         pa_proplist_free(propList);
         AUDIO_ERR_LOG("pa_stream_new_with_proplist failed, error: %{public}d", error);
         return nullptr;
     }
 
     pa_proplist_free(propList);
-    pa_stream_set_state_callback(paStream, PAStreamStateCb, (void *)this);
+    pa_stream_set_state_callback(paStream, PAStreamStateCb, reinterpret_cast<void *>(this));
     palock.Unlock();
 
     std::string deviceName;
@@ -400,7 +397,7 @@ std::shared_ptr<IRendererStream> PaAdapterManager::CreateRendererStream(AudioPro
     std::lock_guard<std::mutex> lock(paElementsMutex_);
     std::shared_ptr<PaRendererStreamImpl> rendererStream =
         std::make_shared<PaRendererStreamImpl>(paStream, processConfig, mainLoop_);
-    if (rendererStream == nullptr || rendererStream->InitParams() != SUCCESS) {
+    if (rendererStream->InitParams() != SUCCESS) {
         AUDIO_ERR_LOG("Create rendererStream Failed");
         return nullptr;
     }
@@ -413,7 +410,7 @@ std::shared_ptr<ICapturerStream> PaAdapterManager::CreateCapturerStream(AudioPro
     std::lock_guard<std::mutex> lock(paElementsMutex_);
     std::shared_ptr<PaCapturerStreamImpl> capturerStream =
         std::make_shared<PaCapturerStreamImpl>(paStream, processConfig, mainLoop_);
-    if (capturerStream == nullptr || capturerStream->InitParams() != SUCCESS) {
+    if (capturerStream->InitParams() != SUCCESS) {
         AUDIO_ERR_LOG("Create capturerStream Failed");
         return nullptr;
     }

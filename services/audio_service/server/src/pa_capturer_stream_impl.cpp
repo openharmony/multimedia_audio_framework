@@ -69,10 +69,11 @@ inline uint32_t PcmFormatToBits(uint8_t format)
 int32_t PaCapturerStreamImpl::InitParams()
 {
     PaLockGuard lock(mainloop_);
-    pa_stream_set_moved_callback(paStream_, PAStreamMovedCb, (void *)this); // used to notify sink/source moved
-    pa_stream_set_read_callback(paStream_, PAStreamReadCb, (void *)this);
-    pa_stream_set_underflow_callback(paStream_, PAStreamUnderFlowCb, (void *)this);
-    pa_stream_set_started_callback(paStream_, PAStreamSetStartedCb, (void *)this);
+    pa_stream_set_moved_callback(paStream_, PAStreamMovedCb,
+        reinterpret_cast<void *>(this)); // used to notify sink/source moved
+    pa_stream_set_read_callback(paStream_, PAStreamReadCb, reinterpret_cast<void *>(this));
+    pa_stream_set_underflow_callback(paStream_, PAStreamUnderFlowCb, reinterpret_cast<void *>(this));
+    pa_stream_set_started_callback(paStream_, PAStreamSetStartedCb, reinterpret_cast<void *>(this));
 
     if (CheckReturnIfStreamInvalid(paStream_, ERROR) < 0) {
         return ERR_ILLEGAL_STATE;
@@ -125,7 +126,7 @@ int32_t PaCapturerStreamImpl::Start()
     }
 
     streamCmdStatus_ = 0;
-    operation = pa_stream_cork(paStream_, 0, PAStreamStartSuccessCb, (void *)this);
+    operation = pa_stream_cork(paStream_, 0, PAStreamStartSuccessCb, reinterpret_cast<void *>(this));
     pa_operation_unref(operation);
     return SUCCESS;
 }
@@ -143,7 +144,7 @@ int32_t PaCapturerStreamImpl::Pause()
         AUDIO_ERR_LOG("Stream Stop Failed");
         return ERR_ILLEGAL_STATE;
     }
-    pa_operation *operation = pa_stream_cork(paStream_, 1, PAStreamPauseSuccessCb, (void *)this);
+    pa_operation *operation = pa_stream_cork(paStream_, 1, PAStreamPauseSuccessCb, reinterpret_cast<void *>(this));
     pa_operation_unref(operation);
     return SUCCESS;
 }
@@ -251,7 +252,7 @@ int32_t PaCapturerStreamImpl::Flush()
         return ERR_ILLEGAL_STATE;
     }
     streamFlushStatus_ = 0;
-    operation = pa_stream_flush(paStream_, PAStreamFlushSuccessCb, (void *)this);
+    operation = pa_stream_flush(paStream_, PAStreamFlushSuccessCb, reinterpret_cast<void *>(this));
     if (operation == nullptr) {
         AUDIO_ERR_LOG("Stream Flush Operation Failed");
         return ERR_OPERATION_FAILED;
@@ -273,7 +274,7 @@ int32_t PaCapturerStreamImpl::Stop()
         AUDIO_ERR_LOG("Stream Stop Failed");
         return ERR_ILLEGAL_STATE;
     }
-    pa_operation *operation = pa_stream_cork(paStream_, 1, PAStreamStopSuccessCb, (void *)this);
+    pa_operation *operation = pa_stream_cork(paStream_, 1, PAStreamStopSuccessCb, reinterpret_cast<void *>(this));
     pa_operation_unref(operation);
     return SUCCESS;
 }
