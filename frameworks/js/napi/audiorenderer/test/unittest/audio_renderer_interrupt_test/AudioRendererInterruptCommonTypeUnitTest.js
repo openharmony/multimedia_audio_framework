@@ -277,7 +277,7 @@ describe("AudioRendererInterruptUnitTest", function() {
         await audioRender.setInterruptMode(audio.InterruptMode.INDEPENDENT_MODE)
         audioRender.on("audioInterrupt", async(eventAction) => {
             console.log("6.eventAction=" + JSON.stringify(eventAction))
-            interruptType(eventAction);
+            interruptPauseType(eventAction);
         })
         await start(audioRender, done)
 
