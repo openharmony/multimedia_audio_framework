@@ -1224,8 +1224,7 @@ void AudioPolicyServer::ProcessCurrentInterrupt(const AudioInterrupt &incomingIn
                 break;
             case INTERRUPT_HINT_DUCK:
                 iterActive->second = DUCK;
-                interruptEvent.duckVolume =
-                    DUCK_FACTOR * GetSystemVolumeDb((iterActive->first).audioFocusType.streamType);
+                interruptEvent.duckVolume = DUCK_FACTOR;
                 break;
             default:
                 break;
@@ -1362,7 +1361,7 @@ void AudioPolicyServer::HandleIncomingState(AudioFocuState incomingState, Interr
         interruptEvent.hintType = INTERRUPT_HINT_PAUSE;
     } else if (incomingState == DUCK) {
         interruptEvent.hintType = INTERRUPT_HINT_DUCK;
-        interruptEvent.duckVolume = DUCK_FACTOR * GetSystemVolumeDb(incomingInterrupt.audioFocusType.streamType);
+        interruptEvent.duckVolume = DUCK_FACTOR;
     } else {
         auto itZone = audioInterruptZonesMap_.find(zoneID);
         CHECK_AND_RETURN_LOG(itZone != audioInterruptZonesMap_.end(), "can not find zoneid");
@@ -1514,10 +1513,8 @@ void AudioPolicyServer::NotifyStateChangedEvent(AudioFocuState oldState, AudioFo
 
     InterruptEventInternal forceActive {INTERRUPT_TYPE_END, INTERRUPT_FORCE, INTERRUPT_HINT_RESUME, 1.0f};
     InterruptEventInternal forceUnduck {INTERRUPT_TYPE_END, INTERRUPT_FORCE, INTERRUPT_HINT_UNDUCK, 1.0f};
-    InterruptEventInternal forceDuck {INTERRUPT_TYPE_END, INTERRUPT_FORCE, INTERRUPT_HINT_DUCK, 1.0f};
+    InterruptEventInternal forceDuck {INTERRUPT_TYPE_END, INTERRUPT_FORCE, INTERRUPT_HINT_DUCK, DUCK_FACTOR};
     InterruptEventInternal forcePause {INTERRUPT_TYPE_END, INTERRUPT_FORCE, INTERRUPT_HINT_PAUSE, 1.0f};
-    float volumeDb = GetSystemVolumeDb((audioInterrupt.audioFocusType).streamType);
-    forceDuck.duckVolume = DUCK_FACTOR * volumeDb;
     switch (newState) {
         case ACTIVE:
             if (oldState == PAUSE) {

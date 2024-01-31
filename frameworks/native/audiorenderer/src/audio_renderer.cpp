@@ -29,8 +29,6 @@
 namespace OHOS {
 namespace AudioStandard {
 
-static const int32_t MAX_VOLUME_LEVEL = 15;
-static const int32_t CONST_FACTOR = 100;
 #ifdef SONIC_ENABLE
 static const int32_t MAX_BUFFER_SIZE = 100000;
 #endif
@@ -70,14 +68,6 @@ static AudioRendererParams SetStreamInfoToParams(const AudioStreamInfo &streamIn
     params.encodingType = streamInfo.encoding;
     params.channelLayout = streamInfo.channelLayout;
     return params;
-}
-
-static float VolumeToDb(int32_t volumeLevel)
-{
-    float value = static_cast<float>(volumeLevel) / MAX_VOLUME_LEVEL;
-    float roundValue = static_cast<int>(value * CONST_FACTOR);
-
-    return static_cast<float>(roundValue) / CONST_FACTOR;
 }
 
 static bool IsNeedVerifyPermission(const StreamUsage streamUsage)
@@ -779,27 +769,18 @@ void AudioRendererInterruptCallbackImpl::NotifyEvent(const InterruptEvent &inter
 
 bool AudioRendererInterruptCallbackImpl::HandleForceDucking(const InterruptEventInternal &interruptEvent)
 {
-    int32_t systemVolumeLevel =
-        AudioPolicyManager::GetInstance().GetSystemVolumeLevel(audioInterrupt_.audioFocusType.streamType);
-    float systemVolumeDb = VolumeToDb(systemVolumeLevel);
-    float duckVolumeDb = interruptEvent.duckVolume;
-    int32_t ret = 0;
+    if (!isForceDucked_) {
+        // This stream need to be ducked. Update instanceVolBeforeDucking_
+        instanceVolBeforeDucking_ = audioStream_->GetVolume();
+    }
 
-    CHECK_AND_RETURN_RET_LOG(systemVolumeDb > duckVolumeDb && !FLOAT_COMPARE_EQ(systemVolumeDb, 0.0f),
-        false, "StreamVolume %{public}f <= duckVolumeDb %{public}f. "
-            "No need to duck further", systemVolumeDb, duckVolumeDb);
+    float duckVolumeFactor = interruptEvent.duckVolume;
+    int32_t ret = audioStream_->SetVolume(instanceVolBeforeDucking_ * duckVolumeFactor);
+    CHECK_AND_RETURN_RET_LOG(ret == SUCCESS, false, "Failed to set duckVolumeFactor(instance) %{pubic}f",
+        duckVolumeFactor);
 
-    instanceVolBeforeDucking_ = audioStream_->GetVolume();
-    float duckInstanceVolume = duckVolumeDb / systemVolumeDb;
-
-    CHECK_AND_RETURN_RET_LOG(!FLOAT_COMPARE_EQ(instanceVolBeforeDucking_, 0.0f) &&
-        instanceVolBeforeDucking_ >= duckInstanceVolume, false, "No need to duck further");
-
-    ret = audioStream_->SetVolume(duckInstanceVolume);
-    CHECK_AND_RETURN_RET_LOG(!ret, false, "Failed to set duckVolumeDb(instance) %{pubic}f",
-        duckInstanceVolume);
-
-    AUDIO_INFO_LOG("Set duckVolumeDb(instance) %{pubic}f successfully", duckInstanceVolume);
+    AUDIO_INFO_LOG("Set duckVolumeFactor %{pubic}f successfully. instanceVolBeforeDucking: %{public}f",
+        duckVolumeFactor, instanceVolBeforeDucking_);
     return true;
 }
 
@@ -852,9 +833,10 @@ void AudioRendererInterruptCallbackImpl::HandleAndNotifyForcedEvent(const Interr
                 return;
             }
             (void)audioStream_->SetVolume(instanceVolBeforeDucking_);
-            AUDIO_INFO_LOG("Unduck Volume(instance) successfully: %{public}f",
+            AUDIO_INFO_LOG("Unduck Volume(instance) successfully: instanceVolBeforeDucking_ %{public}f",
                 instanceVolBeforeDucking_);
             isForceDucked_ = false;
+            instanceVolBeforeDucking_ = 1.0f;
             break;
         default: // If the hintType is NONE, don't need to send callbacks
             return;

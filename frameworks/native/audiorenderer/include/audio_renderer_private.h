@@ -194,7 +194,7 @@ private:
     AudioInterrupt audioInterrupt_ {};
     bool isForcePaused_ = false;
     bool isForceDucked_ = false;
-    float instanceVolBeforeDucking_ = 0.2f;
+    float instanceVolBeforeDucking_ = 1.0f;
 };
 
 class AudioStreamCallbackRenderer : public AudioStreamCallback {
