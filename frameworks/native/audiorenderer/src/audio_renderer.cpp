@@ -512,7 +512,9 @@ void AudioRendererPrivate::UnsetRendererPeriodPositionCallback()
 bool AudioRendererPrivate::Start(StateChangeCmdType cmdType) const
 {
     Trace trace("AudioRenderer::Start");
-    AUDIO_INFO_LOG("AudioRenderer::Start");
+
+    AUDIO_INFO_LOG("AudioRenderer::Start id: %{public}u", sessionID_);
+
     RendererState state = GetStatus();
     CHECK_AND_RETURN_RET_LOG((state == RENDERER_PREPARED) || (state == RENDERER_STOPPED) || (state == RENDERER_PAUSED),
         false, "Start failed. Illegal state:%{public}u", state);
@@ -616,7 +618,9 @@ bool AudioRendererPrivate::PauseTransitent(StateChangeCmdType cmdType) const
 bool AudioRendererPrivate::Pause(StateChangeCmdType cmdType) const
 {
     Trace trace("AudioRenderer::Pause");
-    AUDIO_INFO_LOG("AudioRenderer::Pause");
+
+    AUDIO_INFO_LOG("AudioRenderer::Pause id: %{public}u", sessionID_);
+
     CHECK_AND_RETURN_RET_LOG(!isSwitching_, false, "Pause failed. Switching state: %{public}d", isSwitching_);
 
     if (audioInterrupt_.streamUsage == STREAM_USAGE_VOICE_MODEM_COMMUNICATION) {
@@ -643,7 +647,7 @@ bool AudioRendererPrivate::Pause(StateChangeCmdType cmdType) const
 
 bool AudioRendererPrivate::Stop() const
 {
-    AUDIO_INFO_LOG("AudioRenderer::Stop");
+    AUDIO_INFO_LOG("AudioRenderer::Stop id: %{public}u", sessionID_);
     CHECK_AND_RETURN_RET_LOG(!isSwitching_, false,
         "AudioRenderer::Stop failed. Switching state: %{public}d", isSwitching_);
     if (audioInterrupt_.streamUsage == STREAM_USAGE_VOICE_MODEM_COMMUNICATION) {
@@ -665,7 +669,8 @@ bool AudioRendererPrivate::Stop() const
 
 bool AudioRendererPrivate::Release() const
 {
-    AUDIO_INFO_LOG("AudioRenderer::Release");
+    AUDIO_INFO_LOG("AudioRenderer::Release id: %{public}u", sessionID_);
+
     // If Stop call was skipped, Release to take care of Deactivation
     (void)AudioPolicyManager::GetInstance().DeactivateAudioInterrupt(audioInterrupt_);
 
