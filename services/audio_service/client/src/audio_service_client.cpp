@@ -44,6 +44,8 @@ const uint32_t DRAIN_TIMEOUT_IN_SEC = 3;
 const uint32_t CORK_TIMEOUT_IN_SEC = 3;
 const uint32_t WRITE_TIMEOUT_IN_SEC = 8;
 const uint32_t READ_TIMEOUT_IN_SEC = 5;
+const uint32_t FLUSH_TIMEOUT_IN_SEC = 5;
+const uint32_t MAINLOOP_WAIT_TIMEOUT_IN_SEC = 5;
 const uint32_t DOUBLE_VALUE = 2;
 const uint32_t MAX_LENGTH_FACTOR = 5;
 const uint32_t T_LENGTH_FACTOR = 4;
@@ -60,6 +62,8 @@ const uint64_t AUDIO_S_TO_NS = 1000000000;
 const uint64_t HDI_OFFLOAD_SAMPLE_RATE = 48000;
 const int64_t SECOND_TO_MICROSECOND = 1000000;
 const uint64_t AUDIO_FIRST_FRAME_LATENCY = 230; //ms
+
+const std::string FORCED_DUMP_PULSEAUDIO_STACKTRACE = "dump_pulseaudio_stacktrace";
 
 static const std::unordered_map<AudioStreamType, std::string> STREAM_TYPE_ENUM_STRING_MAP = {
     {STREAM_VOICE_CALL, "voice_call"},
@@ -1330,6 +1334,41 @@ int32_t AudioServiceClient::FlushStream()
         pa_threaded_mainloop_unlock(mainLoop);
         return AUDIO_CLIENT_ERR;
     }
+
+    UpdatePropListForFlush();
+
+    while (pa_operation_get_state(operation) == PA_OPERATION_RUNNING) {
+        static bool triggerDumpStacktrace_ = true;
+        if (triggerDumpStacktrace_ == true) {
+            AudioXCollie audioXCollie("AudioServiceClient::DumpTrace", MAINLOOP_WAIT_TIMEOUT_IN_SEC, [this](void *) {
+                audioSystemManager_->GetAudioParameter(FORCED_DUMP_PULSEAUDIO_STACKTRACE);
+                triggerDumpStacktrace_ = false;
+                pa_threaded_mainloop_signal(this->mainLoop, 0);
+            }, nullptr, 0);
+            pa_threaded_mainloop_wait(mainLoop);
+        } else {
+            StartTimer(FLUSH_TIMEOUT_IN_SEC);
+            pa_threaded_mainloop_wait(mainLoop);
+            StopTimer();
+            if (IsTimeOut()) {
+                pa_threaded_mainloop_unlock(mainLoop);
+                AUDIO_ERR_LOG("FlushStream timeout");
+                return AUDIO_CLIENT_ERR;
+            }
+        }
+    }
+    pa_operation_unref(operation);
+    pa_threaded_mainloop_unlock(mainLoop);
+
+    CHECK_AND_RETURN_RET_LOG(streamFlushStatus_ == 1, AUDIO_CLIENT_ERR, "Stream Flush failed");
+    acache_.readIndex = 0;
+    acache_.writeIndex = 0;
+    acache_.isFull = false;
+    return AUDIO_CLIENT_SUCCESS;
+}
+
+void AudioServiceClient::UpdatePropListForFlush()
+{
     pa_proplist *propListFlushTrue = pa_proplist_new();
     pa_proplist_sets(propListFlushTrue, "stream.flush", "true");
     pa_operation *updatePropOperationTrue = pa_stream_proplist_update(paStream, PA_UPDATE_REPLACE, propListFlushTrue,
@@ -1343,22 +1382,6 @@ int32_t AudioServiceClient::FlushStream()
         propListFlushFalse, nullptr, nullptr);
     pa_proplist_free(propListFlushFalse);
     pa_operation_unref(updatePropOperationFalse);
-
-    while (pa_operation_get_state(operation) == PA_OPERATION_RUNNING) {
-        pa_threaded_mainloop_wait(mainLoop);
-    }
-    pa_operation_unref(operation);
-    pa_threaded_mainloop_unlock(mainLoop);
-
-    if (!streamFlushStatus_) {
-        AUDIO_ERR_LOG("Stream Flush Failed");
-        return AUDIO_CLIENT_ERR;
-    } else {
-        acache_.readIndex = 0;
-        acache_.writeIndex = 0;
-        acache_.isFull = false;
-        return AUDIO_CLIENT_SUCCESS;
-    }
 }
 
 int32_t AudioServiceClient::DrainStream()

@@ -792,6 +792,8 @@ private:
     int32_t SetPaProplist(pa_proplist *propList, pa_channel_map &map,
         AudioStreamParams &audioParams, const std::string &streamName, const std::string &streamStartTime);
 
+    void UpdatePropListForFlush();
+
     // Error code used
     static const int32_t AUDIO_CLIENT_SUCCESS = 0;
     static const int32_t AUDIO_CLIENT_ERR = -1;
