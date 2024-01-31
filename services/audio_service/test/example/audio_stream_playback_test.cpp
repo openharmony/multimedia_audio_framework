@@ -187,8 +187,8 @@ int32_t PlaybackTest::InitRenderer(bool isFast)
             AudioStandard::AudioChannel::STEREO,
         },
         {
-            AudioStandard::ContentType::CONTENT_TYPE_MUSIC,
-            AudioStandard::StreamUsage::STREAM_USAGE_MEDIA,
+            AudioStandard::ContentType::CONTENT_TYPE_UNKNOWN,
+            AudioStandard::StreamUsage::STREAM_USAGE_GAME,
             isFast ? AudioStandard::STREAM_FLAG_FAST : AudioStandard::STREAM_FLAG_NORMAL, // fast audio stream
         }
     };
@@ -334,6 +334,7 @@ int32_t PlaybackTest::StopPlay()
 
 int32_t PlaybackTest::ReleaseRenderer()
 {
+    StopPlay();
     isSpkFast_ = false;
     if (audioRenderer_ != nullptr && !audioRenderer_->Release()) {
         AUDIO_ERR_LOG("Audio renderer release failed.");
