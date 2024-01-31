@@ -205,7 +205,7 @@ void AudioServer::SetAudioParameter(const std::string &key, const std::string &v
 
     if (key == "AUDIO_EXT_PARAM_KEY_LOWPOWER") {
         parmKey = AudioParamKey::PARAM_KEY_LOWPOWER;
-        HiSysEventWrite(HiviewDFX::HiSysEvent::Domain::AUDIO, "SMATPA_LOWPOWER",
+        HiSysEventWrite(HiviewDFX::HiSysEvent::Domain::AUDIO, "SMARTPA_LOWPOWER",
             HiviewDFX::HiSysEvent::EventType::BEHAVIOR, "STATE", value == "SmartPA_lowpower=on" ? 1 : 0);
     } else if (key == "bt_headset_nrec") {
         parmKey = AudioParamKey::BT_HEADSET_NREC;
