@@ -75,6 +75,10 @@ inline const sptr<IAudioPolicy> GetAudioPolicyManagerProxy()
 void AudioPolicyManager::AudioPolicyServerDied(pid_t pid)
 {
     lock_guard<mutex> lock(g_apProxyMutex);
+    if (g_apProxy == nullptr) {
+        AUDIO_ERR_LOG("Audio policy server has already died!");
+        return;
+    }
     AUDIO_INFO_LOG("Audio policy server died: reestablish connection");
     std::shared_ptr<AudioRendererPolicyServiceDiedCallback> cb;
     for (auto it = rendererCBMap_.begin(); it != rendererCBMap_.end(); ++it) {
