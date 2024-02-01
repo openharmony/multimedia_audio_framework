@@ -51,7 +51,6 @@ namespace {
 static const size_t MAX_CLIENT_READ_SIZE = 20 * 1024 * 1024; // 20M
 static const int32_t CREATE_TIMEOUT_IN_SECOND = 5; // 5S
 static const int32_t OPERATION_TIMEOUT_IN_MS = 500; // 500ms
-static const int32_t READ_TIMEOUT_IN_MS = 5000; // 5000ms
 const uint64_t AUDIO_US_PER_MS = 1000;
 const uint64_t AUDIO_US_PER_S = 1000000;
 const uint64_t DEFAULT_BUF_DURATION_IN_USEC = 20000; // 20ms
@@ -1511,10 +1510,8 @@ int32_t CapturerInClientInner::HandleCapturerRead(size_t &readSize, size_t &user
             // wait for server read some data
             std::unique_lock<std::mutex> readLock(readDataMutex_);
             bool isTimeout = !readDataCV_.wait_for(readLock,
-                std::chrono::milliseconds(READ_TIMEOUT_IN_MS), [this] {
-                int32_t currentSizeInFrame = clientBuffer_->GetAvailableDataFrames();
-                CHECK_AND_RETURN_RET_LOG(currentSizeInFrame >= 0, true, "invalid");
-                return ((currentSizeInFrame * sizePerFrameInByte_) >= clientSpanSizeInByte_);
+                std::chrono::milliseconds(OPERATION_TIMEOUT_IN_MS), [this] {
+                    return clientBuffer_->GetCurWriteFrame() > clientBuffer_->GetCurReadFrame();
             });
             if (isTimeout) {
                 AUDIO_WARNING_LOG("timeout");
