@@ -435,6 +435,8 @@ bool AudioSocketThread::AudioPnpUeventParse(const char *msg, const ssize_t strLe
         AUDIO_ERR_LOG("strLength > UEVENT_MSG_LEN + 1");
         return false;
     }
+    AUDIO_INFO_LOG("AudioPnpUeventParse param strLength: %{public}zu msg: [%{public}s] len: [%{public}zu]",\
+        strLength, msg, strlen(msg));
     for (const char *msgTmp = msg; msgTmp < (msg + strLength);) {
         if (*msgTmp == '\0') {
             msgTmp++;
