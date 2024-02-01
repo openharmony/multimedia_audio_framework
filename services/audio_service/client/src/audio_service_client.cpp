@@ -996,12 +996,12 @@ int32_t AudioServiceClient::SetPaProplist(pa_proplist *propList, pa_channel_map 
     uint32_t channelsInLayout = ConvertChLayoutToPaChMap(audioParams.channelLayout, map);
     if (channelsInLayout != audioParams.channels || !channelsInLayout) {
         AUDIO_ERR_LOG("Invalid channel Layout");
-        pa_proplist_free(proplist);
+        pa_proplist_free(propList);
         pa_threaded_mainloop_unlock(mainLoop);
         ResetPAAudioClient();
         return AUDIO_CLIENT_CREATE_STREAM_ERR;
     }
-    
+
     ResetOffload();
     return AUDIO_CLIENT_SUCCESS;
 }
