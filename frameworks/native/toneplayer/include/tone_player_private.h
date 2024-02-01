@@ -83,6 +83,7 @@ private:
     tone_data_state toneDataState_;
     // to wait for audio rendere callback completion after a change is requested
     float volume_;  // Volume applied to audio Renderer
+    volatile bool playWait_ = true; // wait_for state
 #ifdef DUMPFILE
     FILE *pfd_;
 #endif // DUMPFILE
