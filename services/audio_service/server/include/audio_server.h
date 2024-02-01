@@ -129,6 +129,7 @@ private:
     void RegisterPolicyServerDeathRecipient();
     void RegisterAudioCapturerSourceCallback();
     int32_t SetIORoute(DeviceType type, DeviceFlag flag);
+    void CheckAndPrintStacktrace();
 
 private:
     static constexpr int32_t MEDIA_SERVICE_UID = 1013;

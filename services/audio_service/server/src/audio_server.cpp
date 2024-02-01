@@ -263,8 +263,19 @@ const std::vector<std::pair<std::string, std::string>> AudioServer::GetExtraPara
     return values;
 }
 
+void AudioServer::CheckAndPrintStacktrace()
+{
+    AUDIO_WARNING_LOG("Start print stacktrace");
+    AudioXCollie audioXCollie("AudioServer::PrintStackTrace", 1);
+    sleep(2); // sleep 2 seconds to dump stacktrace;
+}
+
 const std::string AudioServer::GetAudioParameter(const std::string &key)
 {
+    if (key == "dump_pulseaudio_stacktrace" && IPCSkeleton::GetCallingUid() == MEDIA_SERVICE_UID) {
+        CheckAndPrintStacktrace();
+        return "";
+    }
     std::lock_guard<std::mutex> lockSet(audioParameterMutex_);
     AudioXCollie audioXCollie("GetAudioParameter", TIME_OUT_SECONDS);
     AUDIO_DEBUG_LOG("server: get audio parameter");
