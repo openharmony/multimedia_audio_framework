@@ -123,7 +123,7 @@ void NapiAudioVolumeKeyEvent::OnJsCallbackVolumeEvent(std::unique_ptr<AudioVolum
     }
     work->data = reinterpret_cast<void *>(jsCb.get());
     int ret = uv_queue_work_with_qos(loop, work, [] (uv_work_t *work) {}, WorkCallbackVolumeChangeDone,
-        uv_qos_default);
+        uv_qos_user_initiated);
     if (ret != 0) {
         AUDIO_ERR_LOG("OnJsCallbackVolumeEvent: Failed to execute libuv work queue");
         delete work;
