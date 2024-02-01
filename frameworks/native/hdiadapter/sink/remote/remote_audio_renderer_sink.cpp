@@ -25,6 +25,7 @@
 #include <sstream>
 #include <unistd.h>
 #include <map>
+#include <mutex>
 #include "securec.h"
 
 #include "audio_manager.h"
@@ -110,6 +111,7 @@ private:
     struct AudioPort audioPort_;
     IAudioSinkAttr attr_;
     FILE *dumpFile_ = nullptr;
+    std::mutex createRenderMutex_;
 };
 
 RemoteAudioRendererSinkInner::RemoteAudioRendererSinkInner(const std::string &deviceNetworkId)
@@ -313,6 +315,7 @@ int32_t RemoteAudioRendererSinkInner::RenderFrame(char &data, uint64_t len, uint
 int32_t RemoteAudioRendererSinkInner::Start(void)
 {
     AUDIO_INFO_LOG("RemoteAudioRendererSinkInner::Start");
+    std::lock_guard<std::mutex> lock(createRenderMutex_);
     DumpFileUtil::OpenDumpFile(DUMP_SERVER_PARA, DUMP_REMOTE_RENDER_SINK_FILENAME, &dumpFile_);
     if (!isRenderCreated_.load()) {
         CHECK_AND_RETURN_RET_LOG(CreateRender(audioPort_) == SUCCESS, ERR_NOT_STARTED,
