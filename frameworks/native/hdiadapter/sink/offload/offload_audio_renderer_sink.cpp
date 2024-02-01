@@ -570,11 +570,6 @@ int32_t OffloadAudioRendererSinkInner::Start(void)
 {
     Trace trace("Sink::Start");
     if (started_) {
-        int32_t ret = audioRender_->Start(audioRender_);
-        if (ret) {
-            AUDIO_ERR_LOG("Start failed!");
-            return ERR_NOT_STARTED;
-        }
         if (isFlushing_) {
             AUDIO_ERR_LOG("start failed! during flushing");
             startDuringFlush_ = true;
@@ -583,6 +578,12 @@ int32_t OffloadAudioRendererSinkInner::Start(void)
             AUDIO_WARNING_LOG("start duplicate!"); // when start while flushing, this will use
             return SUCCESS;
         }
+    }
+
+    int32_t ret = audioRender_->Start(audioRender_);
+    if (ret) {
+        AUDIO_ERR_LOG("Start failed! ret %d", ret);
+        return ERR_NOT_STARTED;
     }
 
     DumpFileUtil::OpenDumpFile(DUMP_SERVER_PARA, DUMP_OFFLOAD_RENDER_SINK_FILENAME, &dumpFile_);

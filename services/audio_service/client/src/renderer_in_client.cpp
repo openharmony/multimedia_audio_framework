@@ -1484,6 +1484,7 @@ bool RendererInClientInner::ReleaseAudioStream(bool releaseRunner)
             cbBufferQueue_.PushNoWait({nullptr, 0, 0});
         }
         cbThreadCv_.notify_all();
+        writeDataCV_.notify_all();
         if (callbackLoop_.joinable()) {
             callbackLoop_.join();
         }
