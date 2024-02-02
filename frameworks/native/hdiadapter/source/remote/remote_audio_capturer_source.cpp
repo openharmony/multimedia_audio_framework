@@ -18,6 +18,7 @@
 #include <cstring>
 #include <dlfcn.h>
 #include <string>
+#include <mutex>
 
 #include "audio_errors.h"
 #include "audio_log.h"
@@ -89,6 +90,7 @@ private:
     struct AudioPort audioPort_;
     FILE *dumpFile_ = nullptr;
     bool muteState_ = false;
+    std::mutex createCaptureMutex_;
 };
 
 std::map<std::string, RemoteAudioCapturerSourceInner *> allRemoteSources;
@@ -275,6 +277,7 @@ int32_t RemoteAudioCapturerSourceInner::CaptureFrame(char *frame, uint64_t reque
 int32_t RemoteAudioCapturerSourceInner::Start(void)
 {
     AUDIO_INFO_LOG("RemoteAudioCapturerSourceInner::Start");
+    std::lock_guard<std::mutex> lock(createCaptureMutex_);
     DumpFileUtil::OpenDumpFile(DUMP_SERVER_PARA, DUMP_REMOTE_CAPTURE_SOURCE_FILENAME, &dumpFile_);
     if (!isCapturerCreated_.load()) {
         CHECK_AND_RETURN_RET_LOG(CreateCapture(audioPort_) == SUCCESS, ERR_NOT_STARTED,
