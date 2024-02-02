@@ -5369,6 +5369,51 @@ void AudioPolicyService::OnScoStateChanged(const std::string &macAddress, bool i
     FetchDevice(false);
 }
 
+void AudioPolicyService::OnPreferredStateUpdated(AudioDeviceDescriptor &desc,
+    const DeviceInfoUpdateCommand updateCommand)
+{
+    unique_ptr<AudioDeviceDescriptor> userSelectMediaRenderDevice =
+        AudioStateManager::GetAudioStateManager().GetPerferredMediaRenderDevice();
+    unique_ptr<AudioDeviceDescriptor> userSelectCallRenderDevice =
+        AudioStateManager::GetAudioStateManager().GetPerferredCallRenderDevice();
+    unique_ptr<AudioDeviceDescriptor> userSelectCallCaptureDevice =
+        AudioStateManager::GetAudioStateManager().GetPerferredCallCaptureDevice();
+    unique_ptr<AudioDeviceDescriptor> userSelectRecordCaptureDevice =
+        AudioStateManager::GetAudioStateManager().GetPerferredRecordCaptureDevice();
+    AudioStreamDeviceChangeReason reason = AudioStreamDeviceChangeReason::UNKNOWN;
+    if (updateCommand == CATEGORY_UPDATE) {
+        if (desc.deviceCategory_ == BT_UNWEAR_HEADPHONE) {
+            reason = AudioStreamDeviceChangeReason::OLD_DEVICE_UNAVALIABLE;
+            if (userSelectMediaRenderDevice->deviceType_ == desc.deviceType_ &&
+                userSelectMediaRenderDevice->macAddress_ == desc.macAddress_) {
+                audioStateManager_.SetPerferredMediaRenderDevice(new(std::nothrow) AudioDeviceDescriptor());
+            }
+            if (userSelectCallRenderDevice->deviceType_ == desc.deviceType_ &&
+                userSelectCallRenderDevice->macAddress_ == desc.macAddress_) {
+                audioStateManager_.SetPerferredCallRenderDevice(new(std::nothrow) AudioDeviceDescriptor());
+            }
+            if (userSelectCallCaptureDevice->deviceType_ == desc.deviceType_ &&
+                userSelectCallCaptureDevice->macAddress_ == desc.macAddress_) {
+                audioStateManager_.SetPerferredCallCaptureDevice(new(std::nothrow) AudioDeviceDescriptor());
+            }
+            if (userSelectRecordCaptureDevice->deviceType_ == desc.deviceType_ &&
+                userSelectRecordCaptureDevice->macAddress_ == desc.macAddress_) {
+                audioStateManager_.SetPerferredRecordCaptureDevice(new(std::nothrow) AudioDeviceDescriptor());
+            }
+        } else {
+            reason = AudioStreamDeviceChangeReason::NEW_DEVICE_AVAILABLE;
+            if (desc.deviceType_ == DEVICE_TYPE_BLUETOOTH_A2DP) {
+                audioStateManager_.SetPerferredMediaRenderDevice(new(std::nothrow) AudioDeviceDescriptor());
+                audioStateManager_.SetPerferredRecordCaptureDevice(new(std::nothrow) AudioDeviceDescriptor());
+            } else {
+                audioStateManager_.SetPerferredCallRenderDevice(new(std::nothrow) AudioDeviceDescriptor());
+                audioStateManager_.SetPerferredCallCaptureDevice(new(std::nothrow) AudioDeviceDescriptor());
+            }
+        }
+    }
+    FetchDevice(true, reason);
+}
+
 void AudioPolicyService::OnDeviceInfoUpdated(AudioDeviceDescriptor &desc, const DeviceInfoUpdateCommand updateCommand)
 {
     AUDIO_INFO_LOG("[OnDeviceInfoUpdated]  updateCommand: %{public}d", updateCommand);
@@ -5388,16 +5433,7 @@ void AudioPolicyService::OnDeviceInfoUpdated(AudioDeviceDescriptor &desc, const 
     sptr<AudioDeviceDescriptor> audioDescriptor = new(std::nothrow) AudioDeviceDescriptor(desc);
     audioDeviceManager_.UpdateDevicesListInfo(audioDescriptor, updateCommand);
 
-    AudioStreamDeviceChangeReason reason = AudioStreamDeviceChangeReason::UNKOWN;
-    if (updateCommand == CATEGORY_UPDATE) {
-        if (desc.deviceCategory_ == BT_UNWEAR_HEADPHONE) {
-            reason = AudioStreamDeviceChangeReason::OLD_DEVICE_UNAVALIABLE;
-        } else {
-            reason = AudioStreamDeviceChangeReason::NEW_DEVICE_AVAILABLE;
-        }
-    }
-    FetchDevice(true, reason);
-
+    OnPreferredStateUpdated(desc, updateCommand);
     FetchDevice(false);
     UpdateA2dpOffloadFlagForAllStream();
 }
