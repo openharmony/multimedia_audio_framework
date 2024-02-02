@@ -1816,6 +1816,7 @@ void NapiAudioRenderer::UnregisterRendererWriteDataCallback(napi_env env, size_t
 
 void NapiAudioRenderer::DestroyCallbacks()
 {
+    CHECK_AND_RETURN_LOG(rendererDeviceChangeCallbackNapi_ != nullptr, "rendererDeviceChangeCallbackNapi_ is nullptr");
     rendererDeviceChangeCallbackNapi_->RemoveAllCallbacks();
     audioRenderer_->DestroyAudioRendererStateCallback();
     DestroyNAPICallbacks();
