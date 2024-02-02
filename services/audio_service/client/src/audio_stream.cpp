@@ -387,8 +387,8 @@ bool AudioStream::StartAudioStream(StateChangeCmdType cmdType)
 
     if (renderMode_ == RENDER_MODE_CALLBACK) {
         if (writeThread_ && writeThread_->joinable()) {
-	    writeThread_->join();
-	}
+            writeThread_->join();
+        }
         isReadyToWrite_ = true;
         writeThread_ = std::make_unique<std::thread>(&AudioStream::WriteCbTheadLoop, this);
         pthread_setname_np(writeThread_->native_handle(), "OS_AudioWriteCb");
