@@ -61,6 +61,7 @@ static const size_t MAX_WRITE_SIZE = 20 * 1024 * 1024; // 20M
 static const int32_t CREATE_TIMEOUT_IN_SECOND = 8; // 8S
 static const int32_t OPERATION_TIMEOUT_IN_MS = 500; // 500ms
 static const int32_t OFFLOAD_OPERATION_TIMEOUT_IN_MS = 8000; // 8000ms for offload
+static const int32_t WRITE_CACHE_TIMEOUT_IN_MS = 3000; // 3000ms
 static const int32_t WRITE_BUFFER_TIMEOUT_IN_MS = 20; // ms
 static const int32_t SHORT_TIMEOUT_IN_MS = 20; // ms
 static constexpr int CB_QUEUE_CAPACITY = 3;
@@ -1694,7 +1695,7 @@ int32_t RendererInClientInner::WriteCacheData()
     while (sizeInFrame * sizePerFrameInByte_ < clientSpanSizeInByte_) {
         // wait for server read some data
         std::unique_lock<std::mutex> lock(writeDataMutex_);
-        int32_t timeout = offloadEnable_ ? OFFLOAD_OPERATION_TIMEOUT_IN_MS : OPERATION_TIMEOUT_IN_MS;
+        int32_t timeout = offloadEnable_ ? OFFLOAD_OPERATION_TIMEOUT_IN_MS : WRITE_CACHE_TIMEOUT_IN_MS;
         std::cv_status stat = writeDataCV_.wait_for(lock, std::chrono::milliseconds(timeout));
         CHECK_AND_RETURN_RET_LOG(stat == std::cv_status::no_timeout, ERROR, "write data time out");
         sizeInFrame = clientBuffer_->GetAvailableDataFrames();
