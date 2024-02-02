@@ -958,8 +958,8 @@ int32_t AudioServiceClient::SetPaProplist(pa_proplist *propList, pa_channel_map 
 {
     if (propList == nullptr) {
         AUDIO_ERR_LOG("pa_proplist_new failed");
-        ResetPAAudioClient();
         pa_threaded_mainloop_unlock(mainLoop);
+        ResetPAAudioClient();
         return AUDIO_CLIENT_CREATE_STREAM_ERR;
     }
 
@@ -994,8 +994,14 @@ int32_t AudioServiceClient::SetPaProplist(pa_proplist *propList, pa_channel_map 
     pa_channel_map_init(&map);
     map.channels = audioParams.channels;
     uint32_t channelsInLayout = ConvertChLayoutToPaChMap(audioParams.channelLayout, map);
-    CHECK_AND_RETURN_RET_LOG(channelsInLayout == audioParams.channels && channelsInLayout != 0,
-        AUDIO_CLIENT_CREATE_STREAM_ERR, "Invalid channel Layout");
+    if (channelsInLayout != audioParams.channels || !channelsInLayout) {
+        AUDIO_ERR_LOG("Invalid channel Layout");
+        pa_proplist_free(propList);
+        pa_threaded_mainloop_unlock(mainLoop);
+        ResetPAAudioClient();
+        return AUDIO_CLIENT_CREATE_STREAM_ERR;
+    }
+
     ResetOffload();
     return AUDIO_CLIENT_SUCCESS;
 }
