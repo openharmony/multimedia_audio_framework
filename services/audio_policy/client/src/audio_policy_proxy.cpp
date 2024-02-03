@@ -380,22 +380,6 @@ std::vector<sptr<AudioDeviceDescriptor>> AudioPolicyProxy::GetDevices(DeviceFlag
     return deviceInfo;
 }
 
-int32_t AudioPolicyProxy::SetWakeUpAudioCapturer(InternalAudioCapturerOptions options)
-{
-    MessageParcel data;
-    MessageParcel reply;
-    MessageOption option;
-
-    bool ret = data.WriteInterfaceToken(GetDescriptor());
-    CHECK_AND_RETURN_RET_LOG(ret, -1, "WriteInterfaceToken failed");
-    options.streamInfo.Marshalling(data);
-    options.capturerInfo.Marshalling(data);
-    int32_t error = Remote()->SendRequest(
-        static_cast<uint32_t>(AudioPolicyInterfaceCode::SET_WAKEUP_AUDIOCAPTURER), data, reply, option);
-    CHECK_AND_RETURN_RET_LOG(error == ERR_NONE, -1, "CreateWakeUpAudioCapturer failed, error: %d", error);
-    return reply.ReadInt32();
-}
-
 std::vector<sptr<AudioDeviceDescriptor>> AudioPolicyProxy::GetPreferredOutputDeviceDescriptors(
     AudioRendererInfo &rendererInfo)
 {
@@ -1935,6 +1919,24 @@ std::unique_ptr<AudioDeviceDescriptor> AudioPolicyProxy::GetActiveBluetoothDevic
     std::unique_ptr<AudioDeviceDescriptor> desc =
         std::make_unique<AudioDeviceDescriptor>(AudioDeviceDescriptor::Unmarshalling(reply));
     return desc;
+}
+
+int32_t AudioPolicyProxy::NotifyCapturerAdded(AudioCapturerInfo capturerInfo, AudioStreamInfo streamInfo,
+    uint32_t sessionId)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+
+    bool ret = data.WriteInterfaceToken(GetDescriptor());
+    CHECK_AND_RETURN_RET_LOG(ret, -1, "WriteInterfaceToken failed");
+    capturerInfo.Marshalling(data);
+    streamInfo.Marshalling(data);
+    data.WriteUint32(sessionId);
+    int32_t error = Remote()->SendRequest(
+        static_cast<uint32_t>(AudioPolicyInterfaceCode::SET_WAKEUP_AUDIOCAPTURER), data, reply, option);
+    CHECK_AND_RETURN_RET_LOG(error == ERR_NONE, -1, "failed, error: %d", error);
+    return reply.ReadInt32();
 }
 } // namespace AudioStandard
 } // namespace OHOS

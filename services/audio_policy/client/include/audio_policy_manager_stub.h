@@ -55,7 +55,7 @@ private:
     void GetStreamInFocusInternal(MessageParcel &data, MessageParcel &reply);
     void GetSessionInfoInFocusInternal(MessageParcel &data, MessageParcel &reply);
     void GetDevicesInternal(MessageParcel &data, MessageParcel &reply);
-    void SetWakeUpAudioCapturerInternal(MessageParcel &data, MessageParcel &reply);
+    void NotifyCapturerAddedInternal(MessageParcel &data, MessageParcel &reply);
     void CheckRecordingCreateInternal(MessageParcel &data, MessageParcel &reply);
     void SelectOutputDeviceInternal(MessageParcel &data, MessageParcel &reply);
     void GetSelectedDeviceInfoInternal(MessageParcel &data, MessageParcel &reply);
@@ -164,7 +164,7 @@ private:
         &AudioPolicyManagerStub::GetStreamInFocusInternal,
         &AudioPolicyManagerStub::GetSessionInfoInFocusInternal,
         &AudioPolicyManagerStub::GetDevicesInternal,
-        &AudioPolicyManagerStub::SetWakeUpAudioCapturerInternal,
+        &AudioPolicyManagerStub::NotifyCapturerAddedInternal,
         &AudioPolicyManagerStub::CheckRecordingCreateInternal,
         &AudioPolicyManagerStub::SelectOutputDeviceInternal,
         &AudioPolicyManagerStub::GetSelectedDeviceInfoInternal,

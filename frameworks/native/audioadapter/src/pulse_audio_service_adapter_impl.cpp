@@ -792,14 +792,6 @@ void PulseAudioServiceAdapterImpl::PaGetSourceOutputCb(pa_context *c, const pa_s
     AUDIO_INFO_LOG("sessionID %{public}u", sessionID);
     sourceIndexSessionIDMap[i->index] = sessionID;
 
-    SourceType sourceType = static_cast<SourceType>(atoi(pa_proplist_gets(i->proplist, "stream.capturerSource")));
-
-    auto isIpcCapturer = pa_proplist_gets(i->proplist, "stream.isIpcCapturer");
-    if ((!isIpcCapturer) || (!strcmp("0", isIpcCapturer))) {
-        g_audioServiceAdapterCallback->OnCapturerSessionAdded(sessionID,
-            {sourceType, i->sample_spec.rate, i->sample_spec.channels});
-    }
-
     const char *captureFlag = pa_proplist_gets(i->proplist, "stream.isInnerCapturer");
     if (captureFlag == nullptr) {
         AUDIO_WARNING_LOG("Invalid stream parameter:isInnerCapturer.");

@@ -139,6 +139,8 @@ private:
     int32_t RegisterAudioStreamPolicyServerDiedCb();
     int32_t UnregisterAudioStreamPolicyServerDiedCb();
 
+    int32_t NotifyCapturerAdded(uint32_t sessionID) override;
+
     AudioStreamType eStreamType_;
     AudioMode eMode_;
     State state_;

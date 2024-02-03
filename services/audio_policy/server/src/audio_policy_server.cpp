@@ -812,17 +812,14 @@ std::vector<sptr<AudioDeviceDescriptor>> AudioPolicyServer::GetDevices(DeviceFla
     return deviceDescs;
 }
 
-int32_t AudioPolicyServer::SetWakeUpAudioCapturer(InternalAudioCapturerOptions options)
+int32_t AudioPolicyServer::NotifyCapturerAdded(AudioCapturerInfo capturerInfo, AudioStreamInfo streamInfo,
+    uint32_t sessionId)
 {
-    bool hasSystemPermission = PermissionUtil::VerifySystemPermission();
-    CHECK_AND_RETURN_RET_LOG(hasSystemPermission, ERR_PERMISSION_DENIED, "No system permission");
+    auto callerUid = IPCSkeleton::GetCallingUid();
+    // Temporarily allow only media service to use non-IPC route
+    CHECK_AND_RETURN_RET_LOG(callerUid == MEDIA_SERVICE_UID, ERR_PERMISSION_DENIED, "No permission");
 
-    bool hasManageIntellgentPermission = VerifyPermission(MANAGE_INTELLIGENT_VOICE_PERMISSION);
-    if (!hasManageIntellgentPermission) {
-        AUDIO_ERR_LOG("SetWakeUpAudioCapturer: No permission");
-        return ERR_PERMISSION_DENIED;
-    }
-    return audioPolicyService_.SetWakeUpAudioCapturer(options);
+    return audioPolicyService_.NotifyCapturerAdded(capturerInfo, streamInfo, sessionId);
 }
 
 int32_t AudioPolicyServer::VerifyVoiceCallPermission(uint64_t fullTokenId, Security::AccessToken::AccessTokenID tokenId)

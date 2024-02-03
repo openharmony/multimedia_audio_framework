@@ -838,6 +838,7 @@ std::pair<const int32_t, const std::string> AudioServiceClient::GetDeviceNameFor
             AUDIO_ERR_LOG("non-IPC channels will no longer support voice wakeup");
             return {AUDIO_CLIENT_ERR, deviceName};
         }
+        NotifyCapturerAdded(sessionID_);
     }
     return {AUDIO_CLIENT_SUCCESS, deviceName};
 }
