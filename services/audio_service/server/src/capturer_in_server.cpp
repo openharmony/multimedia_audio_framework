@@ -125,7 +125,6 @@ void CapturerInServer::OnStatusUpdate(IOperation operation)
 {
     AUDIO_INFO_LOG("CapturerInServer::OnStatusUpdate operation: %{public}d", operation);
     operation_ = operation;
-    std::lock_guard<std::mutex> lock(statusLock_);
     if (status_ == I_STATUS_RELEASED) {
         AUDIO_WARNING_LOG("Stream already released");
         return;
