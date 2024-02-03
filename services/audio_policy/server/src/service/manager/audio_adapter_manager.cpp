@@ -71,6 +71,15 @@ static const std::vector<AudioStreamType> MEDIA_VOLUME_TYPE_LIST = {
     STREAM_NAVIGATION
 };
 
+static const std::vector<std::string> SYSTEM_SOUND_KEY_LIST = {
+    // all keys for system sound uri
+    "ringtone_for_sim_card_0",
+    "ringtone_for_sim_card_1",
+    "system_tone_for_sim_card_0",
+    "system_tone_for_sim_card_1",
+    "system_tone_for_notification"
+};
+
 bool AudioAdapterManager::Init()
 {
     char testMode[10] = {0}; // 10 for system parameter usage
@@ -1161,14 +1170,49 @@ float AudioAdapterManager::CalculateVolumeDb(int32_t volumeLevel)
     return static_cast<float>(roundValue) / CONST_FACTOR;
 }
 
+void AudioAdapterManager::InitSystemSoundUriMap()
+{
+    CHECK_AND_RETURN_LOG(audioPolicyKvStore_ != nullptr, "audioPolicyKvStore_ is null");
+    for (auto &key: SYSTEM_SOUND_KEY_LIST) {
+        std::string systemSoundUri = LoadSystemSoundUriFromKvStore(key);
+        if (systemSoundUri == "") {
+            AUDIO_WARNING_LOG("Could not load system sound uri for %{public}s from kvStore", key.c_str());
+        }
+        systemSoundUriMap_[key] = systemSoundUri;
+    }
+}
+
 int32_t AudioAdapterManager::SetSystemSoundUri(const std::string &key, const std::string &uri)
 {
+    auto pos = std::find(SYSTEM_SOUND_KEY_LIST.begin(), SYSTEM_SOUND_KEY_LIST.end(), key);
+    if (pos == SYSTEM_SOUND_KEY_LIST.end()) {
+        AUDIO_ERR_LOG("Invalid key %{public}s for system sound uri", key.c_str());
+        return ERR_INVALID_PARAM;
+    }
+    std::lock_guard<std::mutex> lock(systemSoundMutex_);
+    if (systemSoundUriMap_.size() == 0) {
+        InitSystemSoundUriMap();
+        CHECK_AND_RETURN_RET_LOG(systemSoundUriMap_.size() != 0, ERR_OPERATION_FAILED,
+            "Failed to init system sound uri map.");
+    }
+    systemSoundUriMap_[key] = uri;
     return WriteSystemSoundUriToKvStore(key, uri);
 }
 
 std::string AudioAdapterManager::GetSystemSoundUri(const std::string &key)
 {
-    return LoadSystemSoundUriFromKvStore(key);
+    auto pos = std::find(SYSTEM_SOUND_KEY_LIST.begin(), SYSTEM_SOUND_KEY_LIST.end(), key);
+    if (pos == SYSTEM_SOUND_KEY_LIST.end()) {
+        AUDIO_ERR_LOG("Invalid key %{public}s for system sound uri", key.c_str());
+        return "";
+    }
+    std::lock_guard<std::mutex> lock(systemSoundMutex_);
+    if (systemSoundUriMap_.size() == 0) {
+        InitSystemSoundUriMap();
+        CHECK_AND_RETURN_RET_LOG(systemSoundUriMap_.size() != 0, "",
+            "Failed to init system sound uri map.");
+    }
+    return systemSoundUriMap_[key];
 }
 
 int32_t AudioAdapterManager::WriteSystemSoundUriToKvStore(const std::string &key, const std::string &uri)

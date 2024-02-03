@@ -179,6 +179,7 @@ private:
     bool LoadMuteStatusFromKvStore(DeviceType deviceType, AudioStreamType streamType);
     void WriteMuteStatusToKvStore(DeviceType deviceType, AudioStreamType streamType, bool muteStatus);
     std::string GetMuteKeyForKvStore(DeviceType deviceType, AudioStreamType streamType);
+    void InitSystemSoundUriMap();
     int32_t WriteSystemSoundUriToKvStore(const std::string &key, const std::string &uri);
     std::string LoadSystemSoundUriFromKvStore(const std::string &key);
     void InitVolumeMapIndex();
@@ -214,6 +215,8 @@ private:
     std::unordered_map<AudioStreamType, int32_t> volumeLevelMap_;
     std::unordered_map<AudioStreamType, int> minVolumeIndexMap_;
     std::unordered_map<AudioStreamType, int> maxVolumeIndexMap_;
+    std::mutex systemSoundMutex_;
+    std::unordered_map<std::string, std::string> systemSoundUriMap_;
     StreamVolumeInfoMap streamVolumeInfos_;
     std::unordered_map<AudioStreamType, bool> muteStatusMap_;
     DeviceType currentActiveDevice_ = DeviceType::DEVICE_TYPE_SPEAKER;
