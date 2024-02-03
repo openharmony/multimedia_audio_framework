@@ -30,7 +30,7 @@ namespace OHOS {
 namespace AudioStandard {
 const uint32_t CHECK_UTIL_SUCCESS = 0;
 const uint64_t BUF_LENGTH_IN_MSEC = 20;
-static const int32_t CONNECT_STREAM_TIMEOUT_IN_SEC = 5; // 5S
+static const int32_t CONNECT_STREAM_TIMEOUT_IN_SEC = 8; // 8S
 static const std::unordered_map<AudioStreamType, std::string> STREAM_TYPE_ENUM_STRING_MAP = {
     {STREAM_VOICE_CALL, "voice_call"},
     {STREAM_MUSIC, "music"},
@@ -426,10 +426,12 @@ int32_t PaAdapterManager::ConnectStreamToPA(pa_stream *paStream, pa_sample_spec 
     }
 
     PaLockGuard lock(mainLoop_);
+    int32_t XcollieFlag = 0; // flag 0 do nothing but the caller defined function
     if (managerType_ == PLAYBACK) {
         int32_t rendererRet = ConnectRendererStreamToPA(paStream, sampleSpec);
         CHECK_AND_RETURN_RET_LOG(rendererRet == SUCCESS, rendererRet, "ConnectRendererStreamToPA failed");
     } else {
+        XcollieFlag = 2; // flag 2 die when timeout, restart server
         int32_t capturerRet = ConnectCapturerStreamToPA(paStream, sampleSpec, deviceName);
         CHECK_AND_RETURN_RET_LOG(capturerRet == SUCCESS, capturerRet, "ConnectCapturerStreamToPA failed");
     }
@@ -449,7 +451,7 @@ int32_t PaAdapterManager::ConnectStreamToPA(pa_stream *paStream, pa_sample_spec 
                 AUDIO_ERR_LOG("ConnectStreamToPA timeout, trigger signal");
                 waitConnect_ = false;
                 pa_threaded_mainloop_signal(this->mainLoop_, 0);
-            }, nullptr, 0);
+            }, nullptr, XcollieFlag);
         pa_threaded_mainloop_wait(mainLoop_);
     }
     return SUCCESS;
