@@ -77,8 +77,6 @@ public:
 
     std::vector<sptr<AudioDeviceDescriptor>> GetDevices(DeviceFlag deviceFlag);
 
-    int32_t SetWakeUpAudioCapturer(InternalAudioCapturerOptions options);
-
     int32_t SetDeviceActive(InternalDeviceType deviceType, bool active);
 
     bool IsDeviceActive(InternalDeviceType deviceType);
@@ -326,6 +324,8 @@ public:
     int32_t SetCallDeviceActive(InternalDeviceType deviceType, bool active, std::string address);
 
     std::unique_ptr<AudioDeviceDescriptor> GetActiveBluetoothDevice();
+
+    int32_t NotifyCapturerAdded(AudioCapturerInfo capturerInfo, AudioStreamInfo streamInfo, uint32_t sessionId);
 
 private:
     AudioPolicyManager()

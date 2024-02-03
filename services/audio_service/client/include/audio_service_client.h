@@ -894,6 +894,8 @@ private:
     void SendUnsetCapturerPeriodReachedRequestEvent();
     void HandleUnsetCapturerPeriodReachedEvent();
 
+    virtual int32_t NotifyCapturerAdded(uint32_t sessionID) = 0;
+
     enum {
         WRITE_BUFFER_REQUEST = 0,
         READ_BUFFER_REQUEST,

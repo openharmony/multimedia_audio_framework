@@ -306,13 +306,6 @@ std::vector<sptr<AudioDeviceDescriptor>> AudioPolicyManager::GetDevices(DeviceFl
     return gsp->GetDevices(deviceFlag);
 }
 
-int32_t AudioPolicyManager::SetWakeUpAudioCapturer(InternalAudioCapturerOptions options)
-{
-    const sptr<IAudioPolicy> gsp = GetAudioPolicyManagerProxy();
-    CHECK_AND_RETURN_RET_LOG(gsp != nullptr, -1, "audio policy manager proxy is NULL.");
-    return gsp->SetWakeUpAudioCapturer(options);
-}
-
 std::vector<sptr<AudioDeviceDescriptor>> AudioPolicyManager::GetPreferredOutputDeviceDescriptors(
     AudioRendererInfo &rendererInfo)
 {
@@ -1404,6 +1397,17 @@ std::unique_ptr<AudioDeviceDescriptor> AudioPolicyManager::GetActiveBluetoothDev
         return make_unique<AudioDeviceDescriptor>();
     }
     return gsp->GetActiveBluetoothDevice();
+}
+
+int32_t AudioPolicyManager::NotifyCapturerAdded(AudioCapturerInfo capturerInfo, AudioStreamInfo streamInfo,
+    uint32_t sessionId)
+{
+    const sptr<IAudioPolicy> gsp = GetAudioPolicyManagerProxy();
+    if (gsp == nullptr) {
+        AUDIO_ERR_LOG("audio policy manager proxy is NULL.");
+        return -1;
+    }
+    return gsp->NotifyCapturerAdded(capturerInfo, streamInfo, sessionId);
 }
 } // namespace AudioStandard
 } // namespace OHOS

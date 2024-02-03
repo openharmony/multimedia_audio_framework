@@ -1336,6 +1336,14 @@ error:
     return false;
 }
 
+int32_t AudioStream::NotifyCapturerAdded(uint32_t sessionID)
+{
+    AudioStreamInfo streamInfo;
+    streamInfo.samplingRate = static_cast<AudioSamplingRate> (streamParams_.samplingRate);
+    streamInfo.channels = static_cast<AudioChannel> (streamParams_.channels);
+    return AudioPolicyManager::GetInstance().NotifyCapturerAdded(capturerInfo_, streamInfo, sessionID);
+}
+
 AudioStreamPolicyServiceDiedCallbackImpl::AudioStreamPolicyServiceDiedCallbackImpl()
 {
     AUDIO_DEBUG_LOG("AudioStreamPolicyServiceDiedCallbackImpl instance create");

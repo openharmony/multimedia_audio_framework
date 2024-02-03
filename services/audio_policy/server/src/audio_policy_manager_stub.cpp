@@ -227,12 +227,17 @@ void AudioPolicyManagerStub::GetDevicesInternal(MessageParcel &data, MessageParc
     }
 }
 
-void AudioPolicyManagerStub::SetWakeUpAudioCapturerInternal(MessageParcel &data, MessageParcel &reply)
+void AudioPolicyManagerStub::NotifyCapturerAddedInternal(MessageParcel &data, MessageParcel &reply)
 {
-    InternalAudioCapturerOptions capturerOptions;
-    capturerOptions.streamInfo.Unmarshalling(data);
-    capturerOptions.capturerInfo.Unmarshalling(data);
-    int32_t result = SetWakeUpAudioCapturer(capturerOptions);
+    AudioCapturerInfo capturerInfo;
+    AudioStreamInfo streamInfo;
+    uint32_t sessionId;
+
+    capturerInfo.Unmarshalling(data);
+    streamInfo.Unmarshalling(data);
+    data.ReadUint32(sessionId);
+
+    int32_t result = NotifyCapturerAdded(capturerInfo, streamInfo, sessionId);
     reply.WriteInt32(result);
 }
 
