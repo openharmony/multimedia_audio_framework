@@ -132,7 +132,6 @@ void RendererInServer::OnStatusUpdate(IOperation operation)
     AUDIO_INFO_LOG("RendererInServer::OnStatusUpdate operation: %{public}d", operation);
     operation_ = operation;
     CHECK_AND_RETURN_LOG(operation != OPERATION_RELEASED, "Stream already released");
-    std::lock_guard<std::mutex> lock(statusLock_);
     std::shared_ptr<IStreamListener> stateListener = streamListener_.lock();
     switch (operation) {
         case OPERATION_UNDERRUN:
