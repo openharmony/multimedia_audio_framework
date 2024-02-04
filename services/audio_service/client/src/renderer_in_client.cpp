@@ -1698,6 +1698,7 @@ int32_t RendererInClientInner::WriteCacheData()
         int32_t timeout = offloadEnable_ ? OFFLOAD_OPERATION_TIMEOUT_IN_MS : WRITE_CACHE_TIMEOUT_IN_MS;
         std::cv_status stat = writeDataCV_.wait_for(lock, std::chrono::milliseconds(timeout));
         CHECK_AND_RETURN_RET_LOG(stat == std::cv_status::no_timeout, ERROR, "write data time out");
+        if (state_ != RUNNING) { return ERR_ILLEGAL_STATE; }
         sizeInFrame = clientBuffer_->GetAvailableDataFrames();
     }
     BufferDesc desc = {};
