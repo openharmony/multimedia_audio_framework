@@ -181,6 +181,7 @@ struct Userdata {
         pa_atomic_t dflag;
         pa_usec_t writeTime;
         pa_usec_t prewrite;
+        pa_sink_state_t previousState;
     } primary;
     struct {
         bool used;
@@ -2592,9 +2593,10 @@ static void ThreadFuncRendererTimerLoop(struct Userdata *u, int64_t *sleepForUse
 {
     pa_usec_t now = 0;
 
-    bool flag = (u->render_in_idle_state && PA_SINK_IS_OPENED(u->sink->thread_info.state)) ||
+    bool flag = ((u->render_in_idle_state && PA_SINK_IS_OPENED(u->sink->thread_info.state)) ||
                 (!u->render_in_idle_state && PA_SINK_IS_RUNNING(u->sink->thread_info.state)) ||
-                (u->sink->state == PA_SINK_IDLE && monitorLinked(u->sink, true));
+                (u->sink->state == PA_SINK_IDLE && monitorLinked(u->sink, true))) &&
+                !(u->sink->state == PA_SINK_IDLE && u->primary.previousState == PA_SINK_SUSPENDED);
     unsigned nPrimary;
     unsigned nOffload;
     unsigned nHd;
@@ -2994,6 +2996,7 @@ static int32_t RemoteSinkStateChange(pa_sink *s, pa_sink_state_t newState)
 
 static int32_t SinkSetStateInIoThreadCbStartPrimary(struct Userdata *u, pa_sink_state_t newState)
 {
+    u->primary.previousState = u->sink->thread_info.state;
     if (!PA_SINK_IS_OPENED(newState)) {
         return 0;
     }
