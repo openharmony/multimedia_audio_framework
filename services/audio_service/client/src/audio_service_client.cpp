@@ -434,13 +434,13 @@ void AudioServiceClient::PAStreamEventCb(pa_stream *stream, const char *event, p
     AudioServiceClient *asClient = (AudioServiceClient *)userdata;
     if (!strcmp(event, "signal_mainloop")) {
         pa_threaded_mainloop_signal(asClient->mainLoop, 0);
-        AUDIO_DEBUG_LOG("AudioServiceClient::PAEventCb receive event signal_mainloop");
+        AUDIO_DEBUG_LOG("receive event signal_mainloop");
     }
 
     if (!strcmp(event, "state_changed")) {
         const char *old_state = pa_proplist_gets(pl, "old_state");
         const char *new_state = pa_proplist_gets(pl, "new_state");
-        AUDIO_INFO_LOG("AudioServiceClient::PAEventCb old state : %{public}s, new state : %{public}s",
+        AUDIO_INFO_LOG("old state : %{public}s, new state : %{public}s",
             old_state, new_state);
         if (asClient != nullptr) {
             if (!strcmp(old_state, "RUNNING") && !strcmp(new_state, "CORKED")) {
@@ -586,7 +586,7 @@ AudioServiceClient::AudioServiceClient()
 
 void AudioServiceClient::ResetPAAudioClient()
 {
-    AUDIO_INFO_LOG("AudioServiceClient::ResetPAAudioClient");
+    AUDIO_INFO_LOG("In");
     lock_guard<mutex> lock(ctrlMutex_);
     if (mainLoop && (isMainLoopStarted_ == true))
         pa_threaded_mainloop_stop(mainLoop);
@@ -679,7 +679,7 @@ AudioServiceClient::~AudioServiceClient()
 
 void AudioServiceClient::SetEnv()
 {
-    AUDIO_INFO_LOG("SetEnv called");
+    AUDIO_DEBUG_LOG("SetEnv called");
 
     int ret = setenv("HOME", PA_HOME_DIR, 1);
     AUDIO_DEBUG_LOG("set env HOME: %{public}d", ret);
@@ -1318,7 +1318,7 @@ int32_t AudioServiceClient::CorkStream()
 
 int32_t AudioServiceClient::FlushStream()
 {
-    AUDIO_INFO_LOG("AudioServiceClient::FlushStream");
+    AUDIO_INFO_LOG("In");
     lock_guard<mutex> lock(dataMutex_);
     int32_t res = CheckPaStatusIfinvalid(mainLoop, context, paStream, AUDIO_CLIENT_PA_ERR);
     CHECK_AND_RETURN_RET(res >= 0, AUDIO_CLIENT_PA_ERR);
@@ -3432,7 +3432,7 @@ int64_t AudioServiceClient::GetStreamFramesRead()
 
 int32_t AudioServiceClient::SetStreamAudioEffectMode(AudioEffectMode audioEffectMode)
 {
-    AUDIO_INFO_LOG("SetStreamAudioEffectMode: %{public}d", audioEffectMode);
+    AUDIO_INFO_LOG("Mode: %{public}d", audioEffectMode);
 
     int32_t ret = CheckPaStatusIfinvalid(mainLoop, context, paStream, AUDIO_CLIENT_PA_ERR);
     CHECK_AND_RETURN_RET_LOG(ret >= 0, AUDIO_CLIENT_PA_ERR,

@@ -219,13 +219,22 @@ int32_t RendererInServer::WriteData()
     Trace::Count("RendererInServer::WriteData", (currentWriteFrame - currentReadFrame) / spanSizeInFrame_);
     Trace trace1("RendererInServer::WriteData");
     if (currentReadFrame + spanSizeInFrame_ > currentWriteFrame) {
-        AUDIO_INFO_LOG("near underrun");
+        if (!underRunLogFlag_) {
+            AUDIO_INFO_LOG("near underrun");
+            underRunLogFlag_ = true;
+        } else {
+            AUDIO_DEBUG_LOG("near underrun");
+        }
+
         Trace trace2("RendererInServer::Underrun");
         std::shared_ptr<IStreamListener> stateListener = streamListener_.lock();
         CHECK_AND_RETURN_RET_LOG(stateListener != nullptr, ERR_OPERATION_FAILED, "IStreamListener is nullptr");
         stateListener->OnOperationHandled(UPDATE_STREAM, currentReadFrame);
         return ERR_OPERATION_FAILED;
+    } else {
+        underRunLogFlag_ = false;
     }
+
     BufferDesc bufferDesc = {nullptr, 0, 0}; // will be changed in GetReadbuffer
 
     if (audioServerBuffer_->GetReadbuffer(currentReadFrame, bufferDesc) == SUCCESS) {

@@ -53,7 +53,7 @@ void NapiAudioCapturer::Destructor(napi_env env, void *nativeObject, void *final
 
 napi_status NapiAudioCapturer::InitAudioCapturer(napi_env env, napi_value &constructor)
 {
-    AUDIO_INFO_LOG("NapiAudioCapturer::InitAudioCapturer()");
+    AUDIO_DEBUG_LOG("NapiAudioCapturer::InitAudioCapturer()");
     napi_property_descriptor audio_capturer_properties[] = {
         DECLARE_NAPI_FUNCTION("getCapturerInfo", GetCapturerInfo),
         DECLARE_NAPI_FUNCTION("getCapturerInfoSync", GetCapturerInfoSync),

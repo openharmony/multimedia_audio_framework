@@ -92,7 +92,6 @@ napi_value NapiTonePlayer::Init(napi_env env, napi_value exports)
         sizeof(static_prop) / sizeof(static_prop[PARAM0]), static_prop);
     CHECK_AND_RETURN_RET_LOG(status == napi_ok, result, "napi_define_properties failed");
 
-    AUDIO_ERR_LOG("SUCCESS in NapiTonePlayer::Init()");
     return exports;
 }
 

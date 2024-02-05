@@ -240,7 +240,7 @@ bool AudioStream::GetAudioPosition(Timestamp &timestamp, Timestamp::Timestampbas
 
 int32_t AudioStream::GetBufferSize(size_t &bufferSize)
 {
-    AUDIO_INFO_LOG("Get Buffer size");
+    AUDIO_DEBUG_LOG("Get Buffer size");
     if (eMode_ == AUDIO_MODE_RECORD) {
         CHECK_AND_RETURN_RET_LOG(state_ != RELEASED, ERR_ILLEGAL_STATE, "Stream state is released");
         return GetBufferSizeForCapturer(bufferSize);

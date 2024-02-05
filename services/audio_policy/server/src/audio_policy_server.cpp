@@ -2141,7 +2141,7 @@ int32_t AudioPolicyServer::RegisterTracker(AudioMode &mode, AudioStreamChangeInf
     auto callerUid = IPCSkeleton::GetCallingUid();
     streamChangeInfo.audioRendererChangeInfo.createrUID = callerUid;
     streamChangeInfo.audioCapturerChangeInfo.createrUID = callerUid;
-    AUDIO_INFO_LOG("RegisterTracker: [caller uid: %{public}d]", callerUid);
+    AUDIO_DEBUG_LOG("RegisterTracker: [caller uid: %{public}d]", callerUid);
     if (callerUid != MEDIA_SERVICE_UID) {
         if (mode == AUDIO_MODE_PLAYBACK) {
             streamChangeInfo.audioRendererChangeInfo.clientUID = callerUid;
@@ -2212,7 +2212,7 @@ int32_t AudioPolicyServer::GetCurrentCapturerChangeInfos(
 
 void AudioPolicyServer::RegisterClientDeathRecipient(const sptr<IRemoteObject> &object, DeathRecipientId id)
 {
-    AUDIO_INFO_LOG("Register clients death recipient!! RecipientId: %{public}d", id);
+    AUDIO_DEBUG_LOG("Register clients death recipient!! RecipientId: %{public}d", id);
     std::lock_guard<std::mutex> lock(clientDiedListenerStateMutex_);
     CHECK_AND_RETURN_LOG(object != nullptr, "Client proxy obj NULL!!");
 

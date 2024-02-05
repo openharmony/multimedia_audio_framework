@@ -1270,14 +1270,14 @@ bool AudioAdapterManager::IsVolumeUnadjustable()
 
 float AudioAdapterManager::GetSystemVolumeInDb(AudioVolumeType volumeType, int32_t volumeLevel, DeviceType deviceType)
 {
-    AUDIO_INFO_LOG("GetSystemVolumeInDb for volumeType: %{public}d deviceType:%{public}d volumeLevel:%{public}d",
+    AUDIO_DEBUG_LOG("GetSystemVolumeInDb for volumeType: %{public}d deviceType:%{public}d volumeLevel:%{public}d",
         volumeType, deviceType, volumeLevel);
     if (useNonlinearAlgo_) {
         getSystemVolumeInDb_ = CalculateVolumeDbNonlinear(volumeType, deviceType, volumeLevel);
     } else {
         getSystemVolumeInDb_ = CalculateVolumeDb(volumeLevel);
     }
-    AUDIO_INFO_LOG("Get system volume in db success %{public}f", getSystemVolumeInDb_);
+    AUDIO_DEBUG_LOG("Get system volume in db success %{public}f", getSystemVolumeInDb_);
 
     return getSystemVolumeInDb_;
 }
@@ -1304,7 +1304,7 @@ uint32_t AudioAdapterManager::GetPositionInVolumePoints(std::vector<VolumePoint>
 float AudioAdapterManager::CalculateVolumeDbNonlinear(AudioStreamType streamType,
     DeviceType deviceType, int32_t volumeLevel)
 {
-    AUDIO_INFO_LOG("CalculateVolumeDbNonlinear for stream: %{public}d devicetype:%{public}d volumeLevel:%{public}d",
+    AUDIO_DEBUG_LOG("CalculateVolumeDbNonlinear for stream: %{public}d devicetype:%{public}d volumeLevel:%{public}d",
         streamType, deviceType, volumeLevel);
     AudioStreamType streamAlias = GetStreamForVolumeMap(streamType);
     int32_t minVolIndex = GetMinVolumeLevel(streamAlias);
@@ -1332,10 +1332,11 @@ float AudioAdapterManager::CalculateVolumeDbNonlinear(AudioStreamType streamType
             AUDIO_INFO_LOG("Min volume index not zero, use min db: %{public}0.1f", volumePoints[0].dbValue / 100.0f);
             return exp((volumePoints[0].dbValue / 100.0f) * 0.115129f);
         }
-        AUDIO_INFO_LOG("position = 0, return 0.0");
+        AUDIO_DEBUG_LOG("position = 0, return 0.0");
         return 0.0f;
     } else if (position >= pointSize) {
-        AUDIO_INFO_LOG("position > pointSize, return %{public}f", exp(volumePoints[pointSize - 1].dbValue * 0.115129f));
+        AUDIO_DEBUG_LOG("position > pointSize, return %{public}f",
+            exp(volumePoints[pointSize - 1].dbValue * 0.115129f));
         return exp((volumePoints[pointSize - 1].dbValue / 100.0f) * 0.115129f);
     }
     float indexFactor = ((float)(idxRatio - volumePoints[position-1].index)) /
@@ -1344,7 +1345,7 @@ float AudioAdapterManager::CalculateVolumeDbNonlinear(AudioStreamType streamType
     float dbValue = (volumePoints[position-1].dbValue / 100.0f) +
         indexFactor * ((volumePoints[position].dbValue / 100.0f) - (volumePoints[position-1].dbValue / 100.0f));
 
-    AUDIO_INFO_LOG(" index=[%{public}d, %{public}d, %{public}d]"
+    AUDIO_DEBUG_LOG(" index=[%{public}d, %{public}d, %{public}d]"
         "db=[%{public}0.1f %{public}0.1f %{public}0.1f] factor=[%{public}f]",
         volumePoints[position-1].index, idxRatio, volumePoints[position].index,
         ((float)volumePoints[position - 1].dbValue / 100.0f), dbValue,

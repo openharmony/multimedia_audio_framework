@@ -1289,7 +1289,7 @@ bool AudioProcessInClientInner::PrepareCurrent(uint64_t curWritePos)
     int tryCount = 10; // try 10 * 2 = 20ms
     SpanStatus targetStatus = SpanStatus::SPAN_READ_DONE;
     while (!tempSpan->spanStatus.compare_exchange_strong(targetStatus, SpanStatus::SPAN_WRITTING) && tryCount-- > 0) {
-        AUDIO_WARNING_LOG("current span %{public}" PRIu64" is not ready, status is %{public}d, wait 2ms.", curWritePos,
+        AUDIO_WARNING_LOG("span %{public}" PRIu64" not ready, status: %{public}d, wait 2ms.", curWritePos,
             targetStatus);
         targetStatus = SpanStatus::SPAN_READ_DONE;
         ClockTime::RelativeSleep(ONE_MILLISECOND_DURATION + ONE_MILLISECOND_DURATION);

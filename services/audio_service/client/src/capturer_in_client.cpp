@@ -51,6 +51,7 @@ namespace {
 static const size_t MAX_CLIENT_READ_SIZE = 20 * 1024 * 1024; // 20M
 static const int32_t CREATE_TIMEOUT_IN_SECOND = 5; // 5S
 static const int32_t OPERATION_TIMEOUT_IN_MS = 500; // 500ms
+static const int32_t LOGLITMITTIMES = 20;
 const uint64_t AUDIO_US_PER_MS = 1000;
 const uint64_t AUDIO_US_PER_S = 1000000;
 const uint64_t DEFAULT_BUF_DURATION_IN_USEC = 20000; // 20ms
@@ -216,6 +217,8 @@ private:
     int32_t clientUid_ = -1;
     int32_t clientPid_ = -1;
     uint32_t appTokenId_ = 0;
+
+    uint32_t readLogTimes_ = 0;
 
     std::unique_ptr<AudioStreamTracker> audioStreamTracker_;
     bool streamTrackerRegistered_ = false;
@@ -1537,7 +1540,18 @@ int32_t CapturerInClientInner::Read(uint8_t &buffer, size_t userSize, bool isBlo
     }
 
     std::unique_lock<std::mutex> statusLock(statusMutex_); // status check
-    CHECK_AND_RETURN_RET_LOG(state_ == RUNNING, ERR_ILLEGAL_STATE, "Illegal state:%{public}u", state_.load());
+    if (state_ != RUNNING) {
+        if (readLogTimes_ < LOGLITMITTIMES) {
+            readLogTimes_++;
+            AUDIO_ERR_LOG("Illegal state:%{public}u", state_.load());
+        } else {
+            AUDIO_DEBUG_LOG("Illegal state:%{public}u", state_.load());
+        }
+        return ERR_ILLEGAL_STATE;
+    } else {
+        readLogTimes_ = 0;
+    }
+
     statusLock.unlock();
     size_t readSize = 0;
     int32_t res = HandleCapturerRead(readSize, userSize, buffer, isBlockingRead);

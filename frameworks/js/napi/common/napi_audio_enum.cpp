@@ -599,7 +599,7 @@ napi_status NapiAudioEnum::InitAudioEnum(napi_env env, napi_value exports)
 
 napi_value NapiAudioEnum::Init(napi_env env, napi_value exports)
 {
-    AUDIO_INFO_LOG("NapiAudioEnum::Init()");
+    AUDIO_DEBUG_LOG("NapiAudioEnum::Init()");
     napi_value constructor;
     napi_value result = nullptr;
     napi_get_undefined(env, &result);

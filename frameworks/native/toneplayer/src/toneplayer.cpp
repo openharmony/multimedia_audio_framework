@@ -476,7 +476,7 @@ void TonePlayerPrivate::AudioToneRendererCallback()
         toneDataState_ = TONE_DATA_REQUESTED;
         waitToneDataCond_.wait_for(lock, std::chrono::seconds(CMAXWAIT));
     }
-    AUDIO_INFO_LOG("AudioToneRendererCallback Exited");
+    AUDIO_DEBUG_LOG("AudioToneRendererCallback Exited");
 }
 
 bool TonePlayerPrivate::AudioToneSequenceGen(BufferDesc &bufDesc)
