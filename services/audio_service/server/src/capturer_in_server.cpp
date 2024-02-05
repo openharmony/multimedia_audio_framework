@@ -283,11 +283,11 @@ int32_t CapturerInServer::Pause()
 int32_t CapturerInServer::Flush()
 {
     std::unique_lock<std::mutex> lock(statusLock_);
-    if (status_ != I_STATUS_STARTED) {
+    if (status_ == I_STATUS_STARTED) {
         status_ = I_STATUS_FLUSHING_WHEN_STARTED;
-    } else if (status_ != I_STATUS_PAUSED) {
+    } else if (status_ == I_STATUS_PAUSED) {
         status_ = I_STATUS_FLUSHING_WHEN_PAUSED;
-    } else if (status_ != I_STATUS_STOPPED) {
+    } else if (status_ == I_STATUS_STOPPED) {
         status_ = I_STATUS_FLUSHING_WHEN_STOPPED;
     } else {
         AUDIO_ERR_LOG("CapturerInServer::Flush failed, Illegal state: %{public}u", status_);
