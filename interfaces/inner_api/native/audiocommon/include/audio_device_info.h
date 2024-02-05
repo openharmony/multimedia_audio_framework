@@ -25,6 +25,15 @@ namespace AudioStandard {
 constexpr size_t AUDIO_DEVICE_INFO_SIZE_LIMIT = 30;
 constexpr int32_t INVALID_GROUP_ID = -1;
 
+enum API_VERSION {
+    API_7 = 7,
+    API_8,
+    API_9,
+    API_10,
+    API_11,
+    API_MAX = 1000
+};
+
 enum DeviceFlag {
     /**
      * Device flag none.
@@ -343,18 +352,43 @@ public:
             && parcel.WriteInt32(volumeGroupId)
             && parcel.WriteBool(isLowLatencyDevice);
     }
-    bool Marshalling(Parcel &parcel, bool hasBTPermission, bool hasSystemPermission) const
+    bool Marshalling(Parcel &parcel, bool hasBTPermission, bool hasSystemPermission, int32_t apiVersion) const
     {
-        return parcel.WriteInt32(static_cast<int32_t>(deviceType))
+        DeviceType devType = deviceType;
+        int32_t devId = deviceId;
+        DeviceStreamInfo streamInfo = audioStreamInfo;
+
+        // If api target version < 11 && does not set deviceType, fix api compatibility.
+        if (apiVersion < API_11 && (deviceType == DEVICE_TYPE_NONE || deviceType == DEVICE_TYPE_INVALID)) {
+            // DeviceType use speaker or mic instead
+            if (deviceRole == OUTPUT_DEVICE) {
+                devType = DEVICE_TYPE_SPEAKER;
+                devId = 1; // 1 default speaker device id
+            } else if (deviceRole == INPUT_DEVICE) {
+                devType = DEVICE_TYPE_MIC;
+                devId = 2; // 2 default mic device id
+            }
+
+            //If does not set sampleRates use SAMPLE_RATE_44100 instead.
+            if (streamInfo.samplingRate.empty()) {
+                streamInfo.samplingRate.insert(SAMPLE_RATE_44100);
+            }
+            // If does not set channelCounts use STEREO instead.
+            if (streamInfo.channels.empty()) {
+                streamInfo.channels.insert(STEREO);
+            }
+        }
+
+        return parcel.WriteInt32(static_cast<int32_t>(devType))
             && parcel.WriteInt32(static_cast<int32_t>(deviceRole))
-            && parcel.WriteInt32(deviceId)
+            && parcel.WriteInt32(devId)
             && parcel.WriteInt32(channelMasks)
             && parcel.WriteInt32(channelIndexMasks)
             && parcel.WriteString((!hasBTPermission && (deviceType == DEVICE_TYPE_BLUETOOTH_A2DP
                 || deviceType == DEVICE_TYPE_BLUETOOTH_SCO)) ? "" : deviceName)
             && parcel.WriteString((!hasBTPermission && (deviceType == DEVICE_TYPE_BLUETOOTH_A2DP
                 || deviceType == DEVICE_TYPE_BLUETOOTH_SCO)) ? "" : macAddress)
-            && audioStreamInfo.Marshalling(parcel)
+            && streamInfo.Marshalling(parcel)
             && parcel.WriteString(hasSystemPermission ? networkId : "")
             && parcel.WriteString(displayName)
             && parcel.WriteInt32(hasSystemPermission ? interruptGroupId : INVALID_GROUP_ID)

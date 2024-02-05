@@ -206,12 +206,6 @@ enum FocusType {
     FOCUS_TYPE_RECORDING = 0,
 };
 
-enum API_VERSION {
-    API_7 = 7,
-    API_8 = 8,
-    API_9 = 9
-};
-
 enum AudioErrors {
     /**
      * Common errors.
@@ -691,7 +685,7 @@ public:
             && parcel.WriteInt32(static_cast<int32_t>(rendererState))
             && outputDeviceInfo.Marshalling(parcel);
     }
-    bool Marshalling(Parcel &parcel, bool hasBTPermission, bool hasSystemPermission) const
+    bool Marshalling(Parcel &parcel, bool hasBTPermission, bool hasSystemPermission, int32_t apiVersion) const
     {
         return parcel.WriteInt32(createrUID)
             && parcel.WriteInt32(hasSystemPermission ? clientUID : EMPTY_UID)
@@ -705,7 +699,7 @@ public:
             && parcel.WriteInt32(rendererInfo.rendererFlags)
             && parcel.WriteInt32(hasSystemPermission ? static_cast<int32_t>(rendererState) :
                 RENDERER_INVALID)
-            && outputDeviceInfo.Marshalling(parcel, hasBTPermission, hasSystemPermission);
+            && outputDeviceInfo.Marshalling(parcel, hasBTPermission, hasSystemPermission, apiVersion);
     }
     void Unmarshalling(Parcel &parcel)
     {
@@ -758,6 +752,21 @@ public:
             && parcel.WriteBool(muted)
             && parcel.WriteUint32(appTokenId);
     }
+
+    bool Marshalling(Parcel &parcel, bool hasBTPermission, bool hasSystemPermission, int32_t apiVersion) const
+    {
+        return parcel.WriteInt32(createrUID)
+            && parcel.WriteInt32(clientUID)
+            && parcel.WriteInt32(sessionId)
+            && parcel.WriteInt32(callerPid)
+            && parcel.WriteInt32(clientPid)
+            && capturerInfo.Marshalling(parcel)
+            && parcel.WriteInt32(static_cast<int32_t>(capturerState))
+            && inputDeviceInfo.Marshalling(parcel, hasBTPermission, hasSystemPermission, apiVersion)
+            && parcel.WriteBool(muted)
+            && parcel.WriteUint32(appTokenId);
+    }
+
     void Unmarshalling(Parcel &parcel)
     {
         createrUID = parcel.ReadInt32();

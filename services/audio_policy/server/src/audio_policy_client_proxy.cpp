@@ -241,7 +241,7 @@ void AudioPolicyClientProxy::OnRendererStateChange(
             AUDIO_ERR_LOG("Renderer change info null, something wrong!!");
             continue;
         }
-        rendererChangeInfo->Marshalling(data, hasBTPermission_, hasSystemPermission_);
+        rendererChangeInfo->Marshalling(data, hasBTPermission_, hasSystemPermission_, apiVersion_);
     }
     int error = Remote()->SendRequest(static_cast<uint32_t>(UPDATE_CALLBACK_CLIENT), data, reply, option);
     if (error != 0) {
@@ -296,7 +296,7 @@ void AudioPolicyClientProxy::OnCapturerStateChange(
             AUDIO_ERR_LOG("Capturer change info null, something wrong!!");
             continue;
         }
-        capturerChangeInfo->Marshalling(data);
+        capturerChangeInfo->Marshalling(data, hasBTPermission_, hasSystemPermission_, apiVersion_);
     }
 
     int error = Remote()->SendRequest(static_cast<uint32_t>(UPDATE_CALLBACK_CLIENT), data, reply, option);
