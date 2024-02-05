@@ -271,7 +271,7 @@ int32_t TonePlayerImpl::GetSamples(uint16_t *freqs, int8_t *buffer, uint32_t req
         freqVal = freqs[i];
         AUDIO_DEBUG_LOG("GetSamples Freq: %{public}d sampleCount_: %{public}d", freqVal, sampleCount_);
         index = sampleCount_;
-        data = (uint8_t*)buffer;
+        data = reinterpret_cast<uint8_t*>(buffer);
         double factor = freqVal * 2 * pi / samplingRate_; // 2 is a parameter in the sine wave formula
         for (uint32_t idx = 0; idx < reqSamples; idx++) {
             int16_t sample = AMPLITUDE * sin(factor * index);
@@ -326,7 +326,7 @@ bool TonePlayerImpl::CheckToneStopped()
 
 bool TonePlayerImpl::AudioToneSequenceGen(BufferDesc &bufDesc)
 {
-    int8_t *audioBuffer = (int8_t *)bufDesc.buffer;
+    int8_t *audioBuffer = reinterpret_cast<int8_t *>(bufDesc.buffer);
     uint32_t totalBufAvailable = bufDesc.bufLength / sizeof(int16_t);
     bool retVal = true;
     while (totalBufAvailable) {

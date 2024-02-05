@@ -108,7 +108,7 @@ void PlayerTest(char *argv[])
 
     // 4. setspeed
     ret = OH_AudioRenderer_SetSpeed(audioRenderer, g_speed);
-
+    printf("speed ret: %d \n", ret);
     // 5. start
     ret = OH_AudioRenderer_Start(audioRenderer);
     printf("start ret: %d \n", ret);

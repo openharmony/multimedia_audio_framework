@@ -1796,7 +1796,7 @@ void NapiAudioRenderer::RegisterRendererWriteDataCallback(napi_env env, napi_val
     AUDIO_INFO_LOG("Register Callback is successful");
 }
 
-void NapiAudioRenderer::UnregisterRendererWriteDataCallback(napi_env env, size_t argc, napi_value *argv,
+void NapiAudioRenderer::UnregisterRendererWriteDataCallback(napi_env env, size_t argc, const napi_value *argv,
     NapiAudioRenderer *napiRenderer)
 {
     napi_value callback = nullptr;

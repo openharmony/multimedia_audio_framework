@@ -210,7 +210,6 @@ int32_t PlaybackTest::InitRenderer(bool isFast)
 
 int32_t PlaybackTest::SwitchDevice(DeviceRole deviceRole)
 {
-    vector<sptr<AudioDeviceDescriptor>> devices;
     if (deviceRole == OUTPUT_DEVICE) {
         return SwitchOutputDevice();
     } else {

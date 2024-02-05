@@ -515,7 +515,7 @@ void PaAdapterManager::PAStreamUpdateStreamIndexSuccessCb(pa_stream *stream, int
 
 void PaAdapterManager::PAContextStateCb(pa_context *context, void *userdata)
 {
-    pa_threaded_mainloop *mainLoop = (pa_threaded_mainloop *)userdata;
+    pa_threaded_mainloop *mainLoop = reinterpret_cast<pa_threaded_mainloop *>(userdata);
     AUDIO_INFO_LOG("Current Context State: %{public}d", pa_context_get_state(context));
     ScheduleReportData(getpid(), gettid(), "audio_server");
 
@@ -543,7 +543,7 @@ void PaAdapterManager::PAStreamStateCb(pa_stream *stream, void *userdata)
         AUDIO_ERR_LOG("PAStreamStateCb: userdata is null");
         return;
     }
-    PaAdapterManager *adapterManger = (PaAdapterManager *)userdata;
+    PaAdapterManager *adapterManger = reinterpret_cast<PaAdapterManager *>(userdata);
     AUDIO_INFO_LOG("Current Stream State: %{public}d", pa_stream_get_state(stream));
     switch (pa_stream_get_state(stream)) {
         case PA_STREAM_READY:

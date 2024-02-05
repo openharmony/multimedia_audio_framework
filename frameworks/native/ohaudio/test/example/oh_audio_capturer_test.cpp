@@ -96,7 +96,7 @@ void RecorderTest(char *argv[])
     int64_t timestamp = 0;
     while (!stop) {
         OH_AudioCapturer_GetTimestamp(audioCapturer, CLOCK_MONOTONIC, &framePosition, &timestamp);
-        printf("Recording audio is in the countdown ... %d s (framePosition: %lu)((timestamp: %lu))\n",
+        printf("Recording audio is in the countdown ... %d s (framePosition: %lld)((timestamp: %lld))\n",
             timeLeft / AudioTestConstants::CONVERT_RATE, framePosition, timestamp);
         std::this_thread::sleep_for(std::chrono::milliseconds(AudioTestConstants::COUNTDOWN_INTERVAL));
         timeLeft  = timeLeft - AudioTestConstants::COUNTDOWN_INTERVAL;

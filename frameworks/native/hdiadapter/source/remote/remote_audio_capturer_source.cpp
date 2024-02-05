@@ -63,7 +63,7 @@ public:
         const std::string &value) override;
 
 private:
-    int32_t CreateCapture(struct AudioPort &capturePort);
+    int32_t CreateCapture(const AudioPort &capturePort);
     int32_t SetInputPortPin(DeviceType inputDevice, AudioRouteNode &source);
     AudioCategory GetAudioCategory(AudioScene audioScene);
     void ClearCapture();
@@ -230,7 +230,7 @@ AudioFormat RemoteAudioCapturerSourceInner::ConvertToHdiFormat(HdiAdapterFormat 
     return hdiFormat;
 }
 
-int32_t RemoteAudioCapturerSourceInner::CreateCapture(struct AudioPort &capturePort)
+int32_t RemoteAudioCapturerSourceInner::CreateCapture(const struct AudioPort &capturePort)
 {
     struct AudioSampleAttributes param;
     param.type = AUDIO_IN_MEDIA;

@@ -423,7 +423,8 @@ void OHAudioRenderer::SetRendererOutputDeviceChangeCallback(OH_AudioRenderer_Out
     CHECK_AND_RETURN_LOG(audioRenderer_ != nullptr, "renderer client is nullptr");
     CHECK_AND_RETURN_LOG(callback != nullptr, "callback is nullptr");
     audioRendererDeviceChangeCallbackWithInfo_ =
-        std::make_shared<OHAudioRendererDeviceChangeCallbackWithInfo> (callback, (OH_AudioRenderer*)this, userData);
+        std::make_shared<OHAudioRendererDeviceChangeCallbackWithInfo> (callback,
+        reinterpret_cast<OH_AudioRenderer*>(this), userData);
     audioRenderer_->RegisterOutputDeviceChangeWithInfoCallback(audioRendererDeviceChangeCallbackWithInfo_);
 }
 
