@@ -419,7 +419,11 @@ int32_t BluetoothRendererSinkInner::RenderFrame(char &data, uint64_t len, uint64
 
     Trace trace("BluetoothRendererSinkInner::RenderFrame");
     while (true) {
-        Trace trace1("BluetoothRendererSinkInner::RenderFrame in");
+        if (*reinterpret_cast<int8_t*>(&data) == 0) {
+            Trace::Count("BluetoothRendererSinkInner::RenderFrame", PCM_MAYBE_SILENT);
+        } else {
+            Trace::Count("BluetoothRendererSinkInner::RenderFrame", PCM_MAYBE_NOT_SILENT);
+        }
         ret = audioRender_->RenderFrame(audioRender_, (void*)&data, len, &writeLen);
         AUDIO_DEBUG_LOG("A2dp RenderFrame returns: %{public}x", ret);
         if (ret == RENDER_FRAME_NUM) {
