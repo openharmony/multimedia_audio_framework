@@ -155,7 +155,7 @@ public:
     ContentType contentType;
     AudioFocusType audioFocusType;
     uint32_t sessionID;
-    bool pauseWhenDucked;
+    bool pauseWhenDucked = false;
     int32_t pid { -1 };
     InterruptMode mode { SHARE_MODE };
     bool parallelPlayFlag {false};

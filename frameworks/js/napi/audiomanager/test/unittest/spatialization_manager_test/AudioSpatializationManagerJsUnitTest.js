@@ -23,6 +23,20 @@ describe("AudioSpatializationManagerJsTest", function () {
   const ERROR_NO_PERMISSION = '201';
   const ERROR_INPUT_INVALID = '401';
   const ERROR_INVALID_PARAM = '6800101';
+  let deviceDescriptor = {
+    address: "123",
+    deviceRole: 2,
+    deviceType: 1,
+    id: 123,
+    name: "123",
+    sampleRates: [18],
+    channelCounts: [2, 6],
+    channelMasks: [2, 6],
+    networkId: "123",
+    interruptGroupId: 12,
+    volumeGroupId: 12,
+    displayName: "123"
+  }
 
   beforeAll(async function () {
     console.info('beforeAll called')
@@ -455,20 +469,6 @@ describe("AudioSpatializationManagerJsTest", function () {
    * @tc.require: I7V04L
    */
   it("SUB_AUDIO_SPATIALIZATION_MANAGER_IS_SPATIALIZATION_SUPPORTED_FOR_DEVICE_001", 0, async function (done) {
-    let deviceDescriptor = {
-      address: "123",
-      deviceRole: 2,
-      deviceType: 1,
-      id: 123,
-      name: "123",
-      sampleRates: [18],
-      channelCounts: [2, 6],
-      channelMasks: [2, 6],
-      networkId: "123",
-      interruptGroupId: 12,
-      volumeGroupId: 12,
-      displayName: "123"
-    }
     try {
       let isSupported = audioSpatializationManager.isSpatializationSupportedForDevice(deviceDescriptor);
       console.info(`SUB_AUDIO_SPATIALIZATION_MANAGER_IS_SPATIALIZATION_SUPPORTED_FOR_DEVICE_001 PASS: ${isSupported}`);
@@ -510,20 +510,7 @@ describe("AudioSpatializationManagerJsTest", function () {
    * @tc.require: I7V04L
    */
   it("SUB_AUDIO_SPATIALIZATION_MANAGER_IS_SPATIALIZATION_SUPPORTED_FOR_DEVICE_003", 0, async function (done) {
-    let deviceDescriptor = {
-      address: "123",
-      deviceRole: 2,
-      deviceType: -2,
-      id: 123,
-      name: "123",
-      sampleRates: [18],
-      channelCounts: [2, 6],
-      channelMasks: [2, 6],
-      networkId: "123",
-      interruptGroupId: 12,
-      volumeGroupId: 12,
-      displayName: "123"
-    }
+    deviceDescriptor.deviceType = -2;
     try {
       let isSupported = audioSpatializationManager.isSpatializationSupportedForDevice(deviceDescriptor);
       console.error(`SUB_AUDIO_SPATIALIZATION_MANAGER_IS_SPATIALIZATION_SUPPORTED_FOR_DEVICE_003 check \
@@ -545,20 +532,7 @@ describe("AudioSpatializationManagerJsTest", function () {
    * @tc.require: I7V04L
    */
   it("SUB_AUDIO_SPATIALIZATION_MANAGER_IS_HEAD_TRACKING_SUPPORTED_FOR_DEVICE_001", 0, async function (done) {
-    let deviceDescriptor = {
-      address: "123",
-      deviceRole: 2,
-      deviceType: 1,
-      id: 123,
-      name: "123",
-      sampleRates: [18],
-      channelCounts: [2, 6],
-      channelMasks: [2, 6],
-      networkId: "123",
-      interruptGroupId: 12,
-      volumeGroupId: 12,
-      displayName: "123"
-    }
+    deviceDescriptor.deviceType = 1;
     try {
       let isSupported = audioSpatializationManager.isHeadTrackingSupportedForDevice(deviceDescriptor);
       console.info(`SUB_AUDIO_SPATIALIZATION_MANAGER_IS_HEAD_TRACKING_SUPPORTED_FOR_DEVICE_001 PASS: ${isSupported}`);
@@ -600,20 +574,7 @@ describe("AudioSpatializationManagerJsTest", function () {
    * @tc.require: I7V04L
    */
   it("SUB_AUDIO_SPATIALIZATION_MANAGER_IS_HEAD_TRACKING_SUPPORTED_FOR_DEVICE_003", 0, async function (done) {
-    let deviceDescriptor = {
-      address: "123",
-      deviceRole: 2,
-      deviceType: -2,
-      id: 123,
-      name: "123",
-      sampleRates: [18],
-      channelCounts: [2, 6],
-      channelMasks: [2, 6],
-      networkId: "123",
-      interruptGroupId: 12,
-      volumeGroupId: 12,
-      displayName: "123"
-    }
+    deviceDescriptor.deviceType = -2;
     try {
       let isSupported = audioSpatializationManager.isHeadTrackingSupportedForDevice(deviceDescriptor);
       console.error(`SUB_AUDIO_SPATIALIZATION_MANAGER_IS_HEAD_TRACKING_SUPPORTED_FOR_DEVICE_003 check \

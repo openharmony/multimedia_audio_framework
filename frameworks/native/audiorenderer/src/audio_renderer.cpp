@@ -1278,7 +1278,7 @@ void AudioRendererPrivate::SwitchStream(bool isLowLatencyDevice)
             targetClass = IAudioStream::FAST_STREAM;
         }
         if (needSwitch) {
-            if (!SwitchToTargetStream(targetClass) && !audioRendererErrorCallback_) {
+            if (!SwitchToTargetStream(targetClass) && audioRendererErrorCallback_) {
                 audioRendererErrorCallback_->OnError(ERROR_SYSTEM);
             }
         } else {
