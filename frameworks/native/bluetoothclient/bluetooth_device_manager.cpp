@@ -24,8 +24,8 @@ const int DEFAULT_COD = -1;
 const int DEFAULT_MAJOR_CLASS = -1;
 const int DEFAULT_MAJOR_MINOR_CLASS = -1;
 const int32_t WEAR_ENABLED = 1;
-const int A2DP_DEFAULT_SELECTION = 0;
-const int HFP_DEFAULT_SELECTION = 0;
+const int A2DP_DEFAULT_SELECTION = -1;
+const int HFP_DEFAULT_SELECTION = -1;
 const int USER_SELECTION = 1;
 const std::map<std::pair<int, int>, DeviceCategory> bluetoothDeviceCategoryMap_ = {
     {std::make_pair(BluetoothDevice::MAJOR_AUDIO_VIDEO, BluetoothDevice::AUDIO_VIDEO_HEADPHONES), BT_HEADPHONE},
