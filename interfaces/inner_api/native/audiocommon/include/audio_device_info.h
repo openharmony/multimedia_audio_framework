@@ -380,7 +380,7 @@ public:
 };
 
 enum class AudioStreamDeviceChangeReason {
-    UNKOWN = 0,
+    UNKNOWN = 0,
     NEW_DEVICE_AVAILABLE = 1,
     OLD_DEVICE_UNAVALIABLE = 2,
     OVERRODE = 3

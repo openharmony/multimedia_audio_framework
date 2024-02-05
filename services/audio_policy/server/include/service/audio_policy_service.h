@@ -404,6 +404,8 @@ public:
 
     void OnScoStateChanged(const std::string &macAddress, bool isConnnected);
 
+    void OnPreferredStateUpdated(AudioDeviceDescriptor &desc, const DeviceInfoUpdateCommand updateCommand);
+
     void OnDeviceInfoUpdated(AudioDeviceDescriptor &desc, const DeviceInfoUpdateCommand updateCommand);
 
     void UpdateA2dpOffloadFlagBySpatialService(
@@ -517,7 +519,7 @@ private:
 
     void SelectNewOutputDevice(unique_ptr<AudioRendererChangeInfo> &rendererChangeInfo,
         unique_ptr<AudioDeviceDescriptor> &outputDevice, bool isStreamStatusUpdated = false,
-        const AudioStreamDeviceChangeReason reason = AudioStreamDeviceChangeReason::UNKOWN);
+        const AudioStreamDeviceChangeReason reason = AudioStreamDeviceChangeReason::UNKNOWN);
 
     void SelectNewInputDevice(unique_ptr<AudioCapturerChangeInfo> &capturerChangeInfo,
         unique_ptr<AudioDeviceDescriptor> &inputDevice, bool isStreamStatusUpdated);
@@ -535,7 +537,7 @@ private:
 
     void FetchOutputDevice(vector<unique_ptr<AudioRendererChangeInfo>> &rendererChangeInfos,
         bool isStreamStatusUpdated = false,
-        const AudioStreamDeviceChangeReason reason = AudioStreamDeviceChangeReason::UNKOWN);
+        const AudioStreamDeviceChangeReason reason = AudioStreamDeviceChangeReason::UNKNOWN);
     
     void FetchStreamForA2dpOffload(vector<unique_ptr<AudioRendererChangeInfo>> &rendererChangeInfos);
 
@@ -546,7 +548,7 @@ private:
         bool isStreamStatusUpdated);
 
     void FetchDevice(bool isOutputDevice = true,
-        const AudioStreamDeviceChangeReason reason = AudioStreamDeviceChangeReason::UNKOWN);
+        const AudioStreamDeviceChangeReason reason = AudioStreamDeviceChangeReason::UNKNOWN);
 
     void UpdateConnectedDevicesWhenConnecting(const AudioDeviceDescriptor& updatedDesc,
         std::vector<sptr<AudioDeviceDescriptor>>& descForCb);
