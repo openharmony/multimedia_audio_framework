@@ -961,7 +961,7 @@ bool AudioEffectChainManager::ExistAudioEffectChain(std::string sceneType, std::
     std::string spatializationEnabled)
 {
     std::lock_guard<std::recursive_mutex> lock(dynamicMutex_);
-    if (!(isInitialized_)) {
+    if (!isInitialized_) {
         if (initializedLogFlag_) {
             AUDIO_ERR_LOG("audioEffectChainManager has not been initialized");
             initializedLogFlag_ = false;
@@ -1200,7 +1200,7 @@ int32_t AudioEffectChainManager::SessionInfoMapDelete(std::string sceneType, std
 int32_t AudioEffectChainManager::SetHdiParam(std::string sceneType, std::string effectMode, bool enabled)
 {
     std::lock_guard<std::recursive_mutex> lock(dynamicMutex_);
-    if (!(isInitialized_)) {
+    if (!isInitialized_) {
         if (initializedLogFlag_) {
             AUDIO_ERR_LOG("audioEffectChainManager has not been initialized");
             initializedLogFlag_ = false;
