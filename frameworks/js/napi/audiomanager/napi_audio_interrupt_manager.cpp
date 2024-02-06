@@ -93,7 +93,7 @@ fail:
 
 napi_value NapiAudioInterruptManager::Init(napi_env env, napi_value exports)
 {
-    AUDIO_INFO_LOG("Init");
+    AUDIO_DEBUG_LOG("Init");
     napi_status status;
     napi_value constructor;
     napi_value result = nullptr;

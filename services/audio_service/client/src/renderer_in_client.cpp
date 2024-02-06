@@ -1060,7 +1060,7 @@ bool RendererInClientInner::WaitForRunning()
             return false;
         }
         if (!stopWaiting) {
-            AUDIO_INFO_LOG("Wait timeout, current state_ is %{public}d", state_.load()); // wait 0.5s
+            AUDIO_DEBUG_LOG("Wait timeout, current state_ is %{public}d", state_.load()); // wait 0.5s
             return false;
         }
     }

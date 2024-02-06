@@ -269,7 +269,7 @@ AudioRendererPrivate::AudioRendererPrivate(AudioStreamType audioStreamType, cons
 
 int32_t AudioRendererPrivate::InitAudioInterruptCallback()
 {
-    AUDIO_INFO_LOG("InitAudioInterruptCallback in");
+    AUDIO_DEBUG_LOG("InitAudioInterruptCallback in");
     CHECK_AND_RETURN_RET_LOG(audioInterrupt_.mode == SHARE_MODE || audioInterrupt_.mode == INDEPENDENT_MODE,
         ERR_INVALID_PARAM, "Invalid interrupt mode!");
     CHECK_AND_RETURN_RET_LOG(audioStream_->GetAudioSessionID(audioInterrupt_.sessionID) == 0, ERR_INVALID_INDEX,
@@ -1312,7 +1312,7 @@ void AudioRendererStateChangeCallbackImpl::OnRendererStateChange(
     const std::vector<std::unique_ptr<AudioRendererChangeInfo>> &audioRendererChangeInfos)
 {
     std::shared_ptr<AudioRendererDeviceChangeCallback> cb = callback_.lock();
-    AUDIO_INFO_LOG("AudioRendererStateChangeCallbackImpl OnRendererStateChange");
+    AUDIO_DEBUG_LOG("AudioRendererStateChangeCallbackImpl OnRendererStateChange");
     DeviceInfo deviceInfo = {};
     bool isDevicedChanged = false;
     {

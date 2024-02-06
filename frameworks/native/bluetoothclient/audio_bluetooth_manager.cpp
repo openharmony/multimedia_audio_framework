@@ -187,8 +187,10 @@ int32_t AudioA2dpManager::OffloadStartPlaying(const std::vector<int32_t> &sessio
 
 int32_t AudioA2dpManager::OffloadStopPlaying(const std::vector<int32_t> &sessionsID)
 {
-    CHECK_AND_RETURN_RET_LOG(activeA2dpDevice_.GetDeviceAddr() != "00:00:00:00:00:00", ERROR,
-        "Invalid mac address, not stop, return error.");
+    if (activeA2dpDevice_.GetDeviceAddr() == "00:00:00:00:00:00") {
+        AUDIO_DEBUG_LOG("Invalid mac address, not stop, return error.");
+        return ERROR;
+    }
     AUDIO_DEBUG_LOG("Stop playing %{public}zu stream", sessionsID.size());
     return a2dpInstance_->OffloadStopPlaying(activeA2dpDevice_, sessionsID);
 }

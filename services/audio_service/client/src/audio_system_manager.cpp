@@ -1031,7 +1031,7 @@ std::string AudioSystemManager::GetSelfBundleName()
     if (iBundleMgr->GetBundleInfoForSelf(0, bundleInfo) == ERR_OK) {
         bundleName = bundleInfo.name;
     } else {
-        AUDIO_WARNING_LOG("Get bundle info failed");
+        AUDIO_DEBUG_LOG("Get bundle info failed");
     }
     return bundleName;
 }

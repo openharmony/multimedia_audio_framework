@@ -188,7 +188,7 @@ int32_t AudioStreamCollector::AddCapturerStream(AudioStreamChangeInfo &streamCha
 int32_t AudioStreamCollector::RegisterTracker(AudioMode &mode, AudioStreamChangeInfo &streamChangeInfo,
     const sptr<IRemoteObject> &object)
 {
-    AUDIO_INFO_LOG("RegisterTracker mode %{public}d", mode);
+    AUDIO_DEBUG_LOG("RegisterTracker mode %{public}d", mode);
 
     int32_t clientId;
     std::lock_guard<std::mutex> lock(streamsInfoMutex_);
