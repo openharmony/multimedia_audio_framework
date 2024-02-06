@@ -650,7 +650,6 @@ AudioEffectChainManager::AudioEffectChainManager()
 
     audioEffectHdi_ = std::make_shared<AudioEffectHdi>();
     memset_s(static_cast<void *>(effectHdiInput), sizeof(effectHdiInput), 0, sizeof(effectHdiInput));
-    logMode_ = system::GetIntParameter("persist.multimedia.audiolog.switch", 0);
 }
 
 AudioEffectChainManager::~AudioEffectChainManager()
@@ -964,11 +963,13 @@ bool AudioEffectChainManager::ExistAudioEffectChain(std::string sceneType, std::
 {
     std::lock_guard<std::recursive_mutex> lock(dynamicMutex_);
     if (!(isInitialized_)) {
-        if (logMode_) {
-            AUDIO_ERR_LOG("has not been initialized");
+        if (initializedLogFlag_) {
+            AUDIO_ERR_LOG("audioEffectChainManager has not been initialized");
+            initializedLogFlag_ = false;
         }
         return false;
     }
+    initializedLogFlag_ = true;
     CHECK_AND_RETURN_RET_LOG(sceneType != "", false, "null sceneType");
     CHECK_AND_RETURN_RET_LOG(GetDeviceTypeName() != "", false, "null deviceType");
 

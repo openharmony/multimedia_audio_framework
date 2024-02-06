@@ -68,7 +68,6 @@ ohos_shared_library("audio_effect") {
     "drivers_interface_audio:effect_idl_headers",
     "drivers_interface_audio:libeffect_proxy_1.0",
     "hilog:libhilog",
-    "init:libbegetutil",
     "ipc:ipc_single",
   ]
 
