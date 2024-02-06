@@ -116,8 +116,12 @@ int32_t AudioA2dpManager::SetActiveA2dpDevice(const std::string& macAddress)
     a2dpInstance_ = A2dpSource::GetProfile();
     CHECK_AND_RETURN_RET_LOG(a2dpInstance_ != nullptr, ERROR, "Failed to obtain A2DP profile instance");
     BluetoothRemoteDevice device;
-    int32_t tmp = MediaBluetoothDeviceManager::GetConnectedA2dpBluetoothDevice(macAddress, device);
-    CHECK_AND_RETURN_RET_LOG(tmp == SUCCESS, ERROR, "SetActiveA2dpDevice: the configuring A2DP device doesn't exist.");
+    if (macAddress != "") {
+        int32_t tmp = MediaBluetoothDeviceManager::GetConnectedA2dpBluetoothDevice(macAddress, device);
+        CHECK_AND_RETURN_RET_LOG(tmp == SUCCESS, ERROR, "the configuring A2DP device doesn't exist.");
+    } else {
+        AUDIO_INFO_LOG("Deactive A2DP device");
+    }
     int32_t ret = a2dpInstance_->SetActiveSinkDevice(device);
     CHECK_AND_RETURN_RET_LOG(ret == 0, ERROR, "SetActiveA2dpDevice failed. result: %{public}d", ret);
     activeA2dpDevice_ = device;
