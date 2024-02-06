@@ -30,6 +30,7 @@
 #include "audio_log.h"
 #include "audio_errors.h"
 #include "audio_effect.h"
+#include "parameters.h"
 
 #define DEVICE_FLAG
 
