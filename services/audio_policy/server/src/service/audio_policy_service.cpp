@@ -3228,6 +3228,7 @@ void AudioPolicyService::RegisterNameMonitorHelper()
     lock_guard<mutex> lock(g_dataShareHelperMutex);
     if (g_dataShareHelper == nullptr) {
         AUDIO_WARNING_LOG("RegisterNameMonitorHelper g_dataShareHelper is NULL.");
+        return;
     }
     auto uri = std::make_shared<Uri>(SETTINGS_DATA_BASE_URI + "&key=" + PREDICATES_STRING);
     sptr<AAFwk::DataAbilityObserverStub> settingDataObserver = std::make_unique<DataShareObserverCallBack>().release();
