@@ -1205,7 +1205,7 @@ int32_t AudioEffectChainManager::SetHdiParam(std::string sceneType, std::string 
             AUDIO_ERR_LOG("audioEffectChainManager has not been initialized");
             initializedLogFlag_ = false;
         }
-        return false;
+        return ERROR;
     }
     initializedLogFlag_ = true;
     CHECK_AND_RETURN_RET_LOG(sceneType != "", ERROR, "null sceneType");
