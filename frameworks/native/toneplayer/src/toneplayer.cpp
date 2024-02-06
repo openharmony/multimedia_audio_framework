@@ -283,9 +283,12 @@ bool TonePlayerPrivate::StopTone()
     AUDIO_INFO_LOG("StopTone tonePlayerState_ %{public}d", tonePlayerState_);
     bool retVal = true;
     mutexLock_.lock();
-    if (tonePlayerState_ == TONE_PLAYER_IDLE || tonePlayerState_ == TONE_PLAYER_INIT || 
-        tonePlayerState_ == TONE_PLAYER_STOPPED) {
+    if (tonePlayerState_ == TONE_PLAYER_IDLE || tonePlayerState_ == TONE_PLAYER_INIT) {
         AUDIO_INFO_LOG("-stop tone End");
+        mutexLock_.unlock();
+        return retVal;
+    } else if (tonePlayerState_ == TONE_PLAYER_STOPPED) {
+        AUDIO_INFO_LOG("tone is End");
         mutexLock_.unlock();
         return retVal;
     }
