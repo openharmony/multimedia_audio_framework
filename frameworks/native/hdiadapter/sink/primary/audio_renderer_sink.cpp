@@ -143,7 +143,7 @@ private:
     int32_t InitRender();
 
     FILE *dumpFile_ = nullptr;
-    DeviceType currentActiveDevice_;
+    DeviceType currentActiveDevice_ = DEVICE_TYPE_NONE;
     AudioScene currentAudioScene_;
 };
 
@@ -534,7 +534,11 @@ int32_t AudioRendererSinkInner::RenderFrame(char &data, uint64_t len, uint64_t &
             switchCV_.notify_all();
         }
     }
-    Trace trace("AudioRendererSinkInner::RenderFrame");
+    if (*reinterpret_cast<int8_t*>(&data) == 0) {
+        Trace::Count("AudioRendererSinkInner::RenderFrame", PCM_MAYBE_SILENT);
+    } else {
+        Trace::Count("AudioRendererSinkInner::RenderFrame", PCM_MAYBE_NOT_SILENT);
+    }
     ret = audioRender_->RenderFrame(audioRender_, reinterpret_cast<int8_t*>(&data), static_cast<uint32_t>(len),
         &writeLen);
     CHECK_AND_RETURN_RET_LOG(ret == 0, ERR_WRITE_FAILED,
@@ -750,7 +754,7 @@ int32_t AudioRendererSinkInner::SetOutputRoute(DeviceType outputDevice, AudioPor
         .sinksLen = 1,
     };
 
-    renderEmptyFrameCount_ = 5; // preRender 5 frames
+    renderEmptyFrameCount_ = 3; // preRender 3 frames
     std::unique_lock<std::mutex> lock(switchMutex_);
     switchCV_.wait_for(lock, std::chrono::milliseconds(SLEEP_TIME_FOR_RENDER_EMPTY), [this] {
         if (renderEmptyFrameCount_ == 0) {
@@ -767,7 +771,7 @@ int32_t AudioRendererSinkInner::SetOutputRoute(DeviceType outputDevice, AudioPor
     inSwitch_.store(false);
     stamp = (ClockTime::GetCurNano() - stamp) / AUDIO_US_PER_SECOND;
     AUDIO_INFO_LOG("UpdateAudioRoute cost[%{public}" PRId64 "]ms", stamp);
-    renderEmptyFrameCount_ = 5; // render 5 empty frame
+    renderEmptyFrameCount_ = 3; // render 3 empty frame
     CHECK_AND_RETURN_RET_LOG(ret == SUCCESS, ERR_OPERATION_FAILED, "UpdateAudioRoute failed");
 
     return SUCCESS;

@@ -33,6 +33,8 @@
 #define BIT_32 32
 namespace OHOS {
 namespace AudioStandard {
+const int64_t PCM_MAYBE_SILENT = 1;
+const int64_t PCM_MAYBE_NOT_SILENT = 5;
 class Trace {
 public:
     static void Count(const std::string &value, int64_t count, bool isEnable = true);
