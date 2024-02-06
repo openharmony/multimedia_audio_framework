@@ -39,59 +39,6 @@ describe("AudioRendererInterruptUnitTest", function() {
         console.info('AudioRendererInterruptUnitTest:afterEach called')
     })
 
-    let renderInfo = {
-        'MUSIC': {
-            content: audio.ContentType.CONTENT_TYPE_MUSIC,
-            usage: audio.StreamUsage.STREAM_USAGE_MEDIA,
-            rendererFlags: 0,
-        },
-        'VOICE_CALL': {
-            content: audio.ContentType.CONTENT_TYPE_SPEECH,
-            usage: audio.StreamUsage.STREAM_USAGE_VOICE_COMMUNICATION,
-            rendererFlags: 0
-        },
-        'RINGTONE': {
-            content: audio.ContentType.CONTENT_TYPE_MUSIC,
-            usage: audio.StreamUsage.STREAM_USAGE_NOTIFICATION_RINGTONE,
-            rendererFlags: 0,
-        },
-        'VOICE_ASSISTANT': {
-            content: audio.ContentType.CONTENT_TYPE_SPEECH,
-            usage: audio.StreamUsage.STREAM_USAGE_VOICE_ASSISTANT,
-            rendererFlags: 0
-        },
-        'ULTRASONIC': {
-            content: audio.ContentType.CONTENT_TYPE_ULTRASONIC,
-            usage: audio.StreamUsage.STREAM_USAGE_SYSTEM,
-            rendererFlags: 0
-        },
-        'ALARM': {
-            content: audio.ContentType.CONTENT_TYPE_MUSIC,
-            usage: audio.StreamUsage.STREAM_USAGE_ALARM,
-            rendererFlags: 0
-        },
-        'ACCESSIBILITY': {
-            content: audio.ContentType.CONTENT_TYPE_SPEECH,
-            usage: audio.StreamUsage.STREAM_USAGE_ACCESSIBILITY,
-            rendererFlags: 0
-        },
-        'SPEECH': {
-            content: audio.ContentType.CONTENT_TYPE_SPEECH,
-            usage: audio.StreamUsage.STREAM_USAGE_MEDIA,
-            rendererFlags: 0
-        },
-        'MOVIE': {
-            content: audio.ContentType.CONTENT_TYPE_MOVIE,
-            usage: audio.StreamUsage.STREAM_USAGE_MEDIA,
-            rendererFlags: 0
-        },
-        'UNKNOW': {
-            content: audio.ContentType.CONTENT_TYPE_UNKNOWN,
-            usage: audio.StreamUsage.STREAM_USAGE_UNKNOWN,
-            rendererFlags: 0
-        },
-    }
-
     let streamInfo = {
         '44100': {
             samplingRate: audio.AudioSamplingRate.SAMPLE_RATE_44100,
@@ -104,6 +51,59 @@ describe("AudioRendererInterruptUnitTest", function() {
             channels: audio.AudioChannel.CHANNEL_2,
             sampleFormat: audio.AudioSampleFormat.SAMPLE_FORMAT_S32LE,
             encodingType: audio.AudioEncodingType.ENCODING_TYPE_RAW
+        },
+    }
+
+    let renderInfo = {
+        'MUSIC': {
+            rendererFlags: 0,
+            content: audio.ContentType.CONTENT_TYPE_MUSIC,
+            usage: audio.StreamUsage.STREAM_USAGE_MEDIA,
+        },
+        'VOICE_CALL': {
+            content: audio.ContentType.CONTENT_TYPE_SPEECH,
+            usage: audio.StreamUsage.STREAM_USAGE_VOICE_COMMUNICATION,
+            rendererFlags: 0
+        },
+        'RINGTONE': {
+            rendererFlags: 0,
+            content: audio.ContentType.CONTENT_TYPE_MUSIC,
+            usage: audio.StreamUsage.STREAM_USAGE_NOTIFICATION_RINGTONE,
+        },
+        'VOICE_ASSISTANT': {
+            content: audio.ContentType.CONTENT_TYPE_SPEECH,
+            usage: audio.StreamUsage.STREAM_USAGE_VOICE_ASSISTANT,
+            rendererFlags: 0
+        },
+        'ULTRASONIC': {
+            rendererFlags: 0,
+            content: audio.ContentType.CONTENT_TYPE_ULTRASONIC,
+            usage: audio.StreamUsage.STREAM_USAGE_SYSTEM,
+        },
+        'ALARM': {
+            content: audio.ContentType.CONTENT_TYPE_MUSIC,
+            usage: audio.StreamUsage.STREAM_USAGE_ALARM,
+            rendererFlags: 0
+        },
+        'ACCESSIBILITY': {
+            rendererFlags: 0,
+            content: audio.ContentType.CONTENT_TYPE_SPEECH,
+            usage: audio.StreamUsage.STREAM_USAGE_ACCESSIBILITY,
+        },
+        'SPEECH': {
+            content: audio.ContentType.CONTENT_TYPE_SPEECH,
+            usage: audio.StreamUsage.STREAM_USAGE_MEDIA,
+            rendererFlags: 0
+        },
+        'MOVIE': {
+            rendererFlags: 0,
+            content: audio.ContentType.CONTENT_TYPE_MOVIE,
+            usage: audio.StreamUsage.STREAM_USAGE_MEDIA,
+        },
+        'UNKNOW': {
+            content: audio.ContentType.CONTENT_TYPE_UNKNOWN,
+            usage: audio.StreamUsage.STREAM_USAGE_UNKNOWN,
+            rendererFlags: 0
         },
     }
 
@@ -729,12 +729,12 @@ describe("AudioRendererInterruptUnitTest", function() {
         })
         await start(render1, done)
 
-        let render2 = await createAudioRenderer(renderInfo['VOICE_ASSISTANT'], streamInfo['48000'])
-        await render2.setInterruptMode(audio.InterruptMode.INDEPENDENT_MODE)
-        await start(render2, done)
+        let render = await createAudioRenderer(renderInfo['VOICE_ASSISTANT'], streamInfo['48000'])
+        await render.setInterruptMode(audio.InterruptMode.INDEPENDENT_MODE)
+        await start(render, done)
         await sleep(500)
         await release(render1, done)
-        await release(render2, done)
+        await release(render, done)
         done()
     })
 

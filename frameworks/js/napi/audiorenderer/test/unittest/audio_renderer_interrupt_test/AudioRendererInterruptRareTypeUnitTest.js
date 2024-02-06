@@ -600,12 +600,12 @@ describe("AudioRendererInterruptRareTypeUnitTest", function() {
         })
         await start(render1, done)
 
-        let render2 = await createAudioRenderer(renderInfo['VOICE_ASSISTANT'], streamInfo['48000'])
-        await render2.setInterruptMode(audio.InterruptMode.INDEPENDENT_MODE)
-        await start(render2, done)
+        let render = await createAudioRenderer(renderInfo['VOICE_ASSISTANT'], streamInfo['48000'])
+        await render.setInterruptMode(audio.InterruptMode.INDEPENDENT_MODE)
+        await start(render, done)
         await sleep(500)
         await release(render1, done)
-        await release(render2, done)
+        await release(render, done)
         done()
     })
 
