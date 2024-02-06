@@ -349,7 +349,7 @@ void AudioHfpManager::DisconnectBluetoothHfpSink()
     HfpBluetoothDeviceManager::ClearAllHfpBluetoothDevice();
 }
 
-void AudioHfpManager::UpdateCurrentActiveHfpDevice(BluetoothRemoteDevice &device)
+void AudioHfpManager::UpdateCurrentActiveHfpDevice(const BluetoothRemoteDevice &device)
 {
     std::lock_guard<std::mutex> hfpDeviceLock(g_activehfpDeviceLock);
     activeHfpDevice_ = device;

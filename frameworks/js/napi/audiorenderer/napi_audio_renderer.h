@@ -150,7 +150,7 @@ private:
 
     static void RegisterRendererWriteDataCallback(napi_env env, napi_value *argv,
         const std::string &cbName, NapiAudioRenderer *napiRenderer);
-    static void UnregisterRendererWriteDataCallback(napi_env env, size_t argc, napi_value *argv,
+    static void UnregisterRendererWriteDataCallback(napi_env env, size_t argc, const napi_value *argv,
         NapiAudioRenderer *napiRenderer);
     /* common interface in AudioRendererNapi */
     static bool CheckContextStatus(std::shared_ptr<AudioRendererAsyncContext> context);

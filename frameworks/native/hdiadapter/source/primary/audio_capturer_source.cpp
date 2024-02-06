@@ -808,7 +808,7 @@ int32_t AudioCapturerSourceInner::SetAudioScene(AudioScene audioScene, DeviceTyp
             struct AudioSceneDescriptor scene;
             scene.scene.id = GetAudioCategory(audioScene);
             scene.desc.pins = audioSceneInPort;
-            scene.desc.desc = (char *)"";
+            scene.desc.desc = const_cast<char *>("");
 
             ret = audioCapture_->SelectScene(audioCapture_, &scene);
             CHECK_AND_RETURN_RET_LOG(ret >= 0, ERR_OPERATION_FAILED,

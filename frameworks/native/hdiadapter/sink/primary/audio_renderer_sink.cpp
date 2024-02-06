@@ -793,7 +793,7 @@ int32_t AudioRendererSinkInner::SetAudioScene(AudioScene audioScene, DeviceType 
             struct AudioSceneDescriptor scene;
             scene.scene.id = GetAudioCategory(audioScene);
             scene.desc.pins = audioSceneOutPort;
-            scene.desc.desc = (char *)"";
+            scene.desc.desc = const_cast<char *>("");
 
             int32_t ret = audioRender_->SelectScene(audioRender_, &scene);
             CHECK_AND_RETURN_RET_LOG(ret >= 0, ERR_OPERATION_FAILED,
