@@ -961,7 +961,14 @@ bool AudioEffectChainManager::ExistAudioEffectChain(std::string sceneType, std::
     std::string spatializationEnabled)
 {
     std::lock_guard<std::recursive_mutex> lock(dynamicMutex_);
-    CHECK_AND_RETURN_RET_LOG(isInitialized_, false, "has not been initialized");
+    if (!isInitialized_) {
+        if (initializedLogFlag_) {
+            AUDIO_ERR_LOG("audioEffectChainManager has not been initialized");
+            initializedLogFlag_ = false;
+        }
+        return false;
+    }
+    initializedLogFlag_ = true;
     CHECK_AND_RETURN_RET_LOG(sceneType != "", false, "null sceneType");
     CHECK_AND_RETURN_RET_LOG(GetDeviceTypeName() != "", false, "null deviceType");
 
@@ -1193,7 +1200,14 @@ int32_t AudioEffectChainManager::SessionInfoMapDelete(std::string sceneType, std
 int32_t AudioEffectChainManager::SetHdiParam(std::string sceneType, std::string effectMode, bool enabled)
 {
     std::lock_guard<std::recursive_mutex> lock(dynamicMutex_);
-    CHECK_AND_RETURN_RET_LOG(isInitialized_, ERROR, "has not been initialized");
+    if (!isInitialized_) {
+        if (initializedLogFlag_) {
+            AUDIO_ERR_LOG("audioEffectChainManager has not been initialized");
+            initializedLogFlag_ = false;
+        }
+        return ERROR;
+    }
+    initializedLogFlag_ = true;
     CHECK_AND_RETURN_RET_LOG(sceneType != "", ERROR, "null sceneType");
     memset_s(static_cast<void *>(effectHdiInput), sizeof(effectHdiInput), 0, sizeof(effectHdiInput));
     effectHdiInput[0] = HDI_BYPASS;

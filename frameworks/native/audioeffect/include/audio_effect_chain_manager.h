@@ -187,7 +187,7 @@ private:
     bool spatializationEnabled_ = false;
     bool headTrackingEnabled_ = false;
     bool offloadEnabled_ = false;
-
+    bool initializedLogFlag_ = true;
 #ifdef SENSOR_ENABLE
     std::shared_ptr<HeadTracker> headTracker_;
 #endif
