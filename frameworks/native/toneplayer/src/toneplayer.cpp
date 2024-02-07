@@ -287,6 +287,10 @@ bool TonePlayerPrivate::StopTone()
         AUDIO_INFO_LOG("-stop tone End");
         mutexLock_.unlock();
         return retVal;
+    } else if (tonePlayerState_ == TONE_PLAYER_STOPPED) {
+        AUDIO_INFO_LOG("tone is End");
+        mutexLock_.unlock();
+        return retVal;
     }
 
     retVal = TonePlayerStateHandler(PLAYER_EVENT_STOP);
@@ -314,16 +318,8 @@ void TonePlayerPrivate::StopEventStateHandler()
     }
     AUDIO_DEBUG_LOG("WAITING wait_for cond");
     mutexLock_.unlock();
-    std::unique_lock<std::mutex> lock(cbkCondLock_);
-    status_t retStatus = waitAudioCbkCond_.wait_for(lock, std::chrono::seconds(CMAXWAIT));
+    waitToneDataCond_.notify_all();
     mutexLock_.lock();
-    if (retStatus != std::cv_status::timeout) {
-        AUDIO_ERR_LOG("StopTone waiting wait_for cond got notified");
-        tonePlayerState_ = TONE_PLAYER_INIT;
-    } else {
-        AUDIO_ERR_LOG("Stop timed out");
-        tonePlayerState_ = TONE_PLAYER_IDLE;
-    }
 }
 
 bool TonePlayerPrivate::InitAudioRenderer()
@@ -600,6 +596,15 @@ void TonePlayerPrivate::AudioToneDataThreadFunc()
             }
 #endif // DUMPFILE
             mutexLock_.lock();
+            if (tonePlayerState_ == TONE_PLAYER_STOPPED) {
+                AUDIO_INFO_LOG("Notifing tone player STOP");
+                tonePlayerState_ = TONE_PLAYER_INIT;
+                mutexLock_.unlock();
+                waitAudioCbkCond_.notify_all();
+                return;
+            }
+            mutexLock_.unlock();
+            mutexLock_.lock();
             if (audioRenderer_ != nullptr) {
                 audioRenderer_->Enqueue(bufDesc);
             } else {
@@ -611,15 +616,6 @@ void TonePlayerPrivate::AudioToneDataThreadFunc()
                 waitToneDataCond_.notify_all();
             }
             toneDataState_ = TONE_DATA_LOADING;
-            mutexLock_.lock();
-            if (tonePlayerState_ == TONE_PLAYER_STOPPED) {
-                AUDIO_INFO_LOG("Notifing tone player STOP");
-                tonePlayerState_ = TONE_PLAYER_INIT;
-                mutexLock_.unlock();
-                waitAudioCbkCond_.notify_all();
-                return;
-            }
-            mutexLock_.unlock();
         }
     }
 }
