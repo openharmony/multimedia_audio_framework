@@ -776,10 +776,10 @@ bool AudioRendererInterruptCallbackImpl::HandleForceDucking(const InterruptEvent
 
     float duckVolumeFactor = interruptEvent.duckVolume;
     int32_t ret = audioStream_->SetVolume(instanceVolBeforeDucking_ * duckVolumeFactor);
-    CHECK_AND_RETURN_RET_LOG(ret == SUCCESS, false, "Failed to set duckVolumeFactor(instance) %{pubic}f",
+    CHECK_AND_RETURN_RET_LOG(ret == SUCCESS, false, "Failed to set duckVolumeFactor(instance) %{public}f",
         duckVolumeFactor);
 
-    AUDIO_INFO_LOG("Set duckVolumeFactor %{pubic}f successfully. instanceVolBeforeDucking: %{public}f",
+    AUDIO_INFO_LOG("Set duckVolumeFactor %{public}f successfully. instanceVolBeforeDucking: %{public}f",
         duckVolumeFactor, instanceVolBeforeDucking_);
     return true;
 }
