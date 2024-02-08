@@ -238,13 +238,13 @@ int32_t IAudioRendererSinkRegCallback(struct RendererSinkAdapter *adapter, int8_
     CHECK_AND_RETURN_RET_LOG(audioRendererSink != nullptr, ERR_INVALID_HANDLE, "null audioRendererSink");
     bool isInited = audioRendererSink->IsInited();
     CHECK_AND_RETURN_RET_LOG(isInited, ERR_NOT_STARTED, "audioRenderer Not Inited! Init the renderer first\n");
-    auto* callback = reinterpret_cast<OnRenderCallback*>(cb);
+    auto *callback = reinterpret_cast<OnRenderCallback*>(cb);
     audioRendererSink->RegisterRenderCallback(callback, userdata);
     return SUCCESS;
 }
 
-int32_t IAudioRendererSinkGetPresentationPosition(struct RendererSinkAdapter* adapter, uint64_t* frames,
-    int64_t* timeSec, int64_t* timeNanoSec)
+int32_t IAudioRendererSinkGetPresentationPosition(struct RendererSinkAdapter *adapter, uint64_t *frames,
+    int64_t *timeSec, int64_t *timeNanoSec)
 {
     CHECK_AND_RETURN_RET_LOG(adapter != nullptr, ERR_INVALID_HANDLE, "null RendererSinkAdapter");
 
@@ -256,7 +256,7 @@ int32_t IAudioRendererSinkGetPresentationPosition(struct RendererSinkAdapter* ad
     return audioRendererSink->GetPresentationPosition(*frames, *timeSec, *timeNanoSec);
 }
 
-int32_t IAudioRendererSinkFlush(struct RendererSinkAdapter* adapter)
+int32_t IAudioRendererSinkFlush(struct RendererSinkAdapter *adapter)
 {
     CHECK_AND_RETURN_RET_LOG(adapter != nullptr, ERR_INVALID_HANDLE, "null RendererSinkAdapter");
 
@@ -269,7 +269,7 @@ int32_t IAudioRendererSinkFlush(struct RendererSinkAdapter* adapter)
     return audioRendererSink->Flush();
 }
 
-int32_t IAudioRendererSinkReset(struct RendererSinkAdapter* adapter)
+int32_t IAudioRendererSinkReset(struct RendererSinkAdapter *adapter)
 {
     CHECK_AND_RETURN_RET_LOG(adapter != nullptr, ERR_INVALID_HANDLE, "null RendererSinkAdapter");
 
@@ -282,7 +282,7 @@ int32_t IAudioRendererSinkReset(struct RendererSinkAdapter* adapter)
     return audioRendererSink->Reset();
 }
 
-int32_t IAudioRendererSinkSetBufferSize(struct RendererSinkAdapter* adapter, uint32_t sizeMs)
+int32_t IAudioRendererSinkSetBufferSize(struct RendererSinkAdapter *adapter, uint32_t sizeMs)
 {
     CHECK_AND_RETURN_RET_LOG(adapter != nullptr, ERR_INVALID_HANDLE, "null RendererSinkAdapter");
 
@@ -295,7 +295,7 @@ int32_t IAudioRendererSinkSetBufferSize(struct RendererSinkAdapter* adapter, uin
     return audioRendererSink->SetBufferSize(sizeMs);
 }
 
-int32_t IAudioRendererSinkOffloadRunningLockInit(struct RendererSinkAdapter* adapter)
+int32_t IAudioRendererSinkOffloadRunningLockInit(struct RendererSinkAdapter *adapter)
 {
     CHECK_AND_RETURN_RET_LOG(adapter != nullptr, ERR_INVALID_HANDLE, "null RendererSinkAdapter");
 
@@ -308,7 +308,7 @@ int32_t IAudioRendererSinkOffloadRunningLockInit(struct RendererSinkAdapter* ada
     return audioRendererSink->OffloadRunningLockInit();
 }
 
-int32_t IAudioRendererSinkOffloadRunningLockLock(struct RendererSinkAdapter* adapter)
+int32_t IAudioRendererSinkOffloadRunningLockLock(struct RendererSinkAdapter *adapter)
 {
     CHECK_AND_RETURN_RET_LOG(adapter != nullptr, ERR_INVALID_HANDLE, "null RendererSinkAdapter");
 
@@ -321,7 +321,7 @@ int32_t IAudioRendererSinkOffloadRunningLockLock(struct RendererSinkAdapter* ada
     return audioRendererSink->OffloadRunningLockLock();
 }
 
-int32_t IAudioRendererSinkOffloadRunningLockUnlock(struct RendererSinkAdapter* adapter)
+int32_t IAudioRendererSinkOffloadRunningLockUnlock(struct RendererSinkAdapter *adapter)
 {
     CHECK_AND_RETURN_RET_LOG(adapter != nullptr, ERR_INVALID_HANDLE, "null RendererSinkAdapter");
 

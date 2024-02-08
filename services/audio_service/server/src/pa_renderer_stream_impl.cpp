@@ -722,6 +722,10 @@ void PaRendererStreamImpl::AbortCallback(int32_t abortTimes)
 
 size_t PaRendererStreamImpl::GetWritableSize()
 {
+    PaLockGuard lock(mainloop_);
+    if (paStream_ == nullptr) {
+        return 0;
+    }
     return pa_stream_writable_size(paStream_);
 }
 

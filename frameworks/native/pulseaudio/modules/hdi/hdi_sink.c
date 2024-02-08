@@ -1977,7 +1977,6 @@ static void StartOffloadHdi(struct Userdata *u, pa_sink_input *i)
             OffloadSetHdiVolumeBufferSize(i);
         }
     }
-    StopPrimaryHdiIfNoRunning(u);
 }
 
 static void PaInputStateChangeCbOffload(struct Userdata *u, pa_sink_input *i, pa_sink_input_state_t state)
@@ -2364,6 +2363,7 @@ static void ThreadFuncRendererTimerOffload(void *userdata)
             } else if (pa_atomic_load(&u->offload.hdistate) == 1) {
                 u->offload.fullTs = 0;
                 OffloadUnlock(u);
+                StopPrimaryHdiIfNoRunning(u);
             } else {
                 u->offload.fullTs = 0;
             }
