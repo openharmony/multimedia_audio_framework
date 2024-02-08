@@ -435,13 +435,13 @@ bool AudioSocketThread::AudioPnpUeventParse(const char *msg, const ssize_t strLe
         AUDIO_ERR_LOG("strLength > UEVENT_MSG_LEN + 1");
         return false;
     }
-    AUDIO_INFO_LOG("AudioPnpUeventParse param strLength: %{public}zu msg: [%{public}s] len: [%{public}zu]",\
-        strLength, msg, strlen(msg));
+    AUDIO_DEBUG_LOG("Param strLength: %{public}zu msg:[%{public}s] len:[%{public}zu]", strLength, msg, strlen(msg));
     for (const char *msgTmp = msg; msgTmp < (msg + strLength);) {
         if (*msgTmp == '\0') {
             msgTmp++;
             continue;
         }
+        AUDIO_DEBUG_LOG("Param msgTmp:[%{public}s] len:[%{public}zu]", msgTmp, strlen(msgTmp));
         const char *arrStrTmp[UEVENT_ARR_SIZE] = {
             UEVENT_ACTION, UEVENT_DEV_NAME, UEVENT_NAME, UEVENT_STATE, UEVENT_DEVTYPE,
             UEVENT_SUBSYSTEM, UEVENT_SWITCH_NAME, UEVENT_SWITCH_STATE, UEVENT_HDI_NAME
