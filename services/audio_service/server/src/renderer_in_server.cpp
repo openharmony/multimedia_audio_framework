@@ -270,17 +270,19 @@ int32_t RendererInServer::OnWriteData(size_t length)
     if (writeLock_.try_lock()) {
         // length unit is bytes, using spanSizeInByte_
         for (size_t i = 0; i < length / spanSizeInByte_; i++) {
-            mayNeedForceWrite = WriteData() != SUCCESS ? true : false;
+            mayNeedForceWrite = WriteData() != SUCCESS || mayNeedForceWrite;
         }
         writeLock_.unlock();
     } else {
         mayNeedForceWrite = true;
     }
 
-    size_t maxEmptyCount = 3;
-    if (mayNeedForceWrite && stream_->GetWritableSize() >= spanSizeInByte_ * maxEmptyCount) {
+    size_t maxEmptyCount = 1;
+    size_t writableSize = stream_->GetWritableSize();
+    if (mayNeedForceWrite && writableSize >= spanSizeInByte_ * maxEmptyCount) {
         AUDIO_WARNING_LOG("Server need force write to recycle callback");
-        needForceWrite_ = 0;
+        needForceWrite_ =
+            writableSize / spanSizeInByte_ > 3 ? 0 : 3 - writableSize / spanSizeInByte_; // 3 is maxlength - 1
     }
     return SUCCESS;
 }

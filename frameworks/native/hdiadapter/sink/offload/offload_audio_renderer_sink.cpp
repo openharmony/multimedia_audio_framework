@@ -329,6 +329,12 @@ int32_t OffloadAudioRendererSinkInner::RenderEventCallback(struct IAudioCallback
         AUDIO_ERR_LOG("impl invalid, %{public}d, %{public}d, %{public}d",
             impl->registered, impl->cookie == nullptr, impl->renderCallback == nullptr);
     }
+    auto *sink = reinterpret_cast<OffloadAudioRendererSinkInner *>(impl->cookie);
+    if (!sink->started_ || sink->isFlushing_) {
+        AUDIO_DEBUG_LOG("invalid renderCallback call, started_ %d, isFlushing_ %d", sink->started_, sink->isFlushing_);
+        return 0;
+    }
+
     auto cbType = RenderCallbackType(type);
     impl->renderCallback(cbType, reinterpret_cast<int8_t*>(impl->userdata));
     return 0;
@@ -794,7 +800,7 @@ int32_t OffloadAudioRendererSinkInner::OffloadRunningLockInit(void)
     CHECK_AND_RETURN_RET_LOG(OffloadKeepRunningLock == nullptr, ERR_OPERATION_FAILED,
         "OffloadKeepRunningLock is not null, init failed!");
     OffloadKeepRunningLock = PowerMgr::PowerMgrClient::GetInstance().CreateRunningLock("AudioOffloadBackgroudPlay",
-        PowerMgr::RunningLockType::RUNNINGLOCK_BACKGROUND);
+        PowerMgr::RunningLockType::RUNNINGLOCK_BACKGROUND_AUDIO);
 #endif
     return SUCCESS;
 }
@@ -804,7 +810,7 @@ int32_t OffloadAudioRendererSinkInner::OffloadRunningLockLock(void)
 #ifdef FEATURE_POWER_MANAGER
     if (OffloadKeepRunningLock == nullptr) {
         OffloadKeepRunningLock = PowerMgr::PowerMgrClient::GetInstance().CreateRunningLock("AudioOffloadBackgroudPlay",
-            PowerMgr::RunningLockType::RUNNINGLOCK_BACKGROUND);
+            PowerMgr::RunningLockType::RUNNINGLOCK_BACKGROUND_AUDIO);
     }
     CHECK_AND_RETURN_RET_LOG(OffloadKeepRunningLock != nullptr, ERR_OPERATION_FAILED,
         "OffloadKeepRunningLock is null, playback can not work well!");
