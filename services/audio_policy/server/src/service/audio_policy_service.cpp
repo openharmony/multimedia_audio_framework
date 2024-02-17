@@ -4288,6 +4288,12 @@ int32_t AudioPolicyService::SetDeviceAbsVolumeSupported(const std::string &macAd
 
     AUDIO_INFO_LOG("SetDeviceAbsVolumeSupported success for macAddress:[%{public}s], support: %{public}d",
         macAddress.c_str(), support);
+
+    std::unique_ptr<AudioDeviceDescriptor> deviceDes = GetActiveBluetoothDevice();
+    if (deviceDes != nullptr && deviceDes->macAddress_ == macAddress) {
+        int32_t volumeLevel = audioPolicyManager_.GetSystemVolumeLevel(STREAM_MUSIC, false);
+        audioPolicyManager_.SetSystemVolumeLevel(STREAM_MUSIC, volumeLevel, false);
+    }
     return SUCCESS;
 }
 
