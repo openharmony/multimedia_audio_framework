@@ -60,7 +60,10 @@ ohos_shared_library("ohaudio") {
   ]
   cflags = [ "-Werror" ]
 
-  external_deps = [ "hilog:libhilog" ]
+  external_deps = [
+    "c_utils:utils",
+    "hilog:libhilog",
+  ]
 
   innerapi_tags = [ "ndk" ]
 

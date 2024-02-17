@@ -433,6 +433,11 @@ void OHAudioRenderer::SetPreferredFrameSize(int32_t frameSize)
     audioRenderer_->SetPreferredFrameSize(frameSize);
 }
 
+bool OHAudioRenderer::IsFastRenderer()
+{
+    return audioRenderer_->IsFastRenderer();
+}
+
 void OHAudioRendererModeCallback::OnWriteData(size_t length)
 {
     OHAudioRenderer* audioRenderer = (OHAudioRenderer*)ohAudioRenderer_;

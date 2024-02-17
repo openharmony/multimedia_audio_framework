@@ -28,6 +28,7 @@ using OHOS::AudioStandard::SourceType;
 
 static const int32_t RENDERER_TYPE = 1;
 static const int32_t CAPTURER_TYPE = 2;
+constexpr int32_t UNDEFINED_SIZE = -1;
 
 static OHOS::AudioStandard::OHAudioStreamBuilder *convertBuilder(OH_AudioStreamBuilder* builder)
 {
@@ -300,7 +301,9 @@ OH_AudioStream_Result OHAudioStreamBuilder::Generate(OH_AudioRenderer** renderer
         audioRenderer->SetRendererCallback(rendererCallbacks_, userData_);
         audioRenderer->SetRendererOutputDeviceChangeCallback(outputDeviceChangecallback_, outputDeviceChangeuserData_);
         *renderer = (OH_AudioRenderer*)audioRenderer;
-        audioRenderer->SetPreferredFrameSize(preferredFrameSize_);
+        if (preferredFrameSize_ != UNDEFINED_SIZE) {
+            audioRenderer->SetPreferredFrameSize(preferredFrameSize_);
+        }
         return AUDIOSTREAM_SUCCESS;
     }
     AUDIO_ERR_LOG("Create OHAudioRenderer failed");
