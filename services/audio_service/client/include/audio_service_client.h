@@ -760,6 +760,8 @@ private:
     uint64_t preFrameNum_ = 0;
 
     int32_t ConnectStreamToPA();
+    int32_t HandlePAStreamConnect(const std::string &deviceNameS, int32_t latencyInMSec);
+    int32_t WaitStreamReady();
     std::pair<const int32_t, const std::string> GetDeviceNameForConnect();
     int32_t UpdatePAProbListOffload(AudioOffloadType statePolicy);
     int32_t UpdatePolicyOffload(AudioOffloadType statePolicy);

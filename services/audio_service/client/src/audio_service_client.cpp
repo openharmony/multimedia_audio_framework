@@ -40,6 +40,7 @@ AudioRendererCallbacks::~AudioRendererCallbacks() = default;
 AudioCapturerCallbacks::~AudioCapturerCallbacks() = default;
 const uint32_t CHECK_UTIL_SUCCESS = 0;
 const uint32_t INIT_TIMEOUT_IN_SEC = 3;
+const uint32_t CONNECT_TIMEOUT_IN_SEC = 10;
 const uint32_t DRAIN_TIMEOUT_IN_SEC = 3;
 const uint32_t CORK_TIMEOUT_IN_SEC = 3;
 const uint32_t WRITE_TIMEOUT_IN_SEC = 8;
@@ -64,6 +65,7 @@ const int64_t SECOND_TO_MICROSECOND = 1000000;
 const uint64_t AUDIO_FIRST_FRAME_LATENCY = 230; //ms
 
 const std::string FORCED_DUMP_PULSEAUDIO_STACKTRACE = "dump_pulseaudio_stacktrace";
+const std::string RECOVERY_AUDIO_SERVER = "recovery_audio_server";
 
 static const std::unordered_map<AudioStreamType, std::string> STREAM_TYPE_ENUM_STRING_MAP = {
     {STREAM_VOICE_CALL, "voice_call"},
@@ -795,13 +797,23 @@ int32_t AudioServiceClient::HandleMainLoopStart()
             return AUDIO_CLIENT_INIT_ERR;
         }
 
-        StartTimer(INIT_TIMEOUT_IN_SEC);
-        pa_threaded_mainloop_wait(mainLoop);
-        StopTimer();
-        if (IsTimeOut()) {
-            AUDIO_ERR_LOG("Initialize timeout");
-            pa_threaded_mainloop_unlock(mainLoop);
-            return AUDIO_CLIENT_INIT_ERR;
+        static bool triggerDumpStacktraceAndKill = true;
+        if (triggerDumpStacktraceAndKill == true) {
+            AudioXCollie audioXCollie("AudioServiceClient::InitDumpTrace", INIT_TIMEOUT_IN_SEC, [this](void *) {
+                audioSystemManager_->GetAudioParameter(RECOVERY_AUDIO_SERVER);
+                triggerDumpStacktraceAndKill = false;
+                pa_threaded_mainloop_signal(this->mainLoop, 0);
+            }, nullptr, 0);
+            pa_threaded_mainloop_wait(mainLoop);
+        } else {
+            StartTimer(INIT_TIMEOUT_IN_SEC);
+            pa_threaded_mainloop_wait(mainLoop);
+            StopTimer();
+            if (IsTimeOut()) {
+                AUDIO_ERR_LOG("Initialize timeout");
+                pa_threaded_mainloop_unlock(mainLoop);
+                return AUDIO_CLIENT_INIT_ERR;
+            }
         }
     }
     return AUDIO_CLIENT_SUCCESS;
@@ -857,25 +869,35 @@ int32_t AudioServiceClient::ConnectStreamToPA()
     auto [errorCode, deviceNameS] = GetDeviceNameForConnect();
     CHECK_AND_RETURN_RET(errorCode == AUDIO_CLIENT_SUCCESS, errorCode);
 
-    const char *deviceName = deviceNameS.empty() ? nullptr : deviceNameS.c_str();
-
     pa_threaded_mainloop_lock(mainLoop);
 
+    if (HandlePAStreamConnect(deviceNameS, latency_in_msec) != SUCCESS || WaitStreamReady() != SUCCESS) {
+        pa_threaded_mainloop_unlock(mainLoop);
+        return AUDIO_CLIENT_CREATE_STREAM_ERR;
+    }
+
+    isStreamConnected_ = true;
+    pa_threaded_mainloop_unlock(mainLoop);
+    return AUDIO_CLIENT_SUCCESS;
+}
+
+int32_t AudioServiceClient::HandlePAStreamConnect(const std::string &deviceNameS, int32_t latencyInMSec)
+{
+    const char *deviceName = deviceNameS.empty() ? nullptr : deviceNameS.c_str();
     pa_buffer_attr bufferAttr;
     bufferAttr.fragsize = static_cast<uint32_t>(-1);
-    if (latency_in_msec <= LATENCY_THRESHOLD) {
-        bufferAttr.prebuf = AlignToAudioFrameSize(pa_usec_to_bytes(latency_in_msec * PA_USEC_PER_MSEC, &sampleSpec),
-                                                  sampleSpec);
+    if (latencyInMSec <= LATENCY_THRESHOLD) {
+        bufferAttr.prebuf = AlignToAudioFrameSize(pa_usec_to_bytes(latencyInMSec * PA_USEC_PER_MSEC, &sampleSpec),
+            sampleSpec);
         bufferAttr.maxlength =  NO_OF_PREBUF_TIMES * bufferAttr.prebuf;
         bufferAttr.tlength = static_cast<uint32_t>(-1);
     } else {
-        bufferAttr.prebuf = pa_usec_to_bytes(latency_in_msec * PA_USEC_PER_MSEC, &sampleSpec);
-        bufferAttr.maxlength = pa_usec_to_bytes(latency_in_msec * PA_USEC_PER_MSEC * MAX_LENGTH_FACTOR, &sampleSpec);
-        bufferAttr.tlength = pa_usec_to_bytes(latency_in_msec * PA_USEC_PER_MSEC * T_LENGTH_FACTOR, &sampleSpec);
+        bufferAttr.prebuf = pa_usec_to_bytes(latencyInMSec * PA_USEC_PER_MSEC, &sampleSpec);
+        bufferAttr.maxlength = pa_usec_to_bytes(latencyInMSec * PA_USEC_PER_MSEC * MAX_LENGTH_FACTOR, &sampleSpec);
+        bufferAttr.tlength = pa_usec_to_bytes(latencyInMSec * PA_USEC_PER_MSEC * T_LENGTH_FACTOR, &sampleSpec);
     }
     bufferAttr.minreq = bufferAttr.prebuf;
-
-    int result;
+    int32_t result = 0;
     if (eAudioClientType == AUDIO_SERVICE_CLIENT_PLAYBACK) {
         result = pa_stream_connect_playback(paStream, deviceName, &bufferAttr,
             (pa_stream_flags_t)(PA_STREAM_ADJUST_LATENCY | PA_STREAM_INTERPOLATE_TIMING | PA_STREAM_START_CORKED |
@@ -883,31 +905,29 @@ int32_t AudioServiceClient::ConnectStreamToPA()
         preBuf_ = make_unique<uint8_t[]>(bufferAttr.maxlength);
         if (preBuf_ == nullptr) {
             AUDIO_ERR_LOG("Allocate memory for buffer failed.");
-            pa_threaded_mainloop_unlock(mainLoop);
             return AUDIO_CLIENT_INIT_ERR;
         }
         if (memset_s(preBuf_.get(), bufferAttr.maxlength, 0, bufferAttr.maxlength) != 0) {
             AUDIO_ERR_LOG("memset_s for buffer failed.");
-            pa_threaded_mainloop_unlock(mainLoop);
             return AUDIO_CLIENT_INIT_ERR;
         }
     } else {
-        AUDIO_DEBUG_LOG("pa_stream_connect_record connect to:%{public}s",
-            deviceName ? deviceName : "nullptr");
+        AUDIO_DEBUG_LOG("pa_stream_connect_record connect to:%{public}s", deviceName ? deviceName : "nullptr");
         result = pa_stream_connect_record(paStream, deviceName, nullptr,
-                                          (pa_stream_flags_t)(PA_STREAM_INTERPOLATE_TIMING
-                                          | PA_STREAM_ADJUST_LATENCY
-                                          | PA_STREAM_START_CORKED
-                                          | PA_STREAM_AUTO_TIMING_UPDATE));
+            (pa_stream_flags_t)(PA_STREAM_INTERPOLATE_TIMING | PA_STREAM_ADJUST_LATENCY
+            | PA_STREAM_START_CORKED | PA_STREAM_AUTO_TIMING_UPDATE));
     }
     if (result < 0) {
         int error = pa_context_errno(context);
         AUDIO_ERR_LOG("connection to stream error: %{public}d", error);
-        pa_threaded_mainloop_unlock(mainLoop);
         ResetPAAudioClient();
         return AUDIO_CLIENT_CREATE_STREAM_ERR;
     }
+    return SUCCESS;
+}
 
+int32_t AudioServiceClient::WaitStreamReady()
+{
     while (true) {
         pa_stream_state_t state = pa_stream_get_state(paStream);
         if (state == PA_STREAM_READY)
@@ -915,18 +935,30 @@ int32_t AudioServiceClient::ConnectStreamToPA()
 
         if (!PA_STREAM_IS_GOOD(state)) {
             int error = pa_context_errno(context);
-            pa_threaded_mainloop_unlock(mainLoop);
             AUDIO_ERR_LOG("connection to stream error: %{public}d", error);
             ResetPAAudioClient();
             return AUDIO_CLIENT_CREATE_STREAM_ERR;
         }
 
-        pa_threaded_mainloop_wait(mainLoop);
+        static bool recoveryAudioServer = true;
+        if (recoveryAudioServer == true) {
+            AudioXCollie audioXCollie("AudioServiceClient::RecoveryConnect", CONNECT_TIMEOUT_IN_SEC, [this](void *) {
+                audioSystemManager_->GetAudioParameter(RECOVERY_AUDIO_SERVER);
+                recoveryAudioServer = false;
+                pa_threaded_mainloop_signal(this->mainLoop, 0);
+            }, nullptr, 0);
+            pa_threaded_mainloop_wait(mainLoop);
+        } else {
+            StartTimer(CONNECT_TIMEOUT_IN_SEC);
+            pa_threaded_mainloop_wait(mainLoop);
+            StopTimer();
+            if (IsTimeOut()) {
+                AUDIO_ERR_LOG("Initialize timeout");
+                return AUDIO_CLIENT_CREATE_STREAM_ERR;
+            }
+        }
     }
-
-    isStreamConnected_ = true;
-    pa_threaded_mainloop_unlock(mainLoop);
-    return AUDIO_CLIENT_SUCCESS;
+    return SUCCESS;
 }
 
 int32_t AudioServiceClient::InitializeAudioCache()
