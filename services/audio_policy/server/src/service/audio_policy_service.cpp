@@ -4640,6 +4640,7 @@ bool AudioPolicyService::SetSharedVolume(AudioVolumeType streamType, DeviceType 
     volumeVector_[index].volumeFloat = vol.volumeFloat;
     volumeVector_[index].volumeInt = vol.volumeInt;
     std::string identity = IPCSkeleton::ResetCallingIdentity();
+    CHECK_AND_RETURN_RET_LOG(g_adProxy != nullptr, false, "Audio server Proxy is null");
     g_adProxy->NotifyStreamVolumeChanged(streamType, vol.volumeFloat);
     IPCSkeleton::SetCallingIdentity(identity);
     return true;
