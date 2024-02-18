@@ -487,7 +487,7 @@ int32_t BluetoothRendererSinkInner::RenderFrame(char &data, uint64_t len, uint64
         isFirstWrite_ = false;
         lastCallWriteTime_ = ClockTime::GetCurNano();
     }
-    Trace trace("BluetoothRendererSinkInner::RenderFrame sleep");
+    Trace trace2("BluetoothRendererSinkInner::RenderFrame sleep");
     int64_t writeTime = BytesToNanoTime(len);
     int64_t timeBetweenCall = ClockTime::GetCurNano() - lastCallWriteTime_;
     int64_t sleepTime = writeTime - timeBetweenCall;
