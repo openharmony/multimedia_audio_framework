@@ -169,6 +169,7 @@ struct Userdata {
         pa_usec_t fullTs;
         bool runninglocked;
         pa_memchunk chunk;
+        bool inited;
     } offload;
     struct {
         pa_usec_t timestamp;
@@ -205,7 +206,7 @@ struct Userdata {
 static void UserdataFree(struct Userdata *u);
 static int32_t PrepareDevice(struct Userdata *u, const char *filePath);
 
-static int32_t PrepareDeviceOffload(struct Userdata *u, struct RendererSinkAdapter *sinkAdapter, const char *filePath);
+static int32_t PrepareDeviceOffload(struct Userdata *u);
 static char *GetStateInfo(pa_sink_state_t state);
 static char *GetInputStateInfo(pa_sink_input_state_t state);
 static void PaInputStateChangeCb(pa_sink_input *i, pa_sink_input_state_t state);
@@ -1407,7 +1408,7 @@ static bool InputIsOffload(pa_sink_input *i)
         return false;
     }
     struct Userdata *u = i->sink->userdata;
-    if (!u->offload_enable) {
+    if (!u->offload_enable || !u->offload.inited) {
         return false;
     }
     const char *offloadEnableStr = pa_proplist_gets(i->proplist, "stream.offload.enable");
@@ -3038,6 +3039,53 @@ static int32_t SinkSetStateInIoThreadCbStartMultiChannel(struct Userdata *u, pa_
     return 0;
 }
 
+static void OffloadSinkStateChangeCb(pa_sink *sink, pa_sink_state_t newState)
+{
+    pa_sink *s;
+    uint32_t idx;
+    struct Userdata *u = NULL;
+    int32_t nOpened = 0;
+    pa_core *c = ((struct Userdata *)(sink->userdata))->core;
+    PA_IDXSET_FOREACH(s, c->sinks, idx) {
+        if (u == NULL || !u->offload_enable) {
+            u = s->userdata;
+        }
+
+        if (s != sink && s->thread_info.state != PA_SINK_SUSPENDED) {
+            nOpened += 1;
+        }
+    }
+    if (u == NULL || !u->offload_enable) {
+        return;
+    }
+
+    const bool starting = PA_SINK_IS_OPENED(newState);
+    const bool stopping = newState == PA_SINK_SUSPENDED;
+    if (!u->offload.inited && starting) {
+        if (PrepareDeviceOffload(u) < 0) {
+            return;
+        }
+        u->offload.inited = true;
+        return;
+    }
+
+    if (stopping && nOpened == 0) {
+        if (u->offload.isHDISinkStarted) {
+            u->offload.sinkAdapter->RendererSinkStop(u->offload.sinkAdapter);
+            AUDIO_INFO_LOG("Stopped Offload HDI renderer, DeInit later");
+            u->offload.isHDISinkStarted = false;
+        }
+        OffloadReset(u);
+        OffloadUnlock(u);
+        if (u->offload.inited) {
+            u->offload.inited = false;
+            u->offload.sinkAdapter->RendererSinkDeInit(u->offload.sinkAdapter);
+            AUDIO_INFO_LOG("DeInited Offload HDI renderer");
+        }
+        return;
+    }
+}
+
 // Called from the IO thread.
 static int32_t SinkSetStateInIoThreadCb(pa_sink *s, pa_sink_state_t newState, pa_suspend_cause_t newSuspendCause)
 {
@@ -3052,6 +3100,10 @@ static int32_t SinkSetStateInIoThreadCb(pa_sink *s, pa_sink_state_t newState, pa
 
     if (!strcmp(GetDeviceClass(u->primary.sinkAdapter->deviceClass), DEVICE_CLASS_REMOTE)) {
         return RemoteSinkStateChange(s, newState);
+    }
+
+    if (u->offload_enable) {
+        OffloadSinkStateChangeCb(s, newState);
     }
 
     if (s->thread_info.state == PA_SINK_SUSPENDED || s->thread_info.state == PA_SINK_INIT ||
@@ -3075,13 +3127,6 @@ static int32_t SinkSetStateInIoThreadCb(pa_sink *s, pa_sink_state_t newState, pa
             u->primary.sinkAdapter->RendererSinkStop(u->primary.sinkAdapter);
             AUDIO_INFO_LOG("Stopped HDI renderer");
             u->primary.isHDISinkStarted = false;
-        }
-        if (u->offload.isHDISinkStarted) {
-            u->offload.sinkAdapter->RendererSinkStop(u->offload.sinkAdapter);
-            AUDIO_INFO_LOG("Stopped Offload HDI renderer");
-            u->offload.isHDISinkStarted = false;
-            OffloadReset(u);
-            OffloadUnlock(u);
         }
     }
 
@@ -3181,26 +3226,30 @@ static int32_t PrepareDevice(struct Userdata *u, const char *filePath)
     return 0;
 }
 
-static int32_t PrepareDeviceOffload(struct Userdata *u, struct RendererSinkAdapter *sinkAdapter, const char *filePath)
+static int32_t PrepareDeviceOffload(struct Userdata *u)
 {
-    AUDIO_INFO_LOG("PrepareDeviceOffload enter, deviceClass %d, filePath %s", sinkAdapter->deviceClass, filePath);
+    const char *adapterName = safeProplistGets(u->sink->proplist, PA_PROP_DEVICE_STRING, "");
+    const char *filePath = safeProplistGets(u->sink->proplist, "filePath", "");
+    const char *deviceNetworkId = safeProplistGets(u->sink->proplist, "NetworkId", "");
+    AUDIO_INFO_LOG("PrepareDeviceOffload enter, deviceClass %d, filePath %s",
+        u->offload.sinkAdapter->deviceClass, filePath);
     SinkAttr sample_attrs;
     int32_t ret;
 
     enum HdiAdapterFormat format = ConvertPaToHdiAdapterFormat(u->ss.format);
     sample_attrs.format = format;
     AUDIO_INFO_LOG("PrepareDeviceOffload audiorenderer format: %d ,adapterName %s",
-        sample_attrs.format, GetDeviceClass(sinkAdapter->deviceClass));
-    sample_attrs.adapterName = u->adapterName;
+        sample_attrs.format, GetDeviceClass(u->offload.sinkAdapter->deviceClass));
+    sample_attrs.adapterName = adapterName;
     sample_attrs.openMicSpeaker = u->open_mic_speaker;
     sample_attrs.sampleRate = u->ss.rate;
     sample_attrs.channel = u->ss.channels;
     sample_attrs.volume = MAX_SINK_VOLUME_LEVEL;
     sample_attrs.filePath = filePath;
-    sample_attrs.deviceNetworkId = u->deviceNetworkId;
+    sample_attrs.deviceNetworkId = deviceNetworkId;
     sample_attrs.deviceType = u->deviceType;
 
-    ret = sinkAdapter->RendererSinkInit(sinkAdapter, &sample_attrs);
+    ret = u->offload.sinkAdapter->RendererSinkInit(u->offload.sinkAdapter, &sample_attrs);
     if (ret != 0) {
         AUDIO_ERR_LOG("PrepareDeviceOffload audiorenderer Init failed!");
         return -1;
@@ -3310,6 +3359,8 @@ static pa_sink *PaHdiSinkInit(struct Userdata *u, pa_modargs *ma, const char *dr
         (u->adapterName ? u->adapterName : DEFAULT_AUDIO_DEVICE_NAME));
     pa_proplist_setf(data.proplist, PA_PROP_DEVICE_DESCRIPTION, "HDI sink is %s",
         (u->adapterName ? u->adapterName : DEFAULT_AUDIO_DEVICE_NAME));
+    pa_proplist_sets(data.proplist, "filePath", pa_modargs_get_value(ma, "file_path", ""));
+    pa_proplist_sets(data.proplist, "networkId", pa_modargs_get_value(ma, "network_id", DEFAULT_DEVICE_NETWORKID));
 
     if (pa_modargs_get_proplist(ma, "sink_properties", data.proplist, PA_UPDATE_REPLACE) < 0) {
         AUDIO_ERR_LOG("Invalid properties");
@@ -3389,9 +3440,6 @@ static int32_t PaHdiSinkNewInitThread(pa_module *m, pa_modargs *ma, struct Userd
         int32_t ret = LoadSinkAdapter(DEVICE_CLASS_OFFLOAD, "LocalDevice", &u->offload.sinkAdapter);
         if (ret) {
             AUDIO_ERR_LOG("Load adapter failed");
-            return -1;
-        }
-        if (PrepareDeviceOffload(u, u->offload.sinkAdapter, pa_modargs_get_value(ma, "file_path", "")) < 0) {
             return -1;
         }
 
