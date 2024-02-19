@@ -54,6 +54,8 @@ const uint64_t AUDIO_US_PER_MS = 1000;
 const int64_t AUDIO_NS_PER_US = 1000;
 const uint64_t AUDIO_US_PER_S = 1000000;
 const uint64_t MAX_BUF_DURATION_IN_USEC = 2000000; // 2S
+const uint64_t MAX_CBBUF_IN_USEC = 100000;
+const uint64_t MIN_CBBUF_IN_USEC = 20000;
 const uint64_t AUDIO_FIRST_FRAME_LATENCY = 230; //ms
 const float AUDIO_VOLOMUE_EPSILON = 0.0001;
 const float AUDIO_MAX_VOLUME = 1.0f;
@@ -1610,7 +1612,17 @@ bool RendererInClientInner::DrainAudioStream()
 
 void RendererInClientInner::SetPreferredFrameSize(int32_t frameSize)
 {
-    AUDIO_WARNING_LOG("Not Supported Yet");
+    size_t maxCbBufferSize = static_cast<size_t>(MAX_CBBUF_IN_USEC * streamParams_.samplingRate / AUDIO_US_PER_S) *
+        sizePerFrameInByte_;
+    size_t minCbBufferSize = static_cast<size_t>(MIN_CBBUF_IN_USEC * streamParams_.samplingRate / AUDIO_US_PER_S) *
+        sizePerFrameInByte_;
+    size_t preferredCbBufferSize = static_cast<size_t>(frameSize) * sizePerFrameInByte_;
+    std::lock_guard<std::mutex> lock(cbBufferMutex_);
+    cbBufferSize_ = (preferredCbBufferSize > maxCbBufferSize || preferredCbBufferSize < minCbBufferSize) ?
+        (preferredCbBufferSize > maxCbBufferSize ? maxCbBufferSize : minCbBufferSize) : preferredCbBufferSize;
+    AUDIO_INFO_LOG("Set CallbackBuffer with byte size: %{public}zu", cbBufferSize_);
+    cbBuffer_ = std::make_unique<uint8_t[]>(cbBufferSize_);
+    return;
 }
 
 int32_t RendererInClientInner::Write(uint8_t *pcmBuffer, size_t pcmBufferSize, uint8_t *metaBuffer,

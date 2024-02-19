@@ -49,7 +49,7 @@ public:
 private:
     int32_t streamType_;
     int32_t latencyMode_ = 0; // default value is normal mode
-    int32_t preferredFrameSize_ = 240; // initial clientBufferSizeInFrame
+    int32_t preferredFrameSize_ = -1; // undefined clientBufferSizeInFrame
 
     // stream params
     int32_t samplingRate_ = SAMPLE_RATE_48000;
