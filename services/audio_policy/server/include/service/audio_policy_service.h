@@ -364,7 +364,7 @@ public:
 
     int32_t GetA2dpDeviceVolume(const std::string& macAddress, int32_t& volume);
 
-    void OnCapturerSessionAdded(uint64_t sessionID, SessionInfo sessionInfo);
+    int32_t OnCapturerSessionAdded(uint64_t sessionID, SessionInfo sessionInfo);
 
     void OnCapturerSessionRemoved(uint64_t sessionID);
 
@@ -656,7 +656,7 @@ private:
 
     bool OpenPortAndAddDeviceOnServiceConnected(AudioModuleInfo &moduleInfo);
 
-    std::tuple<SourceType, uint32_t, uint32_t> FetchTargetInfoForSessionAdd(const SessionInfo sessionInfo);
+    int32_t FetchTargetInfoForSessionAdd(const SessionInfo sessionInfo, SourceInfo &targetInfo);
 
     void StoreDistributedRoutingRoleInfo(const sptr<AudioDeviceDescriptor> descriptor, CastType type);
 

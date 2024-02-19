@@ -1708,7 +1708,8 @@ void AudioPolicyServer::OnCapturerSessionAdded(const uint64_t sessionID, Session
     streamInfo.samplingRate = static_cast<AudioSamplingRate>(sessionInfo.rate);
     streamInfo.channels = static_cast<AudioChannel>(sessionInfo.channels);
 
-    audioPolicyServerHandler_->SendCapturerCreateEvent(capturerInfo, streamInfo, sessionID, false);
+    int32_t error = SUCCESS;
+    audioPolicyServerHandler_->SendCapturerCreateEvent(capturerInfo, streamInfo, sessionID, false, error);
 }
 
 void AudioPolicyServer::ProcessSessionAdded(SessionEvent sessionEvent)
