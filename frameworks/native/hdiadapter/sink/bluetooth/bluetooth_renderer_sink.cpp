@@ -19,6 +19,7 @@
 #include <cstring>
 #include <string>
 #include <list>
+#include <cinttypes>
 
 #include <dlfcn.h>
 #include <unistd.h>
@@ -52,6 +53,7 @@ const uint32_t PCM_24_BIT = 24;
 const uint32_t PCM_32_BIT = 32;
 const uint32_t STEREO_CHANNEL_COUNT = 2;
 constexpr int32_t RUNNINGLOCK_LOCK_TIMEOUTMS_LASTING = -1;
+constexpr uint32_t BIT_TO_BYTES = 8;
 }
 
 #ifdef BT_DUMPFILE
@@ -101,6 +103,7 @@ private:
     BluetoothSinkAttr attr_;
     bool rendererInited_;
     bool started_;
+    bool isFirstWrite_ = true;
     bool paused_;
     float leftVolume_;
     float rightVolume_;
@@ -113,6 +116,7 @@ private:
     bool audioBalanceState_ = false;
     float leftBalanceCoef_ = 1.0f;
     float rightBalanceCoef_ = 1.0f;
+    int64_t lastCallWriteTime_ = 0;
 
     std::shared_ptr<PowerMgr::RunningLock> keepRunningLock_;
 
@@ -121,6 +125,7 @@ private:
     void AdjustStereoToMono(char *data, uint64_t len);
     void AdjustAudioBalance(char *data, uint64_t len);
     AudioFormat ConverToHdiFormat(AudioSampleFormat format);
+    int64_t BytesToNanoTime(size_t lens);
 #ifdef BT_DUMPFILE
     FILE *pfd;
 #endif // DUMPFILE
@@ -478,6 +483,18 @@ int32_t BluetoothRendererSinkInner::RenderFrame(char &data, uint64_t len, uint64
 
         break;
     }
+    if (isFirstWrite_) {
+        isFirstWrite_ = false;
+        lastCallWriteTime_ = ClockTime::GetCurNano();
+    }
+    Trace trace2("BluetoothRendererSinkInner::RenderFrame sleep");
+    int64_t writeTime = BytesToNanoTime(len);
+    int64_t timeBetweenCall = ClockTime::GetCurNano() - lastCallWriteTime_;
+    int64_t sleepTime = writeTime - timeBetweenCall;
+    if (timeBetweenCall < writeTime) {
+        ClockTime::RelativeSleep(sleepTime);
+    }
+    lastCallWriteTime_ += writeTime;
     return ret;
 }
 
@@ -501,9 +518,11 @@ int32_t BluetoothRendererSinkInner::Start(void)
     int32_t ret;
 
     if (!started_) {
+        lastCallWriteTime_ = ClockTime::GetCurNano();
         ret = audioRender_->control.Start(reinterpret_cast<AudioHandle>(audioRender_));
         if (!ret) {
             started_ = true;
+            isFirstWrite_ = true;
             return SUCCESS;
         } else {
             AUDIO_ERR_LOG("Start failed!");
@@ -667,7 +686,9 @@ int32_t BluetoothRendererSinkInner::Resume(void)
     if (paused_) {
         ret = audioRender_->control.Resume(reinterpret_cast<AudioHandle>(audioRender_));
         if (!ret) {
+            lastCallWriteTime_ = ClockTime::GetCurNano();
             paused_ = false;
+            isFirstWrite_ = true;
             return SUCCESS;
         } else {
             AUDIO_ERR_LOG("Resume failed!");
@@ -809,6 +830,16 @@ void BluetoothRendererSinkInner::AdjustAudioBalance(char *data, uint64_t len)
             break;
         }
     }
+}
+static uint32_t HdiFormatToByte(HDI::Audio_Bluetooth::AudioFormat format)
+{
+    return PcmFormatToBits(format) / BIT_TO_BYTES;
+}
+
+int64_t BluetoothRendererSinkInner::BytesToNanoTime(size_t lens)
+{
+    int64_t res = AUDIO_NS_PER_SECOND * lens / (attr_.sampleRate * attr_.channel * HdiFormatToByte(attr_.format));
+    return res;
 }
 } // namespace AudioStandard
 } // namespace OHOS
