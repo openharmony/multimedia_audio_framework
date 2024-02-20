@@ -448,6 +448,7 @@ AudioFormat AudioRendererSinkInner::ConvertToHdiFormat(HdiAdapterFormat format)
 
 int32_t AudioRendererSinkInner::CreateRender(const struct AudioPort &renderPort)
 {
+    Trace trace("AudioRendererSinkInner::CreateRender");
     int32_t ret;
     struct AudioSampleAttributes param;
     struct AudioDeviceDescriptor deviceDesc;
@@ -485,6 +486,7 @@ int32_t AudioRendererSinkInner::Init(const IAudioSinkAttr &attr)
     adapterNameCase_ = attr_.adapterName;
     openSpeaker_ = attr_.openMicSpeaker;
     logMode_ = system::GetIntParameter("persist.multimedia.audiolog.switch", 0);
+    Trace trace("AudioRendererSinkInner::Init " + adapterNameCase_);
 
     int32_t ret = InitAdapter();
     CHECK_AND_RETURN_RET_LOG(ret == SUCCESS, ret, "Init adapter failed");
@@ -554,7 +556,7 @@ int32_t AudioRendererSinkInner::RenderFrame(char &data, uint64_t len, uint64_t &
 int32_t AudioRendererSinkInner::Start(void)
 {
     AUDIO_INFO_LOG("Start.");
-    Trace trace("Sink::Start");
+    Trace trace("AudioRendererSinkInner::Start");
 #ifdef FEATURE_POWER_MANAGER
     AudioXCollie audioXCollie("AudioRendererSinkInner::CreateRunningLock", TIME_OUT_SECONDS);
     if (keepRunningLock_ == nullptr) {
@@ -724,6 +726,8 @@ int32_t AudioRendererSinkInner::SetOutputRoute(DeviceType outputDevice)
 
 int32_t AudioRendererSinkInner::SetOutputRoute(DeviceType outputDevice, AudioPortPin &outputPortPin)
 {
+    Trace trace("AudioRendererSinkInner::SetOutputRoute pin " + std::to_string(outputPortPin) + " device " +
+        std::to_string(outputDevice));
     currentActiveDevice_ = outputDevice;
 
     AudioRouteNode source = {};
@@ -733,7 +737,7 @@ int32_t AudioRendererSinkInner::SetOutputRoute(DeviceType outputDevice, AudioPor
     CHECK_AND_RETURN_RET_LOG(ret == SUCCESS, ret, "SetOutputRoute FAILED: %{public}d", ret);
 
     outputPortPin = sink.ext.device.type;
-    AUDIO_INFO_LOG("Output PIN is: 0x%{public}X", outputPortPin);
+    AUDIO_INFO_LOG("Output PIN is: 0x%{public}X DeviceType is %{public}d", outputPortPin, outputDevice);
     source.portId = 0;
     source.role = AUDIO_PORT_SOURCE_ROLE;
     source.type = AUDIO_PORT_MIX_TYPE;
@@ -832,6 +836,7 @@ int32_t AudioRendererSinkInner::GetTransactionId(uint64_t *transactionId)
 
 int32_t AudioRendererSinkInner::Stop(void)
 {
+    Trace trace("AudioRendererSinkInner::Stop");
     AUDIO_INFO_LOG("Stop.");
 #ifdef FEATURE_POWER_MANAGER
     if (keepRunningLock_ != nullptr) {
@@ -1028,6 +1033,7 @@ int32_t AudioRendererSinkInner::InitAdapter()
 
 int32_t AudioRendererSinkInner::InitRender()
 {
+    Trace trace("AudioRendererSinkInner::InitRender");
     AUDIO_INFO_LOG("Init render start");
 
     if (renderInited_) {

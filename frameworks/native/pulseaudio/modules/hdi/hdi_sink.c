@@ -85,6 +85,9 @@ const char *DEVICE_CLASS_REMOTE = "remote";
 const char *DEVICE_CLASS_OFFLOAD = "offload";
 const char *DEVICE_CLASS_MULTICHANNEL = "multichannel";
 
+char *const SCENE_TYPE_SET[SCENE_TYPE_NUM] = {"SCENE_MUSIC", "SCENE_GAME", "SCENE_MOVIE", "SCENE_SPEECH", "SCENE_RING",
+    "SCENE_OTHERS", "EFFECT_NONE"};
+
 enum HdiInputType { HDI_INPUT_TYPE_PRIMARY, HDI_INPUT_TYPE_OFFLOAD, HDI_INPUT_TYPE_MULTICHANNEL };
 
 enum {
@@ -657,7 +660,7 @@ static unsigned SinkRenderPrimaryClusterCap(pa_sink *si, size_t *length, pa_mix_
     while ((sinkIn = pa_hashmap_iterate(si->thread_info.inputs, &state, NULL)) && maxInfo > 0) {
         if (IsInnerCapturer(sinkIn) && InputIsPrimary(sinkIn)) {
             pa_sink_input_assert_ref(sinkIn);
-
+            AUTO_CTRACE("hdi_sink::ClusterCap::pa_sink_input_peek:%d len:%zu", sinkIn->index, *length);
             pa_sink_input_peek(sinkIn, *length, &infoIn->chunk, &infoIn->volume);
 
             if (mixlength == 0 || infoIn->chunk.length < mixlength)
@@ -687,7 +690,6 @@ static unsigned SinkRenderPrimaryClusterCap(pa_sink *si, size_t *length, pa_mix_
 
 static void SinkRenderPrimaryMix(pa_sink *si, size_t length, pa_mix_info *infoIn, unsigned n, pa_memchunk *chunkIn)
 {
-    AUTO_CLEAR CTrace *trace = GetAndStart("hdi_sink::SinkRenderPrimaryMix");
     if (n == 0) {
         if (chunkIn->length > length)
             chunkIn->length = length;
@@ -733,7 +735,6 @@ static void SinkRenderPrimaryMix(pa_sink *si, size_t length, pa_mix_info *infoIn
 
         pa_memblock_release(chunkIn->memblock);
     }
-    EndCTrace(trace);
 }
 
 static void SinkRenderPrimaryInputsDropCap(pa_sink *si, pa_mix_info *infoIn, unsigned n, pa_memchunk *chunkIn)
@@ -969,7 +970,7 @@ static void SinkRenderMultiChannelInputsDrop(pa_sink *si, pa_mix_info *infoIn, u
 static unsigned SinkRenderPrimaryCluster(pa_sink *si, size_t *length, pa_mix_info *infoIn,
     unsigned maxInfo, char *sceneType)
 {
-    AUTO_CLEAR CTrace *trace = GetAndStart("hdi_sink::SinkRenderPrimaryCluster");
+    AUTO_CTRACE("hdi_sink::SinkRenderPrimaryCluster:%s len:%zu", sceneType, *length);
     pa_sink_input *sinkIn;
     unsigned n = 0;
     void *state = NULL;
@@ -996,6 +997,8 @@ static unsigned SinkRenderPrimaryCluster(pa_sink *si, size_t *length, pa_mix_inf
             (pa_safe_streq(sceneType, "EFFECT_NONE") && (!existFlag))) {
             pa_sink_input_assert_ref(sinkIn);
             updateResampler(sinkIn, sinkSceneType, false);
+
+            AUTO_CTRACE("hdi_sink::PrimaryCluster:%u len:%zu", sinkIn->index, *length);
             pa_sink_input_peek(sinkIn, *length, &infoIn->chunk, &infoIn->volume);
 
             if (mixlength == 0 || infoIn->chunk.length < mixlength)
@@ -1020,7 +1023,6 @@ static unsigned SinkRenderPrimaryCluster(pa_sink *si, size_t *length, pa_mix_inf
         *length = mixlength;
     }
 
-    EndCTrace(trace);
     return n;
 }
 
@@ -1097,6 +1099,7 @@ static int32_t SinkRenderPrimaryPeek(pa_sink *si, pa_memchunk *chunkIn, char *sc
     pa_assert(si->thread_info.rewind_nbytes == 0);
 
     if (si->thread_info.state == PA_SINK_SUSPENDED) {
+        AUTO_CTRACE("hdi_sink::Primary:PA_SINK_SUSPENDED");
         pa_silence_memchunk(chunkIn, &si->sample_spec);
         return 0;
     }
@@ -1109,14 +1112,13 @@ static int32_t SinkRenderPrimaryPeek(pa_sink *si, pa_memchunk *chunkIn, char *sc
         length = pa_frame_align(blockSizeMax, &si->sample_spec);
 
     pa_assert(length > 0);
-
-    AUTO_CLEAR CTrace *trace = GetAndStart("hdi_sink::SinkRenderPrimaryPeek");
     n = SinkRenderPrimaryCluster(si, &length, info, MAX_MIX_CHANNELS, sceneType);
+
+    AUTO_CTRACE("hdi_sink:Primary:SinkRenderPrimaryMix:%u len:%zu", n, length);
     SinkRenderPrimaryMix(si, length, info, n, chunkIn);
 
     SinkRenderPrimaryInputsDrop(si, info, n, chunkIn);
     pa_sink_unref(si);
-    EndCTrace(trace);
     return n;
 }
 
@@ -1139,6 +1141,7 @@ static int32_t SinkRenderMultiChannelPeek(pa_sink *si, pa_memchunk *chunkIn)
     pa_assert(si->thread_info.rewind_nbytes == 0);
 
     if (si->thread_info.state == PA_SINK_SUSPENDED) {
+        AUTO_CTRACE("hdi_sink::MultiCh:PA_SINK_SUSPENDED");
         pa_silence_memchunk(chunkIn, &si->sample_spec);
         return 0;
     }
@@ -1153,6 +1156,8 @@ static int32_t SinkRenderMultiChannelPeek(pa_sink *si, pa_memchunk *chunkIn)
     pa_assert(length > 0);
 
     n = SinkRenderMultiChannelCluster(si, &length, info, MAX_MIX_CHANNELS);
+
+    AUTO_CTRACE("hdi_sink:MultiCh:SinkRenderPrimaryMix:%u len:%zu", n, length);
     SinkRenderPrimaryMix(si, length, info, n, chunkIn);
 
     SinkRenderMultiChannelInputsDrop(si, info, n, chunkIn);
@@ -1163,7 +1168,7 @@ static int32_t SinkRenderMultiChannelPeek(pa_sink *si, pa_memchunk *chunkIn)
 
 static int32_t SinkRenderPrimaryGetData(pa_sink *si, pa_memchunk *chunkIn, char *sceneType)
 {
-    AUTO_CLEAR CTrace *trace = GetAndStart("hdi_sink::SinkRenderPrimaryGetData");
+    AUTO_CTRACE("hdi_sink::SinkRenderPrimaryGetData:%s", sceneType);
     pa_memchunk chunk;
     size_t l;
     size_t d;
@@ -1199,7 +1204,6 @@ static int32_t SinkRenderPrimaryGetData(pa_sink *si, pa_memchunk *chunkIn, char 
         d += chunk.length;
         l -= chunk.length;
     }
-    EndCTrace(trace);
     pa_sink_unref(si);
 
     return nSinkInput;
@@ -1250,8 +1254,6 @@ static int32_t SinkRenderMultiChannelGetData(pa_sink *si, pa_memchunk *chunkIn)
 
 static void AdjustProcessParamsBeforeGetData(pa_sink *si, uint8_t *sceneTypeLenRef)
 {
-    char *sceneTypeSet[SCENE_TYPE_NUM] = {"SCENE_MUSIC", "SCENE_GAME", "SCENE_MOVIE",
-        "SCENE_SPEECH", "SCENE_RING", "SCENE_OTHERS", "EFFECT_NONE"};
     for (int32_t i = 0; i < SCENE_TYPE_NUM; i++) {
         sceneTypeLenRef[i] = DEFAULT_IN_CHANNEL_NUM;
     }
@@ -1275,7 +1277,7 @@ static void AdjustProcessParamsBeforeGetData(pa_sink *si, uint8_t *sceneTypeLenR
             continue;
         }
         for (int32_t i = 0; i < SCENE_TYPE_NUM; i++) {
-            if (pa_safe_streq(sinkSceneType, sceneTypeSet[i])) {
+            if (pa_safe_streq(sinkSceneType, SCENE_TYPE_SET[i])) {
                 sceneTypeLenRef[i] = processChannels;
             }
         }
@@ -1288,8 +1290,6 @@ static void SinkRenderPrimaryProcess(pa_sink *si, size_t length, pa_memchunk *ch
     pa_memchunk capResult;
     SinkRenderCapProcess(si, length, &capResult);
 
-    char *sceneTypeSet[SCENE_TYPE_NUM] = {"SCENE_MUSIC", "SCENE_GAME", "SCENE_MOVIE",
-        "SCENE_SPEECH", "SCENE_RING", "SCENE_OTHERS", "EFFECT_NONE"};
     uint8_t sceneTypeLenRef[SCENE_TYPE_NUM];
     struct Userdata *u;
     pa_assert_se(u = si->userdata);
@@ -1305,7 +1305,7 @@ static void SinkRenderPrimaryProcess(pa_sink *si, size_t length, pa_memchunk *ch
         size_t tmpLength = length * sceneTypeLenRef[i] / DEFAULT_IN_CHANNEL_NUM;
         chunkIn->index = 0;
         chunkIn->length = tmpLength;
-        int32_t nSinkInput = SinkRenderPrimaryGetData(si, chunkIn, sceneTypeSet[i]);
+        int32_t nSinkInput = SinkRenderPrimaryGetData(si, chunkIn, SCENE_TYPE_SET[i]);
         if (nSinkInput == 0) { continue; }
         chunkIn->index = 0;
         chunkIn->length = tmpLength;
@@ -1316,7 +1316,8 @@ static void SinkRenderPrimaryProcess(pa_sink *si, size_t length, pa_memchunk *ch
         memcpy_s(u->bufferAttr->bufIn, frameLen * sizeof(float), u->bufferAttr->tempBufIn, frameLen * sizeof(float));
         u->bufferAttr->numChanIn = sceneTypeLenRef[i];
         u->bufferAttr->frameLen = frameLen / u->bufferAttr->numChanIn;
-        EffectChainManagerProcess(sceneTypeSet[i], u->bufferAttr);
+        AUTO_CTRACE("hdi_sink::EffectChainManagerProcess:%s", SCENE_TYPE_SET[i]);
+        EffectChainManagerProcess(SCENE_TYPE_SET[i], u->bufferAttr);
         for (int32_t k = 0; k < u->bufferAttr->frameLen * u->bufferAttr->numChanOut; k++) {
             u->bufferAttr->tempBufOut[k] += u->bufferAttr->bufOut[k];
         }
@@ -1377,9 +1378,8 @@ static void SinkRenderPrimary(pa_sink *si, size_t length, pa_memchunk *chunkIn)
         length = pa_frame_align(blockSizeMax, &si->sample_spec);
 
     pa_assert(length > 0);
-    AUTO_CLEAR CTrace *trace = GetAndStart("hdi_sink::SinkRenderPrimaryProcess");
+    AUTO_CTRACE("hdi_sink::SinkRenderPrimaryProcess:len:%zu", length);
     SinkRenderPrimaryProcess(si, length, chunkIn);
-    EndCTrace(trace);
 
     pa_sink_unref(si);
 }
@@ -1391,11 +1391,10 @@ static void ProcessRenderUseTiming(struct Userdata *u, pa_usec_t now)
     // Fill the buffer up the latency size
     pa_memchunk chunk;
 
-    AUTO_CLEAR CTrace *renderTrace = GetAndStart("hdi_sink::SinkRenderPrimary");
+    AUTO_CTRACE("hdi_sink::SinkRenderPrimary");
     // Change from pa_sink_render to pa_sink_render_full for alignment issue in 3516
     SinkRenderPrimary(u->sink, u->sink->thread_info.max_request, &chunk);
     pa_assert(chunk.length > 0);
-    EndCTrace(renderTrace);
 
     StartPrimaryHdiIfRunning(u);
     pa_asyncmsgq_post(u->primary.dq, NULL, HDI_RENDER, NULL, 0, &chunk, NULL);
@@ -1673,8 +1672,8 @@ static void PaSinkRenderIntoOffload(pa_sink *s, pa_mix_info *infoInputs, unsigne
         pa_sink_input *i = infoInputs[ii].userdata;
         pa_sink_input_assert_ref(i);
 
+        AUTO_CTRACE("hdi_sink::Offload:pa_sink_input_peek:%d len:%zu", i->index, length);
         pa_sink_input_peek(i, length, &info[n].chunk, &info[n].volume);
-
         if (mixlength == 0 || info[n].chunk.length < mixlength)
             mixlength = info[n].chunk.length;
 
@@ -2022,6 +2021,7 @@ static void PaInputStateChangeCbPrimary(struct Userdata *u, pa_sink_input *i, pa
 
 static void StartPrimaryHdiIfRunning(struct Userdata *u)
 {
+    AUTO_CTRACE("hdi_sink::StartPrimaryHdiIfRunning");
     if (u->primary.isHDISinkStarted) {
         return;
     }

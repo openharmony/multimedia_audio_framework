@@ -20,11 +20,18 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
-
+#define SPRINTF_STRING_LEN 256
 #define AUTO_CLEANUP(func) __attribute__((cleanup(func)))
 #define AUTO_CLEAR AUTO_CLEANUP(CallEndAndClear)
 
 typedef struct CTrace CTrace;
+
+// must use string length less than 256
+#define AUTO_CTRACE(fmt, args...)                                           \
+    char str[SPRINTF_STRING_LEN] = {0};                                     \
+    int ret = sprintf_s(str, SPRINTF_STRING_LEN, fmt, ##args);              \
+    AUTO_CLEAR CTrace *tmpCtrace = (ret >= 0 ? GetAndStart(str) : NULL);    \
+    (void)tmpCtrace
 
 // must call with AUTO_CLEAR
 CTrace *GetAndStart(const char *traceName);

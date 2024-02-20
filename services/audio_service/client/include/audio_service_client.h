@@ -647,6 +647,7 @@ private:
     int32_t streamDrainStatus_;
     int32_t streamFlushStatus_;
     bool isMainLoopStarted_ = false;
+    uint32_t streamId_ = 0;
     bool isContextConnected_ = false;
     bool isStreamConnected_ = false;
     bool isInnerCapturerStream_ = false;
@@ -688,7 +689,7 @@ private:
     AudioEffectMode effectMode;
     std::shared_ptr<AudioCapturerReadCallback> readCallback_;
     std::shared_ptr<AudioRendererWriteCallback> writeCallback_;
-    int64_t mWriteCbStamp = 0; // used to measure callback duration
+    int64_t writeCbStamp_ = 0; // used to measure callback duration
     uint32_t mFrameSize = 0;
     bool mMarkReached = false;
     uint64_t mFrameMarkPosition = 0;

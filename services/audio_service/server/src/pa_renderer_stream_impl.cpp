@@ -80,6 +80,7 @@ int32_t PaRendererStreamImpl::InitParams()
         return ERR_ILLEGAL_STATE;
     }
 
+    sinkInputIndex_ = pa_stream_get_index(paStream_);
     pa_stream_set_moved_callback(paStream_, PAStreamMovedCb,
         reinterpret_cast<void *>(this)); // used to notify sink/source moved
     pa_stream_set_write_callback(paStream_, PAStreamWriteCb, reinterpret_cast<void *>(this));
@@ -518,7 +519,6 @@ int32_t PaRendererStreamImpl::EnqueueBuffer(const BufferDesc &bufferDesc)
 
 void PaRendererStreamImpl::PAStreamWriteCb(pa_stream *stream, size_t length, void *userdata)
 {
-    Trace trace("PaRendererStreamImpl::PAStreamWriteCb" + std::to_string(length));
     CHECK_AND_RETURN_LOG(userdata, "PAStreamWriteCb: userdata is null");
 
     auto streamImpl = static_cast<PaRendererStreamImpl *>(userdata);
@@ -527,6 +527,8 @@ void PaRendererStreamImpl::PAStreamWriteCb(pa_stream *stream, size_t length, voi
         streamImpl->abortFlag_--;
         return ;
     }
+    Trace trace("PaRendererStreamImpl::PAStreamWriteCb sink-input:" + std::to_string(streamImpl->sinkInputIndex_) +
+        " length:" + std::to_string(length));
     std::shared_ptr<IWriteCallback> writeCallback = streamImpl->writeCallback_.lock();
     if (writeCallback != nullptr) {
         writeCallback->OnWriteData(length);
