@@ -169,9 +169,11 @@ public:
         const std::vector<std::unique_ptr<AudioCapturerChangeInfo>> &audioCapturerChangeInfos);
     void NotifyAudioCapturerInfoChange(
         const std::vector<std::unique_ptr<AudioCapturerChangeInfo>> &audioCapturerChangeInfos);
+    void HandleCapturerDestructor();
 private:
     std::vector<std::shared_ptr<AudioCapturerDeviceChangeCallback>> deviceChangeCallbacklist_;
     std::vector<std::shared_ptr<AudioCapturerInfoChangeCallback>> capturerInfoChangeCallbacklist_;
+    std::mutex capturerMutex_;
     AudioCapturerPrivate *capturer_;
 };
 
