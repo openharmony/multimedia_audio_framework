@@ -398,10 +398,15 @@ void AudioServiceClient::PAStreamWriteCb(pa_stream *stream, size_t length, void 
     CHECK_AND_RETURN_LOG(userdata, "userdata is null");
 
     auto asClient = static_cast<AudioServiceClient *>(userdata);
+    Trace trace("AudioServiceClient::PAStreamWriteCb sink-input:" + std::to_string(asClient->streamId_) + " length:" +
+        std::to_string(length));
     int64_t now = ClockTime::GetCurNano() / AUDIO_US_PER_SECOND;
-    AUDIO_DEBUG_LOG("Inside PA write callback cost[%{public}" PRId64 "], sessionID %u",
-        (now - asClient->mWriteCbStamp), asClient->sessionID_);
-    asClient->mWriteCbStamp = now;
+    int64_t duration = now - asClient->writeCbStamp_;
+    if (duration > 40) { // 40 ms
+        AUDIO_INFO_LOG("Inside PA write callback cost[%{public}" PRId64 "]ms, sessionID %u", duration,
+            asClient->sessionID_);
+    }
+    asClient->writeCbStamp_ = now;
     auto mainLoop = static_cast<pa_threaded_mainloop *>(asClient->mainLoop);
     pa_threaded_mainloop_signal(mainLoop, 0);
 }
@@ -877,6 +882,7 @@ int32_t AudioServiceClient::ConnectStreamToPA()
     }
 
     isStreamConnected_ = true;
+    streamId_ = pa_stream_get_index(paStream);
     pa_threaded_mainloop_unlock(mainLoop);
     return AUDIO_CLIENT_SUCCESS;
 }
@@ -1157,6 +1163,8 @@ int32_t AudioServiceClient::GetSessionID(uint32_t &sessionID) const
 int32_t AudioServiceClient::StartStream(StateChangeCmdType cmdType)
 {
     AUDIO_INFO_LOG("AudioServiceClient::StartStream");
+    writeCbStamp_ = ClockTime::GetCurNano() / AUDIO_US_PER_SECOND;
+    Trace trace("AudioServiceClient::StartStream " + std::to_string(sessionID_));
     int error;
     lock_guard<mutex> lockdata(dataMutex_);
     unique_lock<mutex> stoppinglock(stoppingMutex_);
@@ -2575,6 +2583,7 @@ int32_t AudioServiceClient::SetStreamType(AudioStreamType audioStreamType)
 
 int32_t AudioServiceClient::SetStreamVolume(float volume)
 {
+    Trace trace("AudioServiceClient::SetStreamVolume " +std::to_string(volume));
     lock_guard<mutex> lock(ctrlMutex_);
     AUDIO_INFO_LOG("SetVolume volume: %{public}f", volume);
 

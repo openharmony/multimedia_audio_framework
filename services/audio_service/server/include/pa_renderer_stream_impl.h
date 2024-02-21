@@ -87,6 +87,7 @@ private:
     uint32_t streamIndex_ = static_cast<uint32_t>(-1); // invalid index
 
     pa_stream *paStream_ = nullptr;
+    uint32_t sinkInputIndex_ = 0;
     AudioProcessConfig processConfig_;
     std::weak_ptr<IStatusCallback> statusCallback_;
     std::weak_ptr<IWriteCallback> writeCallback_;

@@ -756,6 +756,7 @@ int32_t AudioPolicyService::DeviceParamsCheck(DeviceRole targetRole,
 
 void AudioPolicyService::NotifyUserSelectionEventToBt(sptr<AudioDeviceDescriptor> audioDeviceDescriptor)
 {
+    Trace trace("AudioPolicyService::NotifyUserSelectionEventToBt");
     if (audioDeviceDescriptor == nullptr) {
         return;
     }
@@ -787,6 +788,7 @@ void AudioPolicyService::NotifyUserSelectionEventToBt(sptr<AudioDeviceDescriptor
 int32_t AudioPolicyService::SelectOutputDevice(sptr<AudioRendererFilter> audioRendererFilter,
     std::vector<sptr<AudioDeviceDescriptor>> audioDeviceDescriptors)
 {
+    Trace trace("AudioPolicyService::SelectOutputDevice");
     AUDIO_INFO_LOG("SelectOutputDevice start for uid[%{public}d]", audioRendererFilter->uid);
     // check size == 1 && output device
     int32_t res = DeviceParamsCheck(DeviceRole::OUTPUT_DEVICE, audioDeviceDescriptors);
@@ -1505,7 +1507,8 @@ DeviceType AudioPolicyService::FetchHighPriorityDevice(bool isOutputDevice = tru
 
 void AudioPolicyService::UpdateActiveDeviceRoute(InternalDeviceType deviceType)
 {
-    AUDIO_DEBUG_LOG("UpdateActiveDeviceRoute Device type[%{public}d]", deviceType);
+    Trace trace("AudioPolicyService::UpdateActiveDeviceRoute DeviceType:" + std::to_string(deviceType));
+    AUDIO_INFO_LOG("Active route with type[%{public}d]", deviceType);
 
     CHECK_AND_RETURN_LOG(g_adProxy != nullptr, "Audio Server Proxy is null");
     auto ret = SUCCESS;
@@ -1860,6 +1863,7 @@ void AudioPolicyService::FetchInputDevice(vector<unique_ptr<AudioCapturerChangeI
 
 void AudioPolicyService::FetchDevice(bool isOutputDevice, const AudioStreamDeviceChangeReason reason)
 {
+    Trace trace("AudioPolicyService::FetchDevice reason:" + std::to_string(static_cast<int>(reason)));
     AUDIO_DEBUG_LOG("FetchDevice start");
     if (isOutputDevice) {
         vector<unique_ptr<AudioRendererChangeInfo>> rendererChangeInfos;
