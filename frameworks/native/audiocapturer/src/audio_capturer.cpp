@@ -44,6 +44,9 @@ AudioCapturerPrivate::~AudioCapturerPrivate()
         audioStream_->ReleaseAudioStream(true);
         audioStream_ = nullptr;
     }
+    if (audioStateChangeCallback_ != nullptr) {
+        audioStateChangeCallback_->HandleCapturerDestructor();
+    }
 }
 
 std::unique_ptr<AudioCapturer> AudioCapturer::Create(AudioStreamType audioStreamType)
@@ -897,6 +900,7 @@ int32_t AudioCapturerStateChangeCallbackImpl::DeviceChangeCallbackArraySize()
 
 void AudioCapturerStateChangeCallbackImpl::setAudioCapturerObj(AudioCapturerPrivate *capturerObj)
 {
+    std::lock_guard<std::mutex> lock(capturerMutex_);
     capturer_ = capturerObj;
 }
 
@@ -906,8 +910,13 @@ void AudioCapturerStateChangeCallbackImpl::NotifyAudioCapturerInfoChange(
     uint32_t sessionId = static_cast<uint32_t>(-1);
     bool found = false;
     AudioCapturerChangeInfo capturerChangeInfo;
-    int32_t ret = capturer_->GetAudioStreamId(sessionId);
-    CHECK_AND_RETURN_LOG(!ret, "Get sessionId failed");
+
+    {
+        std::lock_guard<std::mutex> lock(capturerMutex_);
+        CHECK_AND_RETURN_LOG(capturer_ != nullptr, "Bare pointer capturer_ is nullptr");
+        int32_t ret = capturer_->GetAudioStreamId(sessionId);
+        CHECK_AND_RETURN_LOG(!ret, "Get sessionId failed");
+    }
 
     for (auto it = audioCapturerChangeInfos.begin(); it != audioCapturerChangeInfos.end(); it++) {
         if ((*it)->sessionId == static_cast<int32_t>(sessionId)) {
@@ -929,7 +938,12 @@ void AudioCapturerStateChangeCallbackImpl::NotifyAudioCapturerDeviceChange(
     const std::vector<std::unique_ptr<AudioCapturerChangeInfo>> &audioCapturerChangeInfos)
 {
     DeviceInfo deviceInfo = {};
-    CHECK_AND_RETURN_LOG(capturer_->IsDeviceChanged(deviceInfo), "Device not change, no need callback.");
+    {
+        std::lock_guard<std::mutex> lock(capturerMutex_);
+        CHECK_AND_RETURN_LOG(capturer_ != nullptr, "Bare pointer capturer_ is nullptr");
+        CHECK_AND_RETURN_LOG(capturer_->IsDeviceChanged(deviceInfo), "Device not change, no need callback.");
+    }
+
     for (auto it = deviceChangeCallbacklist_.begin(); it != deviceChangeCallbacklist_.end(); ++it) {
         if (*it != nullptr) {
             (*it)->OnStateChange(deviceInfo);
@@ -947,6 +961,12 @@ void AudioCapturerStateChangeCallbackImpl::OnCapturerStateChange(
     if (capturerInfoChangeCallbacklist_.size() != 0) {
         NotifyAudioCapturerInfoChange(audioCapturerChangeInfos);
     }
+}
+
+void AudioCapturerStateChangeCallbackImpl::HandleCapturerDestructor()
+{
+    std::lock_guard<std::mutex> lock(capturerMutex_);
+    capturer_ = nullptr;
 }
 
 CapturerPolicyServiceDiedCallback::CapturerPolicyServiceDiedCallback()
