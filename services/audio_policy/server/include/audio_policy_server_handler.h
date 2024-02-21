@@ -96,12 +96,13 @@ public:
     struct CapturerCreateEvent {
         CapturerCreateEvent() = delete;
         CapturerCreateEvent(const AudioCapturerInfo &capturerInfo, const AudioStreamInfo &streamInfo,
-            uint64_t sessionId)
-            : capturerInfo_(capturerInfo), streamInfo_(streamInfo), sessionId_(sessionId)
+            uint64_t sessionId, int32_t error)
+            : capturerInfo_(capturerInfo), streamInfo_(streamInfo), sessionId_(sessionId), error_(error)
         {}
         AudioCapturerInfo capturerInfo_;
         AudioStreamInfo streamInfo_;
         uint64_t sessionId_;
+        int32_t error_;
     };
 
     void AddAudioPolicyClientProxyMap(int32_t clientPid, const sptr<IAudioPolicyClient> &cb);
@@ -137,7 +138,7 @@ public:
     bool SendRendererDeviceChangeEvent(const int32_t clientPid, const uint32_t sessionId,
         const DeviceInfo &outputDeviceInfo, const AudioStreamDeviceChangeReason reason);
     bool SendCapturerCreateEvent(AudioCapturerInfo capturerInfo, AudioStreamInfo streamInfo,
-        uint64_t sessionId, bool isSync);
+        uint64_t sessionId, bool isSync, int32_t &error);
     bool SendCapturerRemovedEvent(uint64_t sessionId, bool isSync);
     bool SendWakeupCloseEvent(bool isSync);
 

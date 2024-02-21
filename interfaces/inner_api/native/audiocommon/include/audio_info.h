@@ -906,6 +906,12 @@ public:
     virtual ~AudioPnpDeviceChangeCallback() = default;
     virtual void OnPnpDeviceStatusChanged(const std::string &info) = 0;
 };
+
+struct SourceInfo {
+    SourceType sourceType_;
+    uint32_t rate_;
+    uint32_t channels_;
+};
 } // namespace AudioStandard
 } // namespace OHOS
 #endif // AUDIO_INFO_H
