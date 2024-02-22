@@ -350,6 +350,7 @@ bool AudioEndpointInner::ConfigInputPoint(const DeviceInfo &deviceInfo)
     attr.channel = dstStreamInfo_.channels;
     attr.format = ConvertToHdiAdapterFormat(dstStreamInfo_.format);
     attr.deviceNetworkId = deviceInfo.networkId.c_str();
+    attr.deviceType = deviceInfo.deviceType;
 
     if (deviceInfo.networkId == LOCAL_NETWORK_ID) {
         attr.adapterName = "primary";
