@@ -261,7 +261,11 @@ public:
     virtual int32_t SetCallDeviceActive(InternalDeviceType deviceType, bool active, std::string address) = 0;
 
     virtual std::unique_ptr<AudioDeviceDescriptor> GetActiveBluetoothDevice() = 0;
-    
+
+    virtual void FetchOutputDeviceForTrack(AudioStreamChangeInfo &streamChangeInfo) = 0;
+
+    virtual void FetchInputDeviceForTrack(AudioStreamChangeInfo &streamChangeInfo) = 0;
+
 public:
     DECLARE_INTERFACE_DESCRIPTOR(u"IAudioPolicy");
 };

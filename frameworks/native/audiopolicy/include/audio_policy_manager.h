@@ -327,6 +327,10 @@ public:
 
     int32_t NotifyCapturerAdded(AudioCapturerInfo capturerInfo, AudioStreamInfo streamInfo, uint32_t sessionId);
 
+    void FetchOutputDeviceForTrack(AudioStreamChangeInfo &streamChangeInfo);
+
+    void FetchInputDeviceForTrack(AudioStreamChangeInfo &streamChangeInfo);
+
 private:
     AudioPolicyManager()
     {
