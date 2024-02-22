@@ -1693,7 +1693,7 @@ bool AudioPolicyService::NeedRehandleA2DPDevice(unique_ptr<AudioDeviceDescriptor
 
 void AudioPolicyService::MuteSinkPort(unique_ptr<AudioDeviceDescriptor> &desc)
 {
-    int32_t duration = 300000; // us
+    int32_t duration = 1000000; // us
     string portName = GetSinkPortName(desc->deviceType_);
     thread switchThread(&AudioPolicyService::KeepPortMute, this, duration, portName, desc->deviceType_);
     switchThread.detach(); // add another sleep before switch local can avoid pop in some case
