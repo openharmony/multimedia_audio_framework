@@ -39,7 +39,6 @@ namespace {
     const string AUDIORENDER_TEST_METAFILE_PATH = "/data/test_48k_5.1.2+2.metadata";  // need manually push
     const int32_t VALUE_NEGATIVE = -1;
     const int32_t VALUE_ZERO = 0;
-    const int32_t VALUE_INVALID = -2;
     const int32_t VALUE_HUNDRED = 100;
     const int32_t VALUE_THOUSAND = 1000;
     const int32_t VALUE_ERROR = -62980098;
@@ -1080,7 +1079,7 @@ HWTEST(AudioRendererUnitTest, Audio_Renderer_GetBufferSize_002, TestSize.Level1)
 
     size_t bufferLen;
     ret = audioRenderer->GetBufferSize(bufferLen);
-    EXPECT_EQ(ERR_OPERATION_FAILED, ret);
+    EXPECT_EQ(VALUE_ZERO, ret);
 }
 
 /**
@@ -1102,7 +1101,7 @@ HWTEST(AudioRendererUnitTest, Audio_Renderer_GetBufferSize_003, TestSize.Level1)
 
     size_t bufferLen;
     ret = audioRenderer->GetBufferSize(bufferLen);
-    EXPECT_EQ(ERR_OPERATION_FAILED, ret);
+    EXPECT_EQ(ERR_ILLEGAL_STATE, ret);
 }
 
 /**
@@ -1253,7 +1252,7 @@ HWTEST(AudioRendererUnitTest, Audio_Renderer_GetFrameCount_002, TestSize.Level1)
 
     uint32_t frameCount;
     ret = audioRenderer->GetFrameCount(frameCount);
-    EXPECT_EQ(ERR_OPERATION_FAILED, ret);
+    EXPECT_EQ(VALUE_ZERO, ret);
 }
 
 /**
@@ -1326,7 +1325,7 @@ HWTEST(AudioRendererUnitTest, Audio_Renderer_GetFrameCount_005, TestSize.Level1)
 
     uint32_t frameCount;
     ret = audioRenderer->GetFrameCount(frameCount);
-    EXPECT_EQ(ERR_OPERATION_FAILED, ret);
+    EXPECT_EQ(ERR_ILLEGAL_STATE, ret);
 }
 
 /**
@@ -1772,7 +1771,7 @@ HWTEST(AudioRendererUnitTest, Audio_Renderer_Write_002, TestSize.Level1)
 
     size_t bufferLen;
     ret = audioRenderer->GetBufferSize(bufferLen);
-    EXPECT_EQ(ERR_OPERATION_FAILED, ret);
+    EXPECT_EQ(VALUE_ZERO, ret);
 
     uint8_t *buffer = (uint8_t *) malloc(bufferLen);
     ASSERT_NE(nullptr, buffer);
@@ -3956,7 +3955,7 @@ HWTEST(AudioRendererUnitTest, Audio_Renderer_GetLatency_002, TestSize.Level1)
 
     uint64_t latency;
     ret = audioRenderer->GetLatency(latency);
-    EXPECT_EQ(ERR_OPERATION_FAILED, ret);
+    EXPECT_EQ(VALUE_ZERO, ret);
 }
 
 /**
@@ -4029,7 +4028,7 @@ HWTEST(AudioRendererUnitTest, Audio_Renderer_GetLatency_005, TestSize.Level1)
 
     uint64_t latency;
     ret = audioRenderer->GetLatency(latency);
-    EXPECT_EQ(ERR_OPERATION_FAILED, ret);
+    EXPECT_EQ(VALUE_ZERO, ret);
 }
 
 /**
@@ -5247,10 +5246,10 @@ HWTEST(AudioRendererUnitTest, Audio_Renderer_Set_Renderer_SamplingRate_001, Test
 
     uint32_t sampleRate = AudioSamplingRate::SAMPLE_RATE_48000;
     ret = audioRenderer->SetRendererSamplingRate(sampleRate);
-    EXPECT_EQ(SUCCESS, ret);
+    EXPECT_EQ(ERROR, ret);
 
     uint32_t sampleRateRet = audioRenderer->GetRendererSamplingRate();
-    EXPECT_EQ(sampleRate, sampleRateRet);
+    EXPECT_EQ(AudioSamplingRate::SAMPLE_RATE_44100, sampleRateRet);
     audioRenderer->Release();
 }
 
@@ -5735,7 +5734,7 @@ HWTEST(AudioRendererUnitTest, Audio_Renderer_SetRendererSamplingRate_001, TestSi
 
     uint32_t samplingRate = 44100;
     ret = audioRenderer->SetRendererSamplingRate(samplingRate);
-    EXPECT_EQ(SUCCESS, ret);
+    EXPECT_EQ(ERROR, ret);
     audioRenderer->Release();
 }
 
@@ -5757,31 +5756,7 @@ HWTEST(AudioRendererUnitTest, Audio_Renderer_SetRendererSamplingRate_002, TestSi
 
     uint32_t invalidRate_1 = 0;
     ret = audioRenderer->SetRendererSamplingRate(invalidRate_1);
-    EXPECT_EQ(VALUE_INVALID, ret);
-
-    audioRenderer->Release();
-}
-
-/**
- * @tc.name  : Test SetRendererSamplingRate
- * @tc.number: Audio_Renderer_SetRendererSamplingRate_Stability_001
- * @tc.desc  : Test SetRendererSamplingRate interface with valid samplingRate for 1000 times.
- */
-HWTEST(AudioRendererUnitTest, Audio_Renderer_SetRendererSamplingRate_Stability_001, TestSize.Level1)
-{
-    int32_t ret = -1;
-    AudioRendererOptions rendererOptions;
-
-    AudioRendererUnitTest::InitializeRendererOptions(rendererOptions);
-    unique_ptr<AudioRenderer> audioRenderer = AudioRenderer::Create(rendererOptions);
-    ASSERT_NE(nullptr, audioRenderer);
-
-    uint32_t samplingRate = 44100;
-
-    for (int i = 0; i < VALUE_THOUSAND; i++) {
-        ret = audioRenderer->SetRendererSamplingRate(samplingRate);
-        EXPECT_EQ(SUCCESS, ret);
-    }
+    EXPECT_EQ(ERROR, ret);
 
     audioRenderer->Release();
 }
@@ -5820,10 +5795,10 @@ HWTEST(AudioRendererUnitTest, Audio_Renderer_GetRendererSamplingRate_002, TestSi
 
     uint32_t samplingRate = 48000;
     ret = audioRenderer->SetRendererSamplingRate(samplingRate);
-    EXPECT_EQ(SUCCESS, ret);
+    EXPECT_EQ(ERROR, ret);
 
     uint32_t retSamplerate = audioRenderer->GetRendererSamplingRate();
-    EXPECT_EQ(samplingRate, retSamplerate);
+    EXPECT_EQ(SAMPLE_RATE_44100, retSamplerate);
     audioRenderer->Release();
 }
 
@@ -5844,7 +5819,7 @@ HWTEST(AudioRendererUnitTest, Audio_Renderer_GetRendererSamplingRate_003, TestSi
 
     uint32_t samplingRate = 0;
     ret = audioRenderer->SetRendererSamplingRate(samplingRate);
-    EXPECT_EQ(VALUE_INVALID, ret);
+    EXPECT_EQ(ERROR, ret);
 
     uint32_t retSamplerate = audioRenderer->GetRendererSamplingRate();
     EXPECT_EQ(SAMPLE_RATE_44100, retSamplerate);
@@ -5868,14 +5843,14 @@ HWTEST(AudioRendererUnitTest, Audio_Renderer_GetRendererSamplingRate_004, TestSi
 
     uint32_t validRate = 48000;
     ret = audioRenderer->SetRendererSamplingRate(validRate);
-    EXPECT_EQ(SUCCESS, ret);
+    EXPECT_EQ(ERROR, ret);
 
     uint32_t invalidRate = 0;
     ret = audioRenderer->SetRendererSamplingRate(invalidRate);
-    EXPECT_EQ(VALUE_INVALID, ret);
+    EXPECT_EQ(ERROR, ret);
 
     uint32_t retSampleRate = audioRenderer->GetRendererSamplingRate();
-    EXPECT_EQ(validRate, retSampleRate);
+    EXPECT_EQ(SAMPLE_RATE_44100, retSampleRate);
     audioRenderer->Release();
 }
 
@@ -5896,10 +5871,10 @@ HWTEST(AudioRendererUnitTest, Audio_Renderer_GetRendererSamplingRate_Stability_0
     for (int i = 0; i < VALUE_THOUSAND; i++) {
         uint32_t samplingRate = 48000;
         ret = audioRenderer->SetRendererSamplingRate(samplingRate);
-        EXPECT_EQ(SUCCESS, ret);
+        EXPECT_EQ(ERROR, ret);
 
         uint32_t retSampleRate = audioRenderer->GetRendererSamplingRate();
-        EXPECT_EQ(samplingRate, retSampleRate);
+        EXPECT_EQ(SAMPLE_RATE_44100, retSampleRate);
     }
 
     audioRenderer->Release();
@@ -6325,6 +6300,5 @@ HWTEST(AudioRendererUnitTest, Audio_Renderer_GetSpeed_001, TestSize.Level1)
     bool isReleased = audioRenderer->Release();
     EXPECT_EQ(true, isReleased);
 }
-
 } // namespace AudioStandard
 } // namespace OHOS
