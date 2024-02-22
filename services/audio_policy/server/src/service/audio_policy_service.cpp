@@ -1611,10 +1611,10 @@ void AudioPolicyService::FetchOutputDeviceWhenNoRunningStream()
         return;
     }
     SetVolumeForSwitchDevice(desc->deviceType_);
-    currentActiveDevice_ = AudioDeviceDescriptor(*desc);
-    if (desc->deviceType_ == DEVICE_TYPE_BLUETOOTH_A2DP || desc->deviceType_ == DEVICE_TYPE_BLUETOOTH_SCO) {
-        activeBTDevice_ = desc->macAddress_;
+    if (desc->deviceType_ == DEVICE_TYPE_BLUETOOTH_A2DP) {
+        SwitchActiveA2dpDevice(new AudioDeviceDescriptor(*desc));
     }
+    currentActiveDevice_ = AudioDeviceDescriptor(*desc);
     AUDIO_DEBUG_LOG("currentActiveDevice update %{public}d", currentActiveDevice_.deviceType_);
     OnPreferredOutputDeviceUpdated(currentActiveDevice_);
 }
@@ -2798,6 +2798,9 @@ void AudioPolicyService::UpdateActiveA2dpDeviceWhenDisconnecting(const std::stri
             IOHandles_.erase(BLUETOOTH_SPEAKER);
         }
         audioPolicyManager_.SetAbsVolumeScene(false);
+#ifdef BLUETOOTH_ENABLE
+        Bluetooth::AudioA2dpManager::SetActiveA2dpDevice("");
+#endif
         return;
     }
 }
@@ -5420,6 +5423,12 @@ void AudioPolicyService::OnPreferredStateUpdated(AudioDeviceDescriptor &desc,
                 userSelectRecordCaptureDevice->macAddress_ == desc.macAddress_) {
                 audioStateManager_.SetPerferredRecordCaptureDevice(new(std::nothrow) AudioDeviceDescriptor());
             }
+#ifdef BLUETOOTH_ENABLE
+            if (desc.deviceType_ == DEVICE_TYPE_BLUETOOTH_A2DP &&
+                desc.macAddress_ == currentActiveDevice_.macAddress_) {
+                Bluetooth::AudioA2dpManager::SetActiveA2dpDevice("");
+            }
+#endif
         } else {
             reason = AudioStreamDeviceChangeReason::NEW_DEVICE_AVAILABLE;
             if (desc.deviceType_ == DEVICE_TYPE_BLUETOOTH_A2DP) {
