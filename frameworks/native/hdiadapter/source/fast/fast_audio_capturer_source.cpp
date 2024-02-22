@@ -81,6 +81,7 @@ private:
     static constexpr uint32_t AUDIO_SAMPLE_RATE_48K = 48000;
     static constexpr uint32_t INT_32_MAX = 0x7fffffff;
     static constexpr uint32_t FAST_INPUT_STREAM_ID = 22; // 14 + 1 * 8
+    int32_t routeHandle_ = -1;
 
     IAudioSourceAttr attr_;
     bool capturerInited_;
@@ -387,11 +388,9 @@ int32_t FastAudioCapturerSourceInner::Init(const IAudioSourceAttr &attr)
     CHECK_AND_RETURN_RET_LOG(initAllPorts == 0, ERR_DEVICE_INIT, "InitAllPorts failed");
     bool tmp = CreateCapture(audioPort) == SUCCESS && PrepareMmapBuffer() == SUCCESS;
     CHECK_AND_RETURN_RET_LOG(tmp, ERR_NOT_STARTED, "Create capture failed");
-    if (openMic_) {
-        ret = SetInputRoute(DEVICE_TYPE_MIC);
-        if (ret < 0) {
-            AUDIO_WARNING_LOG("update route FAILED: %{public}d", ret);
-        }
+    ret = SetInputRoute(static_cast<DeviceType>(attr_.deviceType));
+    if (ret < 0) {
+        AUDIO_WARNING_LOG("update route FAILED: %{public}d", ret);
     }
     capturerInited_ = true;
 
@@ -481,14 +480,70 @@ int32_t FastAudioCapturerSourceInner::GetMute(bool &isMute)
     return ERR_DEVICE_NOT_SUPPORTED;
 }
 
+static int32_t SetInputPortPin(DeviceType inputDevice, AudioRouteNode &source)
+{
+    int32_t ret = SUCCESS;
+
+    switch (inputDevice) {
+        case DEVICE_TYPE_MIC:
+        case DEVICE_TYPE_EARPIECE:
+        case DEVICE_TYPE_SPEAKER:
+            source.ext.device.type = PIN_IN_MIC;
+            source.ext.device.desc = (char *)"pin_in_mic";
+            break;
+        case DEVICE_TYPE_WIRED_HEADSET:
+            source.ext.device.type = PIN_IN_HS_MIC;
+            source.ext.device.desc = (char *)"pin_in_hs_mic";
+            break;
+        default:
+            ret = ERR_NOT_SUPPORTED;
+            break;
+    }
+
+    return ret;
+}
+
 int32_t FastAudioCapturerSourceInner::SetInputRoute(DeviceType inputDevice)
 {
-    return ERR_DEVICE_NOT_SUPPORTED;
+    AudioPortPin inputPortPin = PIN_IN_MIC;
+    return SetInputRoute(inputDevice, inputPortPin);
 }
 
 int32_t FastAudioCapturerSourceInner::SetInputRoute(DeviceType inputDevice, AudioPortPin &inputPortPin)
 {
-    return ERR_DEVICE_NOT_SUPPORTED;
+    AudioRouteNode source = {};
+    AudioRouteNode sink = {};
+    int32_t ret = SetInputPortPin(inputDevice, source);
+    if (ret != SUCCESS) {
+        return ret;
+    }
+    inputPortPin = source.ext.device.type;
+    AUDIO_INFO_LOG("Input PIN is: 0x%{public}X", inputPortPin);
+    source.portId = static_cast<int32_t>(audioPort.portId);
+    source.role = AUDIO_PORT_SOURCE_ROLE;
+    source.type = AUDIO_PORT_DEVICE_TYPE;
+    source.ext.device.moduleId = 0;
+    source.ext.device.desc = (char *)"";
+
+    sink.portId = 0;
+    sink.role = AUDIO_PORT_SINK_ROLE;
+    sink.type = AUDIO_PORT_MIX_TYPE;
+    sink.ext.mix.moduleId = 0;
+    sink.ext.mix.streamId = FAST_INPUT_STREAM_ID;
+    sink.ext.device.desc = (char *)"";
+
+    AudioRoute route = {
+        .sources = &source,
+        .sourcesLen = 1,
+        .sinks = &sink,
+        .sinksLen = 1,
+    };
+
+    CHECK_AND_RETURN_RET_LOG(audioAdapter_ != nullptr, ERR_OPERATION_FAILED,
+        "AudioAdapter object is null.");
+
+    ret = audioAdapter_->UpdateAudioRoute(audioAdapter_, &route, &routeHandle_);
+    return (ret == SUCCESS) ? SUCCESS : ERR_OPERATION_FAILED;
 }
 
 int32_t FastAudioCapturerSourceInner::SetAudioScene(AudioScene audioScene, DeviceType activeDevice)
