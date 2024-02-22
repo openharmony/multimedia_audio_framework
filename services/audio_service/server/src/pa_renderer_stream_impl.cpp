@@ -882,8 +882,11 @@ int32_t PaRendererStreamImpl::OffloadUpdatePolicy(AudioOffloadType statePolicy, 
         pa_proplist_free(propList);
         pa_operation_unref(updatePropOperation);
 
-        const uint32_t bufLenMs = statePolicy > 1 ? OFFLOAD_HDI_CACHE2 : OFFLOAD_HDI_CACHE1;
-        OffloadSetBufferSize(bufLenMs);
+        if (!(statePolicy == OFFLOAD_DEFAULT &&
+              (offloadStatePolicy_ == OFFLOAD_DEFAULT || offloadStatePolicy_ == OFFLOAD_ACTIVE_FOREGROUND))) {
+            const uint32_t bufLenMs = statePolicy > 1 ? OFFLOAD_HDI_CACHE2 : OFFLOAD_HDI_CACHE1;
+            OffloadSetBufferSize(bufLenMs);
+        }
 
         offloadStatePolicy_ = statePolicy;
         offloadNextStateTargetPolicy_ = statePolicy; // Fix here if sometimes can't cut into state 3

@@ -2073,9 +2073,7 @@ int32_t AudioPolicyService::SwitchActiveA2dpDevice(const sptr<AudioDeviceDescrip
         A2dpDeviceConfigInfo configInfo = connectedA2dpDeviceMap_[activeBTDevice_];
         audioPolicyManager_.SetAbsVolumeScene(configInfo.absVolumeSupport);
     }
-    if (a2dpOffloadFlag_ != A2DP_OFFLOAD) {
-        result = LoadA2dpModule(DEVICE_TYPE_BLUETOOTH_A2DP);
-    }
+    result = LoadA2dpModule(DEVICE_TYPE_BLUETOOTH_A2DP);
     CHECK_AND_RETURN_RET_LOG(result == SUCCESS, ERR_OPERATION_FAILED, "LoadA2dpModule failed %{public}d", result);
 #endif
     return result;
