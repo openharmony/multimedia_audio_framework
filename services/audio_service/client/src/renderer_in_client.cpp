@@ -779,7 +779,10 @@ bool RendererInClientInner::GetAudioTime(Timestamp &timestamp, Timestamp::Timest
     }
 
     int64_t deltaPos = static_cast<uint64_t>(currentWritePos) >= readPos ?  currentWritePos - readPos : 0;
-    int64_t tempLatency = 45000000; // 45000000 -> 45 ms
+    int64_t tempLatency = 0;
+    if (GetState() == RUNNING) {
+        tempLatency = 45000000; // 45000000 -> 45 ms
+    }
     int64_t deltaTime = deltaPos * AUDIO_MS_PER_SECOND / streamParams_.samplingRate * AUDIO_US_PER_S;
 
     int64_t audioTimeResult = handleTime + deltaTime + tempLatency;
