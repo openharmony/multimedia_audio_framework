@@ -489,6 +489,9 @@ private:
 
     bool CheckAudioInterruptZonePermission();
 
+    AppExecFwk::BundleInfo GetBundleInfoFromUid();
+    int32_t GetApiTargerVersion();
+
     // externel function call
 #ifdef FEATURE_MULTIMODALINPUT_INPUT
     bool MaxOrMinVolumeOption(const int32_t &volLevel, const int32_t keyType, const AudioStreamType &streamInFocus);

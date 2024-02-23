@@ -60,6 +60,7 @@ constexpr int32_t PARAMS_INTERRUPT_NUM = 4;
 constexpr int32_t PARAMS_RENDER_STATE_NUM = 2;
 constexpr int32_t EVENT_DES_SIZE = 60;
 constexpr int32_t ADAPTER_STATE_CONTENT_DES_SIZE = 60;
+constexpr int32_t API_VERSION_REMAINDER = 1000;
 constexpr uid_t UID_ROOT = 0;
 constexpr uid_t UID_MSDP_SA = 6699;
 constexpr uid_t UID_INTELLIGENT_VOICE_SA = 1042;
@@ -3064,6 +3065,7 @@ int32_t AudioPolicyServer::RegisterPolicyCallbackClient(const sptr<IRemoteObject
     bool hasSysPermission = PermissionUtil::VerifySystemPermission();
     callback->hasBTPermission_ = hasBTPermission;
     callback->hasSystemPermission_ = hasSysPermission;
+    callback->apiVersion_ = GetApiTargerVersion();
     audioPolicyService_.AddAudioPolicyClientProxyMap(clientPid, callback);
 
     {
@@ -3390,6 +3392,42 @@ std::unique_ptr<AudioDeviceDescriptor> AudioPolicyServer::GetActiveBluetoothDevi
     }
 
     return btdevice;
+}
+
+AppExecFwk::BundleInfo AudioPolicyServer::GetBundleInfoFromUid()
+{
+    std::string bundleName {""};
+    AppExecFwk::BundleInfo bundleInfo;
+    auto systemAbilityManager = SystemAbilityManagerClient::GetInstance().GetSystemAbilityManager();
+    CHECK_AND_RETURN_RET_LOG(systemAbilityManager != nullptr, bundleInfo, "systemAbilityManager is nullptr");
+
+    sptr<IRemoteObject> remoteObject = systemAbilityManager->GetSystemAbility(BUNDLE_MGR_SERVICE_SYS_ABILITY_ID);
+    CHECK_AND_RETURN_RET_LOG(remoteObject != nullptr, bundleInfo, "remoteObject is nullptr");
+
+    sptr<AppExecFwk::IBundleMgr> bundleMgrProxy = OHOS::iface_cast<AppExecFwk::IBundleMgr>(remoteObject);
+    CHECK_AND_RETURN_RET_LOG(bundleMgrProxy != nullptr, bundleInfo, "bundleMgrProxy is nullptr");
+
+    int32_t callingUid = IPCSkeleton::GetCallingUid();
+    bundleMgrProxy->GetNameForUid(callingUid, bundleName);
+
+    bundleMgrProxy->GetBundleInfoV9(bundleName, AppExecFwk::BundleFlag::GET_BUNDLE_DEFAULT |
+        AppExecFwk::BundleFlag::GET_BUNDLE_WITH_ABILITIES |
+        AppExecFwk::BundleFlag::GET_BUNDLE_WITH_REQUESTED_PERMISSION |
+        AppExecFwk::BundleFlag::GET_BUNDLE_WITH_EXTENSION_INFO |
+        AppExecFwk::BundleFlag::GET_BUNDLE_WITH_HASH_VALUE,
+        bundleInfo,
+        AppExecFwk::Constants::ALL_USERID);
+
+    return bundleInfo;
+}
+
+int32_t AudioPolicyServer::GetApiTargerVersion()
+{
+    AppExecFwk::BundleInfo bundleInfo = GetBundleInfoFromUid();
+
+    // Taking remainder of large integers
+    int32_t apiTargetversion = bundleInfo.applicationInfo.apiTargetVersion % API_VERSION_REMAINDER;
+    return apiTargetversion;
 }
 } // namespace AudioStandard
 } // namespace OHOS

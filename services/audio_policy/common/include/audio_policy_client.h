@@ -64,6 +64,7 @@ public:
 
     bool hasBTPermission_ = true;
     bool hasSystemPermission_ = true;
+    int32_t apiVersion_ = API_MAX;
 
 public:
     DECLARE_INTERFACE_DESCRIPTOR(u"IAudioPolicyClient");
