@@ -179,6 +179,7 @@ enum ActiveDeviceType {
     EARPIECE = 1,
     SPEAKER = 2,
     BLUETOOTH_SCO = 7,
+    USB_HEADSET = 22,
     FILE_SINK_DEVICE = 50,
     ACTIVE_DEVICE_TYPE_MAX
 };
