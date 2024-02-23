@@ -204,6 +204,7 @@ int32_t AudioSystemManager::SetDeviceActive(ActiveDeviceType deviceType, bool fl
         case EARPIECE:
         case SPEAKER:
         case BLUETOOTH_SCO:
+        case USB_HEADSET:
         case FILE_SINK_DEVICE:
             break;
         default:
@@ -221,6 +222,7 @@ bool AudioSystemManager::IsDeviceActive(ActiveDeviceType deviceType) const
         case EARPIECE:
         case SPEAKER:
         case BLUETOOTH_SCO:
+        case USB_HEADSET:
         case FILE_SINK_DEVICE:
             break;
         default:
