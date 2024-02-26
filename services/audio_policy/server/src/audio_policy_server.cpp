@@ -2780,7 +2780,7 @@ int32_t AudioPolicyServer::OffloadStopPlaying(const AudioInterrupt &audioInterru
 int32_t AudioPolicyServer::ConfigDistributedRoutingRole(const sptr<AudioDeviceDescriptor> descriptor, CastType type)
 {
     if (!PermissionUtil::VerifySystemPermission()) {
-        AUDIO_ERR_LOG("ConfigDistributedRoutingRole: No system permission");
+        AUDIO_ERR_LOG("No system permission");
         return ERR_PERMISSION_DENIED;
     }
     audioPolicyService_.ConfigDistributedRoutingRole(descriptor, type);
