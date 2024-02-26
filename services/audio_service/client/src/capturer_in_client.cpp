@@ -1430,8 +1430,10 @@ bool CapturerInClientInner::FlushAudioStream()
     if (notifiedOperation_ != FLUSH_STREAM || notifiedResult_ != SUCCESS) {
         AUDIO_ERR_LOG("Flush failed: %{public}s Operation:%{public}d result:%{public}" PRId64".",
             (!stopWaiting ? "timeout" : "no timeout"), notifiedOperation_, notifiedResult_);
+        notifiedOperation_ = MAX_OPERATION_CODE;
         return false;
     }
+    notifiedOperation_ = MAX_OPERATION_CODE;
     waitLock.unlock();
     AUDIO_INFO_LOG("Flush stream SUCCESS, sessionId: %{public}d", sessionId_);
     return true;
@@ -1531,7 +1533,8 @@ int32_t CapturerInClientInner::Read(uint8_t &buffer, size_t userSize, bool isBlo
 {
     Trace trace("CapturerInClientInner::Read " + std::to_string(userSize));
 
-    CHECK_AND_RETURN_RET_LOG(userSize < MAX_CLIENT_READ_SIZE, ERR_INVALID_PARAM, "invalid size %{public}zu", userSize);
+    CHECK_AND_RETURN_RET_LOG(userSize < MAX_CLIENT_READ_SIZE && userSize > 0,
+        ERR_INVALID_PARAM, "invalid size %{public}zu", userSize);
 
     std::lock_guard<std::mutex> lock(readMutex_);
 
