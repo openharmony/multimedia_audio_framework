@@ -547,7 +547,7 @@ int32_t AudioPolicyServer::GetSystemVolumeLevelInternal(AudioStreamType streamTy
 int32_t AudioPolicyServer::SetLowPowerVolume(int32_t streamId, float volume)
 {
     auto callerUid = IPCSkeleton::GetCallingUid();
-    if (callerUid != UID_FOUNDATION_SA ||
+    if (callerUid != UID_FOUNDATION_SA &&
         callerUid != UID_COMPONENT_SCHEDULE_SERVICE_SA) {
         AUDIO_ERR_LOG("SetLowPowerVolume callerUid Error: not foundation or component_schedule_service");
         return ERROR;

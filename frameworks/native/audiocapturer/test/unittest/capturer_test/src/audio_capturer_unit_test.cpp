@@ -2137,9 +2137,22 @@ HWTEST(AudioCapturerUnitTest, Audio_Capturer_Stop_006, TestSize.Level1)
 
     uint8_t *buffer = (uint8_t *) malloc(bufferLen);
     ASSERT_NE(nullptr, buffer);
+    FILE *capFile = fopen(AUDIO_CAPTURE_FILE1.c_str(), "wb");
+    ASSERT_NE(nullptr, capFile);
 
-    int32_t bytesRead = audioCapturer->Read(*buffer, bufferLen, isBlockingRead);
-    EXPECT_GE(bytesRead, VALUE_ZERO);
+    size_t size = 1;
+    int32_t bytesRead = 0;
+    int32_t numBuffersToCapture = READ_BUFFERS_COUNT;
+
+    while (numBuffersToCapture) {
+        bytesRead = audioCapturer->Read(*buffer, bufferLen, isBlockingRead);
+        if (bytesRead <= 0) {
+            break;
+        } else if (bytesRead > 0) {
+            fwrite(buffer, size, bytesRead, capFile);
+            numBuffersToCapture--;
+        }
+    }
 
     audioCapturer->Flush();
 
@@ -2191,7 +2204,7 @@ HWTEST(AudioCapturerUnitTest, Audio_Capturer_Release_001, TestSize.Level1)
 /**
 * @tc.name  : Test Release API via illegal state, CAPTURER_NEW: Call Release without initializing the capturer.
 * @tc.number: Audio_Capturer_Release_002
-* @tc.desc  : Test Release interface, Returns false, if the state is CAPTURER_NEW.
+* @tc.desc  : Test Release interface, Returns true, if the state is CAPTURER_NEW.
 */
 HWTEST(AudioCapturerUnitTest, Audio_Capturer_Release_002, TestSize.Level1)
 {
@@ -2199,13 +2212,13 @@ HWTEST(AudioCapturerUnitTest, Audio_Capturer_Release_002, TestSize.Level1)
     ASSERT_NE(nullptr, audioCapturer);
 
     bool isReleased = audioCapturer->Release();
-    EXPECT_EQ(false, isReleased);
+    EXPECT_EQ(true, isReleased);
 }
 
 /**
 * @tc.name  : Test Release API via illegal state, CAPTURER_RELEASED: call Release repeatedly.
 * @tc.number: Audio_Capturer_Release_003
-* @tc.desc  : Test Release interface. Returns false, if the state is already CAPTURER_RELEASED.
+* @tc.desc  : Test Release interface. Returns true, if the state is already CAPTURER_RELEASED.
 */
 HWTEST(AudioCapturerUnitTest, Audio_Capturer_Release_003, TestSize.Level1)
 {
@@ -2219,7 +2232,7 @@ HWTEST(AudioCapturerUnitTest, Audio_Capturer_Release_003, TestSize.Level1)
     EXPECT_EQ(true, isReleased);
 
     isReleased = audioCapturer->Release();
-    EXPECT_EQ(false, isReleased);
+    EXPECT_EQ(true, isReleased);
 }
 
 /**
@@ -2294,9 +2307,22 @@ HWTEST(AudioCapturerUnitTest, Audio_Capturer_Release_006, TestSize.Level1)
 
     uint8_t *buffer = (uint8_t *) malloc(bufferLen);
     ASSERT_NE(nullptr, buffer);
+    FILE *capFile = fopen(AUDIO_CAPTURE_FILE1.c_str(), "wb");
+    ASSERT_NE(nullptr, capFile);
+    
+    size_t size = 1;
+    int32_t bytesRead = 0;
+    int32_t numBuffersToCapture = READ_BUFFERS_COUNT;
 
-    int32_t bytesRead = audioCapturer->Read(*buffer, bufferLen, isBlockingRead);
-    EXPECT_GE(bytesRead, VALUE_ZERO);
+    while (numBuffersToCapture) {
+        bytesRead = audioCapturer->Read(*buffer, bufferLen, isBlockingRead);
+        if (bytesRead <= 0) {
+            break;
+        } else if (bytesRead > 0) {
+            fwrite(buffer, size, bytesRead, capFile);
+            numBuffersToCapture--;
+        }
+    }
 
     audioCapturer->Flush();
     audioCapturer->Stop();
@@ -2417,7 +2443,7 @@ HWTEST(AudioCapturerUnitTest, Audio_Capturer_GetStatus_004, TestSize.Level1)
 /**
 * @tc.name  : Test GetStatus API, call Release without initializing
 * @tc.number: Audio_Capturer_GetStatus_005
-* @tc.desc  : Test GetStatus interface. Not changes to CAPTURER_RELEASED, if the current state is CAPTURER_NEW.
+* @tc.desc  : Test GetStatus interface. Changing to CAPTURER_RELEASED, if the current state is CAPTURER_NEW.
 */
 HWTEST(AudioCapturerUnitTest, Audio_Capturer_GetStatus_005, TestSize.Level1)
 {
@@ -2427,10 +2453,10 @@ HWTEST(AudioCapturerUnitTest, Audio_Capturer_GetStatus_005, TestSize.Level1)
     ASSERT_NE(nullptr, audioCapturer);
 
     bool isReleased = audioCapturer->Release();
-    EXPECT_EQ(false, isReleased);
+    EXPECT_EQ(true, isReleased);
     state = audioCapturer->GetStatus();
-    EXPECT_NE(CAPTURER_RELEASED, state);
-    EXPECT_EQ(CAPTURER_NEW, state);
+    EXPECT_EQ(CAPTURER_RELEASED, state);
+    EXPECT_NE(CAPTURER_NEW, state);
 }
 
 /**
@@ -3258,6 +3284,9 @@ HWTEST(AudioCapturerUnitTest, Audio_Capturer_GetCurrentInputDevices_001, TestSiz
     deviceInfo.deviceType = DEVICE_TYPE_EARPIECE;
     isDeviceChanged = audioCapturerPrivate->IsDeviceChanged(deviceInfo);
     EXPECT_EQ(false, isDeviceChanged);
+
+    bool isStarted = audioCapturer->Start();
+    EXPECT_EQ(true, isStarted);
 
     int32_t ret1 = -1;
     auto inputDeviceDescriptors = AudioSystemManager::GetInstance()->GetDevices(DeviceFlag::INPUT_DEVICES_FLAG);
