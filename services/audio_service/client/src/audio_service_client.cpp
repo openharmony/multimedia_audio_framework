@@ -741,6 +741,7 @@ int32_t AudioServiceClient::Initialize(ASClientType eClientType)
     if (mainLoop == nullptr)
         return AUDIO_CLIENT_INIT_ERR;
     api = pa_threaded_mainloop_get_api(mainLoop);
+    pa_threaded_mainloop_set_name(mainLoop, "OS_AudioML");
     if (api == nullptr) {
         ResetPAAudioClient();
         return AUDIO_CLIENT_INIT_ERR;

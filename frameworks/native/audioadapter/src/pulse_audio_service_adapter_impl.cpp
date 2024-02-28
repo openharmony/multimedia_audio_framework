@@ -81,6 +81,7 @@ bool PulseAudioServiceAdapterImpl::Connect()
     mMainLoop = pa_threaded_mainloop_new();
     CHECK_AND_RETURN_RET_LOG(mMainLoop, false, "MainLoop creation failed");
 
+    pa_threaded_mainloop_set_name(mMainLoop, "OS_AudioML");
     if (pa_threaded_mainloop_start(mMainLoop) < 0) {
         AUDIO_ERR_LOG("Failed to start mainloop");
         pa_threaded_mainloop_free(mMainLoop);
