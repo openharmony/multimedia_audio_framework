@@ -1519,6 +1519,7 @@ bool RendererInClientInner::FlushAudioStream()
 {
     Trace trace("RendererInClientInner::FlushAudioStream " + std::to_string(sessionId_));
     std::lock_guard<std::mutex>lock(writeMutex_);
+    std::unique_lock<std::mutex> statusLock(statusMutex_);
     if ((state_ != RUNNING) && (state_ != PAUSED) && (state_ != STOPPED)) {
         AUDIO_ERR_LOG("Flush failed. Illegal state:%{public}u", state_.load());
         return false;
