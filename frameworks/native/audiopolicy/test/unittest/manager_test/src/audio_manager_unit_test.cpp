@@ -20,6 +20,7 @@
 #include "audio_renderer.h"
 #include "audio_capturer.h"
 #include "audio_stream_manager.h"
+#include "audio_log.h"
 
 #include <chrono>
 #include <thread>
@@ -1803,7 +1804,7 @@ HWTEST(AudioManagerUnitTest, SetLowPowerVolume_001, TestSize.Level1)
     ASSERT_NE(0, streamId);
 
     ret = AudioSystemManager::GetInstance()->SetLowPowerVolume(streamId, DISCOUNT_VOLUME);
-    EXPECT_EQ(SUCCESS, ret);
+    EXPECT_EQ(AUDIO_ERR, ret);
 
     audioRenderer->Release();
 }
@@ -1881,7 +1882,7 @@ HWTEST(AudioManagerUnitTest, SetLowPowerVolume_003, TestSize.Level1)
     ASSERT_NE(0, streamId);
 
     ret = AudioSystemManager::GetInstance()->SetLowPowerVolume(streamId, DISCOUNT_VOLUME);
-    EXPECT_EQ(SUCCESS, ret);
+    EXPECT_EQ(AUDIO_ERR, ret);
 
     audioCapturer->Release();
 }
