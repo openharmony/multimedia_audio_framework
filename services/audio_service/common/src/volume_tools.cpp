@@ -93,7 +93,7 @@ ChannelVolumes VolumeTools::GetChannelVolumes(AudioChannel channel, float volSta
     return vols;
 }
 
-inline size_t GetByteSize(AudioSampleFormat format)
+size_t GetByteSize(AudioSampleFormat format)
 {
     size_t bitWidthSize = 0;
     switch (format) {
@@ -136,7 +136,7 @@ inline int32_t VolumeFlatten(int32_t vol)
     return vol < INT32_VOLUME_MIN ? 0 : (vol > INT32_VOLUME_MAX ? INT32_VOLUME_MAX : vol);
 }
 
-inline void ProcessOneFrame(uint8_t *ptr, AudioSampleFormat format, int32_t vol)
+void ProcessOneFrame(uint8_t *ptr, AudioSampleFormat format, int32_t vol)
 {
     int64_t temp = 0;
     int16_t *raw16 = nullptr;

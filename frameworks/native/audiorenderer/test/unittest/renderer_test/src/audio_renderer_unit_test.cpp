@@ -122,7 +122,8 @@ void AudioRendererUnitTest::ReleaseBufferAndFiles(uint8_t* &buffer, uint8_t* &me
 {
     delete []buffer;
     delete []metaBuffer;
-    fclose(wavFile);
+    uint32_t ret = fclose(wavFile);
+    EXPECT_EQ(SUCCESS, ret);
     fclose(metaFile);
 }
 

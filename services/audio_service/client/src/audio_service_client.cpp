@@ -2714,7 +2714,7 @@ int32_t AudioServiceClient::UpdatePAProbListOffload(AudioOffloadType statePolicy
     return AUDIO_CLIENT_SUCCESS;
 }
 
-inline size_t GetFormatSize(const AudioStreamParams& info)
+size_t AudioServiceClient::GetFormatSize(const AudioStreamParams& info)
 {
     size_t result = 0;
     size_t bitWidthSize = 0;

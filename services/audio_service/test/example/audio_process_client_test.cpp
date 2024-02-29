@@ -986,6 +986,10 @@ void CountLatencyTime()
         cout << "Time is: " << ((g_captureBeepTime_[i] - g_playBeepTime_[i]) / g_usPerMs) << endl;
         sum += g_captureBeepTime_[i] - g_playBeepTime_[i];
     }
+    if (playSize == 0) {
+        cout << "playSize is 0;" << endl;
+        return;
+    }
     cout << "Remote audio latency in average is: " << sum / playSize << " (us)." << endl;
 
     g_playBeepTime_.clear();

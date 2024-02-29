@@ -55,7 +55,7 @@ PaRendererStreamImpl::PaRendererStreamImpl(pa_stream *paStream, AudioProcessConf
     processConfig_ = processConfig;
 }
 
-inline uint32_t PcmFormatToBits(uint8_t format)
+uint32_t PaRendererStreamImpl::PcmFormatToBits(uint8_t format)
 {
     switch (format) {
         case SAMPLE_U8:
