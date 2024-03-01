@@ -21,6 +21,7 @@
 
 #include <chrono>
 
+#include "safe_map.h"
 #include "pa_adapter_tools.h"
 #include "audio_errors.h"
 #include "audio_log.h"
@@ -29,6 +30,7 @@
 
 namespace OHOS {
 namespace AudioStandard {
+static SafeMap<PaRendererStreamImpl *, bool> rendererStreamInstanceMap_;
 const uint32_t DOUBLE_VALUE = 2;
 const uint32_t MAX_LENGTH_OFFLOAD = 500;
 const int32_t OFFLOAD_HDI_CACHE1 = 200; // ms, should equal with val in hdi_sink.c
@@ -55,6 +57,13 @@ PaRendererStreamImpl::PaRendererStreamImpl(pa_stream *paStream, AudioProcessConf
     processConfig_ = processConfig;
 }
 
+PaRendererStreamImpl::~PaRendererStreamImpl()
+{
+    AUDIO_DEBUG_LOG("~PaRendererStreamImpl");
+    std::lock_guard<std::mutex> lock(rendererStreamLock_);
+    rendererStreamInstanceMap_.Erase(this);
+}
+
 inline uint32_t PcmFormatToBits(uint8_t format)
 {
     switch (format) {
@@ -75,6 +84,7 @@ inline uint32_t PcmFormatToBits(uint8_t format)
 
 int32_t PaRendererStreamImpl::InitParams()
 {
+    rendererStreamInstanceMap_.Insert(this, true);
     PaLockGuard lock(mainloop_);
     if (CheckReturnIfStreamInvalid(paStream_, ERR_ILLEGAL_STATE) < 0) {
         return ERR_ILLEGAL_STATE;
@@ -620,6 +630,12 @@ void PaRendererStreamImpl::PAStreamDrainSuccessCb(pa_stream *stream, int32_t suc
     CHECK_AND_RETURN_LOG(userdata, "PAStreamDrainSuccessCb: userdata is null");
 
     PaRendererStreamImpl *streamImpl = static_cast<PaRendererStreamImpl *>(userdata);
+    bool tempBool = true;
+    if (rendererStreamInstanceMap_.Find(streamImpl, tempBool) == false) {
+        AUDIO_ERR_LOG("streamImpl is null");
+        return;
+    }
+    std::lock_guard<std::mutex> lock(streamImpl->rendererStreamLock_);
     std::shared_ptr<IStatusCallback> statusCallback = streamImpl->statusCallback_.lock();
     if (statusCallback != nullptr) {
         statusCallback->OnStatusUpdate(OPERATION_DRAINED);
