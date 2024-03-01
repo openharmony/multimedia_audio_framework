@@ -87,7 +87,7 @@ void AudioBlend::ProcessWithBlendMode(T *buffer, size_t bufferSize)
 template <typename T>
 void AudioBlend::BlendLR(T& left, T& right)
 {
-    left = left / HALF_FACTOR + right / HALF_FACTOR;
+    left = left / 2 + right / 2;
     right = left;
 }
 
