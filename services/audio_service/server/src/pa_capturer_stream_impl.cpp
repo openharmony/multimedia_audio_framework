@@ -48,7 +48,7 @@ PaCapturerStreamImpl::~PaCapturerStreamImpl()
     }
 }
 
-uint32_t PaCapturerStreamImpl::PcmFormatToBits(uint8_t format)
+__attribute__((unused)) static uint32_t PcmFormatToBits(uint8_t format)
 {
     switch (format) {
         case SAMPLE_U8:

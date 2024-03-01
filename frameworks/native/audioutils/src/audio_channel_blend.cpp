@@ -94,11 +94,11 @@ void AudioBlend::BlendLR(T& left, T& right)
 template <>
 void AudioBlend::BlendLR(int24_t& left, int24_t& right)
 {
-    left.value[0] = left.value[0] / HALF_FACTOR + right.value[0] / HALF_FACTOR;
+    left.value[0] = left.value[0] / 2 + right.value[0] / 2;
     right.value[0] = left.value[0];
-    left.value[1] = left.value[1] / HALF_FACTOR + right.value[1] / HALF_FACTOR;
+    left.value[1] = left.value[1] / 2 + right.value[1] / 2;
     right.value[0] = left.value[0];
-    left.value[2] = left.value[2] / HALF_FACTOR + right.value[2] / HALF_FACTOR;
+    left.value[2] = left.value[2] / 2 + right.value[2] / 2;
     right.value[2] = left.value[2];
 }
 

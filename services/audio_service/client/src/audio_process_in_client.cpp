@@ -457,7 +457,7 @@ bool AudioProcessInClientInner::InitAudioBuffer()
     return true;
 }
 
-inline size_t GetFormatSize(const AudioStreamInfo &info)
+static size_t GetFormatSize(const AudioStreamInfo &info)
 {
     size_t result = 0;
     size_t bitWidthSize = 0;

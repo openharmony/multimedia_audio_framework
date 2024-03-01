@@ -57,8 +57,6 @@ private:
     static void PAStreamPauseSuccessCb(pa_stream *stream, int32_t success, void *userdata);
     static void PAStreamFlushSuccessCb(pa_stream *stream, int32_t success, void *userdata);
     static void PAStreamStopSuccessCb(pa_stream *stream, int32_t success, void *userdata);
-
-    uint32_t PcmFormatToBits(uint8_t format);
     
     uint32_t streamIndex_ = static_cast<uint32_t>(-1); // invalid index
 

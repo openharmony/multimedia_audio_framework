@@ -75,7 +75,6 @@ private:
 
     const std::string GetEffectModeName(int32_t effectMode);
     const std::string GetEffectSceneName(AudioStreamType audioType);
-    uint32_t PcmFormatToBits(uint8_t format);
     // offload
     int32_t OffloadGetPresentationPosition(uint64_t& frames, int64_t& timeSec, int64_t& timeNanoSec);
     int32_t OffloadSetBufferSize(uint32_t sizeMs);

@@ -139,7 +139,6 @@ private:
     int32_t RegisterAudioStreamPolicyServerDiedCb();
     int32_t UnregisterAudioStreamPolicyServerDiedCb();
 
-    size_t GetFormatSize(const AudioStreamParams& info);
     int32_t NotifyCapturerAdded(uint32_t sessionID) override;
 
     AudioStreamType eStreamType_;

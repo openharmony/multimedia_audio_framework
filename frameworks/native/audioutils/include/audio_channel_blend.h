@@ -30,7 +30,6 @@ static constexpr int32_t CHANNEL_SIX = 5;
 static constexpr int32_t CHANNEL_SEVEN = 6;
 static constexpr int32_t CHANNEL_EIGHT = 7;
 
-static constexpr int32_t HALF_FACTOR = 2;
 typedef struct {
     int8_t value[3];
 } __attribute__((__packed__)) int24_t;
