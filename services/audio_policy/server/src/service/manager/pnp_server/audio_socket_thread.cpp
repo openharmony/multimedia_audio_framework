@@ -258,7 +258,7 @@ int32_t AudioSocketThread::ReadAndScanUsbDev(const char *devPath)
     }
 
     while (tryTime < AUDIO_DEVICE_WAIT_TRY_TIME) {
-        if (realpath(devPath, realpathRes) != NULL) {
+        if (realpath(devPath, realpathRes) != NULL || (strlen(devPath) > PATH_MAX)) {
             AUDIO_ERR_LOG("audio try[%{public}d] realpath fail[%{public}d] realpathRes [%{public}s]",
                 tryTime, errno, realpathRes);
             break;
