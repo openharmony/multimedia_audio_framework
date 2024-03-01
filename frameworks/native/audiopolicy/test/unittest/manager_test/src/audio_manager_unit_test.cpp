@@ -2852,7 +2852,7 @@ HWTEST(AudioManagerUnitTest, ConfigDistributedRoutingRoleTest_002, TestSize.Leve
 /**
 * @tc.name  : Test ConfigDistributedRoutingRole API
 * @tc.number: ConfigDistributedRoutingRoleTest_003
-* @tc.desc  : Test ConfigDistributedRoutingRole inner api, when networkid is REMOTE_NETWORK_ID 
+* @tc.desc  : Test ConfigDistributedRoutingRole inner api, when networkid is REMOTE_NETWORK_ID
 */
 HWTEST(AudioManagerUnitTest, ConfigDistributedRoutingRoleTest_003, TestSize.Level1)
 {
