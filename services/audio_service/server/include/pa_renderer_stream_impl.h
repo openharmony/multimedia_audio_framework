@@ -24,6 +24,7 @@ namespace AudioStandard {
 class PaRendererStreamImpl : public IRendererStream {
 public:
     PaRendererStreamImpl(pa_stream *paStream, AudioProcessConfig processConfig, pa_threaded_mainloop *mainloop);
+    ~PaRendererStreamImpl();
     int32_t InitParams();
     int32_t Start() override;
     int32_t Pause() override;
@@ -91,6 +92,7 @@ private:
     AudioProcessConfig processConfig_;
     std::weak_ptr<IStatusCallback> statusCallback_;
     std::weak_ptr<IWriteCallback> writeCallback_;
+    std::mutex rendererStreamLock_;
     int32_t streamCmdStatus_;
     int32_t streamDrainStatus_;
     int32_t streamFlushStatus_;
