@@ -63,6 +63,7 @@ private:
     AudioProcessConfig processConfig_;
     std::weak_ptr<IStatusCallback> statusCallback_;
     std::weak_ptr<IReadCallback> readCallback_;
+    std::mutex streamImplLock_;
     int32_t streamCmdStatus_;
     int32_t streamFlushStatus_;
     State state_;

@@ -155,16 +155,16 @@ void RendererInServer::OnStatusUpdate(IOperation operation)
             stateListener->OnOperationHandled(PAUSE_STREAM, 0);
             break;
         case OPERATION_STOPPED:
-            stateListener->OnOperationHandled(STOP_STREAM, 0);
             status_ = I_STATUS_STOPPED;
+            stateListener->OnOperationHandled(STOP_STREAM, 0);
             break;
         case OPERATION_FLUSHED:
-            stateListener->OnOperationHandled(FLUSH_STREAM, 0);
             HandleOperationFlushed();
+            stateListener->OnOperationHandled(FLUSH_STREAM, 0);
             break;
         case OPERATION_DRAINED:
-            stateListener->OnOperationHandled(DRAIN_STREAM, 0);
             status_ = I_STATUS_STARTED;
+            stateListener->OnOperationHandled(DRAIN_STREAM, 0);
             afterDrain = true;
             break;
         case OPERATION_RELEASED:

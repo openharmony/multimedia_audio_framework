@@ -221,6 +221,9 @@ private:
     void WriteCallbackFunc();
     // for callback mode. Check status if not running, wait for start or release.
     bool WaitForRunning();
+
+    int32_t WriteInner(uint8_t *buffer, size_t bufferSize);
+
 private:
     AudioStreamType eStreamType_;
     int32_t appUid_;
@@ -1113,7 +1116,7 @@ void RendererInClientInner::WriteCallbackFunc()
                 continue;
             }
             // call write here.
-            int32_t result = Write(temp.buffer, temp.bufLength);
+            int32_t result = WriteInner(temp.buffer, temp.bufLength);
             if (result < 0 || result != static_cast<int32_t>(temp.bufLength)) {
                 AUDIO_WARNING_LOG("Call write fail, result:%{public}d, bufLength:%{public}zu", result, temp.bufLength);
             }
@@ -1518,8 +1521,8 @@ bool RendererInClientInner::ReleaseAudioStream(bool releaseRunner)
 bool RendererInClientInner::FlushAudioStream()
 {
     Trace trace("RendererInClientInner::FlushAudioStream " + std::to_string(sessionId_));
-    std::lock_guard<std::mutex>lock(writeMutex_);
     std::unique_lock<std::mutex> statusLock(statusMutex_);
+    std::lock_guard<std::mutex>lock(writeMutex_);
     if ((state_ != RUNNING) && (state_ != PAUSED) && (state_ != STOPPED)) {
         AUDIO_ERR_LOG("Flush failed. Illegal state:%{public}u", state_.load());
         return false;
@@ -1646,6 +1649,11 @@ int32_t RendererInClientInner::Write(uint8_t *buffer, size_t bufferSize)
 {
     CHECK_AND_RETURN_RET_LOG(renderMode_ != RENDER_MODE_CALLBACK, ERR_INCORRECT_MODE,
         "Write with callback is not supported");
+    return WriteInner(buffer, bufferSize);
+}
+
+int32_t RendererInClientInner::WriteInner(uint8_t *buffer, size_t bufferSize)
+{
     Trace trace("RendererInClient::Write " + std::to_string(bufferSize));
     CHECK_AND_RETURN_RET_LOG(buffer != nullptr && bufferSize < MAX_WRITE_SIZE && bufferSize > 0, ERR_INVALID_PARAM,
         "invalid size is %{public}zu", bufferSize);
