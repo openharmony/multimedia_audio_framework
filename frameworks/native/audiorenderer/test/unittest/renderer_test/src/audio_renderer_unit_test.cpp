@@ -3875,10 +3875,9 @@ HWTEST(AudioRendererUnitTest, Audio_Renderer_GetStatus_005, TestSize.Level1)
     ASSERT_NE(nullptr, audioRenderer);
 
     bool isReleased = audioRenderer->Release();
-    EXPECT_EQ(false, isReleased);
+    EXPECT_EQ(true, isReleased);
     state = audioRenderer->GetStatus();
-    EXPECT_NE(RENDERER_RELEASED, state);
-    EXPECT_EQ(RENDERER_NEW, state);
+    EXPECT_EQ(RENDERER_RELEASED, state);
 }
 
 /**
