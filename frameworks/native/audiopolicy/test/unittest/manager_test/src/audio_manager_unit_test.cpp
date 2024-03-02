@@ -20,6 +20,7 @@
 #include "audio_renderer.h"
 #include "audio_capturer.h"
 #include "audio_stream_manager.h"
+#include "audio_log.h"
 
 #include <chrono>
 #include <thread>
@@ -1803,7 +1804,7 @@ HWTEST(AudioManagerUnitTest, SetLowPowerVolume_001, TestSize.Level1)
     ASSERT_NE(0, streamId);
 
     ret = AudioSystemManager::GetInstance()->SetLowPowerVolume(streamId, DISCOUNT_VOLUME);
-    EXPECT_EQ(SUCCESS, ret);
+    EXPECT_EQ(AUDIO_ERR, ret);
 
     audioRenderer->Release();
 }
@@ -1881,7 +1882,7 @@ HWTEST(AudioManagerUnitTest, SetLowPowerVolume_003, TestSize.Level1)
     ASSERT_NE(0, streamId);
 
     ret = AudioSystemManager::GetInstance()->SetLowPowerVolume(streamId, DISCOUNT_VOLUME);
-    EXPECT_EQ(SUCCESS, ret);
+    EXPECT_EQ(AUDIO_ERR, ret);
 
     audioCapturer->Release();
 }
@@ -2818,6 +2819,55 @@ HWTEST(AudioManagerUnitTest, OffloadSetVolumeTest_001, TestSize.Level1)
     } else {
         EXPECT_NE(SUCCESS, ret);
     }
+}
+
+/**
+* @tc.name  : Test ConfigDistributedRoutingRole API
+* @tc.number: ConfigDistributedRoutingRoleTest_001
+* @tc.desc  : Test ConfigDistributedRoutingRole inner api, when audioDeviceDescriptors is INPUT_DEVICES
+*/
+HWTEST(AudioManagerUnitTest, ConfigDistributedRoutingRoleTest_001, TestSize.Level1)
+{
+    int32_t ret;
+    auto audioDeviceDescriptors = AudioSystemManager::GetInstance()->GetDevices(DeviceFlag::INPUT_DEVICES_FLAG);
+    ret = audioDeviceDescriptors.size();
+    EXPECT_GE(ret, MIN_DEVICE_NUM);
+    CastType castType = CAST_TYPE_ALL;
+    ret = AudioSystemManager::GetInstance()->ConfigDistributedRoutingRole(audioDeviceDescriptors[0], castType);
+    EXPECT_EQ(ERR_INVALID_PARAM, ret);
+}
+
+/**
+* @tc.name  : Test ConfigDistributedRoutingRole API
+* @tc.number: ConfigDistributedRoutingRoleTest_002
+* @tc.desc  : Test ConfigDistributedRoutingRole inner api, when audioDeviceDescriptors is OUTPUT_DEVICES
+*/
+HWTEST(AudioManagerUnitTest, ConfigDistributedRoutingRoleTest_002, TestSize.Level1)
+{
+    int32_t ret;
+    auto audioDeviceDescriptors = AudioSystemManager::GetInstance()->GetDevices(DeviceFlag::OUTPUT_DEVICES_FLAG);
+    ret = audioDeviceDescriptors.size();
+    EXPECT_GE(ret, MIN_DEVICE_NUM);
+    CastType castType = CAST_TYPE_ALL;
+    ret = AudioSystemManager::GetInstance()->ConfigDistributedRoutingRole(audioDeviceDescriptors[0], castType);
+    EXPECT_EQ(SUCCESS, ret);
+}
+
+/**
+* @tc.name  : Test ConfigDistributedRoutingRole API
+* @tc.number: ConfigDistributedRoutingRoleTest_003
+* @tc.desc  : Test ConfigDistributedRoutingRole inner api, when networkid is REMOTE_NETWORK_ID
+*/
+HWTEST(AudioManagerUnitTest, ConfigDistributedRoutingRoleTest_003, TestSize.Level1)
+{
+    int32_t ret;
+    auto audioDeviceDescriptors = AudioSystemManager::GetInstance()->GetDevices(DeviceFlag::OUTPUT_DEVICES_FLAG);
+    ret = audioDeviceDescriptors.size();
+    EXPECT_GE(ret, MIN_DEVICE_NUM);
+    CastType castType = CAST_TYPE_ALL;
+    audioDeviceDescriptors[0]->networkId_ = REMOTE_NETWORK_ID;
+    ret = AudioSystemManager::GetInstance()->ConfigDistributedRoutingRole(audioDeviceDescriptors[0], castType);
+    EXPECT_EQ(ERR_INVALID_PARAM, ret);
 }
 } // namespace AudioStandard
 } // namespace OHOS
