@@ -388,7 +388,7 @@ bool AudioEndpointSeparate::StopDevice()
         int32_t ret = memset_s(dstAudioBuffer_->GetDataBase(), dstAudioBuffer_->GetDataSize(), 0,
             dstAudioBuffer_->GetDataSize());
         if (ret != EOK) {
-            AUDIO_WARNING_LOG("StopDevice memset_s failed. ret:%{public}d", ret);
+            AUDIO_WARNING_LOG("memset_s failed. ret:%{public}d", ret);
         }
     }
 
