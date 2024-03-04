@@ -796,7 +796,7 @@ private:
         AudioStreamParams &audioParams, const std::string &streamName, const std::string &streamStartTime);
 
     void UpdatePropListForFlush();
-
+    
     // Error code used
     static const int32_t AUDIO_CLIENT_SUCCESS = 0;
     static const int32_t AUDIO_CLIENT_ERR = -1;

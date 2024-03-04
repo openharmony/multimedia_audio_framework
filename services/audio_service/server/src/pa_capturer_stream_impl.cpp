@@ -52,24 +52,6 @@ PaCapturerStreamImpl::~PaCapturerStreamImpl()
     paCapturerMap_.Erase(this);
 }
 
-inline uint32_t PcmFormatToBits(uint8_t format)
-{
-    switch (format) {
-        case SAMPLE_U8:
-            return 1; // 1 byte
-        case SAMPLE_S16LE:
-            return 2; // 2 byt
-        case SAMPLE_S24LE:
-            return 3; // 3 byte
-        case SAMPLE_S32LE:
-            return 4; // 4 byte
-        case SAMPLE_F32LE:
-            return 4; // 4 byte
-        default:
-            return 2; // 2 byte
-    }
-}
-
 int32_t PaCapturerStreamImpl::InitParams()
 {
     paCapturerMap_.Insert(this, true);

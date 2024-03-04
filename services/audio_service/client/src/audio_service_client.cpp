@@ -2714,31 +2714,6 @@ int32_t AudioServiceClient::UpdatePAProbListOffload(AudioOffloadType statePolicy
     return AUDIO_CLIENT_SUCCESS;
 }
 
-inline size_t GetFormatSize(const AudioStreamParams& info)
-{
-    size_t result = 0;
-    size_t bitWidthSize = 0;
-    switch (info.format) {
-        case SAMPLE_U8:
-            bitWidthSize = 1; // size is 1
-            break;
-        case SAMPLE_S16LE:
-            bitWidthSize = 2; // size is 2
-            break;
-        case SAMPLE_S24LE:
-            bitWidthSize = 3; // size is 3
-            break;
-        case SAMPLE_S32LE:
-            bitWidthSize = 4; // size is 4
-            break;
-        default:
-            bitWidthSize = 2; // size is 2
-            break;
-    }
-    result = bitWidthSize * info.channels;
-    return result;
-}
-
 int32_t AudioServiceClient::UpdatePolicyOffload(AudioOffloadType statePolicy)
 {
     pa_proplist *propList = pa_proplist_new();

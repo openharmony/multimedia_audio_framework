@@ -120,7 +120,7 @@ int32_t AudioRenderer::CheckMaxRendererInstances()
     return SUCCESS;
 }
 
-inline size_t GetFormatSize(const AudioStreamParams& info)
+size_t GetFormatSize(const AudioStreamParams& info)
 {
     size_t bitWidthSize = 0;
     switch (info.format) {

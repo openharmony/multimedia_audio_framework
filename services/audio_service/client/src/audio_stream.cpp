@@ -132,7 +132,7 @@ AudioStream::~AudioStream()
     }
 }
 
-inline size_t GetFormatSize(const AudioStreamParams& info)
+static size_t GetFormatSize(const AudioStreamParams& info)
 {
     size_t result = 0;
     size_t bitWidthSize = 0;

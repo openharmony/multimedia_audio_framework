@@ -25,7 +25,7 @@ using namespace testing::ext;
 namespace OHOS {
 namespace AudioStandard {
 namespace {
-    const char *g_testFilePath = "/data/test_capture.pcm";
+    const char *TEST_FILE_PATH = "/data/test_capture.pcm";
     FILE *wavFile_;
     SLObjectItf engineObject_;
     SLRecordItf captureItf_;
@@ -78,7 +78,7 @@ HWTEST(AudioOpenslesRecorderUnitTest, Audio_Opensles_Capture_CreateEngine_003, T
 
 HWTEST(AudioOpenslesRecorderUnitTest, Audio_Opensles_Capture_CreateAudioRecorder_001, TestSize.Level0)
 {
-    wavFile_ = fopen(g_testFilePath, "wb");
+    wavFile_ = fopen(TEST_FILE_PATH, "wb");
     if (wavFile_ == nullptr) {
         AUDIO_INFO_LOG("AudioCaptureTest: Unable to open record file.");
     }
@@ -385,7 +385,7 @@ HWTEST(AudioOpenslesRecorderUnitTest, Prf_Audio_Opensles_Capture_GetInterface_00
 
 HWTEST(AudioOpenslesRecorderUnitTest, Prf_Audio_Opensles_CreateAudioRecorder_001, TestSize.Level0)
 {
-    wavFile_ = fopen(g_testFilePath, "wb");
+    wavFile_ = fopen(TEST_FILE_PATH, "wb");
     if (wavFile_ == nullptr) {
         AUDIO_INFO_LOG("AudioCaptureTest: Unable to open record file.");
     }
@@ -441,7 +441,7 @@ HWTEST(AudioOpenslesRecorderUnitTest, Prf_Audio_Opensles_CreateAudioRecorder_001
 
 HWTEST(AudioOpenslesRecorderUnitTest, Audio_Opensles_Capture_SlToOhosChannel_001, TestSize.Level1)
 {
-    wavFile_ = fopen(g_testFilePath, "wb");
+    wavFile_ = fopen(TEST_FILE_PATH, "wb");
     if (wavFile_ == nullptr) {
         AUDIO_INFO_LOG("SlToOhosChannel_001: Unable to open record file.");
     }
@@ -485,7 +485,7 @@ HWTEST(AudioOpenslesRecorderUnitTest, Audio_Opensles_Capture_SlToOhosChannel_001
 
 HWTEST(AudioOpenslesRecorderUnitTest, Audio_Opensles_Capture_SlToOhosChannel_002, TestSize.Level1)
 {
-    wavFile_ = fopen(g_testFilePath, "wb");
+    wavFile_ = fopen(TEST_FILE_PATH, "wb");
     if (wavFile_ == nullptr) {
         AUDIO_INFO_LOG("SlToOhosChannel_002: Unable to open record file.");
     }
@@ -528,7 +528,7 @@ HWTEST(AudioOpenslesRecorderUnitTest, Audio_Opensles_Capture_SlToOhosChannel_002
 
 HWTEST(AudioOpenslesRecorderUnitTest, Audio_Opensles_Capture_SlToOhosChannel_003, TestSize.Level1)
 {
-    wavFile_ = fopen(g_testFilePath, "wb");
+    wavFile_ = fopen(TEST_FILE_PATH, "wb");
     if (wavFile_ == nullptr) {
         AUDIO_INFO_LOG("SlToOhosChannel_003: Unable to open record file.");
     }
@@ -571,7 +571,7 @@ HWTEST(AudioOpenslesRecorderUnitTest, Audio_Opensles_Capture_SlToOhosChannel_003
 
 HWTEST(AudioOpenslesRecorderUnitTest, Audio_Opensles_Capture_SlToOhosChannel_004, TestSize.Level1)
 {
-    wavFile_ = fopen(g_testFilePath, "wb");
+    wavFile_ = fopen(TEST_FILE_PATH, "wb");
     if (wavFile_ == nullptr) {
         AUDIO_INFO_LOG("SlToOhosChannel_004: Unable to open record file.");
     }
@@ -613,7 +613,7 @@ HWTEST(AudioOpenslesRecorderUnitTest, Audio_Opensles_Capture_SlToOhosChannel_004
 
 HWTEST(AudioOpenslesRecorderUnitTest, Audio_Opensles_Capture_SlToOhosChannel_005, TestSize.Level1)
 {
-    wavFile_ = fopen(g_testFilePath, "wb");
+    wavFile_ = fopen(TEST_FILE_PATH, "wb");
     if (wavFile_ == nullptr) {
         AUDIO_INFO_LOG("SlToOhosChannel_005: Unable to open record file.");
     }
@@ -657,7 +657,7 @@ HWTEST(AudioOpenslesRecorderUnitTest, Audio_Opensles_Capture_SlToOhosChannel_005
 
 HWTEST(AudioOpenslesRecorderUnitTest, Audio_Opensles_Capture_SlToOhosChannel_006, TestSize.Level1)
 {
-    wavFile_ = fopen(g_testFilePath, "wb");
+    wavFile_ = fopen(TEST_FILE_PATH, "wb");
     if (wavFile_ == nullptr) {
         AUDIO_INFO_LOG("SlToOhosChannel_006: Unable to open record file.");
     }
@@ -700,7 +700,7 @@ HWTEST(AudioOpenslesRecorderUnitTest, Audio_Opensles_Capture_SlToOhosChannel_006
 
 HWTEST(AudioOpenslesRecorderUnitTest, Audio_Opensles_Capture_SlToOhosChannel_007, TestSize.Level1)
 {
-    wavFile_ = fopen(g_testFilePath, "wb");
+    wavFile_ = fopen(TEST_FILE_PATH, "wb");
     if (wavFile_ == nullptr) {
         AUDIO_INFO_LOG("SlToOhosChannel_007: Unable to open record file.");
     }
@@ -743,7 +743,7 @@ HWTEST(AudioOpenslesRecorderUnitTest, Audio_Opensles_Capture_SlToOhosChannel_007
 
 HWTEST(AudioOpenslesRecorderUnitTest, Audio_Opensles_Capture_SlToOhosChannel_008, TestSize.Level1)
 {
-    wavFile_ = fopen(g_testFilePath, "wb");
+    wavFile_ = fopen(TEST_FILE_PATH, "wb");
     if (wavFile_ == nullptr) {
         AUDIO_INFO_LOG("SlToOhosChannel_008: Unable to open record file.");
     }
@@ -785,7 +785,7 @@ HWTEST(AudioOpenslesRecorderUnitTest, Audio_Opensles_Capture_SlToOhosChannel_008
 
 HWTEST(AudioOpenslesRecorderUnitTest, Audio_Opensles_Capture_SlToOhosChannel_009, TestSize.Level1)
 {
-    wavFile_ = fopen(g_testFilePath, "wb");
+    wavFile_ = fopen(TEST_FILE_PATH, "wb");
     if (wavFile_ == nullptr) {
         AUDIO_INFO_LOG("SlToOhosChannel_009: Unable to open record file.");
     }
@@ -828,7 +828,7 @@ HWTEST(AudioOpenslesRecorderUnitTest, Audio_Opensles_Capture_SlToOhosChannel_009
 
 HWTEST(AudioOpenslesRecorderUnitTest, Audio_Opensles_Capture_SlToOhosChannel_010, TestSize.Level1)
 {
-    wavFile_ = fopen(g_testFilePath, "wb");
+    wavFile_ = fopen(TEST_FILE_PATH, "wb");
     if (wavFile_ == nullptr) {
         AUDIO_INFO_LOG("SlToOhosChannel_010: Unable to open record file.");
     }
@@ -871,7 +871,7 @@ HWTEST(AudioOpenslesRecorderUnitTest, Audio_Opensles_Capture_SlToOhosChannel_010
 
 HWTEST(AudioOpenslesRecorderUnitTest, Audio_Opensles_Capture_SlToOhosChannel_011, TestSize.Level1)
 {
-    wavFile_ = fopen(g_testFilePath, "wb");
+    wavFile_ = fopen(TEST_FILE_PATH, "wb");
     if (wavFile_ == nullptr) {
         AUDIO_INFO_LOG("SlToOhosChannel_011: Unable to open record file.");
     }
@@ -914,7 +914,7 @@ HWTEST(AudioOpenslesRecorderUnitTest, Audio_Opensles_Capture_SlToOhosChannel_011
 
 HWTEST(AudioOpenslesRecorderUnitTest, Audio_Opensles_Capture_SlToOhosChannel_012, TestSize.Level1)
 {
-    wavFile_ = fopen(g_testFilePath, "wb");
+    wavFile_ = fopen(TEST_FILE_PATH, "wb");
     if (wavFile_ == nullptr) {
         AUDIO_INFO_LOG("SlToOhosChannel_012: Unable to open record file.");
     }
