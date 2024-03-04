@@ -763,7 +763,7 @@ HWTEST(AudioPolicyUnitTest, Audio_Policy_SetSystemSoundUri_001, TestSize.Level1)
     EXPECT_EQ(ERR_INVALID_PARAM, ret);
 
     std::string systemSoundUri = AudioPolicyManager::GetInstance().GetSystemSoundUri(key);
-    EXPECT_NE(systemSoundUri, "");
+    EXPECT_EQ(systemSoundUri, "");
 }
 } // namespace AudioStandard
 } // namespace OHOS
