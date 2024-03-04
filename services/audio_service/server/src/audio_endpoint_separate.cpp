@@ -387,7 +387,9 @@ bool AudioEndpointSeparate::StopDevice()
     if (dstAudioBuffer_ != nullptr) {
         int32_t ret = memset_s(dstAudioBuffer_->GetDataBase(), dstAudioBuffer_->GetDataSize(), 0,
             dstAudioBuffer_->GetDataSize());
-        AUDIO_INFO_LOG("StopDevice clear buffer ret:%{public}d", ret);
+        if (ret != EOK) {
+            AUDIO_WARNING_LOG("memset_s failed. ret:%{public}d", ret);
+        }
     }
 
     if (fastSink_ == nullptr || fastSink_->Stop() != SUCCESS) {
