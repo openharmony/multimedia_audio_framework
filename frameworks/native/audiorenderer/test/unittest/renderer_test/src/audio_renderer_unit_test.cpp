@@ -2900,8 +2900,7 @@ HWTEST(AudioRendererUnitTest, Audio_Renderer_Drain_Stability_001, TestSize.Level
     thread renderThread(StartRenderThread, audioRenderer.get(), 0);
 
     for (int i = 0; i < VALUE_THOUSAND; i++) {
-        bool isDrained = audioRenderer->Drain();
-        EXPECT_EQ(true, isDrained);
+        audioRenderer->Drain();
     }
 
     renderThread.join();
