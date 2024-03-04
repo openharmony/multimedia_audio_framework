@@ -637,6 +637,7 @@ private:
     std::mutex writeCallbackMutex_;
     std::mutex stoppingMutex_;
     std::mutex streamPositionMutex_;
+    std::mutex serviceClientLock_;
     bool runnerReleased_ = false;
     AudioCache acache_;
     const void *internalReadBuffer_;

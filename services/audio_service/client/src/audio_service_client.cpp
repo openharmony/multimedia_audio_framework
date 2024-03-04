@@ -18,6 +18,7 @@
 #include <fstream>
 #include <sstream>
 
+#include "safe_map.h"
 #include "iservice_registry.h"
 #include "audio_log.h"
 #include "audio_utils.h"
@@ -36,6 +37,7 @@ using namespace std;
 
 namespace OHOS {
 namespace AudioStandard {
+static SafeMap<AudioServiceClient *, bool> serviceClientInstanceMap_;
 AudioRendererCallbacks::~AudioRendererCallbacks() = default;
 AudioCapturerCallbacks::~AudioCapturerCallbacks() = default;
 const uint32_t CHECK_UTIL_SUCCESS = 0;
@@ -485,6 +487,12 @@ void AudioServiceClient::PAStreamStateCb(pa_stream *stream, void *userdata)
     CHECK_AND_RETURN_LOG(userdata, "userdata is null");
 
     AudioServiceClient *asClient = (AudioServiceClient *)userdata;
+    bool isClientExist;
+    if (serviceClientInstanceMap_.Find(asClient, isClientExist) == false) {
+        AUDIO_ERR_LOG("asClient is null");
+        return;
+    }
+    std::lock_guard<std::mutex> lock(asClient->serviceClientLock_);
     pa_threaded_mainloop *mainLoop = (pa_threaded_mainloop *)asClient->mainLoop;
 
     if (asClient->mAudioRendererCallbacks)
@@ -589,6 +597,7 @@ AudioServiceClient::AudioServiceClient()
     mPrivacyType = PRIVACY_TYPE_PUBLIC;
     mStreamUsage = STREAM_USAGE_UNKNOWN;
     streamClass_ = IAudioStream::StreamClass::PA_STREAM;
+    serviceClientInstanceMap_.Insert(this, true);
 }
 
 void AudioServiceClient::ResetPAAudioClient()
@@ -682,6 +691,8 @@ AudioServiceClient::~AudioServiceClient()
     UnregisterSpatializationStateEventListener(spatializationRegisteredSessionID_);
     ResetPAAudioClient();
     StopTimer();
+    std::lock_guard<std::mutex> lock(serviceClientLock_);
+    serviceClientInstanceMap_.Erase(this);
 }
 
 void AudioServiceClient::SetEnv()
