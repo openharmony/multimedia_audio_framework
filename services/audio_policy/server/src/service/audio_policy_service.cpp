@@ -5394,14 +5394,11 @@ void AudioPolicyService::OnScoStateChanged(const std::string &macAddress, bool i
 void AudioPolicyService::OnPreferredStateUpdated(AudioDeviceDescriptor &desc,
     const DeviceInfoUpdateCommand updateCommand)
 {
-    unique_ptr<AudioDeviceDescriptor> userSelectMediaRenderDevice =
-        AudioStateManager::GetAudioStateManager().GetPerferredMediaRenderDevice();
-    unique_ptr<AudioDeviceDescriptor> userSelectCallRenderDevice =
-        AudioStateManager::GetAudioStateManager().GetPerferredCallRenderDevice();
-    unique_ptr<AudioDeviceDescriptor> userSelectCallCaptureDevice =
-        AudioStateManager::GetAudioStateManager().GetPerferredCallCaptureDevice();
-    unique_ptr<AudioDeviceDescriptor> userSelectRecordCaptureDevice =
-        AudioStateManager::GetAudioStateManager().GetPerferredRecordCaptureDevice();
+    AudioStateManager& stateManager = AudioStateManager::GetAudioStateManager();
+    unique_ptr<AudioDeviceDescriptor> userSelectMediaRenderDevice = stateManager.GetPerferredMediaRenderDevice();
+    unique_ptr<AudioDeviceDescriptor> userSelectCallRenderDevice = stateManager.GetPerferredCallRenderDevice();
+    unique_ptr<AudioDeviceDescriptor> userSelectCallCaptureDevice = stateManager.GetPerferredCallCaptureDevice();
+    unique_ptr<AudioDeviceDescriptor> userSelectRecordCaptureDevice = stateManager.GetPerferredRecordCaptureDevice();
     AudioStreamDeviceChangeReason reason = AudioStreamDeviceChangeReason::UNKNOWN;
     if (updateCommand == CATEGORY_UPDATE) {
         if (desc.deviceCategory_ == BT_UNWEAR_HEADPHONE) {
@@ -5438,6 +5435,9 @@ void AudioPolicyService::OnPreferredStateUpdated(AudioDeviceDescriptor &desc,
                 audioStateManager_.SetPerferredCallCaptureDevice(new(std::nothrow) AudioDeviceDescriptor());
             }
         }
+    } else if (updateCommand == ENABLE_UPDATE) {
+        reason = desc.isEnable_ ? AudioStreamDeviceChangeReason::NEW_DEVICE_AVAILABLE :
+            AudioStreamDeviceChangeReason::OLD_DEVICE_UNAVALIABLE;
     }
     FetchDevice(true, reason);
 }
