@@ -123,6 +123,7 @@ private:
     AudioFormat ConverToHdiFormat(AudioSampleFormat format);
     void AdjustStereoToMono(char *data, uint64_t len);
     void AdjustAudioBalance(char *data, uint64_t len);
+    void ReleaseRunningLock();
 #ifdef DUMPFILE
     FILE *pfd;
     const char *g_audioOutTestFilePath = "/data/data/.pulse_dir/dump_audiosink.pcm";
@@ -812,17 +813,19 @@ int32_t AudioRendererSinkInner::GetTransactionId(uint64_t *transactionId)
     return SUCCESS;
 }
 
-int32_t AudioRendererSinkInner::Stop(void)
+void AudioRendererSinkInner::ReleaseRunningLock()
 {
-    AUDIO_INFO_LOG("Stop.");
-
     if (keepRunningLock_ != nullptr) {
         AUDIO_INFO_LOG("AudioRendererSink call KeepRunningLock UnLock");
         keepRunningLock_->UnLock();
     } else {
         AUDIO_ERR_LOG("keepRunningLock_ is null, playback can not work well!");
     }
+}
 
+int32_t AudioRendererSinkInner::Stop(void)
+{
+    AUDIO_INFO_LOG("Stop.");
     int32_t ret;
 
     if (audioRender_ == nullptr) {
@@ -834,13 +837,15 @@ int32_t AudioRendererSinkInner::Stop(void)
         ret = audioRender_->Stop(audioRender_);
         if (!ret) {
             started_ = false;
+            ReleaseRunningLock();
             return SUCCESS;
         } else {
             AUDIO_ERR_LOG("Stop failed!");
+            ReleaseRunningLock();
             return ERR_OPERATION_FAILED;
         }
     }
-
+    ReleaseRunningLock();
     return SUCCESS;
 }
 
