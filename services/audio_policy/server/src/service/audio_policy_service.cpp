@@ -1806,6 +1806,7 @@ void AudioPolicyService::FetchOutputDeviceWhenNoRunningStream()
 {
     AUDIO_INFO_LOG("In");
     unique_ptr<AudioDeviceDescriptor> desc = audioRouterCenter_.FetchOutputDevice(STREAM_USAGE_MEDIA, -1);
+    CHECK_AND_RETURN_LOG(desc != nullptr, "desc is nullptr");
     if (desc->deviceType_ == DEVICE_TYPE_NONE || IsSameDevice(desc, currentActiveDevice_)) {
         AUDIO_DEBUG_LOG("output device is not change");
         return;
