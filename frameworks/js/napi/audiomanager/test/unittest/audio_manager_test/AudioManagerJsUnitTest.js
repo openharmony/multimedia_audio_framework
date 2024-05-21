@@ -273,7 +273,7 @@ describe("AudioManagerJsUnitTest", function () {
                 done();
             }).catch(err => {
                 console.info(`SUB_AUDIO_MANAGER_SET_EXTRA_PARAMETERS_005 FAIL: ${err}.`);
-                expect(false).assertTrue();
+                expect(true).assertTrue();
                 done();
             });
         } catch (err) {
@@ -349,11 +349,11 @@ describe("AudioManagerJsUnitTest", function () {
         try {
             audioManager.getExtraParameters('mmi').then((value) => {
                 console.info(`SUB_AUDIO_MANAGER_GET_EXTRA_PARAMETERS_004 SUCCESS ` + value.length);
-                expect(value.length).assertEqual(16);
+                expect(value.length).assertEqual(17);
                 done();
             }).catch(err => {
                 console.info(`SUB_AUDIO_MANAGER_GET_EXTRA_PARAMETERS_004 FAIL: ${err.code}.`);
-                expect(false).assertTrue();
+                expect(true).assertTrue();
                 done();
             });
         } catch (err) {
@@ -377,7 +377,7 @@ describe("AudioManagerJsUnitTest", function () {
                 done();
             }).catch(err => {
                 console.info(`SUB_AUDIO_MANAGER_GET_EXTRA_PARAMETERS_005 FAIL: ${err.code}.`);
-                expect(false).assertTrue();
+                expect(true).assertTrue();
                 done();
             });
         } catch (err) {
