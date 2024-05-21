@@ -79,6 +79,7 @@ void AudioRendererMultithreadTest::Write(unique_ptr<AudioRenderer> &audioRendere
     size_t minBytes = 4;
     int32_t numBuffersToRender = WRITE_BUFFERS_COUNT;
 
+    int32_t failCount = 10;
     while (numBuffersToRender) {
         bytesToWrite = fread(buffer, 1, bufferLen, wavFile);
         bytesWritten = 0;
@@ -88,9 +89,14 @@ void AudioRendererMultithreadTest::Write(unique_ptr<AudioRenderer> &audioRendere
                                                  bytesToWrite - static_cast<size_t>(bytesWritten));
             EXPECT_GE(bytesWritten, VALUE_ZERO);
             if (bytesWritten < 0) {
+                failCount--;
                 break;
             }
         }
+        if (failCount < 0) {
+            break;
+        }
+
         numBuffersToRender--;
     }
 
