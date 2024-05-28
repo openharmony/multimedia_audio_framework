@@ -77,6 +77,7 @@ Note:If the text contains special characters, please escape them according to th
                 <filteritem type="filepath" name="pulseaudio/src/daemon/ohos_pa_main.c" desc="Pulseaudio daemon file with no systemd"/>
                 <filteritem type="filepath" name="test/demo/entry/src/main/resources/rawfile/test1.mp4" desc="Resource file for audio demo and no copyright issues involved"/>
                 <filteritem type="filepath" name="test/demo/entry/src/main/resources/rawfile/test2.mp4" desc="Resource file for audio demo and no copyright issues involved"/>
+                <filteritem type="filepath" name="interfaces/kits/c/common/multimedia/native_audio_channel_layout.h" desc="Soft link file related to definition in media foundation and no copyright issues involved"/>
             </filefilter>
             <filefilter name="binaryFileTypePolicyFilter" desc="Filters for binary file policies">
                 <filteritem type="filename" name="*.png" desc="Audio service design diagrams"/>
