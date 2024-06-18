@@ -6456,7 +6456,7 @@ HWTEST(AudioRendererUnitTest, Audio_Renderer_SetSpeed_001, TestSize.Level1)
     ret = audioRenderer->SetSpeed(4); // 4 max speed
     EXPECT_EQ(SUCCESS, ret);
 
-    ret = audioRenderer->SetSpeed(0.24); // 0.24 lower
+    ret = audioRenderer->SetSpeed(0.124); // 0.124 lower
     EXPECT_EQ(ERR_INVALID_PARAM, ret);
 
     ret = audioRenderer->SetSpeed(4.01); // 4.01 upper

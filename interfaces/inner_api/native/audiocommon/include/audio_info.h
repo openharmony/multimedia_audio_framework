@@ -54,7 +54,7 @@ constexpr int32_t AUDIO_USAGE_VOIP = 1;
 constexpr uint32_t STREAM_FLAG_FAST = 1;
 constexpr uint32_t STREAM_FLAG_NORMAL = 0;
 constexpr float MAX_STREAM_SPEED_LEVEL = 4.0f;
-constexpr float MIN_STREAM_SPEED_LEVEL = 0.25f;
+constexpr float MIN_STREAM_SPEED_LEVEL = 0.125f;
 constexpr int32_t EMPTY_UID = 0;
 
 const std::string MICROPHONE_PERMISSION = "ohos.permission.MICROPHONE";
