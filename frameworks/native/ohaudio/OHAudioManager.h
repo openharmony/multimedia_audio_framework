@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,16 +13,26 @@
  * limitations under the License.
  */
 
-#include <common.h>
+#ifndef OH_AUDIO_MANAGER_H
+#define OH_AUDIO_MANAGER_H
 
-using namespace OHOS::AudioStandard;
+#include "audio_info.h"
+#include "native_audio_common.h"
+#include "native_audio_manager.h"
 
-SLresult AudioRecorderDestroy(void *self)
-{
-    if (self == nullptr) {
-        return SL_RESULT_PARAMETER_INVALID;
-    }
-    CAudioRecorder *cAudioRecorder = (CAudioRecorder *)self;
-    AudioCapturerAdapter::GetInstance()->EraseAudioCapturerById(cAudioRecorder->mId);
-    return SL_RESULT_SUCCESS;
-}
+namespace OHOS {
+namespace AudioStandard {
+
+class OHAudioManager {
+public:
+    ~OHAudioManager() {};
+
+    static OHAudioManager *GetInstance();
+    AudioScene GetAudioScene();
+private:
+    OHAudioManager() {};
+};
+
+} // namespace AudioStandard
+} // namespace OHOS
+#endif // OH_AUDIO_MANAGER_H
